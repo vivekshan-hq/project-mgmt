@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slate — Project Management</title>
+  <title>Slate — Group Management</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&display=swap" rel="stylesheet">
@@ -102,7 +102,7 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: 1fr;
       grid-template-rows: auto 1fr;
       min-height: 100vh;
       gap: 1px;
@@ -201,6 +201,176 @@
     .task-delete:hover {
       color: #ef4444;
       background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Group Selector */
+    .group-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-dropdown {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+      outline: none;
+      min-width: 140px;
+    }
+
+    .group-dropdown:focus {
+      border-color: var(--column-todo);
+    }
+
+    .add-group-btn {
+      width: 28px;
+      height: 28px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .add-group-btn:hover {
+      border-color: var(--border-default);
+      color: var(--text-secondary);
+    }
+
+    /* Delete Confirmation Modal */
+    .modal.modal-sm {
+      width: 320px;
+    }
+
+    .modal-message {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .modal-task-preview {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-primary);
+      margin-top: 12px;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* Form Select */
+    .form-select {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      border-color: var(--column-todo);
+    }
+
+    .form-textarea {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      max-height: 200px;
+      transition: border-color 0.2s;
+    }
+
+    .form-textarea:focus {
+      border-color: var(--column-todo);
+    }
+
+    .form-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .task-notes-wrapper {
+      position: static;
+      display: flex;
+      align-items: center;
+    }
+
+    .task-card {
+      overflow: visible;
+    }
+
+    .task-meta {
+      position: relative;
+    }
+
+    .task-notes-indicator {
+      width: 14px;
+      height: 14px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .task-notes-wrapper:hover .task-notes-indicator {
+      color: var(--text-secondary);
+    }
+
+    .task-notes-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      width: 240px;
+      max-height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      box-shadow: var(--shadow-elevated);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s, visibility 0.15s;
+      z-index: 10000;
+    }
+
+    .task-notes-wrapper:hover .task-notes-tooltip {
+      opacity: 1;
+      visibility: visible;
     }
 
     .section-header {
@@ -342,33 +512,39 @@
       border-color: var(--overhead-border);
     }
 
-    .task-priority {
-      font-size: 9px;
-      font-weight: 600;
+    .task-group-label {
+      font-size: 10px;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
       margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
-    .task-card.leverage .task-priority { color: var(--leverage-text); }
-    .task-card.neutral .task-priority { color: var(--neutral-text); }
-    .task-card.overhead .task-priority { color: var(--overhead-text); }
-
-    .priority-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
+    .task-priority-pill {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-transform: capitalize;
     }
 
-    .task-card.leverage .priority-dot {
-      background: var(--leverage-text);
-      box-shadow: 0 0 6px var(--leverage-text);
+    .task-priority-pill.leverage {
+      background: var(--leverage-bg);
+      color: var(--leverage-text);
+      border: 1px solid var(--leverage-border);
     }
-    .task-card.neutral .priority-dot { background: var(--neutral-text); }
-    .task-card.overhead .priority-dot { background: var(--overhead-text); }
+
+    .task-priority-pill.neutral {
+      background: var(--neutral-bg);
+      color: var(--neutral-text);
+      border: 1px solid var(--neutral-border);
+    }
+
+    .task-priority-pill.overhead {
+      background: var(--overhead-bg);
+      color: var(--overhead-text);
+      border: 1px solid var(--overhead-border);
+    }
 
     .task-title {
       font-size: 13px;
@@ -376,6 +552,7 @@
       line-height: 1.5;
       color: var(--text-primary);
       margin-bottom: 10px;
+      word-wrap: break-word;
     }
 
     .task-meta {
@@ -391,48 +568,6 @@
       background: var(--bg-elevated);
       border-radius: 4px;
       font-size: 10px;
-    }
-
-    /* Notes Panel */
-    .notes-panel {
-      background: var(--bg-primary);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      border-left: 1px solid var(--border-subtle);
-    }
-
-    .notes-textarea {
-      flex: 1;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      font-family: var(--font-serif);
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--text-secondary);
-      resize: none;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .notes-textarea::placeholder {
-      color: var(--text-muted);
-      font-style: italic;
-    }
-
-    .notes-textarea:focus {
-      border-color: var(--border-default);
-    }
-
-    .notes-footer {
-      margin-top: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--text-muted);
     }
 
     /* Modal */
@@ -645,20 +780,33 @@
 
     // State
     let tasks = [];
-    let notes = '';
+    let groups = [];
     let currentColumn = 'todo';
     let selectedPriority = 'neutral';
+    let selectedGroup = 'all';
     let isOnline = true;
+    let taskToDelete = null;
+    let editingTaskId = null;
 
     // DOM Elements
     const modalOverlay = document.getElementById('modal-overlay');
     const taskTitleInput = document.getElementById('task-title-input');
+    const taskGroupSelect = document.getElementById('task-group-select');
+    const taskNotesInput = document.getElementById('task-notes-input');
     const priorityOptions = document.querySelectorAll('.priority-option');
     const modalCancel = document.getElementById('modal-cancel');
     const modalSubmit = document.getElementById('modal-submit');
-    const notesTextarea = document.getElementById('notes-textarea');
-    const notesCharCount = document.getElementById('notes-char-count');
     const syncStatus = document.getElementById('sync-status');
+    const groupDropdown = document.getElementById('group-dropdown');
+    const addGroupBtn = document.getElementById('add-group-btn');
+    const deleteModalOverlay = document.getElementById('delete-modal-overlay');
+    const deleteTaskPreview = document.getElementById('delete-task-preview');
+    const deleteCancel = document.getElementById('delete-cancel');
+    const deleteConfirm = document.getElementById('delete-confirm');
+    const groupModalOverlay = document.getElementById('group-modal-overlay');
+    const groupNameInput = document.getElementById('group-name-input');
+    const groupCancel = document.getElementById('group-cancel');
+    const groupSubmit = document.getElementById('group-submit');
 
     // Real-time listener for tasks
     onSnapshot(collection(db, 'tasks'), (snapshot) => {
@@ -671,12 +819,135 @@
       loadFromLocalStorage();
     });
 
-    // Real-time listener for notes
-    onSnapshot(doc(db, 'settings', 'notes'), (snapshot) => {
-      if (snapshot.exists()) {
-        notes = snapshot.data().content || '';
-        notesTextarea.value = notes;
-        updateCharCount();
+    // Real-time listener for groups (stored as 'projects' in Firebase)
+    onSnapshot(collection(db, 'projects'), (snapshot) => {
+      groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderGroupDropdowns();
+      renderTasks();
+    }, (error) => {
+      console.error('Groups error:', error);
+    });
+
+    // Render group dropdowns
+    function renderGroupDropdowns() {
+      const groupOptions = groups.map(p =>
+        `<option value="${p.id}">${escapeHtml(p.name)}</option>`
+      ).join('');
+
+      // Main dropdown - show "Add new group" option if no groups exist
+      if (groups.length === 0) {
+        groupDropdown.innerHTML = `
+          <option value="all">All Tasks</option>
+          <option value="__add_new__">+ Add new group</option>
+        `;
+      } else {
+        groupDropdown.innerHTML = `
+          <option value="all">All Groups</option>
+          ${groupOptions}
+        `;
+      }
+      groupDropdown.value = selectedGroup;
+
+      // Task form dropdown - always show "Add new group" option
+      taskGroupSelect.innerHTML = `
+        <option value="">No Group</option>
+        ${groupOptions}
+        <option value="__add_new__">+ Add new group</option>
+      `;
+    }
+
+    // Handle "Add new group" selection in task form
+    taskGroupSelect.addEventListener('change', () => {
+      if (taskGroupSelect.value === '__add_new__') {
+        taskGroupSelect.value = '';
+        groupModalOverlay.classList.add('active');
+        groupNameInput.focus();
+      }
+    });
+
+    // Group dropdown change
+    groupDropdown.addEventListener('change', () => {
+      if (groupDropdown.value === '__add_new__') {
+        // Reset to "all" and open add group modal
+        groupDropdown.value = 'all';
+        groupModalOverlay.classList.add('active');
+        groupNameInput.focus();
+      } else {
+        selectedGroup = groupDropdown.value;
+        renderTasks();
+      }
+    });
+
+    // Add Group Button
+    addGroupBtn.addEventListener('click', () => {
+      groupModalOverlay.classList.add('active');
+      groupNameInput.focus();
+    });
+
+    // Group Modal Controls
+    groupCancel.addEventListener('click', () => {
+      groupModalOverlay.classList.remove('active');
+      groupNameInput.value = '';
+    });
+
+    groupModalOverlay.addEventListener('click', (e) => {
+      if (e.target === groupModalOverlay) {
+        groupModalOverlay.classList.remove('active');
+        groupNameInput.value = '';
+      }
+    });
+
+    groupSubmit.addEventListener('click', async () => {
+      const name = groupNameInput.value.trim();
+      if (name) {
+        updateSyncStatus('syncing');
+        try {
+          const groupRef = doc(collection(db, 'projects'));
+          await setDoc(groupRef, { name, createdAt: new Date().toISOString() });
+        } catch (error) {
+          console.error('Error adding group:', error);
+        }
+        groupModalOverlay.classList.remove('active');
+        groupNameInput.value = '';
+      }
+    });
+
+    groupNameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        groupSubmit.click();
+      } else if (e.key === 'Escape') {
+        groupModalOverlay.classList.remove('active');
+        groupNameInput.value = '';
+      }
+    });
+
+    // Delete Confirmation Modal
+    function showDeleteConfirmation(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        taskToDelete = taskId;
+        deleteTaskPreview.textContent = task.title;
+        deleteModalOverlay.classList.add('active');
+      }
+    }
+
+    deleteCancel.addEventListener('click', () => {
+      deleteModalOverlay.classList.remove('active');
+      taskToDelete = null;
+    });
+
+    deleteModalOverlay.addEventListener('click', (e) => {
+      if (e.target === deleteModalOverlay) {
+        deleteModalOverlay.classList.remove('active');
+        taskToDelete = null;
+      }
+    });
+
+    deleteConfirm.addEventListener('click', async () => {
+      if (taskToDelete) {
+        await deleteTask(taskToDelete);
+        deleteModalOverlay.classList.remove('active');
+        taskToDelete = null;
       }
     });
 
@@ -711,7 +982,31 @@
     });
 
     // Modal Controls
-    function openModal() {
+    const modalTitle = document.querySelector('#modal-overlay .modal-title');
+
+    function openModal(taskId = null) {
+      editingTaskId = taskId;
+
+      if (taskId) {
+        // Edit mode - populate fields
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          modalTitle.textContent = 'Edit Task';
+          modalSubmit.textContent = 'Save';
+          taskTitleInput.value = task.title || '';
+          taskGroupSelect.value = task.projectId || '';
+          taskNotesInput.value = task.notes || '';
+          selectedPriority = task.priority || 'neutral';
+          priorityOptions.forEach(o => {
+            o.classList.toggle('selected', o.dataset.priority === selectedPriority);
+          });
+        }
+      } else {
+        // Add mode
+        modalTitle.textContent = 'New Task';
+        modalSubmit.textContent = 'Add Task';
+      }
+
       modalOverlay.classList.add('active');
       taskTitleInput.focus();
     }
@@ -719,7 +1014,10 @@
     function closeModal() {
       modalOverlay.classList.remove('active');
       taskTitleInput.value = '';
+      taskGroupSelect.value = '';
+      taskNotesInput.value = '';
       selectedPriority = 'neutral';
+      editingTaskId = null;
       priorityOptions.forEach(o => o.classList.remove('selected'));
       document.querySelector('[data-priority="neutral"]').classList.add('selected');
     }
@@ -729,10 +1027,23 @@
       if (e.target === modalOverlay) closeModal();
     });
 
-    modalSubmit.addEventListener('click', () => {
+    modalSubmit.addEventListener('click', async () => {
       const title = taskTitleInput.value.trim();
+      const groupId = taskGroupSelect.value;
+      const notes = taskNotesInput.value.trim();
       if (title) {
-        addTask(title, selectedPriority, currentColumn);
+        if (editingTaskId) {
+          // Update existing task
+          await updateTask(editingTaskId, {
+            title,
+            priority: selectedPriority,
+            projectId: groupId || '',
+            notes: notes || ''
+          });
+        } else {
+          // Add new task
+          addTask(title, selectedPriority, currentColumn, groupId, notes);
+        }
         closeModal();
       }
     });
@@ -746,11 +1057,13 @@
     });
 
     // Task Management
-    async function addTask(title, priority, status) {
+    async function addTask(title, priority, status, groupId, notes) {
       const task = {
         title,
         priority,
         status,
+        projectId: groupId || '',
+        notes: notes || '',
         createdAt: new Date().toISOString()
       };
 
@@ -796,34 +1109,60 @@
     }
 
     function renderTasks() {
+      // Filter tasks by selected group
+      const filteredTasks = selectedGroup === 'all'
+        ? tasks
+        : tasks.filter(t => t.projectId === selectedGroup);
+
       document.querySelectorAll('.kanban-column').forEach(column => {
         const status = column.dataset.status;
         const cardsContainer = column.querySelector('[data-cards]');
         const countEl = column.querySelector('[data-count]');
 
-        const columnTasks = tasks.filter(t => t.status === status);
+        const columnTasks = filteredTasks.filter(t => t.status === status);
         countEl.textContent = columnTasks.length;
 
-        cardsContainer.innerHTML = columnTasks.map(task => `
-          <div class="task-card ${task.priority}" draggable="true" data-task-id="${task.id}">
-            <button class="task-delete" data-delete="${task.id}">&times;</button>
-            <div class="task-priority">
-              <span class="priority-dot"></span>
-              ${task.priority}
+        cardsContainer.innerHTML = columnTasks.map(task => {
+          const group = groups.find(p => p.id === task.projectId);
+          const groupLabel = group
+            ? `<div class="task-group-label">${escapeHtml(group.name)}</div>`
+            : '';
+          const notesIndicator = task.notes
+            ? `<span class="task-notes-wrapper">
+                <svg class="task-notes-indicator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span class="task-notes-tooltip">${escapeHtml(task.notes)}</span>
+              </span>`
+            : '';
+
+          return `
+            <div class="task-card ${task.priority}" draggable="true" data-task-id="${task.id}">
+              <button class="task-delete" data-delete="${task.id}">&times;</button>
+              ${groupLabel}
+              <div class="task-title">${escapeHtml(task.title || 'Untitled')}</div>
+              <div class="task-meta">
+                <span class="task-tag">${getTimeAgo(task.createdAt)}</span>
+                <span class="task-priority-pill ${task.priority}">${task.priority}</span>
+                ${notesIndicator}
+              </div>
             </div>
-            <div class="task-title">${escapeHtml(task.title)}</div>
-            <div class="task-meta">
-              <span class="task-tag">${getTimeAgo(task.createdAt)}</span>
-            </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       });
 
-      // Delete buttons
+      // Delete buttons - show confirmation instead of direct delete
       document.querySelectorAll('.task-delete').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          deleteTask(btn.dataset.delete);
+          showDeleteConfirmation(btn.dataset.delete);
+        });
+      });
+
+      // Click to edit task
+      document.querySelectorAll('.task-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          // Don't open edit if clicking delete button
+          if (e.target.closest('.task-delete')) return;
+          openModal(card.dataset.taskId);
         });
       });
 
@@ -872,52 +1211,18 @@
       });
     }
 
-    // Notes with debounce
-    let notesTimeout;
-    notesTextarea.addEventListener('input', () => {
-      notes = notesTextarea.value;
-      updateCharCount();
-
-      clearTimeout(notesTimeout);
-      notesTimeout = setTimeout(() => {
-        saveNotes();
-      }, 500);
-    });
-
-    async function saveNotes() {
-      updateSyncStatus('syncing');
-      try {
-        await setDoc(doc(db, 'settings', 'notes'), { content: notes });
-      } catch (error) {
-        console.error('Error saving notes:', error);
-        localStorage.setItem('slate-notes', notes);
-      }
-    }
-
-    function updateCharCount() {
-      notesCharCount.textContent = `${notesTextarea.value.length} characters`;
-    }
-
     // Local Storage Fallback
     function saveToLocalStorage() {
       localStorage.setItem('slate-tasks', JSON.stringify(tasks));
-      localStorage.setItem('slate-notes', notes);
     }
 
     function loadFromLocalStorage() {
       try {
         const localTasks = JSON.parse(localStorage.getItem('slate-tasks'));
-        const localNotes = localStorage.getItem('slate-notes');
         if (localTasks) tasks = localTasks;
-        if (localNotes) {
-          notes = localNotes;
-          notesTextarea.value = notes;
-        }
         renderTasks();
-        updateCharCount();
       } catch {
         tasks = [];
-        notes = '';
       }
     }
 
@@ -941,14 +1246,23 @@
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-        closeModal();
+      if (e.key === 'Escape') {
+        if (modalOverlay.classList.contains('active')) {
+          closeModal();
+        }
+        if (deleteModalOverlay.classList.contains('active')) {
+          deleteModalOverlay.classList.remove('active');
+          taskToDelete = null;
+        }
+        if (groupModalOverlay.classList.contains('active')) {
+          groupModalOverlay.classList.remove('active');
+          groupNameInput.value = '';
+        }
       }
     });
 
     // Initial render
     renderTasks();
-    updateCharCount();
   </script>
 </head>
 <body>
@@ -958,8 +1272,13 @@
         <div class="logo-mark">S</div>
         <span class="logo-text">Slate</span>
       </div>
+      <div class="group-selector">
+        <select class="group-dropdown" id="group-dropdown">
+          <option value="all">All Groups</option>
+        </select>
+        <button class="add-group-btn" id="add-group-btn" title="New Group">+</button>
+      </div>
       <div class="header-meta">
-        <span>Project Alpha</span>
 <span id="sync-status" style="display: flex; align-items: center; gap: 6px;">
           <span class="status-dot"></span>
           Connecting...
@@ -999,16 +1318,6 @@
       </div>
     </main>
 
-    <aside class="notes-panel">
-      <div class="section-header">
-        <span class="section-title">Notes</span>
-      </div>
-      <textarea class="notes-textarea" id="notes-textarea" placeholder="Write your thoughts, ideas, or project notes here..."></textarea>
-      <div class="notes-footer">
-        <span id="notes-char-count">0 characters</span>
-        <span>Markdown supported</span>
-      </div>
-    </aside>
   </div>
 
   <!-- Add Task Modal -->
@@ -1020,6 +1329,12 @@
         <input type="text" class="form-input" id="task-title-input" placeholder="What needs to be done?">
       </div>
       <div class="form-group">
+        <label class="form-label">Group</label>
+        <select class="form-select" id="task-group-select">
+          <option value="">No Group</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Priority</label>
         <div class="priority-options">
           <div class="priority-option leverage" data-priority="leverage">Leverage</div>
@@ -1027,9 +1342,41 @@
           <div class="priority-option overhead" data-priority="overhead">Overhead</div>
         </div>
       </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="task-notes-input" placeholder="Add details, links, or context..."></textarea>
+      </div>
       <div class="modal-actions">
         <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
         <button class="btn btn-primary" id="modal-submit">Add Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="delete-modal-overlay">
+    <div class="modal modal-sm">
+      <h3 class="modal-title">Delete Task</h3>
+      <p class="modal-message">Are you sure you want to delete this task?</p>
+      <div class="modal-task-preview" id="delete-task-preview"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="delete-cancel">Cancel</button>
+        <button class="btn btn-danger" id="delete-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Group Modal -->
+  <div class="modal-overlay" id="group-modal-overlay">
+    <div class="modal modal-sm">
+      <h3 class="modal-title">New Group</h3>
+      <div class="form-group">
+        <label class="form-label">Group Name</label>
+        <input type="text" class="form-input" id="group-name-input" placeholder="e.g. Website, Mobile App">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="group-cancel">Cancel</button>
+        <button class="btn btn-primary" id="group-submit">Create</button>
       </div>
     </div>
   </div>
