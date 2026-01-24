@@ -167,6 +167,42 @@
       50% { opacity: 0.5; }
     }
 
+    .status-dot.syncing {
+      background: var(--column-todo);
+    }
+
+    .status-dot.offline {
+      background: #ef4444;
+    }
+
+    .task-delete {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+
+    .task-card:hover .task-delete {
+      opacity: 1;
+    }
+
+    .task-delete:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
     .section-header {
       display: flex;
       align-items: center;
@@ -588,6 +624,332 @@
       animation: fadeSlideIn 0.3s ease-out;
     }
   </style>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDMJZQ5huBF0uhXSDN7YeJtNsm6cJqAMao",
+      authDomain: "slate-20260124.firebaseapp.com",
+      projectId: "slate-20260124",
+      storageBucket: "slate-20260124.firebasestorage.app",
+      messagingSenderId: "423781479597",
+      appId: "1:423781479597:web:f20940ac92d5208079c224"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // State
+    let tasks = [];
+    let notes = '';
+    let currentColumn = 'todo';
+    let selectedPriority = 'neutral';
+    let isOnline = true;
+
+    // DOM Elements
+    const modalOverlay = document.getElementById('modal-overlay');
+    const taskTitleInput = document.getElementById('task-title-input');
+    const priorityOptions = document.querySelectorAll('.priority-option');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalSubmit = document.getElementById('modal-submit');
+    const notesTextarea = document.getElementById('notes-textarea');
+    const notesCharCount = document.getElementById('notes-char-count');
+    const syncStatus = document.getElementById('sync-status');
+
+    // Real-time listener for tasks
+    onSnapshot(collection(db, 'tasks'), (snapshot) => {
+      tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderTasks();
+      updateSyncStatus('synced');
+    }, (error) => {
+      console.error('Firestore error:', error);
+      updateSyncStatus('offline');
+      loadFromLocalStorage();
+    });
+
+    // Real-time listener for notes
+    onSnapshot(doc(db, 'settings', 'notes'), (snapshot) => {
+      if (snapshot.exists()) {
+        notes = snapshot.data().content || '';
+        notesTextarea.value = notes;
+        updateCharCount();
+      }
+    });
+
+    function updateSyncStatus(status) {
+      if (status === 'synced') {
+        syncStatus.innerHTML = '<span class="status-dot"></span> Synced';
+        isOnline = true;
+      } else if (status === 'syncing') {
+        syncStatus.innerHTML = '<span class="status-dot syncing"></span> Syncing...';
+      } else {
+        syncStatus.innerHTML = '<span class="status-dot offline"></span> Offline';
+        isOnline = false;
+      }
+    }
+
+    // Priority Selection
+    priorityOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        priorityOptions.forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedPriority = option.dataset.priority;
+      });
+    });
+
+    // Add Card Buttons
+    document.querySelectorAll('[data-add-card]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const column = btn.closest('.kanban-column');
+        currentColumn = column.dataset.status;
+        openModal();
+      });
+    });
+
+    // Modal Controls
+    function openModal() {
+      modalOverlay.classList.add('active');
+      taskTitleInput.focus();
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('active');
+      taskTitleInput.value = '';
+      selectedPriority = 'neutral';
+      priorityOptions.forEach(o => o.classList.remove('selected'));
+      document.querySelector('[data-priority="neutral"]').classList.add('selected');
+    }
+
+    modalCancel.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    modalSubmit.addEventListener('click', () => {
+      const title = taskTitleInput.value.trim();
+      if (title) {
+        addTask(title, selectedPriority, currentColumn);
+        closeModal();
+      }
+    });
+
+    taskTitleInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        modalSubmit.click();
+      } else if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Task Management
+    async function addTask(title, priority, status) {
+      const task = {
+        title,
+        priority,
+        status,
+        createdAt: new Date().toISOString()
+      };
+
+      updateSyncStatus('syncing');
+      try {
+        const taskRef = doc(collection(db, 'tasks'));
+        await setDoc(taskRef, task);
+      } catch (error) {
+        console.error('Error adding task:', error);
+        // Fallback to localStorage
+        task.id = Date.now().toString();
+        tasks.push(task);
+        saveToLocalStorage();
+        renderTasks();
+      }
+    }
+
+    async function updateTask(taskId, updates) {
+      updateSyncStatus('syncing');
+      try {
+        await setDoc(doc(db, 'tasks', taskId), updates, { merge: true });
+      } catch (error) {
+        console.error('Error updating task:', error);
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          Object.assign(task, updates);
+          saveToLocalStorage();
+          renderTasks();
+        }
+      }
+    }
+
+    async function deleteTask(taskId) {
+      updateSyncStatus('syncing');
+      try {
+        await deleteDoc(doc(db, 'tasks', taskId));
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        tasks = tasks.filter(t => t.id !== taskId);
+        saveToLocalStorage();
+        renderTasks();
+      }
+    }
+
+    function renderTasks() {
+      document.querySelectorAll('.kanban-column').forEach(column => {
+        const status = column.dataset.status;
+        const cardsContainer = column.querySelector('[data-cards]');
+        const countEl = column.querySelector('[data-count]');
+
+        const columnTasks = tasks.filter(t => t.status === status);
+        countEl.textContent = columnTasks.length;
+
+        cardsContainer.innerHTML = columnTasks.map(task => `
+          <div class="task-card ${task.priority}" draggable="true" data-task-id="${task.id}">
+            <button class="task-delete" data-delete="${task.id}">&times;</button>
+            <div class="task-priority">
+              <span class="priority-dot"></span>
+              ${task.priority}
+            </div>
+            <div class="task-title">${escapeHtml(task.title)}</div>
+            <div class="task-meta">
+              <span class="task-tag">${getTimeAgo(task.createdAt)}</span>
+            </div>
+          </div>
+        `).join('');
+      });
+
+      // Delete buttons
+      document.querySelectorAll('.task-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteTask(btn.dataset.delete);
+        });
+      });
+
+      setupDragAndDrop();
+    }
+
+    // Drag and Drop
+    function setupDragAndDrop() {
+      const cards = document.querySelectorAll('.task-card');
+      const columns = document.querySelectorAll('[data-cards]');
+
+      cards.forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          card.classList.add('dragging');
+          e.dataTransfer.setData('text/plain', card.dataset.taskId);
+        });
+
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          columns.forEach(col => col.classList.remove('drag-over'));
+        });
+      });
+
+      columns.forEach(column => {
+        column.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          column.classList.add('drag-over');
+        });
+
+        column.addEventListener('dragleave', () => {
+          column.classList.remove('drag-over');
+        });
+
+        column.addEventListener('drop', (e) => {
+          e.preventDefault();
+          column.classList.remove('drag-over');
+
+          const taskId = e.dataTransfer.getData('text/plain');
+          const newStatus = column.closest('.kanban-column').dataset.status;
+
+          const task = tasks.find(t => t.id === taskId);
+          if (task && task.status !== newStatus) {
+            updateTask(taskId, { status: newStatus });
+          }
+        });
+      });
+    }
+
+    // Notes with debounce
+    let notesTimeout;
+    notesTextarea.addEventListener('input', () => {
+      notes = notesTextarea.value;
+      updateCharCount();
+
+      clearTimeout(notesTimeout);
+      notesTimeout = setTimeout(() => {
+        saveNotes();
+      }, 500);
+    });
+
+    async function saveNotes() {
+      updateSyncStatus('syncing');
+      try {
+        await setDoc(doc(db, 'settings', 'notes'), { content: notes });
+      } catch (error) {
+        console.error('Error saving notes:', error);
+        localStorage.setItem('slate-notes', notes);
+      }
+    }
+
+    function updateCharCount() {
+      notesCharCount.textContent = `${notesTextarea.value.length} characters`;
+    }
+
+    // Local Storage Fallback
+    function saveToLocalStorage() {
+      localStorage.setItem('slate-tasks', JSON.stringify(tasks));
+      localStorage.setItem('slate-notes', notes);
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const localTasks = JSON.parse(localStorage.getItem('slate-tasks'));
+        const localNotes = localStorage.getItem('slate-notes');
+        if (localTasks) tasks = localTasks;
+        if (localNotes) {
+          notes = localNotes;
+          notesTextarea.value = notes;
+        }
+        renderTasks();
+        updateCharCount();
+      } catch {
+        tasks = [];
+        notes = '';
+      }
+    }
+
+    // Utilities
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function getTimeAgo(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+
+      if (seconds < 60) return 'just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      return `${Math.floor(seconds / 86400)}d ago`;
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+        closeModal();
+      }
+    });
+
+    // Initial render
+    renderTasks();
+    updateCharCount();
+  </script>
 </head>
 <body>
   <div class="app">
@@ -598,9 +960,9 @@
       </div>
       <div class="header-meta">
         <span>Project Alpha</span>
-        <span style="display: flex; align-items: center; gap: 6px;">
+<span id="sync-status" style="display: flex; align-items: center; gap: 6px;">
           <span class="status-dot"></span>
-          Auto-saved
+          Connecting...
         </span>
       </div>
     </header>
@@ -672,217 +1034,5 @@
     </div>
   </div>
 
-  <script>
-    // State
-    let tasks = [];
-    let notes = '';
-    let currentColumn = 'todo';
-    let selectedPriority = 'neutral';
-
-    // DOM Elements
-    const modalOverlay = document.getElementById('modal-overlay');
-    const taskTitleInput = document.getElementById('task-title-input');
-    const priorityOptions = document.querySelectorAll('.priority-option');
-    const modalCancel = document.getElementById('modal-cancel');
-    const modalSubmit = document.getElementById('modal-submit');
-    const notesTextarea = document.getElementById('notes-textarea');
-    const notesCharCount = document.getElementById('notes-char-count');
-
-    // Initialize
-    loadFromStorage();
-    renderTasks();
-
-    // Priority Selection
-    priorityOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        priorityOptions.forEach(o => o.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedPriority = option.dataset.priority;
-      });
-    });
-
-    // Add Card Buttons
-    document.querySelectorAll('[data-add-card]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const column = btn.closest('.kanban-column');
-        currentColumn = column.dataset.status;
-        openModal();
-      });
-    });
-
-    // Modal Controls
-    function openModal() {
-      modalOverlay.classList.add('active');
-      taskTitleInput.focus();
-    }
-
-    function closeModal() {
-      modalOverlay.classList.remove('active');
-      taskTitleInput.value = '';
-      selectedPriority = 'neutral';
-      priorityOptions.forEach(o => o.classList.remove('selected'));
-      document.querySelector('[data-priority="neutral"]').classList.add('selected');
-    }
-
-    modalCancel.addEventListener('click', closeModal);
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) closeModal();
-    });
-
-    modalSubmit.addEventListener('click', () => {
-      const title = taskTitleInput.value.trim();
-      if (title) {
-        addTask(title, selectedPriority, currentColumn);
-        closeModal();
-      }
-    });
-
-    taskTitleInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        modalSubmit.click();
-      } else if (e.key === 'Escape') {
-        closeModal();
-      }
-    });
-
-    // Task Management
-    function addTask(title, priority, status) {
-      const task = {
-        id: Date.now().toString(),
-        title,
-        priority,
-        status,
-        createdAt: new Date().toISOString()
-      };
-      tasks.push(task);
-      saveToStorage();
-      renderTasks();
-    }
-
-    function renderTasks() {
-      document.querySelectorAll('.kanban-column').forEach(column => {
-        const status = column.dataset.status;
-        const cardsContainer = column.querySelector('[data-cards]');
-        const countEl = column.querySelector('[data-count]');
-
-        const columnTasks = tasks.filter(t => t.status === status);
-        countEl.textContent = columnTasks.length;
-
-        cardsContainer.innerHTML = columnTasks.map(task => `
-          <div class="task-card ${task.priority}" draggable="true" data-task-id="${task.id}">
-            <div class="task-priority">
-              <span class="priority-dot"></span>
-              ${task.priority}
-            </div>
-            <div class="task-title">${escapeHtml(task.title)}</div>
-            <div class="task-meta">
-              <span class="task-tag">${getTimeAgo(task.createdAt)}</span>
-            </div>
-          </div>
-        `).join('');
-      });
-
-      setupDragAndDrop();
-    }
-
-    // Drag and Drop
-    function setupDragAndDrop() {
-      const cards = document.querySelectorAll('.task-card');
-      const columns = document.querySelectorAll('[data-cards]');
-
-      cards.forEach(card => {
-        card.addEventListener('dragstart', (e) => {
-          card.classList.add('dragging');
-          e.dataTransfer.setData('text/plain', card.dataset.taskId);
-        });
-
-        card.addEventListener('dragend', () => {
-          card.classList.remove('dragging');
-          columns.forEach(col => col.classList.remove('drag-over'));
-        });
-      });
-
-      columns.forEach(column => {
-        column.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          column.classList.add('drag-over');
-        });
-
-        column.addEventListener('dragleave', () => {
-          column.classList.remove('drag-over');
-        });
-
-        column.addEventListener('drop', (e) => {
-          e.preventDefault();
-          column.classList.remove('drag-over');
-
-          const taskId = e.dataTransfer.getData('text/plain');
-          const newStatus = column.closest('.kanban-column').dataset.status;
-
-          const task = tasks.find(t => t.id === taskId);
-          if (task) {
-            task.status = newStatus;
-            saveToStorage();
-            renderTasks();
-          }
-        });
-      });
-    }
-
-    // Notes
-    notesTextarea.value = notes;
-    updateCharCount();
-
-    notesTextarea.addEventListener('input', () => {
-      notes = notesTextarea.value;
-      updateCharCount();
-      saveToStorage();
-    });
-
-    function updateCharCount() {
-      notesCharCount.textContent = `${notesTextarea.value.length} characters`;
-    }
-
-    // Storage
-    function saveToStorage() {
-      localStorage.setItem('slate-tasks', JSON.stringify(tasks));
-      localStorage.setItem('slate-notes', notes);
-    }
-
-    function loadFromStorage() {
-      try {
-        tasks = JSON.parse(localStorage.getItem('slate-tasks')) || [];
-        notes = localStorage.getItem('slate-notes') || '';
-      } catch {
-        tasks = [];
-        notes = '';
-      }
-    }
-
-    // Utilities
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function getTimeAgo(dateString) {
-      const date = new Date(dateString);
-      const now = new Date();
-      const seconds = Math.floor((now - date) / 1000);
-
-      if (seconds < 60) return 'just now';
-      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-      return `${Math.floor(seconds / 86400)}d ago`;
-    }
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-        closeModal();
-      }
-    });
-  </script>
 </body>
 </html>
