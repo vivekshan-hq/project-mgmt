@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capacity Planning · Rocketlane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #5B50E8; --brand-dark: #4338CA; --brand-light: #EEF2FF; --brand-muted: #C7D2FE;
+      --bg: #F8F9FA; --surface: #fff; --border: #E5E7EB; --border-strong: #D1D5DB;
+      --text-1: #111827; --text-2: #374151; --text-3: #6B7280; --text-4: #9CA3AF;
+      --radius: 8px; --radius-sm: 5px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; color: var(--text-1); background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Top header ── */
+    .top-header { height: 48px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 4px; flex-shrink: 0; }
+    .header-icon { width: 20px; height: 20px; color: var(--text-2); margin-right: 6px; }
+    .header-title { font-size: 15px; font-weight: 700; color: var(--text-1); margin-right: 20px; }
+    .nav-tab { display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 13px; font-weight: 500; color: var(--text-3); cursor: pointer; border-bottom: 2px solid transparent; border-top: none; border-left: none; border-right: none; background: none; font-family: inherit; transition: color .12s; text-decoration: none; margin-bottom: -1px; }
+    .nav-tab:hover { color: var(--text-1); }
+    .nav-tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
+    .nav-tab svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ── Sub toolbar ── */
+    .sub-toolbar { height: 44px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 8px; flex-shrink: 0; }
+    .sub-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
+    .filter-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; font-size: 12px; font-weight: 500; color: var(--text-2); background: var(--surface); cursor: pointer; transition: all .12s; }
+    .filter-btn:hover { border-color: var(--border-strong); background: var(--bg); }
+    .filter-btn svg { width: 12px; height: 12px; }
+    .sub-toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .toggle-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+    .toggle-btn { padding: 5px 13px; font-family: inherit; font-size: 12px; font-weight: 500; color: var(--text-3); background: var(--surface); border: none; cursor: pointer; transition: all .12s; }
+    .toggle-btn:hover { background: var(--bg); }
+    .toggle-btn.active { background: var(--brand-light); color: var(--brand); font-weight: 600; }
+
+    /* ── Page body ── */
+    .page-body { flex: 1; overflow: auto; }
+
+    /* ── Table ── */
+    .cp-tbl { border-collapse: collapse; width: 100%; table-layout: fixed; min-width: 900px; }
+
+    /* Header */
+    .cp-tbl thead th {
+      position: sticky; top: 0; z-index: 3;
+      padding: 7px 12px; font-size: 11px; font-weight: 600; letter-spacing: .4px;
+      color: var(--text-3); background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      text-align: center; white-space: nowrap;
+    }
+    .th-role { width: 220px; text-align: left !important; position: sticky; left: 0; z-index: 5 !important; }
+    .th-metric { width: 88px; text-align: left !important; position: sticky; left: 220px; z-index: 5 !important; border-right: 2px solid var(--border); }
+    .th-month { min-width: 110px; }
+    .th-today { background: #FFF7ED !important; color: #EA580C !important; border-bottom-color: #EA580C !important; }
+    .today-pill { display: inline-block; background: #EA580C; color: white; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+
+    /* Fixed columns */
+    .td-role {
+      width: 220px;
+      position: sticky; left: 0; z-index: 2;
+      background: var(--surface);
+      vertical-align: middle;
+      padding: 0 8px 0 14px;
+    }
+    .td-metric {
+      width: 88px;
+      position: sticky; left: 220px; z-index: 2;
+      background: var(--surface);
+      border-right: 2px solid var(--border);
+      padding: 8px 10px;
+      font-size: 11px; font-weight: 500; color: var(--text-3);
+      white-space: nowrap;
+    }
+
+    /* Data cells */
+    .td-data {
+      text-align: center; padding: 8px 10px;
+      font-size: 12px; font-weight: 500; color: var(--text-2);
+      border-right: 1px solid #F3F4F6;
+    }
+    .td-data-today { background: #FFFDF9 !important; }
+
+    /* Role name cell */
+    .role-cell { display: flex; align-items: center; gap: 7px; }
+    .expand-btn {
+      width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-4); display: grid; place-items: center;
+      transition: all .12s;
+    }
+    .expand-btn:hover { background: var(--bg); color: var(--brand); }
+    .expand-btn svg { width: 11px; height: 11px; transition: transform .15s; }
+    .expand-btn svg { transform: rotate(-90deg); }
+    .expand-btn.open svg { transform: rotate(0deg); }
+    .role-name { font-size: 13px; font-weight: 600; color: var(--text-1); flex: 1; }
+    .role-hc-badge {
+      font-size: 10px; font-weight: 600; color: var(--text-4);
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+    }
+
+    /* Skill indented cell */
+    .td-skill {
+      width: 220px;
+      position: sticky; left: 0; z-index: 2;
+      background: #FAFBFF;
+      vertical-align: middle;
+      padding: 0 8px 0 44px;
+    }
+    .skill-cell { display: flex; align-items: center; gap: 7px; }
+    .skill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-muted); flex-shrink: 0; }
+    .skill-name { font-size: 12px; font-weight: 500; color: var(--text-2); }
+
+    /* Skill metric cell */
+    .td-metric-skill {
+      width: 88px;
+      position: sticky; left: 220px; z-index: 2;
+      background: #FAFBFF;
+      border-right: 2px solid var(--border);
+      padding: 7px 10px;
+      font-size: 11px; font-weight: 500; color: var(--text-4);
+      white-space: nowrap;
+    }
+    .td-data-skill { background: #FAFBFF; }
+
+    /* Row separators */
+    .row-cc .td-metric,
+    .row-cc .td-data,
+    .row-cc .td-role { border-bottom: 2px solid var(--border) !important; }
+    .role-sep td { background: var(--bg) !important; height: 4px; padding: 0; border: none !important; }
+
+    .skill-last td { border-bottom: 2px solid var(--border) !important; }
+
+    /* Gap coloring */
+    .gap-pos { color: #DC2626; font-weight: 700; background: #FEF2F2; }
+    .gap-neg { color: #059669; font-weight: 700; background: #ECFDF5; }
+    .gap-zero { color: var(--text-4); }
+
+    /* CC% coloring */
+    .cc-over { color: #DC2626; font-weight: 700; }
+    .cc-near { color: #D97706; font-weight: 600; }
+    .cc-ok   { color: var(--brand); font-weight: 600; }
+    .cc-good { color: #059669; font-weight: 600; }
+
+    /* Hover */
+    .cp-tbl tbody tr.role-metric-row:hover .td-data,
+    .cp-tbl tbody tr.role-metric-row:hover .td-metric,
+    .cp-tbl tbody tr.role-metric-row:hover .td-role { background: #F5F7FF !important; }
+    .cp-tbl tbody tr.skill-row:hover .td-data-skill,
+    .cp-tbl tbody tr.skill-row:hover .td-metric-skill,
+    .cp-tbl tbody tr.skill-row:hover .td-skill { background: #EEF0FB !important; }
+  </style>
+</head>
+<body>
+
+<!-- ── Top header ── -->
+<div class="top-header">
+  <svg class="header-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+  </svg>
+  <span class="header-title">Resource management</span>
+  <a class="nav-tab" href="rm-projects.html">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    People
+  </a>
+  <a class="nav-tab" href="rm-projects.html">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    Projects
+  </a>
+  <a class="nav-tab active" href="#">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    Capacity Planning
+  </a>
+  <a class="nav-tab" href="#">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Apps
+  </a>
+</div>
+
+<!-- ── Sub toolbar ── -->
+<div class="sub-toolbar">
+  <span class="sub-title">Role Summary</span>
+  <button class="filter-btn">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
+    Filter
+  </button>
+  <div class="sub-toolbar-right">
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="this.classList.add('active');this.nextElementSibling.classList.remove('active')">Hours</button>
+      <button class="toggle-btn" onclick="this.classList.add('active');this.previousElementSibling.classList.remove('active')">FTE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Table ── -->
+<div class="page-body">
+  <table class="cp-tbl">
+    <thead>
+      <tr>
+        <th class="th-role">ROLE</th>
+        <th class="th-metric">METRIC</th>
+        <th class="th-month th-today"><span class="today-pill">Mar-26</span></th>
+        <th class="th-month">Apr-26</th>
+        <th class="th-month">May-26</th>
+        <th class="th-month">Jun-26</th>
+        <th class="th-month">Jul-26</th>
+        <th class="th-month">Aug-26</th>
+      </tr>
+    </thead>
+    <tbody id="cp-tbody"></tbody>
+  </table>
+</div>
+
+<script>
+  const MONTHS = ['Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26'];
+
+  const roles = [
+    {
+      id: 'developer', name: 'Developer', hc: 8,
+      demand: [320, 290, 250, 210, 170, 130],
+      supply: [300, 300, 300, 300, 300, 300],
+      skills: [
+        { name:'Java',       demand:[180,165,140,115, 90, 65], supply:[170,170,170,170,170,170] },
+        { name:'Workday',    demand:[ 90, 80, 70, 60, 45, 35], supply:[ 80, 80, 80, 80, 80, 80] },
+        { name:'Javascript', demand:[ 50, 45, 40, 35, 35, 30], supply:[ 50, 50, 50, 50, 50, 50] },
+      ]
+    },
+    {
+      id: 'architect', name: 'Architect', hc: 3,
+      demand: [130, 110,  90,  70,  50,  30],
+      supply: [110, 110, 110, 110, 110, 110],
+      skills: [
+        { name:'Workday',    demand:[ 90, 75, 60, 45, 30, 15], supply:[75,75,75,75,75,75] },
+        { name:'Salesforce', demand:[ 40, 35, 30, 25, 20, 15], supply:[35,35,35,35,35,35] },
+      ]
+    },
+    {
+      id: 'engineer', name: 'Engineer', hc: 5,
+      demand: [210, 190, 160, 130, 100,  80],
+      supply: [190, 190, 190, 190, 190, 190],
+      skills: [
+        { name:'Java',   demand:[100,90,75,60,45,35], supply:[90,90,90,90,90,90] },
+        { name:'Python', demand:[ 70,65,55,45,35,25], supply:[60,60,60,60,60,60] },
+        { name:'Rust',   demand:[ 40,35,30,25,20,20], supply:[40,40,40,40,40,40] },
+      ]
+    },
+    {
+      id: 'pm', name: 'Project Manager', hc: 4,
+      demand: [160, 140, 120,  95,  70,  50],
+      supply: [140, 140, 140, 140, 140, 140],
+      skills: []
+    }
+  ];
+
+  const expanded = {};
+
+  function gapCls(g) {
+    return g > 0 ? 'gap-pos' : g < 0 ? 'gap-neg' : 'gap-zero';
+  }
+
+  function ccCls(cc) {
+    if (cc > 110) return 'cc-good';
+    if (cc > 100) return 'cc-ok';
+    if (cc >= 85)  return 'cc-near';
+    return 'cc-over';
+  }
+
+  function dataCells(demand, supply, metric, isSkill) {
+    const baseClass = isSkill ? 'td-data td-data-skill' : 'td-data';
+    return MONTHS.map((_, i) => {
+      const todayCls = i === 0 ? ' td-data-today' : '';
+      if (metric === 'Demand') return `<td class="${baseClass}${todayCls}">${demand[i]}</td>`;
+      if (metric === 'Supply') return `<td class="${baseClass}${todayCls}">${supply[i]}</td>`;
+      if (metric === 'Gap') {
+        const g = demand[i] - supply[i];
+        const cls = gapCls(g);
+        return `<td class="${baseClass} ${cls}${todayCls}">${g > 0 ? '+' + g : g}</td>`;
+      }
+      if (metric === 'CC%') {
+        const cc = demand[i] === 0 ? 0 : Math.round(supply[i] / demand[i] * 100);
+        return `<td class="${baseClass}${todayCls}"><span class="${ccCls(cc)}">${cc}%</span></td>`;
+      }
+      return `<td class="${baseClass}${todayCls}"></td>`;
+    }).join('');
+  }
+
+  function buildTable() {
+    const roleMetrics  = ['Demand','Supply','Gap','CC%'];
+    const skillMetrics = ['Demand','Supply','Gap','CC%'];
+    let html = '';
+
+    roles.forEach(role => {
+      expanded[role.id] = false;
+
+      // 4 metric rows per role, role name cell spans all 4
+      roleMetrics.forEach((metric, mi) => {
+        const isLast = mi === roleMetrics.length - 1;
+        html += `<tr class="role-metric-row row-${metric.toLowerCase().replace('%','')} role-rows-${role.id}">`;
+
+        if (mi === 0) {
+          html += `
+            <td class="td-role" rowspan="4">
+              <div class="role-cell">
+                ${role.skills.length > 0
+                  ? `<button class="expand-btn" id="xbtn-${role.id}" onclick="toggleRole('${role.id}')" title="Expand skills">
+                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+                     </button>`
+                  : `<span style="width:20px;flex-shrink:0"></span>`}
+                <span class="role-name">${role.name}</span>
+                <span class="role-hc-badge">${role.hc}</span>
+              </div>
+            </td>`;
+        }
+
+        const metricTd = isLast
+          ? `<td class="td-metric" style="border-bottom:2px solid var(--border)">${metric}</td>`
+          : `<td class="td-metric">${metric}</td>`;
+        html += metricTd;
+        html += dataCells(role.demand, role.supply, metric, false);
+        html += '</tr>';
+      });
+
+      // Skill rows (hidden by default)
+      role.skills.forEach((skill, si) => {
+        const isLastSkill = si === role.skills.length - 1;
+        skillMetrics.forEach((metric, mi) => {
+          const isLastRow = isLastSkill && mi === skillMetrics.length - 1;
+          html += `<tr class="skill-row skill-rows-${role.id}${isLastRow ? ' skill-last' : ''}" style="display:none">`;
+
+          if (mi === 0) {
+            html += `<td class="td-skill" rowspan="4">
+              <div class="skill-cell">
+                <span class="skill-dot"></span>
+                <span class="skill-name">${skill.name}</span>
+              </div>
+            </td>`;
+          }
+
+          html += `<td class="td-metric-skill">${metric}</td>`;
+          html += dataCells(skill.demand, skill.supply, metric, true);
+          html += '</tr>';
+        });
+      });
+
+      html += `<tr class="role-sep"><td colspan="${2 + MONTHS.length}"></td></tr>`;
+    });
+
+    document.getElementById('cp-tbody').innerHTML = html;
+  }
+
+  function toggleRole(roleId) {
+    expanded[roleId] = !expanded[roleId];
+    document.querySelectorAll(`.skill-rows-${roleId}`)
+      .forEach(r => r.style.display = expanded[roleId] ? 'table-row' : 'none');
+    const btn = document.getElementById(`xbtn-${roleId}`);
+    if (btn) btn.classList.toggle('open', expanded[roleId]);
+  }
+
+  buildTable();
+</script>
+</body>
+</html>

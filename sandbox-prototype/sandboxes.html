@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sandboxes · Settings · Rocketlane</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #4F46E5; --brand-dark: #3730A3; --brand-light: #EEECFF; --brand-muted: #C4BCF8;
+      --sidebar-bg: #0B0D1A; --sidebar-text: rgba(255,255,255,0.55); --sidebar-active-bg: rgba(79,70,229,0.18); --sidebar-hover-bg: rgba(255,255,255,0.06);
+      --bg: #EDEEF5; --surface: #fff; --border: #E4E7EF; --border-strong: #CAD0DF;
+      --text-1: #0F111A; --text-2: #353A4B; --text-3: #697082; --text-4: #9BA3B8;
+      --success: #0CB472; --success-bg: #EDFBF4; --success-border: #86EFCA;
+      --warning: #D08B0A; --warning-bg: #FFFCEC; --warning-border: #FCD565;
+      --danger: #E1271F; --danger-bg: #FFF0EF; --danger-border: #FBBABD;
+      --info: #2557E7; --info-bg: #EEF4FF; --info-border: #AFC6FC;
+      --radius: 10px; --radius-sm: 7px;
+      --shadow-sm: 0 1px 3px rgba(10,12,30,0.07), 0 1px 2px rgba(10,12,30,0.04);
+      --shadow: 0 2px 8px rgba(10,12,30,0.09), 0 1px 3px rgba(10,12,30,0.05);
+      --shadow-md: 0 8px 24px rgba(10,12,30,0.11), 0 2px 8px rgba(10,12,30,0.06);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 13px; color: var(--text-1); background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 220px; flex-shrink: 0; background: var(--sidebar-bg); display: flex; flex-direction: column; background-image: radial-gradient(ellipse 160% 36% at 50% 0%, rgba(79,70,229,0.2) 0%, transparent 100%); }
+    .sidebar-header { padding: 18px 16px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg, #4F46E5, #7C3AED); border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 0 16px rgba(79,70,229,0.45), 0 2px 6px rgba(79,70,229,0.3); }
+    .logo-text { color: #fff; font-weight: 700; font-size: 14px; letter-spacing: -0.3px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 8px; }
+    .nav-section-label { padding: 10px 8px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255,255,255,0.25); }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 7px; cursor: pointer; color: var(--sidebar-text); font-size: 13px; font-weight: 500; text-decoration: none; transition: background 0.15s, color 0.15s; margin-bottom: 1px; }
+    .nav-item:hover { background: var(--sidebar-hover-bg); color: rgba(255,255,255,0.88); }
+    .nav-item.active { background: var(--sidebar-active-bg); color: #fff; box-shadow: inset 0 0 0 1px rgba(79,70,229,0.3); }
+    .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 1.75; }
+    .sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .env-pill { background: rgba(79,70,229,0.18); border: 1px solid rgba(79,70,229,0.32); color: #A5B4FC; font-size: 10px; font-weight: 700; letter-spacing: 0.07em; padding: 6px 0; border-radius: 7px; text-align: center; }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { height: 50px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 22px; gap: 12px; flex-shrink: 0; }
+    .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-3); }
+    .breadcrumb a { color: var(--text-3); text-decoration: none; transition: color 0.12s; }
+    .breadcrumb a:hover { color: var(--brand); }
+    .breadcrumb-sep { color: var(--text-4); font-size: 11px; }
+    .breadcrumb-current { color: var(--text-1); font-weight: 600; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; cursor: pointer; box-shadow: 0 2px 6px rgba(79,70,229,0.3); }
+
+    /* ── Settings layout ── */
+    .settings-layout { flex: 1; display: flex; overflow: hidden; }
+    .settings-sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px 0; }
+    .settings-nav-section { padding: 6px 16px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-4); margin-top: 8px; }
+    .settings-nav-section:first-child { margin-top: 0; }
+    .settings-nav-item { display: block; padding: 7px 16px; font-size: 13px; color: var(--text-3); text-decoration: none; transition: all 0.12s; border-left: 2px solid transparent; }
+    .settings-nav-item:hover { color: var(--text-1); background: var(--bg); }
+    .settings-nav-item.active { color: var(--brand); font-weight: 600; border-left-color: var(--brand); background: var(--brand-light); }
+
+    /* ── Content ── */
+    .content { flex: 1; overflow-y: auto; padding: 28px 32px; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+    .page-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
+    .page-desc { font-size: 13px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: all 0.15s; white-space: nowrap; font-family: inherit; }
+    .btn-primary { background: linear-gradient(135deg, #4F46E5, #6D28D9); color: #fff; box-shadow: 0 1px 4px rgba(79,70,229,0.28), 0 0 0 1px rgba(79,70,229,0.15); }
+    .btn-primary:hover { background: linear-gradient(135deg, #4338CA, #5B21B6); box-shadow: 0 2px 10px rgba(79,70,229,0.38), 0 0 0 1px rgba(79,70,229,0.25); transform: translateY(-1px); }
+    .btn-default { background: var(--surface); color: var(--text-1); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .btn-default:hover { background: var(--bg); border-color: var(--border-strong); }
+    .btn-ghost { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
+    .btn-danger-ghost { background: transparent; color: var(--danger); border: 1px solid var(--danger-border); }
+    .btn-danger-ghost:hover { background: var(--danger-bg); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+    .btn svg { width: 14px; height: 14px; stroke-width: 2; flex-shrink: 0; }
+
+    /* ── Info banner ── */
+    .info-banner { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: var(--radius); padding: 12px 16px; display: flex; gap: 10px; margin-bottom: 18px; }
+    .info-banner svg { width: 15px; height: 15px; color: var(--info); flex-shrink: 0; margin-top: 1px; }
+    .info-banner-text { font-size: 13px; color: #1e40af; line-height: 1.5; }
+
+    /* ── Tier card ── */
+    .tier-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: var(--shadow-sm); }
+    .tier-left { display: flex; align-items: center; gap: 12px; }
+    .plan-badge { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.04em; }
+    .tier-text { font-size: 13px; color: var(--text-3); }
+    .tier-text strong { color: var(--text-1); }
+    .tier-right { display: flex; align-items: center; gap: 14px; }
+    .quota-wrap { text-align: right; }
+    .quota-label { font-size: 11px; color: var(--text-3); margin-bottom: 5px; }
+    .quota-bar-bg { width: 100px; height: 4px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .quota-bar-fill { height: 100%; border-radius: 3px; background: var(--danger); }
+
+    /* ── Card / Table ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .card-header { padding: 13px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: #FAFBFC; }
+    .card-title { font-size: 13px; font-weight: 700; letter-spacing: -0.1px; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 9px 18px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.07em; background: #FAFBFC; border-bottom: 1px solid var(--border); }
+    tbody td { padding: 14px 18px; vertical-align: middle; border-bottom: 1px solid var(--border); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #F5F6FF; }
+
+    /* ── Status badges ── */
+    .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .badge-ready { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+    .badge-creating { background: var(--info-bg); color: var(--info); border: 1px solid var(--info-border); }
+    .badge-refreshing { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
+
+    /* ── Sandbox name cell ── */
+    .sandbox-name { font-weight: 700; font-size: 13px; color: var(--text-1); letter-spacing: -0.1px; }
+    .sandbox-url { font-size: 11px; color: var(--text-4); font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; margin-top: 3px; }
+
+    /* ── Row actions ── */
+    .row-actions { display: flex; align-items: center; gap: 6px; }
+    tbody tr:not(:hover) .row-actions { opacity: 0; pointer-events: none; }
+
+    /* ── User chip ── */
+    .user-chip { display: flex; align-items: center; gap: 7px; }
+    .user-avatar-sm { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 700; background: linear-gradient(135deg, #EEF2FF, #E0E7FF); color: var(--brand); }
+
+    /* ── Footer bar ── */
+    .footer-row { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+    .footer-hint { font-size: 12px; color: var(--text-3); }
+
+    /* ── Modal overlay ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(10,12,26,0.52); display: none; place-items: center; z-index: 100; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: grid; }
+    .modal { background: var(--surface); border-radius: 14px; width: 420px; box-shadow: 0 24px 64px rgba(10,12,26,0.22), 0 8px 24px rgba(10,12,26,0.10), 0 0 0 1px rgba(10,12,26,0.06); overflow: hidden; animation: modal-in 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes modal-in { from { opacity: 0; transform: scale(0.95) translateY(12px); } to { opacity: 1; transform: none; } }
+    .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+    .modal-close { background: none; border: none; cursor: pointer; color: var(--text-3); padding: 4px; border-radius: 5px; display: grid; place-items: center; transition: all 0.12s; }
+    .modal-close:hover { background: var(--bg); color: var(--text-1); }
+    .modal-body { padding: 20px 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+    .warning-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--danger-bg); display: grid; place-items: center; margin: 0 auto 14px; }
+    .warning-icon svg { color: var(--danger); width: 22px; height: 22px; }
+    .modal-warning-title { text-align: center; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .modal-warning-desc { text-align: center; font-size: 13px; color: var(--text-3); line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-mark">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L3 7l9 5 9-5-9-5zM3 17l9 5 9-5M3 12l9 5 9-5"/></svg>
+    </div>
+    <span class="logo-text">Rocketlane</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Projects
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Customers
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Reports
+    </a>
+    <div class="nav-section-label">Configure</div>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Automations
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Templates
+    </a>
+    <a href="sandboxes.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="env-pill">PRODUCTION</div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="#">Settings</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Sandboxes</span>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar">AK</div>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+    <!-- Settings Nav -->
+    <nav class="settings-sidebar">
+      <div class="settings-nav-section">Account</div>
+      <a href="#" class="settings-nav-item">General</a>
+      <a href="#" class="settings-nav-item">Members &amp; Roles</a>
+      <a href="#" class="settings-nav-item">Billing &amp; Plans</a>
+      <a href="#" class="settings-nav-item active">Sandboxes</a>
+      <div class="settings-nav-section">Workspace</div>
+      <a href="#" class="settings-nav-item">Fields</a>
+      <a href="#" class="settings-nav-item">Workflows</a>
+      <a href="#" class="settings-nav-item">Sprints</a>
+      <a href="#" class="settings-nav-item">Customer Portal</a>
+      <a href="#" class="settings-nav-item">Automations</a>
+      <a href="#" class="settings-nav-item">AI Capabilities</a>
+      <div class="settings-nav-section">Integrations</div>
+      <a href="#" class="settings-nav-item">Integrations</a>
+      <a href="#" class="settings-nav-item">API Keys</a>
+      <a href="#" class="settings-nav-item">Webhooks</a>
+      <a href="#" class="settings-nav-item">Secret Store</a>
+    </nav>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Sandboxes</div>
+          <div class="page-desc">Test changes in Settings, Automations, Integrations or any new feature safely in an isolated environment before deploying to production.</div>
+        </div>
+        <button class="btn btn-primary" onclick="openQuotaModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Create Sandbox
+        </button>
+      </div>
+
+      <!-- Info banner -->
+      <div class="info-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="info-banner-text">
+          Copies all configs + 30 days of data.
+        </div>
+      </div>
+
+      <!-- Tier card -->
+      <div class="tier-card">
+        <div class="tier-left">
+          <span class="plan-badge">ENTERPRISE</span>
+          <span class="tier-text">
+            <strong>1 sandbox</strong> included free (config only) &nbsp;·&nbsp;
+            +5% ACV for sample data
+          </span>
+        </div>
+        <div class="tier-right">
+          <div class="quota-wrap">
+            <div class="quota-label">1 of 1 used</div>
+            <div class="quota-bar-bg"><div class="quota-bar-fill" style="width: 100%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sandbox list -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Active Sandboxes</span>
+          <span style="font-size: 12px; color: var(--text-4);">1 sandbox</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Sandbox</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Last Activity</th>
+              <th>Owner</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="sandbox-name">NiCE_Sandbox</div>
+                <div class="sandbox-url">nice-sandbox.rocketlane.com</div>
+              </td>
+              <td>
+                <span class="badge badge-ready"><span class="badge-dot"></span> Active</span>
+              </td>
+              <td style="color:var(--text-3);">Feb 12, 2026<br><span style="font-size:11px;color:var(--text-4);">22 days ago</span></td>
+              <td style="color:var(--text-3);">Today, 10:42 AM<br><span style="font-size:11px;color:var(--text-4);">2 hours ago</span></td>
+              <td>
+                <div class="user-chip">
+                  <div class="user-avatar-sm">AK</div>
+                  <span style="color:var(--text-2);">Arun Kumar</span>
+                </div>
+              </td>
+              <td style="width: 220px;">
+                <div class="row-actions">
+                  <a href="review-changes.html" class="btn btn-default btn-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Open
+                  </a>
+                  <button class="btn btn-ghost btn-sm" onclick="openRefreshModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Refresh
+                  </button>
+                  <button class="btn btn-danger-ghost btn-sm" onclick="openDeleteModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer-row">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:11px;color:var(--text-3);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Auto-deletes after 90 days of inactivity
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:11px;color:var(--text-3);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Merge logs: 90 days
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:11px;color:var(--text-3);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Activity logs: forever
+          </div>
+        </div>
+        <a href="#" class="btn btn-ghost btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          View Audit Log
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Refresh Modal -->
+<div class="modal-overlay" id="refreshModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Refresh Sandbox</span>
+      <button class="modal-close" onclick="closeModal('refreshModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="warning-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="modal-warning-title">Refresh "NiCE_Sandbox"?</div>
+      <div class="modal-warning-desc">
+        This will <strong>permanently delete all sandbox work</strong> that hasn't been merged to production and resync with the latest production data and configs.<br><br>
+        All sandbox admins will be notified by email.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('refreshModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('refreshModal'); alert('Refresh initiated — admins will be notified by email when ready.')">Refresh Sandbox</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quota Modal -->
+<div class="modal-overlay" id="quotaModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Sandbox quota reached</span>
+      <button class="modal-close" onclick="closeModal('quotaModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;">
+        <div style="width:36px;height:36px;background:var(--danger-bg);border-radius:50%;display:grid;place-items:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:13px;">1 of 1 sandbox(es) used</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:2px;">Your Enterprise plan includes 1 sandbox. Additional sandboxes are available at +10% of ACV.</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.6;">
+        To create another sandbox, contact your account manager or request an upgrade. Your existing sandbox will remain active in the meantime.
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;align-items:center;">
+      <a href="create-sandbox.html" style="font-size:12px;color:var(--text-4);text-decoration:none;font-style:italic;">↗ Demo: skip to create flow</a>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-default" onclick="closeModal('quotaModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="closeModal('quotaModal');alert('Request sent — your account manager will reach out shortly.')">Request Upgrade</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Delete Sandbox</span>
+      <button class="modal-close" onclick="closeModal('deleteModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="warning-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </div>
+      <div class="modal-warning-title">Delete "NiCE_Sandbox"?</div>
+      <div class="modal-warning-desc">
+        All unmerged changes will be <strong>permanently lost</strong>. This action cannot be undone.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn" style="background:var(--danger);color:#fff;" onclick="closeModal('deleteModal')">Delete Sandbox</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openQuotaModal() { document.getElementById('quotaModal').classList.add('open'); }
+  function openRefreshModal() { document.getElementById('refreshModal').classList.add('open'); }
+  function openDeleteModal() { document.getElementById('deleteModal').classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+</script>
+</body>
+</html>

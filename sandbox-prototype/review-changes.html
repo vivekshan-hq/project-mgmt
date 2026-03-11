@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Changes · Rocketlane Sandbox</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #4F46E5; --brand-dark: #3730A3; --brand-light: #EEECFF; --brand-muted: #C4BCF8;
+      --sidebar-bg: #0B0D1A;
+      --bg: #EDEEF5; --surface: #fff; --border: #E4E7EF; --border-strong: #CAD0DF;
+      --text-1: #0F111A; --text-2: #353A4B; --text-3: #697082; --text-4: #9BA3B8;
+      --success: #0CB472; --success-bg: #EDFBF4; --success-border: #86EFCA;
+      --warning: #D08B0A; --warning-bg: #FFFCEC; --warning-border: #FDE68A;
+      --danger: #E1271F; --danger-bg: #FFF0EF; --danger-border: #FBBABD;
+      --info: #2557E7; --info-bg: #EEF4FF; --info-border: #AFC6FC;
+      --conflict: #7C3AED; --conflict-bg: #F5F3FF; --conflict-border: #DDD6FE;
+      --new-color: #0CB472; --new-bg: #EDFBF4; --new-border: #86EFCA;
+      --mod-color: #D08B0A; --mod-bg: #FFFCEC; --mod-border: #FDE68A;
+      --del-color: #E1271F; --del-bg: #FFF0EF; --del-border: #FBBABD;
+      --radius: 10px; --radius-sm: 7px;
+      --shadow-sm: 0 1px 3px rgba(10,12,30,0.07), 0 1px 2px rgba(10,12,30,0.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 13px; color: var(--text-1); background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar { width: 220px; flex-shrink: 0; background: var(--sidebar-bg); display: flex; flex-direction: column; background-image: radial-gradient(ellipse 160% 36% at 50% 0%, rgba(79,70,229,0.2) 0%, transparent 100%); }
+    .sidebar-header { padding: 18px 16px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg, #4F46E5, #7C3AED); border-radius: 8px; display: grid; place-items: center; box-shadow: 0 0 16px rgba(79,70,229,0.45); }
+    .logo-text { color: #fff; font-weight: 700; font-size: 14px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 8px; }
+    .nav-section-label { padding: 10px 8px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255,255,255,0.25); }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 7px; cursor: pointer; color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; margin-bottom: 1px; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.88); }
+    .nav-item.active { background: rgba(79,70,229,0.18); color: #fff; box-shadow: inset 0 0 0 1px rgba(79,70,229,0.3); }
+    .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 1.75; }
+    .sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,0.07); }
+
+    /* Sandbox env pill — red variant for sandbox pages */
+    .env-pill { background: rgba(225,39,31,0.15); border: 1px solid rgba(225,39,31,0.3); color: #FCA5A5; font-size: 10px; font-weight: 700; letter-spacing: 0.07em; padding: 6px 0; border-radius: 7px; text-align: center; }
+
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Sandbox banner — amber stripe, more refined */
+    .sandbox-banner { background: linear-gradient(90deg, #B91C1C, #DC2626); color: #fff; padding: 7px 22px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; flex-shrink: 0; }
+    .sandbox-banner svg { width: 13px; height: 13px; }
+
+    .topbar { height: 50px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 22px; gap: 12px; flex-shrink: 0; }
+    .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-3); }
+    .breadcrumb a { color: var(--text-3); text-decoration: none; transition: color 0.12s; }
+    .breadcrumb a:hover { color: var(--brand); }
+    .breadcrumb-sep { color: var(--text-4); font-size: 11px; }
+    .breadcrumb-current { color: var(--text-1); font-weight: 600; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(79,70,229,0.3); }
+
+    /* Content */
+    .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Page header */
+    .page-header { padding: 18px 24px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .page-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .page-title { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
+    .page-meta { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .sandbox-tag { display: inline-flex; align-items: center; gap: 5px; background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; margin-right: 6px; }
+
+    /* Stat chips */
+    .stat-chips { display: flex; gap: 8px; }
+    .stat-chip { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid; cursor: pointer; transition: all 0.15s; }
+    .stat-chip.all { background: #fff; border-color: var(--border-strong); color: var(--text-1); }
+    .stat-chip.all.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .stat-chip.new-c { background: var(--new-bg); border-color: var(--new-border); color: var(--new-color); }
+    .stat-chip.new-c.active { background: var(--new-color); color: #fff; border-color: var(--new-color); }
+    .stat-chip.mod-c { background: var(--mod-bg); border-color: var(--mod-border); color: var(--mod-color); }
+    .stat-chip.mod-c.active { background: var(--mod-color); color: #fff; border-color: var(--mod-color); }
+    .stat-chip.del-c { background: var(--del-bg); border-color: var(--del-border); color: var(--del-color); }
+    .stat-chip.del-c.active { background: var(--del-color); color: #fff; border-color: var(--del-color); }
+    .chip-count { font-weight: 700; }
+
+    /* Production changed warning */
+    .prod-changed-banner { background: var(--warning-bg); border-bottom: 1px solid var(--warning-border); padding: 9px 24px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #78350f; flex-shrink: 0; }
+    .prod-changed-banner svg { width: 14px; height: 14px; color: var(--warning); flex-shrink: 0; }
+    .prod-changed-banner .dismiss { margin-left: auto; background: none; border: none; cursor: pointer; color: #92400e; font-size: 12px; font-family: inherit; font-weight: 600; text-decoration: underline; }
+
+    /* Changes list */
+    .changes-scroll { flex: 1; overflow-y: auto; padding: 16px 24px 120px; }
+
+    /* Section */
+    .change-section { margin-bottom: 16px; }
+    .section-header { display: flex; align-items: center; gap: 8px; padding: 0 0 8px; }
+    .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); }
+    .section-count { font-size: 11px; color: var(--text-4); }
+
+    /* Change row */
+    .change-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; transition: border-color 0.15s, box-shadow 0.15s; box-shadow: var(--shadow-sm); }
+    .change-row:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
+    .change-row.has-conflict { border-left: 3px solid var(--conflict); }
+    .change-row-header { display: flex; align-items: center; padding: 11px 14px; gap: 12px; cursor: pointer; }
+
+    /* Checkbox */
+    .custom-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border-strong); display: grid; place-items: center; flex-shrink: 0; cursor: pointer; transition: all 0.15s; }
+    .custom-cb.checked { background: var(--brand); border-color: var(--brand); }
+    .custom-cb.checked svg { display: block; }
+    .custom-cb svg { display: none; width: 10px; height: 10px; stroke-width: 3; color: #fff; }
+    .custom-cb.warn { border-color: var(--del-color); }
+    .custom-cb.checked.warn { background: var(--del-color); border-color: var(--del-color); }
+
+    /* Type badge */
+    .type-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.04em; flex-shrink: 0; }
+    .type-new { background: var(--new-bg); color: var(--new-color); border: 1px solid var(--new-border); }
+    .type-mod { background: var(--mod-bg); color: var(--mod-color); border: 1px solid var(--mod-border); }
+    .type-del { background: var(--del-bg); color: var(--del-color); border: 1px solid var(--del-border); }
+
+    /* Row name */
+    .row-name { flex: 1; display: flex; align-items: center; gap: 8px; }
+    .row-name-text { font-weight: 600; font-size: 13px; color: var(--text-1); }
+    .row-name-sub { font-size: 11px; color: var(--text-4); margin-top: 1px; }
+
+    /* Tags */
+    .conflict-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--conflict-bg); color: var(--conflict); border: 1px solid var(--conflict-border); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+    .resolved-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+    .dep-badge { display: inline-flex; align-items: center; gap: 4px; background: #F0F9FF; color: #0369A1; border: 1px solid #BAE6FD; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; cursor: help; }
+    .dep-badge svg { width: 10px; height: 10px; }
+
+    /* Expand btn */
+    .expand-btn { font-size: 11px; color: var(--brand); font-weight: 600; background: none; border: 1px solid var(--brand-muted); border-radius: 999px; padding: 3px 10px; cursor: pointer; transition: all 0.15s; font-family: inherit; display: flex; align-items: center; gap: 4px; }
+    .expand-btn:hover { background: var(--brand-light); }
+    .expand-btn svg { width: 11px; height: 11px; transition: transform 0.2s; }
+    .expand-btn.expanded svg { transform: rotate(180deg); }
+
+    /* Deleted warning */
+    .del-warning { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--del-color); font-weight: 500; }
+    .del-warning svg { width: 12px; height: 12px; }
+
+    /* Diff area */
+    .diff-area { display: none; border-top: 1px solid var(--border); padding: 14px 14px 14px 44px; }
+    .diff-area.open { display: block; }
+    .diff-header { display: flex; gap: 12px; margin-bottom: 10px; }
+    .diff-side { flex: 1; font-size: 11px; font-weight: 600; color: var(--text-3); display: flex; align-items: center; gap: 5px; }
+    .diff-side svg { width: 11px; height: 11px; }
+    .diff-table { width: 100%; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-size: 12px; }
+    .diff-row { display: flex; }
+    .diff-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+    .diff-cell { flex: 1; padding: 7px 10px; font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; line-height: 1.5; }
+    .diff-cell.label { background: #FAFBFC; color: var(--text-4); font-family: 'Plus Jakarta Sans', inherit; font-weight: 600; font-size: 11px; flex: 0 0 120px; border-right: 1px solid var(--border); }
+    .diff-cell.snap-val { background: #F8F9FC; color: var(--text-3); }
+    .diff-cell.prod-val { background: #FFF8F8; }
+    .diff-cell.sand-val { background: #F0FFF8; }
+    .diff-highlight-del { background: #FECACA; color: var(--danger); text-decoration: line-through; padding: 1px 3px; border-radius: 3px; }
+    .diff-highlight-add { background: #A7F3D0; color: var(--success); padding: 1px 3px; border-radius: 3px; }
+    .diff-row-header { display: flex; }
+    .diff-row-header .diff-cell { background: #FAFBFC; font-weight: 700; font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Plus Jakarta Sans', inherit; }
+
+    /* DELETED detail */
+    .del-detail { background: var(--del-bg); border: 1px solid var(--del-border); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #7F1D1D; }
+    .del-impact { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .del-impact-item { display: flex; align-items: center; gap: 6px; }
+    .del-impact-item svg { width: 12px; height: 12px; color: var(--del-color); }
+
+    /* Bottom bar */
+    .bottom-bar { position: absolute; bottom: 0; left: 220px; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; z-index: 10; box-shadow: 0 -4px 20px rgba(10,12,30,0.08); }
+    .selection-summary { font-size: 13px; color: var(--text-3); }
+    .selection-summary strong { color: var(--text-1); }
+    .spacer { flex: 1; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: all 0.15s; font-family: inherit; }
+    .btn-primary { background: linear-gradient(135deg, #4F46E5, #6D28D9); color: #fff; box-shadow: 0 1px 4px rgba(79,70,229,0.28), 0 0 0 1px rgba(79,70,229,0.15); }
+    .btn-primary:hover { background: linear-gradient(135deg, #4338CA, #5B21B6); transform: translateY(-1px); }
+    .btn-default { background: var(--surface); color: var(--text-1); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .btn-default:hover { background: var(--bg); }
+    .btn-conflict { background: linear-gradient(135deg, #7C3AED, #6D28D9); color: #fff; box-shadow: 0 1px 4px rgba(124,58,237,0.28); }
+    .btn-conflict:hover { background: linear-gradient(135deg, #6D28D9, #5B21B6); transform: translateY(-1px); }
+    .btn svg { width: 14px; height: 14px; stroke-width: 2; }
+    .btn:disabled { opacity: 0.5; pointer-events: none; }
+
+    /* Dep tooltip */
+    .dep-tooltip-wrap { position: relative; }
+    .dep-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1F2937; color: #fff; font-size: 11px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; margin-bottom: 6px; display: none; z-index: 20; }
+    .dep-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1F2937; }
+    .dep-tooltip-wrap:hover .dep-tooltip { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-mark">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L3 7l9 5 9-5-9-5zM3 17l9 5 9-5M3 12l9 5 9-5"/></svg>
+    </div>
+    <span class="logo-text">Rocketlane</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Projects
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Customers
+    </a>
+    <div class="nav-section-label">Configure</div>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Automations
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Project Templates
+    </a>
+    <a href="sandboxes.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="env-pill">SANDBOX</div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Sandbox Banner -->
+  <div class="sandbox-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    SANDBOX ENVIRONMENT
+    <span style="width:1px;height:12px;background:rgba(255,255,255,0.3);margin:0 4px;display:inline-block;vertical-align:middle;"></span>
+    <span style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);border-radius:5px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.03em;">NiCE_Sandbox</span>
+    <span style="width:1px;height:12px;background:rgba(255,255,255,0.3);margin:0 4px;display:inline-block;vertical-align:middle;"></span>
+    Changes here do not affect production
+  </div>
+
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="#">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Sync to Production</span>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar">AK</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-top">
+        <div>
+          <div class="page-title">Review Changes</div>
+          <div class="page-meta">
+            Comparing against Production &nbsp;·&nbsp; Snapshot taken Feb 12, 2026 at 9:04 AM
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-default" onclick="document.getElementById('prodChangedBanner').style.display='flex'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Simulate Prod Change
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="stat-chips">
+        <button class="stat-chip all active" id="chip-all" onclick="filterBy('all')">
+          <span class="chip-count">13</span> All Changes
+        </button>
+        <button class="stat-chip new-c" id="chip-new" onclick="filterBy('new')">
+          <span class="chip-count">4</span> New
+        </button>
+        <button class="stat-chip mod-c" id="chip-mod" onclick="filterBy('mod')">
+          <span class="chip-count">7</span> Modified
+        </button>
+        <button class="stat-chip del-c" id="chip-del" onclick="filterBy('del')">
+          <span class="chip-count">2</span> Deleted
+        </button>
+      </div>
+    </div>
+
+    <!-- Prod changed banner (hidden by default) -->
+    <div class="prod-changed-banner" id="prodChangedBanner" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <strong>Production has changed since you opened this review.</strong>&nbsp; An admin edited the "Customer Portal" settings 5 minutes ago.
+      <button class="dismiss" onclick="this.closest('.prod-changed-banner').style.display='none'">Refresh diff</button>
+    </div>
+
+    <!-- Scrollable change list -->
+    <div class="changes-scroll">
+
+      <!-- Templates (2 NEW) -->
+      <div class="change-section" data-category="new">
+        <div class="section-header">
+          <span class="section-title">Project Templates</span>
+          <span class="section-count">2 changes</span>
+        </div>
+
+        <div class="change-row">
+          <div class="change-row-header">
+            <div class="custom-cb checked" onclick="toggleCb(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-new">NEW</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Onboarding v3 Template</div>
+                <div class="row-name-sub">23 tasks · 4 phases · 3 assignee rules</div>
+              </div>
+            </div>
+            <a href="#" onclick="return false;" class="expand-btn" style="border-color:var(--new-border);color:var(--new-color);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Preview
+            </a>
+          </div>
+        </div>
+
+        <div class="change-row">
+          <div class="change-row-header">
+            <div class="custom-cb checked" onclick="toggleCb(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-new">NEW</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Technical Setup Checklist</div>
+                <div class="row-name-sub">11 tasks · 2 phases</div>
+              </div>
+            </div>
+            <a href="#" onclick="return false;" class="expand-btn" style="border-color:var(--new-border);color:var(--new-color);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Preview
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Automations (3 MOD, 1 NEW) -->
+      <div class="change-section">
+        <div class="section-header">
+          <span class="section-title">Automations</span>
+          <span class="section-count">4 changes</span>
+        </div>
+
+        <!-- CONFLICT item -->
+        <div class="change-row has-conflict">
+          <div class="change-row-header" onclick="toggleDiff('diff-kickoff', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text" style="display:flex;align-items:center;gap:6px;">
+                  Project Kickoff
+                  <span class="conflict-badge" id="conflict-badge-kickoff">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    CONFLICT
+                  </span>
+                </div>
+                <div class="row-name-sub">Modified in both Production and Sandbox since snapshot</div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-kickoff">
+              View diff
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="diff-area" id="diff-kickoff">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell snap-val">Day 1 Snapshot</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Step 3 Action</div>
+                <div class="diff-cell snap-val">Send email to client</div>
+                <div class="diff-cell prod-val">Send email to client, <span class="diff-highlight-add">CC project lead</span></div>
+                <div class="diff-cell sand-val">Send <span class="diff-highlight-add">Slack message</span> to <span class="diff-highlight-add">PM</span></div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Step 3 Trigger</div>
+                <div class="diff-cell snap-val">On project create</div>
+                <div class="diff-cell prod-val"><span class="diff-highlight-add">On kickoff call scheduled</span></div>
+                <div class="diff-cell sand-val">On project create</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Modified by</div>
+                <div class="diff-cell snap-val">—</div>
+                <div class="diff-cell prod-val" style="color:var(--text-3);">Admin A · 5 days ago</div>
+                <div class="diff-cell sand-val" style="color:var(--text-3);">Admin B · today</div>
+              </div>
+            </div>
+            <div id="conflict-warn-kickoff" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#5B21B6;">
+              <strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.
+            </div>
+          </div>
+        </div>
+
+        <!-- Modified, no conflict -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-welcome', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Client Welcome Email</div>
+                <div class="row-name-sub">2 fields changed</div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-welcome">
+              View diff
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="diff-area" id="diff-welcome">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Subject line</div>
+                <div class="diff-cell prod-val">Welcome to <span class="diff-highlight-del">Acme</span></div>
+                <div class="diff-cell sand-val">Welcome to <span class="diff-highlight-add">your Rocketlane project</span></div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Send delay</div>
+                <div class="diff-cell prod-val"><span class="diff-highlight-del">Immediately</span></div>
+                <div class="diff-cell sand-val"><span class="diff-highlight-add">1 hour after trigger</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW with dependency -->
+        <div class="change-row">
+          <div class="change-row-header">
+            <div class="custom-cb checked" onclick="toggleCb(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-new">NEW</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text" style="display:flex;align-items:center;gap:6px;">
+                  Slack Integration Trigger
+                  <div class="dep-tooltip-wrap">
+                    <span class="dep-badge">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      Depends on: Custom Field "Client Tier"
+                    </span>
+                    <div class="dep-tooltip">Must merge "Client Tier" custom field together</div>
+                  </div>
+                </div>
+                <div class="row-name-sub">References "Client Tier" custom field · Must be merged together</div>
+              </div>
+            </div>
+            <a href="#" onclick="return false;" class="expand-btn" style="border-color:var(--new-border);color:var(--new-color);">Preview</a>
+          </div>
+        </div>
+
+        <!-- Modified -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-status', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Status Change Notifier</div>
+                <div class="row-name-sub">1 field changed</div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-status">
+              View diff
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="diff-area" id="diff-status">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Recipients</div>
+                <div class="diff-cell prod-val"><span class="diff-highlight-del">Project Owner</span></div>
+                <div class="diff-cell sand-val"><span class="diff-highlight-add">Project Owner, CSM</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Fields (2 changes) -->
+      <div class="change-section">
+        <div class="section-header">
+          <span class="section-title">Custom Fields</span>
+          <span class="section-count">3 changes</span>
+        </div>
+
+        <div class="change-row">
+          <div class="change-row-header">
+            <div class="custom-cb checked" onclick="toggleCb(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-new">NEW</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text" style="display:flex;align-items:center;gap:6px;">
+                  Client Tier
+                  <div class="dep-tooltip-wrap">
+                    <span class="dep-badge">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      Required by: Slack Integration Trigger
+                    </span>
+                    <div class="dep-tooltip">Automation "Slack Integration Trigger" depends on this field</div>
+                  </div>
+                </div>
+                <div class="row-name-sub">Dropdown · 3 options: Enterprise, Mid-Market, SMB</div>
+              </div>
+            </div>
+            <a href="#" onclick="return false;" class="expand-btn" style="border-color:var(--new-border);color:var(--new-color);">Preview</a>
+          </div>
+        </div>
+
+        <div class="change-row has-conflict">
+          <div class="change-row-header" onclick="toggleDiff('diff-priority', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text" style="display:flex;align-items:center;gap:6px;">
+                  Priority Levels
+                  <span class="conflict-badge" id="conflict-badge-priority">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    CONFLICT
+                  </span>
+                </div>
+                <div class="row-name-sub">Options list changed in both environments</div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-priority">
+              View diff
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="diff-area" id="diff-priority">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell snap-val">Day 1 Snapshot</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Options</div>
+                <div class="diff-cell snap-val">Low, Medium, High</div>
+                <div class="diff-cell prod-val">Low, Medium, High, <span class="diff-highlight-add">Critical</span></div>
+                <div class="diff-cell sand-val">Low, Medium, <span class="diff-highlight-del">High</span> <span class="diff-highlight-add">P1</span>, <span class="diff-highlight-add">P2</span>, <span class="diff-highlight-add">P3</span></div>
+              </div>
+            </div>
+            <div id="conflict-warn-priority" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#5B21B6;">
+              <strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.
+            </div>
+          </div>
+        </div>
+
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-stage', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Project Stage</div>
+                <div class="row-name-sub">1 option added</div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-stage">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-stage">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Options</div>
+                <div class="diff-cell prod-val">Draft, Active, On Hold, Closed</div>
+                <div class="diff-cell sand-val">Draft, Active, On Hold, Closed, <span class="diff-highlight-add">Archived</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings (2 MOD) -->
+      <div class="change-section">
+        <div class="section-header">
+          <span class="section-title">Settings</span>
+          <span class="section-count">2 changes</span>
+        </div>
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-portal', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Customer Portal Branding</div>
+                <div class="row-name-sub">2 fields changed</div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-portal">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-portal">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Primary color</div>
+                <div class="diff-cell prod-val"><span class="diff-highlight-del">#003366</span></div>
+                <div class="diff-cell sand-val"><span class="diff-highlight-add">#1E40AF</span></div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Logo</div>
+                <div class="diff-cell prod-val"><span class="diff-highlight-del">acme-logo-v1.png</span></div>
+                <div class="diff-cell sand-val"><span class="diff-highlight-add">acme-logo-v2.png</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-sprint', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Sprint Duration Default</div>
+                <div class="row-name-sub">1 field changed</div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-sprint">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-sprint">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Duration</div>
+                <div class="diff-cell prod-val"><span class="diff-highlight-del">1 week</span></div>
+                <div class="diff-cell sand-val"><span class="diff-highlight-add">2 weeks</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deleted (2 items, unchecked by default) -->
+      <div class="change-section" data-category="del">
+        <div class="section-header">
+          <span class="section-title">Deleted</span>
+          <span class="section-count">2 changes · unchecked by default — must explicitly include</span>
+        </div>
+
+        <!-- Deleted skill -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-skill', this)">
+            <div class="custom-cb warn" id="cb-skill" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-del">DELETED</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Salesforce Admin Skill</div>
+                <div class="row-name-sub" style="color:var(--del-color);">
+                  <div class="del-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Assigned to 5 team members — will be unlinked on merge
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-skill" style="border-color:var(--del-border);color:var(--del-color);">
+              View impact
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="diff-area" id="diff-skill">
+            <div class="del-detail">
+              <div><strong>What will be removed:</strong> Skill "Salesforce Admin" (used for task assignment matching)</div>
+              <div class="del-impact">
+                <div class="del-impact-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg> <strong>⚠ 5 team members</strong> have this skill assigned — skill will be removed from their profiles</div>
+                <div class="del-impact-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg> <strong>⚠ 3 task templates</strong> use this skill as an assignment rule — rules will be cleared</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deleted task -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-task', this)">
+            <div class="custom-cb warn" id="cb-task" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-del">DELETED</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Security Review Sign-off Task</div>
+                <div class="row-name-sub" style="color:var(--del-color);">
+                  <div class="del-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Removed from "Onboarding v3 Template" — affects all projects using this template
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-task" style="border-color:var(--del-border);color:var(--del-color);">
+              View impact
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="diff-area" id="diff-task">
+            <div class="del-detail">
+              <div><strong>What will be removed:</strong> Task "Security Review Sign-off" from Onboarding v3 Template, Phase 3</div>
+              <div class="del-impact">
+                <div class="del-impact-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> This task is not yet started in any active projects — safe to remove</div>
+                <div class="del-impact-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg> <strong>⚠ 7 future projects</strong> spawned from this template will no longer include this task</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end changes-scroll -->
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <div class="selection-summary" id="selectionSummary">
+    <strong id="selectedCount">11</strong> of 13 changes selected
+  </div>
+  <div id="bottom-conflict-msg" style="font-size:12px;color:var(--conflict);font-weight:600;display:flex;align-items:center;gap:5px;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+    2 conflicts must be resolved before merging
+  </div>
+  <div class="spacer"></div>
+  <a href="sandboxes.html" class="btn btn-default">Cancel</a>
+  <a href="conflict-resolution.html" class="btn btn-conflict" id="cta-resolve">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+    Resolve 2 Conflicts →
+  </a>
+  <a href="#" class="btn btn-primary" id="cta-merge" style="display:none;" onclick="return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+    Merge to Production
+  </a>
+</div>
+
+<script>
+  let totalSelected = 11;
+  const total = 13;
+
+  function toggleCb(el) {
+    const wasChecked = el.classList.contains('checked');
+    el.classList.toggle('checked');
+    totalSelected += wasChecked ? -1 : 1;
+    document.getElementById('selectedCount').textContent = totalSelected;
+  }
+
+  function toggleDiff(id, rowHeader) {
+    const diff = document.getElementById(id);
+    const btnId = 'btn-' + id;
+    const btn = document.getElementById(btnId);
+    const isOpen = diff.classList.contains('open');
+    diff.classList.toggle('open', !isOpen);
+    if (btn) {
+      btn.classList.toggle('expanded', !isOpen);
+    }
+  }
+
+  function filterBy(type) {
+    document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('chip-' + type).classList.add('active');
+    // In a real implementation, filter rows
+  }
+
+  // Reflect resolved conflicts from conflict-resolution page
+  (function() {
+    const saved = JSON.parse(localStorage.getItem('sandbox_conflicts_resolved') || 'null');
+    if (!saved) return;
+
+    ['kickoff', 'priority'].forEach(function(id) {
+      if (!saved[id]) return;
+      const choiceLabel = saved[id] === 'prod' ? 'Production' : 'Sandbox';
+
+      // Swap CONFLICT badge → Conflict Resolved
+      const badge = document.getElementById('conflict-badge-' + id);
+      if (badge) {
+        badge.className = 'resolved-badge';
+        badge.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Conflict Resolved';
+      }
+
+      // Swap warning box → resolved note
+      const warn = document.getElementById('conflict-warn-' + id);
+      if (warn) {
+        warn.style.background = 'var(--success-bg)';
+        warn.style.borderColor = 'var(--success-border)';
+        warn.style.color = 'var(--success)';
+        warn.innerHTML = '<strong>✓ Resolved:</strong> Using ' + choiceLabel + ' version.';
+      }
+    });
+
+    // If all resolved, swap bottom bar CTA
+    const allResolved = saved.kickoff && saved.priority;
+    if (allResolved) {
+      document.getElementById('bottom-conflict-msg').style.display = 'none';
+      document.getElementById('cta-resolve').style.display = 'none';
+      document.getElementById('cta-merge').style.display = 'inline-flex';
+    }
+  })();
+</script>
+</body>
+</html>

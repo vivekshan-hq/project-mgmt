@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills Linking Prototype · Rocketlane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #5B50E8; --brand-dark: #4338CA; --brand-light: #EEF2FF; --brand-muted: #C7D2FE;
+      --sidebar-bg: #12131F; --sidebar-text: rgba(255,255,255,0.55);
+      --sidebar-active-bg: rgba(91,80,232,0.2); --sidebar-hover-bg: rgba(255,255,255,0.05);
+      --bg: #F3F4F8; --surface: #fff; --border: #E5E7EB; --border-strong: #D1D5DB;
+      --text-1: #111827; --text-2: #374151; --text-3: #6B7280; --text-4: #9CA3AF;
+      --success: #059669; --success-bg: #ECFDF5;
+      --danger: #DC2626; --danger-bg: #FEF2F2;
+      --warning-bg: #FFFBEB;
+      --radius: 8px; --radius-sm: 5px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; color: var(--text-1); background: var(--bg); overflow: hidden; }
+
+    /* ── Demo bar ── */
+    .demo-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: #0f172a; display: flex; align-items: center; gap: 12px;
+      padding: 7px 16px; height: 36px;
+    }
+    .demo-label { color: rgba(255,255,255,0.35); font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; }
+    .screen-tabs { display: flex; gap: 3px; margin-left: auto; }
+    .screen-tab {
+      padding: 4px 12px; border-radius: 4px; border: none;
+      font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer;
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); transition: all .12s;
+    }
+    .screen-tab.active { background: var(--brand); color: #fff; }
+    .screen-tab:hover:not(.active) { background: rgba(255,255,255,0.14); color: #fff; }
+
+    /* ── Screens ── */
+    .screen { display: none; margin-top: 36px; height: calc(100vh - 36px); overflow: hidden; }
+    .screen.active { display: flex; }
+
+    /* ══════════════ SIDEBAR ══════════════ */
+    .sidebar {
+      width: 216px; flex-shrink: 0; background: var(--sidebar-bg);
+      display: flex; flex-direction: column; height: 100%;
+    }
+    .sidebar-header {
+      padding: 15px 14px 12px; display: flex; align-items: center; gap: 9px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .logo-mark {
+      width: 26px; height: 26px; background: var(--brand); border-radius: 6px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .logo-text { color: #fff; font-weight: 700; font-size: 14px; letter-spacing: -.2px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 10px 8px; }
+    .nav-sec-lbl {
+      padding: 10px 8px 3px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,0.25);
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+      border-radius: 6px; cursor: pointer; color: var(--sidebar-text);
+      font-size: 12px; font-weight: 500; text-decoration: none;
+      transition: background .12s, color .12s; margin-bottom: 1px;
+    }
+    .nav-item:hover { background: var(--sidebar-hover-bg); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: var(--sidebar-active-bg); color: #fff; }
+    .nav-item svg { width: 14px; height: 14px; flex-shrink: 0; stroke-width: 1.75; }
+    .nav-indent { padding-left: 30px; font-size: 12px; }
+
+    /* ══════════════ MAIN ══════════════ */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar {
+      height: 46px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px; gap: 8px; flex-shrink: 0;
+    }
+    .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-3); }
+    .breadcrumb a { color: var(--text-3); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--brand); }
+    .bc-sep { color: var(--text-4); font-size: 10px; }
+    .bc-curr { color: var(--text-1); font-weight: 600; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand), #818CF8);
+      color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center;
+    }
+
+    .content { flex: 1; overflow-y: auto; }
+    .page-header {
+      padding: 20px 24px 0;
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .page-title { font-size: 16px; font-weight: 700; }
+    .page-desc { font-size: 12px; color: var(--text-3); margin-top: 3px; max-width: 520px; }
+
+    /* ══════════════ BUTTONS ══════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all .12s; border: none; white-space: nowrap;
+    }
+    .btn-primary { background: var(--brand); color: #fff; }
+    .btn-primary:hover { background: var(--brand-dark); }
+    .btn-secondary { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg); border-color: var(--border-strong); }
+    .btn-ghost { background: transparent; color: var(--text-3); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text-2); }
+    .btn-sm { padding: 3px 8px; font-size: 11px; }
+    .btn-icon {
+      width: 28px; height: 28px; border-radius: var(--radius-sm);
+      background: transparent; border: none; cursor: pointer; color: var(--text-3);
+      display: grid; place-items: center; transition: background .12s;
+    }
+    .btn-icon:hover { background: var(--bg); color: var(--text-2); }
+    .btn-link {
+      background: none; border: none; color: var(--brand); font-size: 12px;
+      font-weight: 500; cursor: pointer; font-family: inherit; padding: 0;
+    }
+    .btn-link:hover { text-decoration: underline; }
+
+    /* ══════════════ TABLE ══════════════ */
+    .tbl-wrap {
+      margin: 16px 24px 32px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th {
+      padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--text-3); text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 1px solid var(--border); background: #FAFAFA;
+    }
+    .tbl td {
+      padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle;
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr:hover td { background: #FAFBFF; }
+    .tbl .row-actions { opacity: 0; transition: opacity .12s; }
+    .tbl tr:hover .row-actions { opacity: 1; }
+    .sec-row td {
+      padding: 6px 14px; font-size: 11px; font-weight: 600;
+      color: var(--text-3); background: #F9FAFB;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .drag-handle { color: var(--text-4); cursor: grab; user-select: none; font-size: 14px; }
+
+    /* Field type badge */
+    .ftype {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--text-3); background: var(--bg);
+      border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px;
+    }
+    .ftype svg { width: 11px; height: 11px; }
+
+    /* Toggle */
+    .toggle { position: relative; width: 34px; height: 18px; display: inline-block; cursor: pointer; }
+    .toggle input { display: none; }
+    .tog-track { position: absolute; inset: 0; background: var(--border-strong); border-radius: 20px; transition: background .2s; }
+    .toggle input:checked + .tog-track { background: var(--brand); }
+    .tog-thumb {
+      position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+      border-radius: 50%; background: white; transition: transform .2s; box-shadow: var(--shadow-sm);
+    }
+    .toggle input:checked ~ .tog-thumb { transform: translateX(16px); }
+
+    /* Skill tags in table */
+    .skills-cell { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 26px; }
+    .skill-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;
+      background: var(--brand-light); color: var(--brand); border: 1px solid var(--brand-muted);
+    }
+    .skill-tag .rm { cursor: pointer; color: var(--brand); opacity: 0.55; font-size: 13px; line-height: 1; border: none; background: none; font-family: inherit; padding: 0; margin-left: 1px; }
+    .skill-tag .rm:hover { opacity: 1; }
+    .link-btn {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 8px; font-size: 11px; font-weight: 500; border-radius: 4px;
+      border: 1px dashed var(--border); background: none; color: var(--brand);
+      cursor: pointer; font-family: inherit; transition: all .12s;
+    }
+    .link-btn:hover { border-color: var(--brand-muted); background: var(--brand-light); }
+    .na-txt { font-size: 11px; color: var(--text-4); font-style: italic; }
+
+    /* ══════════════ MODAL ══════════════ */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 800;
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border-radius: 12px; width: 520px;
+      max-height: 82vh; display: flex; flex-direction: column;
+      box-shadow: var(--shadow-lg); overflow: hidden;
+      animation: fadeUp .15s ease;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-hdr {
+      padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0;
+    }
+    .modal-title { font-size: 15px; font-weight: 700; }
+    .modal-sub { font-size: 12px; color: var(--text-3); margin-top: 3px; line-height: 1.5; }
+    .modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+    .modal-ftr {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-shrink: 0;
+    }
+
+    /* Search */
+    .search-wrap { position: relative; margin-bottom: 14px; }
+    .search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; color: var(--text-4); }
+    .search-input {
+      width: 100%; padding: 7px 10px 7px 28px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-family: inherit; font-size: 12px;
+      color: var(--text-1); outline: none; transition: border .12s; background: var(--bg);
+    }
+    .search-input:focus { border-color: var(--brand); background: #fff; }
+
+    /* Skill checkboxes */
+    .skill-grp-lbl {
+      font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase;
+      letter-spacing: .07em; margin: 14px 0 7px;
+    }
+    .skill-grp-lbl:first-child { margin-top: 0; }
+    .skill-chips-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sk-cb { display: none; }
+    .sk-lbl {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+      cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text-2);
+      transition: all .12s; background: var(--surface); user-select: none;
+    }
+    .sk-lbl:hover { border-color: var(--brand-muted); color: var(--brand); }
+    .sk-cb:checked + .sk-lbl {
+      background: var(--brand-light); border-color: var(--brand-muted); color: var(--brand);
+    }
+    .sk-cb:checked + .sk-lbl::before {
+      content: ''; display: block; width: 12px; height: 12px; border-radius: 3px;
+      flex-shrink: 0;
+      background: var(--brand) url("data:image/svg+xml,%3Csvg viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 6l3 3 5-5' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+
+    /* Selected strip */
+    .sel-strip {
+      margin-top: 16px; padding: 11px 13px; background: var(--bg);
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
+    }
+    .sel-strip-lbl { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+    .sel-chips { display: flex; flex-wrap: wrap; gap: 5px; min-height: 24px; }
+    .sel-chip {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;
+      background: var(--brand-light); color: var(--brand); border: 1px solid var(--brand-muted);
+    }
+    .chip-rm { background: none; border: none; cursor: pointer; color: var(--brand); font-size: 14px; line-height: 1; padding: 0 0 0 2px; }
+    .empty-msg { font-size: 12px; color: var(--text-4); font-style: italic; }
+
+    /* Skill + level rows in selected strip */
+    .sel-chips { flex-direction: column !important; gap: 6px !important; }
+    .sel-chip-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 9px; border-radius: var(--radius-sm);
+      background: var(--brand-light); border: 1px solid var(--brand-muted);
+    }
+    .sel-chip-name { font-size: 12px; font-weight: 600; color: var(--brand); flex: 1; }
+    .sel-chip-level {
+      padding: 2px 7px; border: 1px solid var(--brand-muted); border-radius: 4px;
+      font-family: inherit; font-size: 11px; color: var(--text-2);
+      background: white; cursor: pointer; outline: none; min-width: 130px;
+    }
+    .sel-chip-level:focus { border-color: var(--brand); }
+    .skill-tag-level { font-size: 10px; opacity: .7; margin-left: 2px; }
+
+  </style>
+</head>
+<body>
+
+<!-- ─── Demo switcher bar ─── -->
+<div class="demo-bar">
+  <span class="demo-label">Prototype</span>
+  <div class="screen-tabs">
+    <button class="screen-tab" onclick="switchScreen('pf', this)">① Project Fields</button>
+    <button class="screen-tab active" onclick="switchScreen('skills', this)">② Skills</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 1: Settings › Project Fields
+════════════════════════════════════════════ -->
+<div id="screen-pf" class="screen" style="display:none">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo-text">Rocketlane</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-sec-lbl">Settings</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        General
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Fields</div>
+      <a class="nav-item active" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+        Project fields
+      </a>
+      <a class="nav-item nav-indent" href="#">Task fields</a>
+      <a class="nav-item nav-indent" href="#">Team member fields</a>
+      <a class="nav-item nav-indent" href="#">Time entry fields</a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Resource Planning</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Skills
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Advanced</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Custom domain
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb">
+        <a href="#">Settings</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-curr">Project fields</span>
+      </div>
+      <div class="topbar-right">
+        <div class="avatar">VK</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Project fields</div>
+          <div class="page-desc">Define custom fields for your projects. Link skills to SKU fields to enable capacity planning based on what's sold.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-secondary">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            New section
+          </button>
+          <button class="btn btn-primary">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            New field
+          </button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width:28px"></th>
+              <th style="width:200px">Field name</th>
+              <th>Description</th>
+              <th style="width:130px">Field type</th>
+              <th style="width:280px">Linked skills</th>
+              <th style="width:80px">Status</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- Section: SKUs -->
+            <tr class="sec-row"><td colspan="7">Product SKUs (4)</td></tr>
+
+            <!-- Workday Integration — has skills -->
+            <tr id="row-workday">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Workday Integration</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Workday HCM implementation</td>
+              <td>
+                <span class="ftype">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  Yes/No
+                </span>
+              </td>
+              <td>
+                <div class="skills-cell" id="sc-workday">
+                  <span class="skill-tag">Workday<span class="skill-tag-level">· Advanced</span><button class="rm" onclick="removeSkill('workday','Workday')">×</button></span>
+                  <span class="skill-tag">Java<span class="skill-tag-level">· Intermediate</span><button class="rm" onclick="removeSkill('workday','Java')">×</button></span>
+                  <span class="skill-tag">Integration Testing<button class="rm" onclick="removeSkill('workday','Integration Testing')">×</button></span>
+                  <button class="link-btn" onclick="openModal('workday','Workday Integration')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Add
+                  </button>
+                </div>
+              </td>
+              <td>
+                <label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+              </td>
+              <td class="row-actions">
+                <button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+              </td>
+            </tr>
+
+            <!-- Salesforce CRM — has skills -->
+            <tr id="row-salesforce">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Salesforce CRM</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Salesforce implementation & config</td>
+              <td>
+                <span class="ftype">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  Yes/No
+                </span>
+              </td>
+              <td>
+                <div class="skills-cell" id="sc-salesforce">
+                  <span class="skill-tag">Salesforce Integration <button class="rm" onclick="removeSkill('salesforce','Salesforce Integration')">×</button></span>
+                  <span class="skill-tag">Data Migration <button class="rm" onclick="removeSkill('salesforce','Data Migration')">×</button></span>
+                  <button class="link-btn" onclick="openModal('salesforce','Salesforce CRM')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Add
+                  </button>
+                </div>
+              </td>
+              <td>
+                <label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+              </td>
+              <td class="row-actions">
+                <button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+              </td>
+            </tr>
+
+            <!-- Java Development — no skills yet -->
+            <tr id="row-java">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Java Development</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Java backend dev SKU</td>
+              <td>
+                <span class="ftype">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  Yes/No
+                </span>
+              </td>
+              <td>
+                <div class="skills-cell" id="sc-java">
+                  <button class="link-btn" onclick="openModal('java','Java Development')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Link skills
+                  </button>
+                </div>
+              </td>
+              <td>
+                <label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+              </td>
+              <td class="row-actions">
+                <button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+              </td>
+            </tr>
+
+            <!-- Program Management — no skills yet -->
+            <tr id="row-pm">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Program Management</span></td>
+              <td style="font-size:12px;color:var(--text-3)">PMO engagement SKU</td>
+              <td>
+                <span class="ftype">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  Yes/No
+                </span>
+              </td>
+              <td>
+                <div class="skills-cell" id="sc-pm">
+                  <button class="link-btn" onclick="openModal('pm','Program Management')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Link skills
+                  </button>
+                </div>
+              </td>
+              <td>
+                <label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+              </td>
+              <td class="row-actions">
+                <button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+              </td>
+            </tr>
+
+            <!-- Section: General -->
+            <tr class="sec-row"><td colspan="7">General fields (3)</td></tr>
+
+            <tr>
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Project start date</span></td>
+              <td></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Date</span></td>
+              <td><span class="na-txt">Not applicable</span></td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Budget</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Project budget in USD</td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Number</span></td>
+              <td><span class="na-txt">Not applicable</span></td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Region</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Customer region</td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Single choice</span></td>
+              <td><span class="na-txt">Not applicable</span></td>
+              <td><label class="toggle"><input type="checkbox"><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /screen-pf -->
+
+
+<!-- ════════════════════════════════════════════
+     SCREEN 2: Settings › Skills (link to Project Fields)
+════════════════════════════════════════════ -->
+<div id="screen-skills" class="screen active">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo-text">Rocketlane</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-sec-lbl">Settings</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        General
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Fields</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+        Project fields
+      </a>
+      <a class="nav-item nav-indent" href="#">Task fields</a>
+      <a class="nav-item nav-indent" href="#">Team member fields</a>
+      <a class="nav-item nav-indent" href="#">Time entry fields</a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Resource Planning</div>
+      <a class="nav-item active" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Skills
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Advanced</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Custom domain
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb">
+        <a href="#">Settings</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-curr">Skills</span>
+      </div>
+      <div class="topbar-right">
+        <div class="avatar">VK</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Skills</div>
+          <div class="page-desc">Skills can be used to define your team members' proficiencies. Link skills to project fields (SKUs) to enable capacity planning.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-secondary">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            New section
+          </button>
+          <button class="btn btn-primary">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            New skill
+          </button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width:28px"></th>
+              <th style="width:180px">Field name</th>
+              <th>Description</th>
+              <th style="width:110px">Field type</th>
+              <th style="width:290px">Linked project fields</th>
+              <th style="width:80px">Status</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- Section: Technical Skills -->
+            <tr class="sec-row"><td colspan="7">Technical Skills (8)</td></tr>
+
+            <tr id="sk-row-javascript">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Javascript</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-javascript">
+                  <button class="link-btn" onclick="openSkuModal('javascript','Javascript')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Link project fields
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-workday">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Workday</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Workday HCM proficiency</td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-workday">
+                  <span class="skill-tag">Workday Integration <button class="rm" onclick="removeSkuFromSkill('workday','Workday Integration')">×</button></span>
+                  <button class="link-btn" onclick="openSkuModal('workday','Workday')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Add
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-java">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Java</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-java">
+                  <span class="skill-tag">Workday Integration <button class="rm" onclick="removeSkuFromSkill('java','Workday Integration')">×</button></span>
+                  <span class="skill-tag">Java Development <button class="rm" onclick="removeSkuFromSkill('java','Java Development')">×</button></span>
+                  <button class="link-btn" onclick="openSkuModal('java','Java')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Add
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-datamig">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Data Migration</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-datamig">
+                  <span class="skill-tag">Salesforce CRM <button class="rm" onclick="removeSkuFromSkill('datamig','Salesforce CRM')">×</button></span>
+                  <button class="link-btn" onclick="openSkuModal('datamig','Data Migration')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Add
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-sf">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Salesforce Integration</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-sf">
+                  <span class="skill-tag">Salesforce CRM <button class="rm" onclick="removeSkuFromSkill('sf','Salesforce CRM')">×</button></span>
+                  <button class="link-btn" onclick="openSkuModal('sf','Salesforce Integration')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Add
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-it">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Integration Testing</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-it">
+                  <span class="skill-tag">Workday Integration <button class="rm" onclick="removeSkuFromSkill('it','Workday Integration')">×</button></span>
+                  <button class="link-btn" onclick="openSkuModal('it','Integration Testing')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Add
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-st">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Software Testing</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-st">
+                  <button class="link-btn" onclick="openSkuModal('st','Software Testing')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Link project fields
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-devops">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">DevOps</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-devops">
+                  <button class="link-btn" onclick="openSkuModal('devops','DevOps')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Link project fields
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <!-- Section: Management Skills -->
+            <tr class="sec-row"><td colspan="7">Management Skills (4)</td></tr>
+
+            <tr id="sk-row-pm">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Program management</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-pm">
+                  <button class="link-btn" onclick="openSkuModal('skpm','Program management')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Link project fields
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-bud">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Budget management</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Level</span></td>
+              <td>
+                <div class="skills-cell" id="skc-bud">
+                  <button class="link-btn" onclick="openSkuModal('bud','Budget management')">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Link project fields
+                  </button>
+                </div>
+              </td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-tm">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Time management</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Number</span></td>
+              <td><span class="na-txt">Not applicable</span></td>
+              <td><label class="toggle"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <tr id="sk-row-sh">
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Stakeholder management</span></td>
+              <td style="font-size:12px;color:var(--text-3)"></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Yes/No</span></td>
+              <td><span class="na-txt">Not applicable</span></td>
+              <td><label class="toggle"><input type="checkbox"><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+            <!-- Section: Certifications -->
+            <tr class="sec-row"><td colspan="7">Certifications (2)</td></tr>
+
+            <tr>
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Certification</span></td>
+              <td style="font-size:12px;color:var(--text-3)">Professional certifications held</td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>Single choice</span></td>
+              <td><span class="na-txt">Not applicable</span></td>
+              <td><label class="toggle"><input type="checkbox"><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="drag-handle">⋮⋮</span></td>
+              <td><span style="font-weight:600;font-size:13px">Certification expiry date</span></td>
+              <td></td>
+              <td><span class="ftype"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Date</span></td>
+              <td><span class="na-txt">Not applicable</span></td>
+              <td><label class="toggle"><input type="checkbox"><div class="tog-track"></div><div class="tog-thumb"></div></label></td>
+              <td class="row-actions"><button class="btn-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /screen-skills -->
+
+
+<!-- ════════════════════════════════════════════
+     MODAL: Link Project Fields to a Skill
+════════════════════════════════════════════ -->
+<div id="modal-sku" class="modal-overlay" onclick="if(event.target===this)closeSkuModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">Link project fields — <span id="sku-modal-skill-name"></span></div>
+        <div class="modal-sub">Select the product SKU fields that require this skill. This links the skill to demand from those projects.</div>
+      </div>
+      <button class="btn-icon" onclick="closeSkuModal()">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="search-wrap">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" class="search-input" id="sku-search" placeholder="Search project fields…" oninput="filterSkuModal(this.value)">
+      </div>
+
+      <div class="skill-grp-lbl">Product SKUs</div>
+      <div class="skill-chips-grid" id="sku-grp-skus">
+        <input type="checkbox" class="sk-cb" id="sku-workday" value="Workday Integration" onchange="syncSkuChips()">
+        <label class="sk-lbl" for="sku-workday">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="opacity:.5"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Workday Integration
+        </label>
+        <input type="checkbox" class="sk-cb" id="sku-salesforce" value="Salesforce CRM" onchange="syncSkuChips()">
+        <label class="sk-lbl" for="sku-salesforce">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="opacity:.5"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Salesforce CRM
+        </label>
+        <input type="checkbox" class="sk-cb" id="sku-java-dev" value="Java Development" onchange="syncSkuChips()">
+        <label class="sk-lbl" for="sku-java-dev">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="opacity:.5"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Java Development
+        </label>
+        <input type="checkbox" class="sk-cb" id="sku-pmo" value="Program Management" onchange="syncSkuChips()">
+        <label class="sk-lbl" for="sku-pmo">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="opacity:.5"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Program Management
+        </label>
+      </div>
+
+      <div class="skill-grp-lbl">General fields</div>
+      <div class="skill-chips-grid" id="sku-grp-general" style="opacity:.5;pointer-events:none">
+        <span class="sk-lbl" style="cursor:default">Project start date <span style="font-size:10px;margin-left:4px;opacity:.6">(Date — not applicable)</span></span>
+        <span class="sk-lbl" style="cursor:default">Budget <span style="font-size:10px;margin-left:4px;opacity:.6">(Number — not applicable)</span></span>
+        <span class="sk-lbl" style="cursor:default">Region <span style="font-size:10px;margin-left:4px;opacity:.6">(Single choice — not applicable)</span></span>
+      </div>
+
+      <div class="sel-strip">
+        <div class="sel-strip-lbl">Selected project fields</div>
+        <div class="sel-chips" id="sku-sel-chips"><span class="empty-msg">No project fields selected yet</span></div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-secondary" onclick="closeSkuModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSkuModal()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     MODAL: Link Skills to Project Field
+════════════════════════════════════════════ -->
+<div id="modal-skills" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">Link skills — <span id="modal-field-name"></span></div>
+        <div class="modal-sub">Skills linked here will surface as suggestions when adding placeholders to projects with this SKU.</div>
+      </div>
+      <button class="btn-icon" onclick="closeModal()">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="search-wrap">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" class="search-input" id="modal-search" placeholder="Search skills…" oninput="filterModalSkills(this.value)">
+      </div>
+
+      <div class="skill-grp-lbl">Technical Skills</div>
+      <div class="skill-chips-grid" id="grp-technical">
+        <input type="checkbox" class="sk-cb" id="m-workday" value="Workday" onchange="syncChips()">
+        <label class="sk-lbl" for="m-workday">Workday</label>
+        <input type="checkbox" class="sk-cb" id="m-java" value="Java" onchange="syncChips()">
+        <label class="sk-lbl" for="m-java">Java</label>
+        <input type="checkbox" class="sk-cb" id="m-js" value="Javascript" onchange="syncChips()">
+        <label class="sk-lbl" for="m-js">Javascript</label>
+        <input type="checkbox" class="sk-cb" id="m-sf" value="Salesforce Integration" onchange="syncChips()">
+        <label class="sk-lbl" for="m-sf">Salesforce Integration</label>
+        <input type="checkbox" class="sk-cb" id="m-dm" value="Data Migration" onchange="syncChips()">
+        <label class="sk-lbl" for="m-dm">Data Migration</label>
+        <input type="checkbox" class="sk-cb" id="m-st" value="Software Testing" onchange="syncChips()">
+        <label class="sk-lbl" for="m-st">Software Testing</label>
+        <input type="checkbox" class="sk-cb" id="m-it" value="Integration Testing" onchange="syncChips()">
+        <label class="sk-lbl" for="m-it">Integration Testing</label>
+        <input type="checkbox" class="sk-cb" id="m-do" value="DevOps" onchange="syncChips()">
+        <label class="sk-lbl" for="m-do">DevOps</label>
+        <input type="checkbox" class="sk-cb" id="m-py" value="Python" onchange="syncChips()">
+        <label class="sk-lbl" for="m-py">Python</label>
+      </div>
+
+      <div class="skill-grp-lbl">Management Skills</div>
+      <div class="skill-chips-grid" id="grp-management">
+        <input type="checkbox" class="sk-cb" id="m-pm" value="Program management" onchange="syncChips()">
+        <label class="sk-lbl" for="m-pm">Program management</label>
+        <input type="checkbox" class="sk-cb" id="m-bud" value="Budget management" onchange="syncChips()">
+        <label class="sk-lbl" for="m-bud">Budget management</label>
+        <input type="checkbox" class="sk-cb" id="m-tm" value="Time management" onchange="syncChips()">
+        <label class="sk-lbl" for="m-tm">Time management</label>
+        <input type="checkbox" class="sk-cb" id="m-sh" value="Stakeholder management" onchange="syncChips()">
+        <label class="sk-lbl" for="m-sh">Stakeholder management</label>
+      </div>
+
+      <div class="sel-strip">
+        <div class="sel-strip-lbl">Selected skills</div>
+        <div class="sel-chips" id="modal-sel-chips"><span class="empty-msg">No skills selected yet</span></div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveModal()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  /* ── State ── */
+  const fieldNames = { workday:'Workday Integration', salesforce:'Salesforce CRM', java:'Java Development', pm:'Program Management' };
+  const fieldSkills = {
+    workday:    [{name:'Workday', level:'Advanced'}, {name:'Java', level:'Intermediate'}, {name:'Integration Testing', level:''}],
+    salesforce: [{name:'Salesforce Integration', level:''}, {name:'Data Migration', level:''}],
+    java:       [],
+    pm:         []
+  };
+  let currentField = null;
+
+  /* ── Screen switch ── */
+  function switchScreen(id, btn) {
+    document.querySelectorAll('.screen').forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
+    const el = document.getElementById('screen-' + id);
+    el.style.display = 'flex'; el.classList.add('active');
+    document.querySelectorAll('.screen-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  /* ── Modal ── */
+  function openModal(fieldId, fieldName) {
+    currentField = fieldId;
+    document.getElementById('modal-field-name').textContent = fieldName;
+    document.getElementById('modal-search').value = '';
+    const savedNames = (fieldSkills[fieldId] || []).map(s => s.name);
+    document.querySelectorAll('#modal-skills .sk-cb').forEach(cb => {
+      cb.checked = savedNames.includes(cb.value);
+      cb.style.display = ''; if (cb.nextElementSibling) cb.nextElementSibling.style.display = '';
+    });
+    syncChips();
+    document.getElementById('modal-skills').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-skills').classList.remove('open');
+  }
+
+  function syncChips() {
+    const checked = [...document.querySelectorAll('#modal-skills .sk-cb:checked')].map(c => c.value);
+    const el = document.getElementById('modal-sel-chips');
+    if (!checked.length) { el.innerHTML = '<span class="empty-msg">No skills selected yet</span>'; return; }
+    const saved = fieldSkills[currentField] || [];
+    const lvlOpts = ['','Beginner','Intermediate','Advanced','Expert'];
+    el.innerHTML = checked.map(name => {
+      const existing = saved.find(s => s.name === name);
+      const curLevel = existing?.level || '';
+      const safeId = 'chip-lvl-' + name.replace(/\s+/g,'-');
+      const opts = lvlOpts.map(v => `<option value="${v}"${curLevel===v?' selected':''}>${v||'Level (optional)'}</option>`).join('');
+      return `<div class="sel-chip-row">
+        <span class="sel-chip-name">${name}</span>
+        <select class="sel-chip-level" id="${safeId}">${opts}</select>
+        <button class="chip-rm" onclick="uncheckModal('${name}')">×</button>
+      </div>`;
+    }).join('');
+  }
+
+  function uncheckModal(val) {
+    document.querySelectorAll('#modal-skills .sk-cb').forEach(cb => { if (cb.value === val) cb.checked = false; });
+    syncChips();
+  }
+
+  function filterModalSkills(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#modal-skills .sk-cb').forEach(cb => {
+      const lbl = cb.nextElementSibling;
+      const show = cb.value.toLowerCase().includes(q);
+      cb.style.display = show ? '' : 'none';
+      if (lbl) lbl.style.display = show ? '' : 'none';
+    });
+  }
+
+  function saveModal() {
+    const checked = [...document.querySelectorAll('#modal-skills .sk-cb:checked')].map(c => c.value);
+    fieldSkills[currentField] = checked.map(name => {
+      const el = document.getElementById('chip-lvl-' + name.replace(/\s+/g,'-'));
+      return { name, level: el?.value || '' };
+    });
+    renderSkillCell(currentField, fieldSkills[currentField]);
+    closeModal();
+  }
+
+  function renderSkillCell(fieldId, skills) {
+    const cell = document.getElementById('sc-' + fieldId);
+    if (!cell) return;
+    const addBtn = `<button class="link-btn" onclick="openModal('${fieldId}','${fieldNames[fieldId]}')"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add</button>`;
+    const emptyBtn = `<button class="link-btn" onclick="openModal('${fieldId}','${fieldNames[fieldId]}')"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Link skills</button>`;
+    cell.innerHTML = skills.length
+      ? skills.map(s => `<span class="skill-tag">${s.name}${s.level ? `<span class="skill-tag-level">· ${s.level}</span>` : ''}<button class="rm" onclick="removeSkill('${fieldId}','${s.name}')">×</button></span>`).join('') + addBtn
+      : emptyBtn;
+  }
+
+  function removeSkill(fieldId, skillName) {
+    fieldSkills[fieldId] = (fieldSkills[fieldId] || []).filter(s => s.name !== skillName);
+    renderSkillCell(fieldId, fieldSkills[fieldId]);
+  }
+
+  /* ── Screen 2: Skills → Link Project Fields ── */
+  const skillNames = {
+    javascript:'Javascript', workday:'Workday', java:'Java', datamig:'Data Migration',
+    sf:'Salesforce Integration', it:'Integration Testing', st:'Software Testing',
+    devops:'DevOps', skpm:'Program management', bud:'Budget management'
+  };
+  const skillSkus = {
+    javascript:[], workday:['Workday Integration'], java:['Workday Integration','Java Development'],
+    datamig:['Salesforce CRM'], sf:['Salesforce CRM'], it:['Workday Integration'],
+    st:[], devops:[], skpm:[], bud:[]
+  };
+  let currentSkill = null;
+
+  function openSkuModal(skillId, skillName) {
+    currentSkill = skillId;
+    document.getElementById('sku-modal-skill-name').textContent = skillName;
+    document.getElementById('sku-search').value = '';
+    document.querySelectorAll('#modal-sku .sk-cb').forEach(cb => {
+      cb.checked = skillSkus[skillId]?.includes(cb.value) || false;
+      cb.style.display = ''; if (cb.nextElementSibling) cb.nextElementSibling.style.display = '';
+    });
+    syncSkuChips();
+    document.getElementById('modal-sku').classList.add('open');
+  }
+
+  function closeSkuModal() {
+    document.getElementById('modal-sku').classList.remove('open');
+  }
+
+  function syncSkuChips() {
+    const checked = [...document.querySelectorAll('#modal-sku .sk-cb:checked')].map(c => c.value);
+    const el = document.getElementById('sku-sel-chips');
+    el.innerHTML = checked.length
+      ? checked.map(s => `<span class="sel-chip">${s}<button class="chip-rm" onclick="uncheckSku('${s}')">×</button></span>`).join('')
+      : '<span class="empty-msg">No project fields selected yet</span>';
+  }
+
+  function uncheckSku(val) {
+    document.querySelectorAll('#modal-sku .sk-cb').forEach(cb => { if (cb.value === val) cb.checked = false; });
+    syncSkuChips();
+  }
+
+  function filterSkuModal(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#modal-sku .sk-cb').forEach(cb => {
+      const lbl = cb.nextElementSibling;
+      const show = cb.value.toLowerCase().includes(q);
+      cb.style.display = show ? '' : 'none';
+      if (lbl) lbl.style.display = show ? '' : 'none';
+    });
+  }
+
+  function saveSkuModal() {
+    const checked = [...document.querySelectorAll('#modal-sku .sk-cb:checked')].map(c => c.value);
+    skillSkus[currentSkill] = checked;
+    renderSkuCell(currentSkill, checked);
+    closeSkuModal();
+  }
+
+  function renderSkuCell(skillId, skus) {
+    const cell = document.getElementById('skc-' + skillId);
+    if (!cell) return;
+    const sName = skillNames[skillId] || skillId;
+    const addBtn = `<button class="link-btn" onclick="openSkuModal('${skillId}','${sName}')"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add</button>`;
+    const emptyBtn = `<button class="link-btn" onclick="openSkuModal('${skillId}','${sName}')"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Link project fields</button>`;
+    cell.innerHTML = skus.length
+      ? skus.map(s => `<span class="skill-tag">${s}<button class="rm" onclick="removeSkuFromSkill('${skillId}','${s}')">×</button></span>`).join('') + addBtn
+      : emptyBtn;
+  }
+
+  function removeSkuFromSkill(skillId, sku) {
+    skillSkus[skillId] = (skillSkus[skillId] || []).filter(s => s !== sku);
+    renderSkuCell(skillId, skillSkus[skillId]);
+  }
+
+</script>
+</body>
+</html>
