@@ -802,7 +802,21 @@
   function filterBy(type) {
     document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('chip-' + type).classList.add('active');
-    // In a real implementation, filter rows
+
+    document.querySelectorAll('.change-row').forEach(row => {
+      if (type === 'all') {
+        row.style.display = '';
+      } else {
+        row.style.display = row.querySelector('.type-' + type) ? '' : 'none';
+      }
+    });
+
+    // Hide sections where all rows are filtered out
+    document.querySelectorAll('.change-section').forEach(section => {
+      const rows = section.querySelectorAll('.change-row');
+      const anyVisible = Array.from(rows).some(r => r.style.display !== 'none');
+      section.style.display = (rows.length > 0 && !anyVisible) ? 'none' : '';
+    });
   }
 
   // Reflect resolved conflicts from conflict-resolution page
