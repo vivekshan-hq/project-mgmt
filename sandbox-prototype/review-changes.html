@@ -393,16 +393,22 @@
                 <div class="diff-cell">Sandbox</div>
               </div>
               <div class="diff-row">
-                <div class="diff-cell label">Step 3 Action</div>
+                <div class="diff-cell label">Trigger</div>
+                <div class="diff-cell snap-val">When project created</div>
+                <div class="diff-cell prod-val"><span class="diff-highlight-add">When kickoff call scheduled</span></div>
+                <div class="diff-cell sand-val">When project created</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Condition</div>
+                <div class="diff-cell snap-val">If Assignee is Project Lead</div>
+                <div class="diff-cell prod-val">If Assignee is Project Lead</div>
+                <div class="diff-cell sand-val">If Assignee is <span class="diff-highlight-add">PM or CSM</span></div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Action</div>
                 <div class="diff-cell snap-val">Send email to client</div>
                 <div class="diff-cell prod-val">Send email to client, <span class="diff-highlight-add">CC project lead</span></div>
                 <div class="diff-cell sand-val">Send <span class="diff-highlight-add">Slack message</span> to <span class="diff-highlight-add">PM</span></div>
-              </div>
-              <div class="diff-row">
-                <div class="diff-cell label">Step 3 Trigger</div>
-                <div class="diff-cell snap-val">On project create</div>
-                <div class="diff-cell prod-val"><span class="diff-highlight-add">On kickoff call scheduled</span></div>
-                <div class="diff-cell sand-val">On project create</div>
               </div>
               <div class="diff-row">
                 <div class="diff-cell label">Modified by</div>
@@ -441,9 +447,14 @@
                 <div class="diff-cell">Sandbox</div>
               </div>
               <div class="diff-row">
-                <div class="diff-cell label">Subject line</div>
-                <div class="diff-cell prod-val">Welcome to <span class="diff-highlight-del">Acme</span></div>
-                <div class="diff-cell sand-val">Welcome to <span class="diff-highlight-add">your Rocketlane project</span></div>
+                <div class="diff-cell label">Trigger</div>
+                <div class="diff-cell prod-val">When project created</div>
+                <div class="diff-cell sand-val">When project created</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Action</div>
+                <div class="diff-cell prod-val">Send email · Subject: "Welcome to <span class="diff-highlight-del">Acme</span>"</div>
+                <div class="diff-cell sand-val">Send email · Subject: "Welcome to <span class="diff-highlight-add">your Rocketlane project</span>"</div>
               </div>
               <div class="diff-row">
                 <div class="diff-cell label">Send delay</div>
@@ -502,9 +513,14 @@
                 <div class="diff-cell">Sandbox</div>
               </div>
               <div class="diff-row">
-                <div class="diff-cell label">Recipients</div>
-                <div class="diff-cell prod-val"><span class="diff-highlight-del">Project Owner</span></div>
-                <div class="diff-cell sand-val"><span class="diff-highlight-add">Project Owner, CSM</span></div>
+                <div class="diff-cell label">Trigger</div>
+                <div class="diff-cell prod-val">When project status changes</div>
+                <div class="diff-cell sand-val">When project status changes</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Action</div>
+                <div class="diff-cell prod-val">Send notification to <span class="diff-highlight-del">Project Owner</span></div>
+                <div class="diff-cell sand-val">Send notification to <span class="diff-highlight-add">Project Owner, CSM</span></div>
               </div>
             </div>
           </div>
