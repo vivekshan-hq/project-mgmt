@@ -289,13 +289,13 @@
       <!-- Filter chips -->
       <div class="stat-chips">
         <button class="stat-chip all active" id="chip-all" onclick="filterBy('all')">
-          <span class="chip-count">13</span> All Changes
+          <span class="chip-count">11</span> All Changes
         </button>
         <button class="stat-chip new-c" id="chip-new" onclick="filterBy('new')">
           <span class="chip-count">4</span> New
         </button>
         <button class="stat-chip mod-c" id="chip-mod" onclick="filterBy('mod')">
-          <span class="chip-count">7</span> Modified
+          <span class="chip-count">5</span> Modified
         </button>
         <button class="stat-chip del-c" id="chip-del" onclick="filterBy('del')">
           <span class="chip-count">2</span> Deleted
@@ -359,7 +359,7 @@
       <div class="change-section">
         <div class="section-header">
           <span class="section-title">Automations</span>
-          <span class="section-count">4 changes</span>
+          <span class="section-count">2 changes</span>
         </div>
 
         <!-- CONFLICT item -->
@@ -423,48 +423,6 @@
           </div>
         </div>
 
-        <!-- Modified, no conflict -->
-        <div class="change-row">
-          <div class="change-row-header" onclick="toggleDiff('diff-welcome', this)">
-            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <span class="type-badge type-mod">MOD</span>
-            <div class="row-name">
-              <div>
-                <div class="row-name-text">Client Welcome Email</div>
-                <div class="row-name-sub">2 fields changed</div>
-              </div>
-            </div>
-            <button class="expand-btn" id="btn-diff-welcome">
-              View diff
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-          </div>
-          <div class="diff-area" id="diff-welcome">
-            <div class="diff-table">
-              <div class="diff-row diff-row-header">
-                <div class="diff-cell label">Steps</div>
-                <div class="diff-cell">Production</div>
-                <div class="diff-cell">Sandbox</div>
-              </div>
-              <div class="diff-row">
-                <div class="diff-cell label">Trigger</div>
-                <div class="diff-cell prod-val">When project created</div>
-                <div class="diff-cell sand-val">When project created</div>
-              </div>
-              <div class="diff-row">
-                <div class="diff-cell label">Action</div>
-                <div class="diff-cell prod-val">Send email · Subject: "Welcome to <span class="diff-highlight-del">Acme</span>"</div>
-                <div class="diff-cell sand-val">Send email · Subject: "Welcome to <span class="diff-highlight-add">your Rocketlane project</span>"</div>
-              </div>
-              <div class="diff-row">
-                <div class="diff-cell label">Send delay</div>
-                <div class="diff-cell prod-val"><span class="diff-highlight-del">Immediately</span></div>
-                <div class="diff-cell sand-val"><span class="diff-highlight-add">1 hour after trigger</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- NEW with dependency -->
         <div class="change-row">
           <div class="change-row-header">
@@ -489,42 +447,6 @@
           </div>
         </div>
 
-        <!-- Modified -->
-        <div class="change-row">
-          <div class="change-row-header" onclick="toggleDiff('diff-status', this)">
-            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <span class="type-badge type-mod">MOD</span>
-            <div class="row-name">
-              <div>
-                <div class="row-name-text">Status Change Notifier</div>
-                <div class="row-name-sub">1 field changed</div>
-              </div>
-            </div>
-            <button class="expand-btn" id="btn-diff-status">
-              View diff
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-          </div>
-          <div class="diff-area" id="diff-status">
-            <div class="diff-table">
-              <div class="diff-row diff-row-header">
-                <div class="diff-cell label">Steps</div>
-                <div class="diff-cell">Production</div>
-                <div class="diff-cell">Sandbox</div>
-              </div>
-              <div class="diff-row">
-                <div class="diff-cell label">Trigger</div>
-                <div class="diff-cell prod-val">When project status changes</div>
-                <div class="diff-cell sand-val">When project status changes</div>
-              </div>
-              <div class="diff-row">
-                <div class="diff-cell label">Action</div>
-                <div class="diff-cell prod-val">Send notification to <span class="diff-highlight-del">Project Owner</span></div>
-                <div class="diff-cell sand-val">Send notification to <span class="diff-highlight-add">Project Owner, CSM</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Custom Fields (2 changes) -->
@@ -775,7 +697,7 @@
 <!-- Bottom bar -->
 <div class="bottom-bar">
   <div class="selection-summary" id="selectionSummary">
-    <strong id="selectedCount">11</strong> of 13 changes selected
+    <strong id="selectedCount">9</strong> of 11 changes selected
   </div>
   <div id="bottom-conflict-msg" style="font-size:14px;line-height:18px;color:var(--conflict);font-weight:600;display:flex;align-items:center;gap:5px;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
@@ -794,8 +716,8 @@
 </div>
 
 <script>
-  let totalSelected = 11;
-  const total = 13;
+  let totalSelected = 9;
+  const total = 11;
 
   function toggleCb(el) {
     const wasChecked = el.classList.contains('checked');
