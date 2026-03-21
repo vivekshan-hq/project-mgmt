@@ -361,7 +361,7 @@
             <div class="info-banner">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <div class="info-banner-text">
-                <strong>Why there's a conflict:</strong> Admin A changed Step 3's action and trigger in Production 5 days ago. Admin B independently changed the Step 3 action differently in Sandbox today. Both diverge from the Day 1 snapshot — you need to pick one version to carry forward.
+                <strong>Why there's a conflict:</strong> Admin A changed the trigger and action in Production 5 days ago. Admin B independently changed the action differently in Sandbox today. Both diverge from the Day 1 snapshot — you need to pick one version to carry forward.
               </div>
             </div>
 
@@ -370,7 +370,7 @@
               <table class="diff-table">
                 <thead>
                   <tr>
-                    <th class="col-label">Field</th>
+                    <th class="col-label">Steps</th>
                     <th class="col-snap">Day 1 Snapshot</th>
                     <th><div class="env-th"><div class="dot-sm dot-prod"></div> Production</div></th>
                     <th><div class="env-th"><div class="dot-sm dot-sand"></div> Sandbox</div></th>
@@ -378,16 +378,22 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td class="col-label">Step 3 Action</td>
+                    <td class="col-label">Trigger</td>
+                    <td class="col-snap">When project created</td>
+                    <td class="col-prod"><span class="add">When kickoff call scheduled</span></td>
+                    <td class="col-sand">When project created</td>
+                  </tr>
+                  <tr>
+                    <td class="col-label">Condition</td>
+                    <td class="col-snap">If Assignee is Project Lead</td>
+                    <td class="col-prod">If Assignee is Project Lead</td>
+                    <td class="col-sand">If Assignee is <span class="add">PM or CSM</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-label">Action</td>
                     <td class="col-snap">Send email to client</td>
                     <td class="col-prod">Send email to client, <span class="add">CC project lead</span></td>
                     <td class="col-sand">Send <span class="add">Slack message</span> to <span class="add">PM</span></td>
-                  </tr>
-                  <tr>
-                    <td class="col-label">Step 3 Trigger</td>
-                    <td class="col-snap">On project create</td>
-                    <td class="col-prod"><span class="add">On kickoff call scheduled</span></td>
-                    <td class="col-sand">On project create</td>
                   </tr>
                   <tr>
                     <td class="col-label" style="color:var(--text-3);font-weight:500;">Last modified</td>
