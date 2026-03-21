@@ -17,7 +17,7 @@
       --shadow-md: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; font-size: 13px; color: var(--text-1); background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+    body { font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 18px; color: var(--text-1); background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
 
     /* ── App sidebar ─────────────────────────────────────────────── */
     .app-sidebar {
@@ -39,23 +39,23 @@
 
     /* Top bar */
     .topbar {
-      height: 52px; background: var(--surface); border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; padding: 0 20px; gap: 10px; flex-shrink: 0;
+      height: 52px; background: var(--surface); border-bottom: 1px solid #f4f4f4;
+      display: flex; align-items: center; padding: 0 24px 0 16px; gap: 10px; flex-shrink: 0;
     }
     .topbar-back {
-      display: flex; align-items: center; gap: 6px; color: var(--text-3); font-size: 12px;
-      font-weight: 500; text-decoration: none; padding: 4px 8px; border-radius: 6px;
+      display: flex; align-items: center; gap: 6px; color: var(--brand); font-size: 14px;
+      line-height: 18px; font-weight: 400; text-decoration: none; padding: 4px 8px; border-radius: 6px;
       transition: background 0.15s, color 0.15s;
     }
-    .topbar-back:hover { background: var(--bg); color: var(--text-1); }
+    .topbar-back:hover { background: var(--bg); color: var(--brand-dark); }
     .topbar-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
-    .topbar-sep { width: 1px; height: 18px; background: var(--border); }
-    .topbar-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
-    .topbar-sub { font-size: 12px; color: var(--text-3); margin-left: 2px; }
+    .topbar-sep { width: 1px; height: 18px; background: #e3e3e3; }
+    .topbar-title { font-size: 14px; line-height: 18px; font-weight: 600; color: var(--text-1); }
+    .topbar-sub { font-size: 14px; line-height: 18px; color: var(--text-3); margin-left: 2px; }
     .topbar-env {
       margin-left: auto; display: flex; align-items: center; gap: 8px;
-      background: #F8F9FC; border: 1px solid var(--border); border-radius: 8px;
-      padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--text-2);
+      background: #fafafa; border: 1px solid var(--border); border-radius: 8px;
+      padding: 5px 10px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-2);
     }
     .env-dot { width: 7px; height: 7px; border-radius: 50%; }
     .env-dot.prod { background: #0CB472; }
@@ -73,14 +73,14 @@
       padding: 16px 16px 12px; border-bottom: 1px solid var(--border);
     }
     .conflict-nav-title {
-      font-size: 11px; font-weight: 700; color: var(--text-1); text-transform: uppercase;
-      letter-spacing: 0.07em; margin-bottom: 8px;
+      font-size: 12px; line-height: 16px; font-weight: 700; color: var(--text-1); text-transform: uppercase;
+      letter-spacing: 0.32px; margin-bottom: 8px;
     }
     .chips-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
     .chip {
       display: inline-flex; align-items: center; gap: 3px;
-      border-radius: 999px; font-size: 10px; font-weight: 700;
-      padding: 2px 8px; border: 1px solid;
+      border-radius: 999px; font-size: 12px; line-height: 16px; letter-spacing: 0.32px; font-weight: 700;
+      padding: 4px 8px; border: 1px solid;
     }
     .chip svg { width: 8px; height: 8px; stroke: currentColor; fill: none; stroke-width: 2.5; }
     .chip-conflict { background: var(--conflict-bg); color: var(--conflict); border-color: var(--conflict-border); }
@@ -111,9 +111,9 @@
     .cni-icon.resolved svg { width: 10px; height: 10px; stroke: var(--success); fill: none; stroke-width: 2.5; }
 
     .cni-text { flex: 1; min-width: 0; }
-    .cni-name { font-size: 12px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cni-section { font-size: 11px; color: var(--text-4); margin-top: 1px; }
-    .cni-kept { font-size: 10px; color: var(--success); font-weight: 600; margin-top: 2px; display: none; }
+    .cni-name { font-size: 14px; line-height: 18px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cni-section { font-size: 12px; line-height: 16px; color: var(--text-4); margin-top: 2px; }
+    .cni-kept { font-size: 12px; line-height: 16px; color: var(--success); font-weight: 600; margin-top: 2px; display: none; }
 
     /* ── Conflict detail ─────────────────────────────────────────── */
     .conflict-detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -124,15 +124,15 @@
 
     /* Detail header */
     .detail-name {
-      font-size: 18px; font-weight: 700; color: var(--text-1);
-      display: flex; align-items: center; gap: 10px; line-height: 1.3; margin-bottom: 5px;
+      font-size: 20px; font-weight: 600; color: var(--text-1);
+      display: flex; align-items: center; gap: 10px; line-height: 28px; margin-bottom: 4px;
     }
-    .detail-sub { font-size: 13px; color: var(--text-3); margin-bottom: 20px; }
+    .detail-sub { font-size: 14px; line-height: 18px; color: var(--text-3); margin-bottom: 20px; }
     .conflict-pill {
       display: inline-flex; align-items: center; gap: 4px;
       background: var(--conflict-bg); color: var(--conflict);
       border: 1px solid var(--conflict-border); border-radius: 999px;
-      font-size: 10px; font-weight: 700; padding: 3px 9px; flex-shrink: 0;
+      font-size: 12px; line-height: 16px; letter-spacing: 0.32px; font-weight: 700; padding: 4px 9px; flex-shrink: 0;
     }
     .conflict-pill svg { width: 9px; height: 9px; stroke: currentColor; fill: none; stroke-width: 2.5; }
 
@@ -143,12 +143,12 @@
       border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 22px;
     }
     .info-banner svg { width: 15px; height: 15px; stroke: var(--conflict); fill: none; stroke-width: 2; flex-shrink: 0; margin-top: 1px; }
-    .info-banner-text { font-size: 12px; color: #491d8b; line-height: 1.6; }
+    .info-banner-text { font-size: 14px; line-height: 18px; color: var(--text-2); }
     .info-banner-text strong { font-weight: 700; }
 
     /* Diff table */
     .section-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+      font-size: 12px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.32px;
       color: var(--text-4); margin-bottom: 10px;
     }
     .diff-card {
@@ -156,14 +156,14 @@
       overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-sm);
     }
     .diff-table { width: 100%; border-collapse: collapse; }
-    .diff-table th { padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: #F8F9FC; color: var(--text-3); border-bottom: 1px solid var(--border); font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; }
-    .diff-table td { padding: 10px 14px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .diff-table th { padding: 8px 12px; text-align: left; font-size: 12px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.32px; background: #fafafa; color: var(--text-3); border-bottom: 1px solid var(--border); font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; }
+    .diff-table td { padding: 8px 12px; font-size: 14px; line-height: 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     .diff-table tr:last-child td { border-bottom: none; }
     .col-label { font-weight: 600; color: var(--text-2); width: 150px; }
-    .col-snap { color: var(--text-4); font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; font-size: 11px; }
-    .col-prod { font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; font-size: 11px; }
-    .col-sand { font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; font-size: 11px; }
-    .col-meta { color: var(--text-3); font-style: italic; font-size: 11px; }
+    .col-snap { color: var(--text-4); font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; font-size: 12px; line-height: 16px; letter-spacing: 0.32px; }
+    .col-prod { font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; font-size: 12px; line-height: 16px; letter-spacing: 0.32px; }
+    .col-sand { font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; font-size: 12px; line-height: 16px; letter-spacing: 0.32px; }
+    .col-meta { color: var(--text-3); font-style: italic; font-size: 12px; line-height: 16px; }
     th.col-snap { color: var(--text-4); }
 
     .env-th { display: flex; align-items: center; gap: 5px; }
@@ -176,7 +176,7 @@
 
     /* ── Resolution cards ────────────────────────────────────────── */
     .res-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+      font-size: 12px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.32px;
       color: var(--text-4); margin-bottom: 12px;
     }
     .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -189,7 +189,7 @@
     .res-card.pick-prod { border-color: #0CB472; background: var(--success-bg); box-shadow: 0 0 0 3px rgba(12,180,114,0.10); }
     .res-card.pick-sand { border-color: var(--brand); background: var(--brand-light); box-shadow: 0 0 0 3px rgba(15,98,254,0.10); }
 
-    .res-env { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; }
+    .res-env { display: flex; align-items: center; gap: 7px; font-size: 14px; line-height: 18px; font-weight: 600; letter-spacing: 0.16px; }
     .res-env.prod { color: #059669; }
     .res-env.sand { color: var(--brand-dark); }
 
