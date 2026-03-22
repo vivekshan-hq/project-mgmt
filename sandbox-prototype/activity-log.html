@@ -98,6 +98,22 @@
     .type-new { background: var(--new-bg); color: var(--new-color); border: 1px solid var(--new-border); }
     .type-mod { background: var(--mod-bg); color: var(--mod-color); border: 1px solid var(--mod-border); }
     .type-del { background: var(--del-bg); color: var(--del-color); border: 1px solid var(--del-border); }
+
+    /* Profile popup */
+    .profile-popup { position: fixed; bottom: 64px; left: 64px; width: 282px; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); z-index: 1000; display: none; overflow: hidden; }
+    .profile-popup.open { display: block; }
+    .pp-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; }
+    .pp-name { font-weight: 700; font-size: 14px; color: #161616; line-height: 18px; }
+    .pp-email { font-size: 13px; color: #6f6f6f; margin-top: 2px; }
+    .pp-av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#6366f1,#3b82f6); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex-shrink: 0; }
+    .pp-section { padding: 4px 8px; }
+    .pp-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; font-size: 14px; color: #161616; text-decoration: none; transition: background 0.12s; cursor: pointer; }
+    .pp-item:hover { background: #f4f4f4; }
+    .pp-item svg { width: 16px; height: 16px; flex-shrink: 0; color: #6f6f6f; fill: none; stroke: currentColor; stroke-width: 1.75; }
+    .pp-badge { margin-left: auto; font-size: 11px; font-weight: 600; background: #defbe6; color: #24a148; border: 1px solid #a7f0ba; border-radius: 999px; padding: 2px 8px; }
+    .pp-div { height: 1px; background: #e0e0e0; margin: 4px 0; }
+    .pp-logout { color: #da1e28 !important; }
+    .pp-logout svg { color: #da1e28 !important; }
   </style>
 </head>
 <body>
@@ -345,6 +361,38 @@
       group.style.display = visible ? '' : 'none';
     });
   }
+  document.querySelector('.sidebar-user').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.getElementById('profilePopup').classList.toggle('open');
+  });
+  document.addEventListener('click', function() {
+    document.getElementById('profilePopup').classList.remove('open');
+  });
+  document.getElementById('profilePopup').addEventListener('click', function(e) { e.stopPropagation(); });
 </script>
+<div class="profile-popup" id="profilePopup">
+  <div class="pp-header">
+    <div>
+      <div class="pp-name">Vivek Shanmugasundaram</div>
+      <div class="pp-email">vivek@rocketlane.com</div>
+    </div>
+    <div class="pp-av">VS</div>
+  </div>
+  <div class="pp-div"></div>
+  <div class="pp-section">
+    <a href="#" class="pp-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+    <a href="#" class="pp-item"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Plans &amp; Billing<span class="pp-badge">Enterprise</span></a>
+    <a href="sandboxes.html" class="pp-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>Settings</a>
+  </div>
+  <div class="pp-div"></div>
+  <div class="pp-section">
+    <a href="#" class="pp-item"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Rocketlane Academy</a>
+    <a href="#" class="pp-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Rocketlane Help Center</a>
+  </div>
+  <div class="pp-div"></div>
+  <div class="pp-section" style="padding-bottom:8px;">
+    <a href="#" class="pp-item pp-logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+  </div>
+</div>
 </body>
 </html>
