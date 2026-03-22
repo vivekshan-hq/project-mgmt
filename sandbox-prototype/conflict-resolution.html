@@ -21,18 +21,17 @@
 
     /* ── App sidebar ─────────────────────────────────────────────── */
     .app-sidebar {
-      width: 52px; background: var(--sidebar-bg); display: flex; flex-direction: column;
-      align-items: center; padding: 14px 0; gap: 6px; flex-shrink: 0;
+      width: 56px; background: #EAECF5; display: flex; flex-direction: column;
+      align-items: center; padding: 10px 0; gap: 0; flex-shrink: 0;
     }
-    .app-logo { width: 32px; height: 32px; background: #1d1d1f; border-radius: 4px;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-    .app-logo svg { width: 18px; height: 18px; fill: #fff; }
+    .app-logo { width: 34px; height: 34px; background: var(--brand); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .app-logo svg { width: 16px; height: 16px; fill: none; stroke: white; stroke-width: 2.5; }
     .nav-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center;
-      justify-content: center; cursor: pointer; transition: background 0.15s; }
-    .nav-icon:hover { background: rgba(255,255,255,0.08); }
-    .nav-icon.active { background: rgba(15,98,254,0.25); }
-    .nav-icon svg { width: 18px; height: 18px; stroke: rgba(255,255,255,0.45); fill: none; stroke-width: 1.6; }
-    .nav-icon.active svg { stroke: #97c1ff; }
+      justify-content: center; cursor: pointer; color: #5c5f70; transition: all 0.15s; }
+    .nav-icon:hover { background: rgba(0,0,0,0.06); color: #1d1d1f; }
+    .nav-icon.active { background: #D4D7EE; color: #1d1d1f; }
+    .nav-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; }
 
     /* ── Page layout ─────────────────────────────────────────────── */
     .page-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
