@@ -259,26 +259,26 @@
                 <input type="radio" name="dataOption" value="configs" checked>
                 <div class="radio-card-header">
                   <span class="radio-card-label">
-                    Configurations only
+                    Settings only
                     <span class="badge-pill">Included free</span>
                   </span>
                   <div class="radio-dot"></div>
                 </div>
                 <div class="radio-card-desc">
-                  Copies all project templates, automations, settings, dashboard, report definitions and workflows. No account or project data.
+                  Copies all settings, templates, automations, dashboards, reports, and workflows. No project or account data.
                 </div>
               </label>
               <label class="radio-card" id="card-data" onclick="selectCard('data')">
                 <input type="radio" name="dataOption" value="data">
                 <div class="radio-card-header">
                   <span class="radio-card-label">
-                    Configurations + 30 days of data
+                    Settings + last 30 projects
                     <span class="badge-pill badge-paid">+5% of ACV</span>
                   </span>
                   <div class="radio-dot"></div>
                 </div>
                 <div class="radio-card-desc">
-                  All configurations plus projects, accounts, tasks, time entries, and invoices from the last 30 days. Team members included.
+                  All settings plus your last 30 projects, including phases, tasks, allocations, time entries, linked accounts, and team members.
                 </div>
               </label>
             </div>
@@ -379,7 +379,7 @@
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 4px; font-size: 12px; color: var(--text-3); line-height: 1.6;">
-            <div><strong style="color: var(--text-1);">What's included:</strong> All project templates, automations, settings, dashboard, report definitions &amp; workflows</div>
+            <div><strong style="color: var(--text-1);">What's included:</strong> All settings, templates, automations, dashboards, reports &amp; workflows</div>
             <div><strong style="color: var(--text-1);">Isolation:</strong> Integrations disconnected · Emails suppressed · Separate DB</div>
             <div><strong style="color: var(--text-1);">Snapshot taken:</strong> Mar 6, 2026 — used for conflict detection when merging</div>
           </div>
@@ -409,7 +409,7 @@
   function selectCard(val) {
     document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
     document.getElementById('card-' + val).classList.add('selected');
-    const est = val === 'data' ? '~2 hours' : '~45 minutes';
+    const est = val === 'data' ? '~2 hours' : '~20 minutes';
     document.querySelector('#estimateBox .warn-box-text').innerHTML =
       `Estimated creation time: <strong>${est}</strong>. You'll receive an email when the sandbox is ready.`;
   }
