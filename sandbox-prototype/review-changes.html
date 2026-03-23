@@ -755,40 +755,6 @@
     });
   }
 
-  // Reflect resolved conflicts from conflict-resolution page
-  (function() {
-    const saved = JSON.parse(localStorage.getItem('sandbox_conflicts_resolved') || 'null');
-    if (!saved) return;
-
-    ['kickoff', 'priority'].forEach(function(id) {
-      if (!saved[id]) return;
-      const choiceLabel = saved[id] === 'prod' ? 'Production' : 'Sandbox';
-
-      // Swap CONFLICT badge → Conflict Resolved
-      const badge = document.getElementById('conflict-badge-' + id);
-      if (badge) {
-        badge.className = 'resolved-badge';
-        badge.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Conflict Resolved';
-      }
-
-      // Swap warning box → resolved note
-      const warn = document.getElementById('conflict-warn-' + id);
-      if (warn) {
-        warn.style.background = 'var(--success-bg)';
-        warn.style.borderColor = 'var(--success-border)';
-        warn.style.color = 'var(--success)';
-        warn.innerHTML = '<strong>✓ Resolved:</strong> Using ' + choiceLabel + ' version.';
-      }
-    });
-
-    // If all resolved, swap bottom bar CTA
-    const allResolved = saved.kickoff && saved.priority;
-    if (allResolved) {
-      document.getElementById('bottom-conflict-msg').style.display = 'none';
-      document.getElementById('cta-resolve').style.display = 'none';
-      document.getElementById('cta-merge').style.display = 'inline-flex';
-    }
-  })();
   document.querySelector('.sidebar-user').addEventListener('click', function(e) {
     e.stopPropagation();
     document.getElementById('profilePopup').classList.toggle('open');
