@@ -243,16 +243,16 @@
               Sandbox Name
               <span class="form-hint">Required</span>
             </label>
-            <input type="text" class="form-input" id="sandboxName" value="Q2 Config Testing" placeholder="e.g. Q2 Config Testing" oninput="updateSlug()">
+            <input type="text" class="form-input" id="sandboxName" value="NiCE_Sandbox" placeholder="e.g. Q2 Config Testing" oninput="updateSlug()">
           </div>
 
           <div class="form-group">
             <label class="form-label">Sandbox URL</label>
             <div class="input-group">
-              <span class="input-addon">acme-</span>
-              <input type="text" class="form-input" id="sandboxSlug" value="q2-config-testing" placeholder="my-sandbox">
+              <span class="input-addon">nice-</span>
+              <input type="text" class="form-input" id="sandboxSlug" value="sandbox" placeholder="my-sandbox">
             </div>
-            <div class="url-preview">Live URL: <span id="urlPreview">acme-q2-config-testing.rocketlane.com</span></div>
+            <div class="url-preview">Live URL: <span id="urlPreview">nice-sandbox.rocketlane.com</span></div>
           </div>
 
           <div class="form-group">
@@ -360,7 +360,7 @@
 
         <div class="wizard-footer" style="justify-content: center;">
           <div style="font-size: 12px; color: var(--text-3); text-align: center;">
-            You can safely close this page — we'll email <strong>arun@acmecorp.com</strong> when the sandbox is ready.
+            You can safely close this page — we'll email <strong>arun@nice.com</strong> when the sandbox is ready.
           </div>
         </div>
       </div>
@@ -377,7 +377,7 @@
           </div>
 
           <div class="sandbox-url-box">
-            <div class="sandbox-url-box-url">acme-q2-config-testing.rocketlane.com</div>
+            <div class="sandbox-url-box-url">nice-sandbox.rocketlane.com</div>
             <button class="btn-link" onclick="alert('URL copied!')">Copy URL</button>
           </div>
 
@@ -404,7 +404,7 @@
     const name = document.getElementById('sandboxName').value;
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     document.getElementById('sandboxSlug').value = slug;
-    document.getElementById('urlPreview').textContent = `acme-${slug}.rocketlane.com`;
+    document.getElementById('urlPreview').textContent = `nice-${slug}.rocketlane.com`;
   }
 
   // Radio card selection
