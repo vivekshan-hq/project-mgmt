@@ -165,8 +165,26 @@
     .settings-nav-item:hover { color: var(--text-1); background: var(--bg); }
     .settings-nav-item.active { color: var(--brand); font-weight: 600; border-left-color: var(--brand); background: var(--brand-light); }
 
+    /* Tree diff (for complex objects like templates) */
+    .tree-diff { padding: 12px 16px 4px; }
+    .tree-group { margin-bottom: 14px; }
+    .tree-group:last-child { margin-bottom: 0; }
+    .tree-group-header { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .tree-group-count { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 10px; }
+    .tree-item { display: flex; align-items: baseline; gap: 8px; padding: 5px 2px; font-size: 13px; line-height: 18px; color: var(--text-1); }
+    .tree-item + .tree-item { border-top: 1px solid #fafafa; }
+    .tree-badge { width: 16px; height: 16px; border-radius: 3px; display: grid; place-items: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .tree-badge-add { background: var(--new-bg); color: var(--new-color); }
+    .tree-badge-mod { background: var(--mod-bg); color: var(--mod-color); }
+    .tree-badge-del { background: var(--del-bg); color: var(--del-color); }
+    .tree-item-name { font-weight: 500; min-width: 180px; }
+    .tree-item-detail { color: var(--text-3); font-size: 12px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .tree-val-old { color: var(--del-color); background: var(--del-bg); padding: 0 4px; border-radius: 3px; text-decoration: line-through; font-size: 12px; }
+    .tree-val-new { color: var(--new-color); background: var(--new-bg); padding: 0 4px; border-radius: 3px; font-size: 12px; }
+    .tree-arrow { color: var(--text-4); font-size: 11px; }
+
     /* Bottom bar */
-    .bottom-bar { position: absolute; bottom: 0; left: 420px; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; z-index: 10; box-shadow: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11); }
+    .bottom-bar { position: absolute; bottom: 0; left: 56px; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; z-index: 10; box-shadow: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11); }
     .selection-summary { font-size: 14px; line-height: 18px; color: var(--text-3); }
     .selection-summary strong { color: var(--text-1); }
     .spacer { flex: 1; }
@@ -280,13 +298,13 @@
       <!-- Filter chips -->
       <div class="stat-chips">
         <button class="stat-chip all active" id="chip-all" onclick="filterBy('all')">
-          <span class="chip-count">11</span> All Changes
+          <span class="chip-count">12</span> All Changes
         </button>
         <button class="stat-chip new-c" id="chip-new" onclick="filterBy('new')">
           <span class="chip-count">4</span> New
         </button>
         <button class="stat-chip mod-c" id="chip-mod" onclick="filterBy('mod')">
-          <span class="chip-count">5</span> Modified
+          <span class="chip-count">6</span> Modified
         </button>
         <button class="stat-chip del-c" id="chip-del" onclick="filterBy('del')">
           <span class="chip-count">2</span> Deleted
@@ -311,7 +329,7 @@
       <div class="change-section" data-category="new">
         <div class="section-header">
           <span class="section-title">Project Templates</span>
-          <span class="section-count">2 changes</span>
+          <span class="section-count">3 changes</span>
         </div>
 
         <div class="change-row">
@@ -347,6 +365,96 @@
             </a>
           </div>
         </div>
+
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-template-enterprise', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Enterprise Onboarding</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:var(--new-color);font-weight:600;">+2 phases</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--mod-color);font-weight:600;">~5 tasks</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--del-color);font-weight:600;">−1 placeholder</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-template-enterprise">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-template-enterprise">
+            <div class="tree-diff">
+
+              <!-- Phases -->
+              <div class="tree-group">
+                <div class="tree-group-header">
+                  Phases
+                  <span class="tree-group-count" style="background:var(--new-bg);color:var(--new-color);">+2 added</span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-add">+</div>
+                  <span class="tree-item-name">Post-Launch Review</span>
+                  <span class="tree-item-detail">New phase · added after "Go Live"</span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-add">+</div>
+                  <span class="tree-item-name">Hypercare Support</span>
+                  <span class="tree-item-detail">New phase · added after "Post-Launch Review"</span>
+                </div>
+              </div>
+
+              <!-- Tasks -->
+              <div class="tree-group">
+                <div class="tree-group-header">
+                  Tasks
+                  <span class="tree-group-count" style="background:var(--mod-bg);color:var(--mod-color);">~5 modified</span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Send Welcome Email</span>
+                  <span class="tree-item-detail">Due offset: <span class="tree-val-old">Day 1</span> <span class="tree-arrow">→</span> <span class="tree-val-new">Day 3</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Intro Call</span>
+                  <span class="tree-item-detail">Assigned to: <span class="tree-val-old">Project Manager</span> <span class="tree-arrow">→</span> <span class="tree-val-new">CSM</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Technical Setup</span>
+                  <span class="tree-item-detail">Duration: <span class="tree-val-old">1 day</span> <span class="tree-arrow">→</span> <span class="tree-val-new">3 days</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Stakeholder Review</span>
+                  <span class="tree-item-detail">Name: <span class="tree-val-old">Stakeholder Review</span> <span class="tree-arrow">→</span> <span class="tree-val-new">Executive Review</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Final Handoff</span>
+                  <span class="tree-item-detail">Phase: <span class="tree-val-old">Kickoff</span> <span class="tree-arrow">→</span> <span class="tree-val-new">Post-Launch Review</span></span>
+                </div>
+              </div>
+
+              <!-- Placeholders -->
+              <div class="tree-group">
+                <div class="tree-group-header">
+                  Placeholders
+                  <span class="tree-group-count" style="background:var(--del-bg);color:var(--del-color);">−1 removed</span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-del">−</div>
+                  <span class="tree-item-name">Customer Onboarding Specialist</span>
+                  <span class="tree-item-detail">Role removed · was assigned to 3 tasks</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Automations (3 MOD, 1 NEW) -->
@@ -413,7 +521,7 @@
             </div>
             <div id="conflict-warn-kickoff" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#491d8b; display:flex; align-items:center; justify-content:space-between; gap:12px;">
               <span><strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.</span>
-              <a href="conflict-resolution.html" class="btn btn-sm" style="background:#7c3aed;color:#fff;border:none;font-size:12px;white-space:nowrap;flex-shrink:0;">Resolve Conflict</a>
+              <a href="conflict-resolution.html" class="btn btn-sm" style="background:#1d1d1f;color:#fff;border:none;font-size:12px;white-space:nowrap;flex-shrink:0;">Resolve Conflict</a>
             </div>
           </div>
         </div>
@@ -512,7 +620,7 @@
             </div>
             <div id="conflict-warn-priority" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#491d8b; display:flex; align-items:center; justify-content:space-between; gap:12px;">
               <span><strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.</span>
-              <a href="conflict-resolution.html" class="btn btn-sm" style="background:#7c3aed;color:#fff;border:none;font-size:12px;white-space:nowrap;flex-shrink:0;">Resolve Conflict</a>
+              <a href="conflict-resolution.html" class="btn btn-sm" style="background:#1d1d1f;color:#fff;border:none;font-size:12px;white-space:nowrap;flex-shrink:0;">Resolve Conflict</a>
             </div>
           </div>
         </div>
@@ -693,7 +801,7 @@
 <!-- Bottom bar -->
 <div class="bottom-bar">
   <div class="selection-summary" id="selectionSummary">
-    <strong id="selectedCount">9</strong> of 11 changes selected
+    <strong id="selectedCount">10</strong> of 12 changes selected
   </div>
   <div id="bottom-conflict-msg" style="font-size:14px;line-height:18px;color:var(--conflict);font-weight:600;display:flex;align-items:center;gap:5px;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
