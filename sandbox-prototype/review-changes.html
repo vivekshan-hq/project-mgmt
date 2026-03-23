@@ -291,6 +291,9 @@
         <button class="stat-chip del-c" id="chip-del" onclick="filterBy('del')">
           <span class="chip-count">2</span> Deleted
         </button>
+        <button class="stat-chip" id="chip-conflict" onclick="filterBy('conflict')" style="background:#fff7ed;border-color:#f59e0b;color:#92650a;">
+          <span class="chip-count">2</span> Conflicts
+        </button>
       </div>
     </div>
 
@@ -354,7 +357,7 @@
         </div>
 
         <!-- CONFLICT item -->
-        <div class="change-row has-conflict">
+        <div class="change-row has-conflict" data-conflict="true">
           <div class="change-row-header" onclick="toggleDiff('diff-kickoff', this)">
             <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
             <span class="type-badge type-mod">MOD</span>
@@ -408,8 +411,9 @@
                 <div class="diff-cell sand-val" style="color:var(--text-3);">Admin B · today</div>
               </div>
             </div>
-            <div id="conflict-warn-kickoff" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#491d8b;">
-              <strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.
+            <div id="conflict-warn-kickoff" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#491d8b; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <span><strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.</span>
+              <a href="conflict-resolution.html" class="btn btn-sm" style="background:#7c3aed;color:#fff;border:none;font-size:12px;white-space:nowrap;flex-shrink:0;">Resolve Conflict</a>
             </div>
           </div>
         </div>
@@ -470,7 +474,7 @@
           </div>
         </div>
 
-        <div class="change-row has-conflict">
+        <div class="change-row has-conflict" data-conflict="true">
           <div class="change-row-header" onclick="toggleDiff('diff-priority', this)">
             <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
             <span class="type-badge type-mod">MOD</span>
@@ -506,8 +510,9 @@
                 <div class="diff-cell sand-val">Low, Medium, <span class="diff-highlight-del">High</span> <span class="diff-highlight-add">P1</span>, <span class="diff-highlight-add">P2</span>, <span class="diff-highlight-add">P3</span></div>
               </div>
             </div>
-            <div id="conflict-warn-priority" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#491d8b;">
-              <strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.
+            <div id="conflict-warn-priority" style="margin-top:10px; background:var(--conflict-bg); border:1px solid var(--conflict-border); border-radius:6px; padding:10px 12px; font-size:12px; color:#491d8b; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <span><strong>⚠ Conflict:</strong> Both Production and Sandbox modified this after Day 1 snapshot. Resolve before merging.</span>
+              <a href="conflict-resolution.html" class="btn btn-sm" style="background:#7c3aed;color:#fff;border:none;font-size:12px;white-space:nowrap;flex-shrink:0;">Resolve Conflict</a>
             </div>
           </div>
         </div>
@@ -735,6 +740,8 @@
     document.querySelectorAll('.change-row').forEach(row => {
       if (type === 'all') {
         row.style.display = '';
+      } else if (type === 'conflict') {
+        row.style.display = row.dataset.conflict === 'true' ? '' : 'none';
       } else {
         row.style.display = row.querySelector('.type-' + type) ? '' : 'none';
       }
