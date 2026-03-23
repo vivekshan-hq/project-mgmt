@@ -3,21 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NiCE_Sandbox · Rocketlane</title>
+  <title>Projects · NiCE_Sandbox · Rocketlane</title>
   <style>
     :root {
-      --brand: #0f62fe; --brand-dark: #0043ce; --brand-light: #edf5ff; --brand-muted: #97c1ff;
-      --bg: #f4f4f4; --surface: #fff; --border: #e0e0e0; --border-strong: #c6c6c6;
-      --text-1: #161616; --text-2: #525252; --text-3: #6f6f6f; --text-4: #a8a8a8;
+      --brand: #0f62fe; --brand-dark: #0043ce; --brand-light: #edf5ff;
+      --bg: #fff; --surface: #fff; --border: #e8e8e8; --border-strong: #c6c6c6;
+      --text-1: #1d1d1f; --text-2: #525252; --text-3: #6f6f6f; --text-4: #a8a8a8;
       --success: #24a148; --success-bg: #defbe6; --success-border: #a7f0ba;
-      --warning: #ffbf00; --warning-bg: #fffbf0; --warning-border: #ffbf00;
-      --danger: #da1e28; --danger-bg: #fff1f1; --danger-border: #ffd7d9;
+      --danger: #da1e28;
       --radius: 8px; --radius-sm: 4px;
-      --shadow-sm: 0px 0.8px 1.8px rgba(0,0,0,0.13), 0px 0.15px 0.45px rgba(0,0,0,0.11);
-      --shadow: 0px 1.6px 3.6px rgba(0,0,0,0.13), 0px 0.3px 0.9px rgba(0,0,0,0.11);
+      --shadow-sm: 0px 0.8px 1.8px rgba(0,0,0,0.10);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 18px; color: var(--text-1); background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+    body { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; font-size: 13px; line-height: 18px; color: var(--text-1); background: #fff; display: flex; height: 100vh; overflow: hidden; }
 
     /* ── Sidebar ── */
     .sidebar { width: 56px; flex-shrink: 0; background: #EAECF5; display: flex; flex-direction: column; align-items: center; padding: 10px 0; }
@@ -37,57 +35,73 @@
 
     /* ── Main ── */
     .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .topbar { height: 50px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px 0 16px; gap: 12px; flex-shrink: 0; }
-    .topbar-left { display: flex; align-items: center; gap: 10px; }
-    .topbar-logo { width: 26px; height: 26px; background: var(--brand); border-radius: 6px; display: grid; place-items: center; }
-    .topbar-name { font-size: 14px; font-weight: 600; color: var(--text-1); }
-    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-    .avatar { width: 30px; height: 30px; border-radius: 50%; background: #525252; color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; cursor: pointer; }
-    .topbar-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); transition: all 0.12s; font-family: inherit; }
-    .topbar-btn:hover { background: var(--bg); color: var(--text-1); }
-    .topbar-btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-    /* ── Page content ── */
-    .content { flex: 1; overflow-y: auto; padding: 24px 32px; }
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .page-title { font-size: 20px; font-weight: 600; line-height: 28px; }
+    /* ── Page header ── */
+    .page-header { padding: 16px 20px 0; flex-shrink: 0; }
+    .page-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .page-title { font-size: 18px; font-weight: 700; color: var(--text-1); }
+    .page-title-icon { color: var(--text-3); }
+    .page-title-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-    /* ── Buttons ── */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: var(--radius-sm); font-size: 14px; line-height: 18px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: all 0.15s; white-space: nowrap; font-family: inherit; }
-    .btn-primary { background: #1d1d1f; color: #fff; box-shadow: var(--shadow-sm); }
-    .btn-primary:hover { background: #2d2d2f; }
-    .btn-default { background: var(--surface); color: var(--text-1); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-    .btn-default:hover { background: var(--bg); border-color: var(--border-strong); }
-    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
-    .btn svg { width: 14px; height: 14px; stroke-width: 2; flex-shrink: 0; fill: none; stroke: currentColor; }
+    /* ── Toolbar ── */
+    .toolbar { display: flex; align-items: center; gap: 6px; padding: 0 20px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .tb-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); transition: all 0.12s; font-family: inherit; white-space: nowrap; }
+    .tb-chip.active { background: #f0f0f0; color: var(--text-1); border-color: #c6c6c6; font-weight: 600; }
+    .tb-chip svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .tb-chip-icon { width: 14px; height: 14px; }
+    .tb-divider { width: 1px; height: 18px; background: var(--border); margin: 0 2px; }
+    .tb-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .tb-icon-btn { width: 30px; height: 30px; border-radius: 6px; display: grid; place-items: center; cursor: pointer; color: var(--text-3); border: none; background: transparent; transition: all 0.12s; }
+    .tb-icon-btn:hover { background: #f0f0f0; color: var(--text-1); }
+    .tb-icon-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .btn-new-project { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #1d1d1f; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-new-project svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+    .group-by-label { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+    .group-by-label strong { color: var(--text-1); font-weight: 600; }
 
-    /* ── Project table ── */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
-    .card-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: #fafafa; }
-    .card-title { font-size: 14px; font-weight: 600; }
-    table { width: 100%; border-collapse: collapse; }
-    thead th { padding: 8px 16px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.32px; background: #fafafa; border-bottom: 1px solid var(--border); }
-    tbody td { padding: 11px 16px; vertical-align: middle; border-bottom: 1px solid var(--border); }
-    tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover td { background: #f4f4f4; cursor: pointer; }
-    .project-name { font-weight: 600; font-size: 13px; color: var(--text-1); }
-    .project-sub { font-size: 11px; color: var(--text-4); margin-top: 2px; }
-    .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; }
-    .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-    .badge-active { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
-    .badge-ontrack { background: #edf5ff; color: var(--brand); border: 1px solid #97c1ff; }
-    .badge-atrisk { background: var(--warning-bg); color: #92650a; border: 1px solid var(--warning-border); }
-    .progress-bar { width: 80px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .progress-fill { height: 100%; border-radius: 3px; background: var(--brand); }
-    .user-chip { display: flex; align-items: center; gap: 6px; }
-    .user-av { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 8px; font-weight: 700; background: var(--brand-light); color: var(--brand); flex-shrink: 0; }
+    /* ── Table ── */
+    .table-wrap { flex: 1; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: var(--text-3); border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; background: #fff; z-index: 1; }
+    thead th:first-child { padding-left: 20px; }
+    tbody td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+    tbody td:first-child { padding-left: 20px; }
+    tbody tr:hover td { background: #f7f7f7; }
 
-    /* ── Stats row ── */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); }
-    .stat-label { font-size: 12px; color: var(--text-3); margin-bottom: 6px; }
-    .stat-value { font-size: 24px; font-weight: 700; color: var(--text-1); line-height: 1; }
-    .stat-sub { font-size: 11px; color: var(--text-4); margin-top: 4px; }
+    /* ── Project name cell ── */
+    .proj-name-cell { display: flex; align-items: center; gap: 9px; }
+    .proj-av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .proj-name { font-size: 13px; font-weight: 500; color: var(--text-1); max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Status ── */
+    .status-cell { display: flex; align-items: center; gap: 6px; }
+    .status-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; flex-shrink: 0; }
+    .status-dot.completed { background: var(--success); border-color: var(--success); }
+    .status-dot.completed svg { display: block; }
+    .status-dot svg { display: none; }
+    .status-label { font-size: 13px; color: var(--text-2); }
+    .status-label.completed { color: var(--success); font-weight: 500; }
+
+    /* ── Progress bar ── */
+    .prog-bar { width: 100px; height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 3px; }
+
+    /* ── Owner chip ── */
+    .owner-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 3px; background: #f0f0f0; border-radius: 999px; font-size: 12px; color: var(--text-1); }
+    .owner-av { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 8px; font-weight: 700; color: #fff; flex-shrink: 0; }
+
+    /* ── Phases chevrons ── */
+    .phases { display: flex; align-items: center; gap: 1px; }
+    .phase-chev { width: 12px; height: 16px; clip-path: polygon(0 0, 70% 0, 100% 50%, 70% 100%, 0 100%, 30% 50%); }
+    .phase-chev.done { background: var(--success); }
+    .phase-chev.active { background: #97c1ff; }
+    .phase-chev.todo { background: #e8e8e8; }
+
+    /* ── Budget ── */
+    .budget { font-size: 13px; color: var(--text-2); }
+
+    /* ── Muted ── */
+    .muted { color: var(--text-4); font-size: 13px; }
 
     /* ── Profile popup ── */
     .profile-popup { position: fixed; bottom: 64px; left: 64px; width: 282px; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); z-index: 1000; display: none; overflow: hidden; }
@@ -146,140 +160,247 @@
     Changes here do not affect production
   </div>
 
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <div style="font-size:14px;font-weight:600;color:var(--text-1);">NiCE_Sandbox</div>
-      <span style="color:var(--text-4);font-size:12px;">nice-sandbox.rocketlane.com</span>
-    </div>
-    <div class="topbar-right">
-      <button class="topbar-btn">
-        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Snapshot: Feb 12, 2026
-      </button>
-      <div class="avatar">VS</div>
+  <!-- Page title -->
+  <div class="page-header">
+    <div class="page-title-row">
+      <span class="page-title-icon"><svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></span>
+      <span class="page-title">Projects</span>
     </div>
   </div>
 
-  <!-- Content -->
-  <div class="content">
-    <div class="page-header">
-      <div class="page-title">Projects</div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-default btn-sm">
-          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          Filter
-        </button>
-        <button class="btn btn-primary btn-sm">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New Project
-        </button>
-      </div>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="tb-chip active">
+      <svg class="tb-chip-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      All projects
+    </button>
+    <button class="tb-chip">
+      <svg class="tb-chip-icon" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filter
+    </button>
+    <button class="tb-chip"><svg class="tb-chip-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg></button>
+    <button class="tb-chip" style="padding:4px 6px;">
+      <svg class="tb-chip-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <span class="group-by-label">Group by: <strong>None</strong></span>
+    <div class="tb-right">
+      <button class="tb-icon-btn"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="tb-icon-btn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+      <button class="tb-icon-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
+      <button class="btn-new-project">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New project
+      </button>
     </div>
+  </div>
 
-    <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">Active Projects</div>
-        <div class="stat-value">24</div>
-        <div class="stat-sub">Across 8 accounts</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">On Track</div>
-        <div class="stat-value" style="color:var(--success)">18</div>
-        <div class="stat-sub">75% of active</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">At Risk</div>
-        <div class="stat-value" style="color:#92650a">4</div>
-        <div class="stat-sub">Action needed</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Completed (30d)</div>
-        <div class="stat-value">6</div>
-        <div class="stat-sub">+2 from last month</div>
-      </div>
-    </div>
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="min-width:220px;">Project name (1089)</th>
+          <th style="min-width:130px;">Status</th>
+          <th style="min-width:160px;">Current phases</th>
+          <th style="min-width:130px;">Progress</th>
+          <th style="min-width:180px;">Project owner</th>
+          <th style="min-width:110px;">Phases</th>
+          <th style="min-width:130px;">Project budget</th>
+          <th style="min-width:80px;">ARR</th>
+          <th style="min-width:90px;">Due date</th>
+        </tr>
+      </thead>
+      <tbody>
 
-    <!-- Project list -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">All Projects</span>
-        <span style="font-size:12px;color:var(--text-4);">24 projects</span>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Status</th>
-            <th>Health</th>
-            <th>Progress</th>
-            <th>Due Date</th>
-            <th>Owner</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><div class="project-name">Acme Corp — Enterprise Rollout</div><div class="project-sub">Phase 3 of 4</div></td>
-            <td><span class="badge badge-active"><span class="badge-dot"></span>Active</span></td>
-            <td><span class="badge badge-ontrack">On Track</span></td>
-            <td><div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div><span style="font-size:11px;color:var(--text-3);margin-left:6px;">68%</span></td>
-            <td style="font-size:13px;color:var(--text-3);">Apr 15, 2026</td>
-            <td><div class="user-chip"><div class="user-av">AK</div><span style="font-size:13px;color:var(--text-2);">Arun Kumar</span></div></td>
-          </tr>
-          <tr>
-            <td><div class="project-name">Globex — Onboarding Q1</div><div class="project-sub">Phase 1 of 2</div></td>
-            <td><span class="badge badge-active"><span class="badge-dot"></span>Active</span></td>
-            <td><span class="badge badge-atrisk">At Risk</span></td>
-            <td><div class="progress-bar"><div class="progress-fill" style="width:32%;background:#f59e0b"></div></div><span style="font-size:11px;color:var(--text-3);margin-left:6px;">32%</span></td>
-            <td style="font-size:13px;color:var(--text-3);">Mar 28, 2026</td>
-            <td><div class="user-chip"><div class="user-av" style="background:#fef3c7;color:#92650a;">SP</div><span style="font-size:13px;color:var(--text-2);">Sara Patel</span></div></td>
-          </tr>
-          <tr>
-            <td><div class="project-name">NovaTech — Platform Migration</div><div class="project-sub">Phase 2 of 3</div></td>
-            <td><span class="badge badge-active"><span class="badge-dot"></span>Active</span></td>
-            <td><span class="badge badge-ontrack">On Track</span></td>
-            <td><div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div><span style="font-size:11px;color:var(--text-3);margin-left:6px;">55%</span></td>
-            <td style="font-size:13px;color:var(--text-3);">May 2, 2026</td>
-            <td><div class="user-chip"><div class="user-av" style="background:#f3e8ff;color:#7c3aed;">RJ</div><span style="font-size:13px;color:var(--text-2);">Raj Johal</span></div></td>
-          </tr>
-          <tr>
-            <td><div class="project-name">Initech — API Integration</div><div class="project-sub">Phase 1 of 1</div></td>
-            <td><span class="badge badge-active"><span class="badge-dot"></span>Active</span></td>
-            <td><span class="badge badge-ontrack">On Track</span></td>
-            <td><div class="progress-bar"><div class="progress-fill" style="width:82%"></div></div><span style="font-size:11px;color:var(--text-3);margin-left:6px;">82%</span></td>
-            <td style="font-size:13px;color:var(--text-3);">Mar 31, 2026</td>
-            <td><div class="user-chip"><div class="user-av" style="background:#dcfce7;color:#16a34a;">KM</div><span style="font-size:13px;color:var(--text-2);">Kiran Mehta</span></div></td>
-          </tr>
-          <tr>
-            <td><div class="project-name">Umbrella Inc — CSM Handoff</div><div class="project-sub">Phase 2 of 2</div></td>
-            <td><span class="badge badge-active"><span class="badge-dot"></span>Active</span></td>
-            <td><span class="badge badge-atrisk">At Risk</span></td>
-            <td><div class="progress-bar"><div class="progress-fill" style="width:45%;background:#f59e0b"></div></div><span style="font-size:11px;color:var(--text-3);margin-left:6px;">45%</span></td>
-            <td style="font-size:13px;color:var(--text-3);">Apr 8, 2026</td>
-            <td><div class="user-chip"><div class="user-av">AK</div><span style="font-size:13px;color:var(--text-2);">Arun Kumar</span></div></td>
-          </tr>
-          <tr>
-            <td><div class="project-name">Vandelay Industries — Full Suite</div><div class="project-sub">Phase 1 of 4</div></td>
-            <td><span class="badge badge-active"><span class="badge-dot"></span>Active</span></td>
-            <td><span class="badge badge-ontrack">On Track</span></td>
-            <td><div class="progress-bar"><div class="progress-fill" style="width:22%"></div></div><span style="font-size:11px;color:var(--text-3);margin-left:6px;">22%</span></td>
-            <td style="font-size:13px;color:var(--text-3);">Jun 30, 2026</td>
-            <td><div class="user-chip"><div class="user-av" style="background:#f3e8ff;color:#7c3aed;">RJ</div><span style="font-size:13px;color:var(--text-2);">Raj Johal</span></div></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#6366f1;">MT</div><span class="proj-name">Customer Portal landing</span></div></td>
+          <td><div class="status-cell"><div class="status-dot completed"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span class="status-label completed">Completed</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--success)"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#e86161;">A</div>amritha</div></td>
+          <td><div class="phases"><div class="phase-chev done"></div></div></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">14 Apr</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#1d1d1f;">MT</div><span class="proj-name">mobile cp4</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Test</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%;background:#97c1ff"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#e86161;">S</div>sachin</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div></div></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">03 Jun</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#1d1d1f;">MT</div><span class="proj-name">mobile cp 3</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#e86161;">S</div>sachin</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div></div></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">10 Apr</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#f59e0b;">AT</div><span class="proj-name">Automation test — Status</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td><span style="font-size:12px;background:#f0f0f0;border-radius:4px;padding:2px 8px;color:var(--text-2);">Kickoff &amp; Readiness</span></td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:8%;background:var(--success)"></div></div></td>
+          <td class="muted">—</td>
+          <td><div class="phases"><div class="phase-chev active"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div></div></td>
+          <td><span class="budget">USD 100</span></td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">29 Jun</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#0ea5e9;">DM</div><span class="proj-name">Deal Mar 20 26 — By Bal</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td class="muted">—</td>
+          <td><div class="phases"><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div></div></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">18 Jun</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#8b5cf6;">V</div><span class="proj-name">Brightflag. Templates</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Test</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#0ea5e9;">VK</div>Viswa Kailash.C</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div><div class="phase-chev todo"></div></div></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">16 Jun</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#1d1d1f;">MT</div><span class="proj-name">Mobile CP test 2</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#e86161;">S</div>sachin</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div><div class="phase-chev todo"></div></div></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">10 Apr</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#6366f1;">2</div><span class="proj-name">Test_template_18Mar</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#6366f1;">VS</div>vivek shanmugasundaram</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div></div></td>
+          <td><span class="budget">USD 10K</span></td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">07 Apr</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#f43f5e;">TA</div><span class="proj-name">Test — auto allocate</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#10b981;">SG</div>Siva Guhan</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div></div></td>
+          <td><span class="budget">USD 1,000</span></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#f43f5e;">T</div><span class="proj-name">test proj</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#f59e0b;">JR</div>jai rr</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div></div></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#f43f5e;">T</div><span class="proj-name">test proj</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#f59e0b;">JR</div>jai rr</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div></div></td>
+          <td><span class="budget">USD 1,000</span></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#f43f5e;">AI</div><span class="proj-name">Shan Fixed Fee</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#8b5cf6;">SK</div>shankar1 kv</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div></div></td>
+          <td><span class="budget">USD 1,000</span></td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">31 Mar</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#f43f5e;">AI</div><span class="proj-name">Shan TM test</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#8b5cf6;">SK</div>shankar1 kv</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div></div></td>
+          <td><span class="budget">USD 2,000</span></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#10b981;">Y</div><span class="proj-name">You scan onboarding</span></div></td>
+          <td><div class="status-cell"><div class="status-dot completed"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span class="status-label completed">Completed</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--success)"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#64748b;"><img src="" style="display:none"/></div>Srikrishnan Ganesan</div></td>
+          <td><div class="phases"><div class="phase-chev done"></div></div></td>
+          <td><span class="budget">USD 1,000</span></td>
+          <td class="muted">—</td>
+          <td style="font-size:13px;color:var(--text-2);">31 Mar</td>
+        </tr>
+
+        <tr>
+          <td><div class="proj-name-cell"><div class="proj-av" style="background:#10b981;">Y</div><span class="proj-name">test45</span></div></td>
+          <td><div class="status-cell"><div class="status-dot"></div><span class="status-label">Pipeline</span></div></td>
+          <td class="muted">—</td>
+          <td><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+          <td><div class="owner-chip"><div class="owner-av" style="background:#22c55e;">P</div>praful</div></td>
+          <td><div class="phases"><div class="phase-chev todo"></div></div></td>
+          <td><span class="budget">USD 10K</span></td>
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+        </tr>
+
+      </tbody>
+    </table>
   </div>
 </div>
 
 <!-- Profile Popup -->
 <div class="profile-popup" id="profilePopup">
   <div class="pp-header">
-    <div>
-      <div class="pp-name">Vivek Shanmugasundaram</div>
-      <div class="pp-email">vivek@rocketlane.com</div>
-    </div>
+    <div><div class="pp-name">Vivek Shanmugasundaram</div><div class="pp-email">vivek@rocketlane.com</div></div>
     <div class="pp-av">VS</div>
   </div>
   <div class="pp-div"></div>
