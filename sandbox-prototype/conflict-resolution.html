@@ -548,6 +548,16 @@
     const TOTAL = 2;
     const state = { kickoff: null, priority: null };
 
+    // Restore any previously saved resolutions
+    (function() {
+      const saved = localStorage.getItem('sandbox_conflicts_resolved');
+      if (!saved) return;
+      try {
+        const s = JSON.parse(saved);
+        ['kickoff','priority'].forEach(id => { if (s[id]) state[id] = s[id]; });
+      } catch(e) {}
+    })();
+
     const LABELS = {
       prod: { kickoff: 'Kept Production version', priority: 'Kept Production version' },
       sand: { kickoff: 'Kept Sandbox version',    priority: 'Kept Sandbox version'    }
@@ -624,6 +634,9 @@
         document.getElementById('back-btn').style.display = 'inline-flex';
       }
     }
+    // Re-apply saved choices visually on load
+    ['kickoff','priority'].forEach(id => { if (state[id]) pick(id, state[id]); });
+
   function toggleProfilePopup(e) {
     e.stopPropagation();
     document.getElementById('profilePopup').classList.toggle('open');

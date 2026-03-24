@@ -841,6 +841,64 @@
     }
   }
 
+  // Reflect any saved conflict resolutions from the resolution page
+  (function applyConflictResolutions() {
+    const raw = localStorage.getItem('sandbox_conflicts_resolved');
+    if (!raw) return;
+    let state;
+    try { state = JSON.parse(raw); } catch(e) { return; }
+
+    let resolvedCount = 0;
+    ['kickoff', 'priority'].forEach(function(id) {
+      if (!state[id]) return;
+      resolvedCount++;
+
+      // Hide conflict badge on row name
+      const badge = document.getElementById('conflict-badge-' + id);
+      if (badge) badge.style.display = 'none';
+
+      // Replace amber conflict warning with green resolved notice
+      const warn = document.getElementById('conflict-warn-' + id);
+      if (warn) {
+        const label = state[id] === 'prod' ? 'Production version' : 'Sandbox version';
+        warn.style.background = 'var(--success-bg)';
+        warn.style.borderColor = 'var(--success-border)';
+        warn.style.color = '#065f46';
+        warn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span><strong>Resolved</strong> \u2014 ' + label + ' will be used after merge.</span>';
+        // Mark row as no longer a conflict for filter purposes
+        const row = warn.closest('.change-row');
+        if (row) { row.dataset.conflict = 'false'; row.classList.remove('has-conflict'); }
+      }
+    });
+
+    // Update conflict chip
+    const remaining = 2 - resolvedCount;
+    const chipConflict = document.getElementById('chip-conflict');
+    if (remaining === 0) {
+      chipConflict.style.display = 'none';
+    } else {
+      chipConflict.querySelector('.chip-count').textContent = remaining;
+    }
+
+    // Update bottom bar
+    const conflictMsg = document.getElementById('bottom-conflict-msg');
+    const ctaResolve = document.getElementById('cta-resolve');
+    const ctaMerge = document.getElementById('cta-merge');
+    if (remaining === 0) {
+      conflictMsg.style.display = 'none';
+      ctaResolve.style.display = 'none';
+      ctaMerge.style.display = '';
+    } else {
+      const n = remaining;
+      const label = n + ' conflict' + (n > 1 ? 's' : '');
+      conflictMsg.lastChild.textContent = ' ' + label + ' must be resolved before merging';
+      const ctaSvg = ctaResolve.querySelector('svg');
+      ctaResolve.innerHTML = '';
+      ctaResolve.appendChild(ctaSvg);
+      ctaResolve.appendChild(document.createTextNode(' Resolve ' + n + ' Conflict' + (n > 1 ? 's' : '') + ' \u2192'));
+    }
+  })();
+
   function filterBy(type) {
     document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('chip-' + type).classList.add('active');
