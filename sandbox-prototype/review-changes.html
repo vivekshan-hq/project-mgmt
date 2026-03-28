@@ -182,6 +182,14 @@
     .tree-val-old { color: var(--del-color); background: var(--del-bg); padding: 0 4px; border-radius: 3px; text-decoration: line-through; font-size: 12px; }
     .tree-val-new { color: var(--new-color); background: var(--new-bg); padding: 0 4px; border-radius: 3px; font-size: 12px; }
     .tree-arrow { color: var(--text-4); font-size: 11px; }
+    .tree-badge-conflict { background: var(--conflict-bg); color: var(--conflict); }
+    .tree-callout { display: flex; align-items: flex-start; gap: 8px; border-radius: 6px; padding: 9px 12px; margin-top: 8px; font-size: 12px; line-height: 16px; }
+    .tree-callout-warn { background: #fff7ed; border: 1px solid #f59e0b; color: #92650a; }
+    .tree-callout-danger { background: var(--del-bg); border: 1px solid var(--del-border); color: var(--del-color); }
+    .tree-callout-conflict { background: var(--conflict-bg); border: 1px solid var(--conflict-border); color: var(--conflict); }
+    .tree-callout svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+    .tree-item-conflict { background: var(--conflict-bg); border-radius: 5px; padding: 5px 8px; margin: 2px 0; }
+    .tree-conflict-chip { font-size: 9px; font-weight: 700; letter-spacing: 0.05em; background: var(--conflict-bg); color: var(--conflict); border: 1px solid var(--conflict-border); border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; }
 
     /* Bottom bar */
     .bottom-bar { position: absolute; bottom: 0; left: 56px; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; z-index: 10; box-shadow: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11); }
@@ -298,19 +306,19 @@
       <!-- Filter chips -->
       <div class="stat-chips">
         <button class="stat-chip all active" id="chip-all" onclick="filterBy('all')">
-          <span class="chip-count">12</span> All Changes
+          <span class="chip-count">17</span> All Changes
         </button>
         <button class="stat-chip new-c" id="chip-new" onclick="filterBy('new')">
           <span class="chip-count">4</span> New
         </button>
         <button class="stat-chip mod-c" id="chip-mod" onclick="filterBy('mod')">
-          <span class="chip-count">6</span> Modified
+          <span class="chip-count">11</span> Modified
         </button>
         <button class="stat-chip del-c" id="chip-del" onclick="filterBy('del')">
           <span class="chip-count">2</span> Deleted
         </button>
         <button class="stat-chip" id="chip-conflict" onclick="filterBy('conflict')" style="background:#fff7ed;border-color:#f59e0b;color:#92650a;">
-          <span class="chip-count">2</span> Conflicts
+          <span class="chip-count">3</span> Conflicts
         </button>
       </div>
     </div>
@@ -329,7 +337,7 @@
       <div class="change-section" data-category="new">
         <div class="section-header">
           <span class="section-title">Project Templates</span>
-          <span class="section-count">3 changes</span>
+          <span class="section-count">8 changes</span>
         </div>
 
         <div class="change-row">
@@ -451,6 +459,273 @@
                 </div>
               </div>
 
+            </div>
+          </div>
+        </div>
+
+        <!-- UC7: Onboarding Pro — Phase deletion with cascade -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-tpl-onboarding-pro', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Onboarding Pro</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:var(--del-color);font-weight:600;">−1 phase</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--del-color);font-weight:600;">−3 tasks</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--text-3);font-size:11px;font-style:italic;">tasks cascade from deleted phase</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-tpl-onboarding-pro">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-tpl-onboarding-pro">
+            <div class="tree-diff">
+              <div class="tree-group">
+                <div class="tree-group-header">Phases <span class="tree-group-count" style="background:var(--del-bg);color:var(--del-color);">−1 deleted</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-del">−</div>
+                  <span class="tree-item-name">Legacy Support</span>
+                  <span class="tree-item-detail">Phase removed · was positioned after "Go Live"</span>
+                </div>
+                <div class="tree-callout tree-callout-danger">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                  <span><strong>Cascade:</strong> 3 tasks inside this phase will also be removed from the template. Existing projects are unaffected.</span>
+                </div>
+              </div>
+              <div class="tree-group">
+                <div class="tree-group-header">Tasks <span class="tree-group-count" style="background:var(--del-bg);color:var(--del-color);">−3 cascaded</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-del">−</div>
+                  <span class="tree-item-name">Deployment Handover</span>
+                  <span class="tree-item-detail" style="color:var(--text-4);font-style:italic;">Removed with phase</span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-del">−</div>
+                  <span class="tree-item-name">Legacy System Sign-off</span>
+                  <span class="tree-item-detail" style="color:var(--text-4);font-style:italic;">Removed with phase</span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-del">−</div>
+                  <span class="tree-item-name">Final KT Session</span>
+                  <span class="tree-item-detail" style="color:var(--text-4);font-style:italic;">Removed with phase</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UC9: Enterprise v3 — Automation with dependency warning -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-tpl-enterprise-v3', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Enterprise v3</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:var(--new-color);font-weight:600;">+1 automation</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:#d97706;font-weight:600;">⚠ dependency</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-tpl-enterprise-v3">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-tpl-enterprise-v3">
+            <div class="tree-diff">
+              <div class="tree-group">
+                <div class="tree-group-header">Automations <span class="tree-group-count" style="background:var(--new-bg);color:var(--new-color);">+1 added</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-add">+</div>
+                  <span class="tree-item-name">Renewal Risk Alert</span>
+                  <span class="tree-item-detail">Trigger: Task completed → Action: Notify CS Lead via Slack</span>
+                </div>
+                <div class="tree-callout tree-callout-warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  <span><strong>Dependency:</strong> References "Client Health Score" custom field · must be merged together with the Custom Fields change or this automation will break.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UC15: Hypercare Template — 3 conflicts across Tasks, Automations, Settings -->
+        <div class="change-row has-conflict" data-conflict="true">
+          <div class="change-row-header" onclick="toggleDiff('diff-tpl-hypercare', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text" style="display:flex;align-items:center;gap:6px;">
+                  Hypercare Template
+                  <span class="conflict-badge">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    CONFLICT
+                  </span>
+                </div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:var(--conflict);font-weight:600;">3 conflicts</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--text-3)">Tasks · Automations · Settings</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-tpl-hypercare">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-tpl-hypercare">
+            <div class="tree-diff">
+              <div class="tree-group">
+                <div class="tree-group-header">Tasks <span class="tree-group-count" style="background:var(--conflict-bg);color:var(--conflict);">1 conflict</span></div>
+                <div class="tree-item tree-item-conflict">
+                  <div class="tree-badge tree-badge-conflict">!</div>
+                  <span class="tree-item-name">Hypercare Review</span>
+                  <span class="tree-item-detail">Duration: <span class="tree-val-old">Prod: 2 days</span> <span class="tree-arrow">↔</span> <span class="tree-val-new">Sandbox: 5 days</span></span>
+                  <span class="tree-conflict-chip">CONFLICT</span>
+                </div>
+              </div>
+              <div class="tree-group">
+                <div class="tree-group-header">Automations <span class="tree-group-count" style="background:var(--conflict-bg);color:var(--conflict);">1 conflict</span></div>
+                <div class="tree-item tree-item-conflict">
+                  <div class="tree-badge tree-badge-conflict">!</div>
+                  <span class="tree-item-name">Weekly Check-in</span>
+                  <span class="tree-item-detail">Trigger: <span class="tree-val-old">Prod: Task Overdue</span> <span class="tree-arrow">↔</span> <span class="tree-val-new">Sandbox: Status → In Review</span></span>
+                  <span class="tree-conflict-chip">CONFLICT</span>
+                </div>
+              </div>
+              <div class="tree-group">
+                <div class="tree-group-header">Settings <span class="tree-group-count" style="background:var(--conflict-bg);color:var(--conflict);">1 conflict</span></div>
+                <div class="tree-item tree-item-conflict">
+                  <div class="tree-badge tree-badge-conflict">!</div>
+                  <span class="tree-item-name">Effort planning level</span>
+                  <span class="tree-item-detail"><span class="tree-val-old">Prod: Phase level</span> <span class="tree-arrow">↔</span> <span class="tree-val-new">Sandbox: Task level</span></span>
+                  <span class="tree-conflict-chip">CONFLICT</span>
+                </div>
+              </div>
+            </div>
+            <div id="conflict-warn-hypercare" style="margin-top:10px;background:var(--conflict-bg);border:1px solid var(--conflict-border);border-radius:6px;padding:10px 12px;font-size:12px;color:#491d8b;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <span><strong>⚠ Conflict:</strong> Tasks, Automations, and Settings were all modified in both Production and Sandbox. All 3 must be resolved before merging.</span>
+              <a href="conflict-resolution.html" class="btn btn-sm" style="background:#1d1d1f;color:#fff;border:none;font-size:12px;white-space:nowrap;flex-shrink:0;">Resolve Conflicts</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- UC8: SMB Template — Placeholder removed + Allocations rebalanced -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-tpl-smb', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">SMB Template</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:var(--del-color);font-weight:600;">−1 placeholder</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--mod-color);font-weight:600;">~2 allocations</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-tpl-smb">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-tpl-smb">
+            <div class="tree-diff">
+              <div class="tree-group">
+                <div class="tree-group-header">Placeholders <span class="tree-group-count" style="background:var(--del-bg);color:var(--del-color);">−1 removed</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-del">−</div>
+                  <span class="tree-item-name">Solutions Engineer</span>
+                  <span class="tree-item-detail">Role removed · was assigned to 4 tasks</span>
+                </div>
+              </div>
+              <div class="tree-group">
+                <div class="tree-group-header">Allocations <span class="tree-group-count" style="background:var(--mod-bg);color:var(--mod-color);">~2 modified</span></div>
+                <div class="tree-callout tree-callout-warn" style="margin-bottom:8px;margin-top:0;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Hours redistributed after Solutions Engineer was removed.</span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Implementation Lead</span>
+                  <span class="tree-item-detail">Hours: <span class="tree-val-old">40h</span> <span class="tree-arrow">→</span> <span class="tree-val-new">60h</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Project Manager</span>
+                  <span class="tree-item-detail">Hours: <span class="tree-val-old">30h</span> <span class="tree-arrow">→</span> <span class="tree-val-new">45h</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UC14: Global Rollout — 4 groups: Phases + Tasks + Placeholders + Allocations -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-tpl-global-rollout', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Global Rollout</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="color:var(--new-color);font-weight:600;">+1 phase</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--mod-color);font-weight:600;">~3 tasks</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--new-color);font-weight:600;">+1 placeholder</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--new-color);font-weight:600;">+1 allocation</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-tpl-global-rollout">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-tpl-global-rollout">
+            <div class="tree-diff">
+              <div class="tree-group">
+                <div class="tree-group-header">Phases <span class="tree-group-count" style="background:var(--new-bg);color:var(--new-color);">+1 added</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-add">+</div>
+                  <span class="tree-item-name">APAC Rollout</span>
+                  <span class="tree-item-detail">New phase · added after "EMEA Rollout"</span>
+                </div>
+              </div>
+              <div class="tree-group">
+                <div class="tree-group-header">Tasks <span class="tree-group-count" style="background:var(--mod-bg);color:var(--mod-color);">~3 modified</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Kickoff Workshop</span>
+                  <span class="tree-item-detail">Duration: <span class="tree-val-old">1 day</span> <span class="tree-arrow">→</span> <span class="tree-val-new">2 days</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Regional Sign-off</span>
+                  <span class="tree-item-detail">Assigned to: <span class="tree-val-old">Project Manager</span> <span class="tree-arrow">→</span> <span class="tree-val-new">Regional Lead</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Go-Live Communication</span>
+                  <span class="tree-item-detail">Phase: <span class="tree-val-old">Global Launch</span> <span class="tree-arrow">→</span> <span class="tree-val-new">APAC Rollout</span></span>
+                </div>
+              </div>
+              <div class="tree-group">
+                <div class="tree-group-header">Placeholders <span class="tree-group-count" style="background:var(--new-bg);color:var(--new-color);">+1 added</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-add">+</div>
+                  <span class="tree-item-name">Regional Lead</span>
+                  <span class="tree-item-detail">New role · assigned to 2 tasks</span>
+                </div>
+              </div>
+              <div class="tree-group">
+                <div class="tree-group-header">Allocations <span class="tree-group-count" style="background:var(--new-bg);color:var(--new-color);">+1 added</span></div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-add">+</div>
+                  <span class="tree-item-name">Regional Lead</span>
+                  <span class="tree-item-detail">40h planned · <span style="color:var(--text-3)">10h/w × 4 weeks</span></span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -801,17 +1076,17 @@
 <!-- Bottom bar -->
 <div class="bottom-bar">
   <div class="selection-summary" id="selectionSummary">
-    <strong id="selectedCount">10</strong> of 12 changes selected
+    <strong id="selectedCount">15</strong> of 17 changes selected
   </div>
   <div id="bottom-conflict-msg" style="font-size:14px;line-height:18px;color:var(--conflict);font-weight:600;display:flex;align-items:center;gap:5px;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
-    2 conflicts must be resolved before merging
+    3 conflicts must be resolved before merging
   </div>
   <div class="spacer"></div>
   <a href="sandboxes.html" class="btn btn-default">Cancel</a>
   <a href="conflict-resolution.html" class="btn btn-conflict" id="cta-resolve">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
-    Resolve 2 Conflicts →
+    Resolve 3 Conflicts →
   </a>
   <a href="#" class="btn btn-primary" id="cta-merge" style="display:none;" onclick="return false;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
@@ -872,7 +1147,7 @@
     });
 
     // Update conflict chip
-    const remaining = 2 - resolvedCount;
+    const remaining = 3 - resolvedCount;
     const chipConflict = document.getElementById('chip-conflict');
     if (remaining === 0) {
       chipConflict.style.display = 'none';
