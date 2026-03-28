@@ -181,6 +181,9 @@
     .tree-item-detail { color: var(--text-3); font-size: 12px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
     .tree-val-old { color: var(--del-color); background: var(--del-bg); padding: 0 4px; border-radius: 3px; text-decoration: line-through; font-size: 12px; }
     .tree-val-new { color: var(--new-color); background: var(--new-bg); padding: 0 4px; border-radius: 3px; font-size: 12px; }
+    /* Conflict value chips — no strikethrough, neutral labels */
+    .tree-val-prod { color: #525252; background: #f4f4f4; border: 1px solid #e0e0e0; padding: 0 5px; border-radius: 3px; font-size: 12px; }
+    .tree-val-sand { color: #0043ce; background: #edf5ff; border: 1px solid #97c1ff; padding: 0 5px; border-radius: 3px; font-size: 12px; }
     .tree-arrow { color: var(--text-4); font-size: 11px; }
     .tree-badge-conflict { background: var(--conflict-bg); color: var(--conflict); }
     .tree-callout { display: flex; align-items: flex-start; gap: 8px; border-radius: 6px; padding: 9px 12px; margin-top: 8px; font-size: 12px; line-height: 16px; }
@@ -594,7 +597,7 @@
                 <div class="tree-item tree-item-conflict">
                   <div class="tree-badge tree-badge-conflict">!</div>
                   <span class="tree-item-name">Hypercare Review</span>
-                  <span class="tree-item-detail">Duration: <span class="tree-val-old">Prod: 2 days</span> <span class="tree-arrow">↔</span> <span class="tree-val-new">Sandbox: 5 days</span></span>
+                  <span class="tree-item-detail">Duration: <span class="tree-val-prod">Prod: 2 days</span> <span class="tree-arrow">↔</span> <span class="tree-val-sand">Sandbox: 5 days</span></span>
                   <span class="tree-conflict-chip">CONFLICT</span>
                 </div>
               </div>
@@ -603,7 +606,7 @@
                 <div class="tree-item tree-item-conflict">
                   <div class="tree-badge tree-badge-conflict">!</div>
                   <span class="tree-item-name">Weekly Check-in</span>
-                  <span class="tree-item-detail">Trigger: <span class="tree-val-old">Prod: Task Overdue</span> <span class="tree-arrow">↔</span> <span class="tree-val-new">Sandbox: Status → In Review</span></span>
+                  <span class="tree-item-detail">Trigger: <span class="tree-val-prod">Prod: Task Overdue</span> <span class="tree-arrow">↔</span> <span class="tree-val-sand">Sandbox: Status → In Review</span></span>
                   <span class="tree-conflict-chip">CONFLICT</span>
                 </div>
               </div>
@@ -612,7 +615,7 @@
                 <div class="tree-item tree-item-conflict">
                   <div class="tree-badge tree-badge-conflict">!</div>
                   <span class="tree-item-name">Effort planning level</span>
-                  <span class="tree-item-detail"><span class="tree-val-old">Prod: Phase level</span> <span class="tree-arrow">↔</span> <span class="tree-val-new">Sandbox: Task level</span></span>
+                  <span class="tree-item-detail"><span class="tree-val-prod">Prod: Phase level</span> <span class="tree-arrow">↔</span> <span class="tree-val-sand">Sandbox: Task level</span></span>
                   <span class="tree-conflict-chip">CONFLICT</span>
                 </div>
               </div>
