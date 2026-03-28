@@ -384,7 +384,11 @@
                 <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
                   <span style="color:var(--new-color);font-weight:600;">+2 phases</span>
                   <span style="color:var(--text-4)">·</span>
-                  <span style="color:var(--mod-color);font-weight:600;">~5 tasks</span>
+                  <span style="color:var(--new-color);font-weight:600;">+1 task</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--mod-color);font-weight:600;">~4 tasks</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--del-color);font-weight:600;">−1 task</span>
                   <span style="color:var(--text-4)">·</span>
                   <span style="color:var(--del-color);font-weight:600;">−1 placeholder</span>
                 </div>
@@ -417,7 +421,9 @@
               <div class="tree-group">
                 <div class="tree-group-header">
                   Tasks
-                  <span class="tree-group-count" style="background:var(--mod-bg);color:var(--mod-color);">~5 modified</span>
+                  <span class="tree-group-count" style="background:var(--new-bg);color:var(--new-color);">+1</span>
+                  <span class="tree-group-count" style="background:var(--mod-bg);color:var(--mod-color);">~4 modified</span>
+                  <span class="tree-group-count" style="background:var(--del-bg);color:var(--del-color);">−1</span>
                 </div>
                 <div class="tree-item">
                   <div class="tree-badge tree-badge-mod">~</div>
@@ -435,9 +441,14 @@
                   <span class="tree-item-detail">Phase: Discovery &nbsp;·&nbsp; Duration: <span class="tree-val-old">1 day</span> <span class="tree-arrow">→</span> <span class="tree-val-new">3 days</span></span>
                 </div>
                 <div class="tree-item">
-                  <div class="tree-badge tree-badge-mod">~</div>
+                  <div class="tree-badge tree-badge-del">−</div>
                   <span class="tree-item-name">Stakeholder Review</span>
-                  <span class="tree-item-detail">Phase: Go Live &nbsp;·&nbsp; Name: <span class="tree-val-old">Stakeholder Review</span> <span class="tree-arrow">→</span> <span class="tree-val-new">Executive Review</span></span>
+                  <span class="tree-item-detail">Phase: Go Live &nbsp;·&nbsp; <span style="color:var(--text-3);font-style:italic;">Deleted · replaced by "Executive Review"</span></span>
+                </div>
+                <div class="tree-item">
+                  <div class="tree-badge tree-badge-add">+</div>
+                  <span class="tree-item-name">Executive Review</span>
+                  <span class="tree-item-detail">Phase: Go Live &nbsp;·&nbsp; <span style="color:var(--text-3);font-style:italic;">New task · replaces "Stakeholder Review"</span></span>
                 </div>
                 <div class="tree-item">
                   <div class="tree-badge tree-badge-mod">~</div>
@@ -789,7 +800,7 @@
                 <div class="tree-item">
                   <div class="tree-badge tree-badge-add">+</div>
                   <span class="tree-item-name">Resource Tracker</span>
-                  <span class="tree-item-detail">Phase: Implementation &nbsp;·&nbsp; Linked to: "Resource Tracker" sheet template &nbsp;·&nbsp; Tabs: Team, Budget, Timeline &nbsp;·&nbsp; Start offset: Day 7</span>
+                  <span class="tree-item-detail">Phase: Implementation &nbsp;·&nbsp; Linked to: "Resource Tracker" sheet template &nbsp;·&nbsp; Tabs: Team, Budget, Timeline</span>
                 </div>
               </div>
               <div class="tree-group">
