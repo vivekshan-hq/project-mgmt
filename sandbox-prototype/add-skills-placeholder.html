@@ -106,14 +106,8 @@
     .mbr-name { font-size: 13px; font-weight: 500; color: #161616; }
     .mbr-sub { font-size: 12px; color: #525252; display: flex; align-items: center; gap: 5px; margin-top: 1px; }
     .no-skills { font-size: 12px; color: #a8a8a8; }
-    .skill-chips { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
-    .skill-chip { font-size: 11px; color: #525252; background: #f4f4f4; border: 1px solid #e0e0e0; border-radius: 4px; padding: 1px 7px; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
-    .skill-chip:hover { background: #e8e8e8; }
-    .skill-chip-more { font-size: 11px; color: #0f62fe; background: #edf5ff; border: 1px solid #97c1ff; border-radius: 4px; padding: 1px 7px; white-space: nowrap; cursor: pointer; flex-shrink: 0; position: relative; }
-    .skill-chip-more:hover { background: #dbeafe; }
-    .more-tooltip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; border-radius: 6px; padding: 8px 12px; font-size: 12px; line-height: 18px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.12s; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .skill-chip-more:hover .more-tooltip { opacity: 1; }
-    .more-tooltip-item { color: rgba(255,255,255,0.88); padding: 1px 0; }
+    .skills-count { font-size: 12px; color: #0f62fe; cursor: pointer; }
+    .skills-count:hover { text-decoration: underline; }
     .mbr-alloc { width: 88px; flex-shrink: 0; padding: 0 12px; font-size: 13px; font-weight: 500; color: #161616; text-align: right; }
 
     /* Action buttons (hover) */
@@ -547,7 +541,7 @@
                 <div class="mbr-name">Engineer</div>
                 <div class="mbr-sub" id="engineer-sub">
                   <span class="no-skills" id="no-skills-label">No skill filters</span>
-                  <div class="skill-chips" id="skill-chips" style="display:none;"></div>
+                  <span class="skills-count" id="skills-count" style="display:none;" onclick="openModal()">0 skills</span>
                 </div>
               </div>
               <div class="mbr-alloc">120h</div>
@@ -1066,64 +1060,20 @@
     if (sec) document.getElementById(sec).scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ─── Apply → update placeholder row with inline chips ───
+  // ─── Apply → update placeholder row ───
   function applySkills() {
     const ids = Object.keys(state);
     closeModal();
     const noLabel = document.getElementById('no-skills-label');
-    const chipsEl = document.getElementById('skill-chips');
-
+    const countEl = document.getElementById('skills-count');
     if (ids.length === 0) {
       noLabel.style.display = '';
-      chipsEl.style.display = 'none';
-      chipsEl.innerHTML = '';
+      countEl.style.display = 'none';
       return;
     }
-
-    // Build chip label: short skill name + condition
-    function chipLabel(id) {
-      const skill = SKILLS[id];
-      const s = state[id];
-      const name = skill.label.split(' ')[0]; // first word for brevity
-      if (skill.type === 'boolean') return `${name} ${s.op}`;
-      return s.val ? `${name} ≥ ${s.val}` : name;
-    }
-
-    chipsEl.innerHTML = '';
-    const SHOW = 2;
-    const visible = ids.slice(0, SHOW);
-    const extra = ids.length - SHOW;
-
-    visible.forEach(id => {
-      const chip = document.createElement('span');
-      chip.className = 'skill-chip';
-      chip.textContent = chipLabel(id);
-      chip.title = (() => {
-        const skill = SKILLS[id]; const s = state[id];
-        return skill.type === 'boolean' ? `${skill.label} ${s.op}` : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : skill.label;
-      })();
-      chip.onclick = openModal;
-      chipsEl.appendChild(chip);
-    });
-
-    if (extra > 0) {
-      const more = document.createElement('span');
-      more.className = 'skill-chip-more';
-      const hiddenIds = ids.slice(SHOW);
-      const tooltipHTML = hiddenIds.map(id => {
-        const skill = SKILLS[id]; const s = state[id];
-        const label = skill.type === 'boolean'
-          ? `${skill.label} ${s.op}`
-          : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : skill.label;
-        return `<div class="more-tooltip-item">${label}</div>`;
-      }).join('');
-      more.innerHTML = `+${extra} more<div class="more-tooltip">${tooltipHTML}</div>`;
-      more.onclick = openModal;
-      chipsEl.appendChild(more);
-    }
-
+    countEl.textContent = ids.length + (ids.length === 1 ? ' skill' : ' skills');
     noLabel.style.display = 'none';
-    chipsEl.style.display = 'flex';
+    countEl.style.display = '';
   }
 </script>
 
