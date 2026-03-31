@@ -109,8 +109,11 @@
     .skill-chips { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
     .skill-chip { font-size: 11px; color: #525252; background: #f4f4f4; border: 1px solid #e0e0e0; border-radius: 4px; padding: 1px 7px; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
     .skill-chip:hover { background: #e8e8e8; }
-    .skill-chip-more { font-size: 11px; color: #0f62fe; background: #edf5ff; border: 1px solid #97c1ff; border-radius: 4px; padding: 1px 7px; white-space: nowrap; cursor: pointer; flex-shrink: 0; }
+    .skill-chip-more { font-size: 11px; color: #0f62fe; background: #edf5ff; border: 1px solid #97c1ff; border-radius: 4px; padding: 1px 7px; white-space: nowrap; cursor: pointer; flex-shrink: 0; position: relative; }
     .skill-chip-more:hover { background: #dbeafe; }
+    .more-tooltip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; border-radius: 6px; padding: 8px 12px; font-size: 12px; line-height: 18px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.12s; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .skill-chip-more:hover .more-tooltip { opacity: 1; }
+    .more-tooltip-item { color: rgba(255,255,255,0.88); padding: 1px 0; }
     .mbr-alloc { width: 88px; flex-shrink: 0; padding: 0 12px; font-size: 13px; font-weight: 500; color: #161616; text-align: right; }
 
     /* Action buttons (hover) */
@@ -1106,7 +1109,15 @@
     if (extra > 0) {
       const more = document.createElement('span');
       more.className = 'skill-chip-more';
-      more.textContent = `+${extra} more`;
+      const hiddenIds = ids.slice(SHOW);
+      const tooltipHTML = hiddenIds.map(id => {
+        const skill = SKILLS[id]; const s = state[id];
+        const label = skill.type === 'boolean'
+          ? `${skill.label} ${s.op}`
+          : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : skill.label;
+        return `<div class="more-tooltip-item">${label}</div>`;
+      }).join('');
+      more.innerHTML = `+${extra} more<div class="more-tooltip">${tooltipHTML}</div>`;
       more.onclick = openModal;
       chipsEl.appendChild(more);
     }
