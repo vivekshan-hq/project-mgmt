@@ -180,6 +180,12 @@
     .cond-tag { font-size: 12px; color: #525252; background: #f4f4f4; padding: 4px 10px; border-radius: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
     .cond-select { padding: 4px 26px 4px 8px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 12px; color: #161616; background: #fff; appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; }
     .cond-select:disabled { color: #a8a8a8; background-color: #f4f4f4; cursor: default; }
+    /* Yes/No toggle */
+    .yn-toggle { display: flex; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; opacity: 0.4; pointer-events: none; }
+    .yn-toggle.active { opacity: 1; pointer-events: all; }
+    .yn-opt { padding: 4px 12px; font-size: 12px; cursor: pointer; color: #525252; background: #fff; border: none; transition: all 0.12s; }
+    .yn-opt:first-child { border-right: 1px solid #e0e0e0; }
+    .yn-opt.selected { background: #0f62fe; color: #fff; }
 
     /* Selected panel */
     .panel-selected { width: 232px; flex-shrink: 0; border-left: 1px solid #e0e0e0; padding: 14px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
@@ -594,14 +600,17 @@
       <!-- Skills panel -->
       <div class="panel-skills" id="skills-panel">
 
-        <!-- Languages group -->
+        <!-- Languages group (Yes/No type) -->
         <div class="sk-group-label" id="sec-languages">Languages</div>
 
         <div class="sk-row" id="row-python">
           <div class="sk-cb" id="cb-python" onclick="toggleSkill('python')"></div>
           <span class="sk-name">Python</span>
           <div class="sk-cond">
-            <span class="cond-tag">is true <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+            <div class="yn-toggle" id="yn-python">
+              <button class="yn-opt selected" onclick="setYN('python','Yes')">Yes</button>
+              <button class="yn-opt" onclick="setYN('python','No')">No</button>
+            </div>
           </div>
         </div>
 
@@ -609,7 +618,10 @@
           <div class="sk-cb" id="cb-javascript" onclick="toggleSkill('javascript')"></div>
           <span class="sk-name">Javascript</span>
           <div class="sk-cond">
-            <span class="cond-tag">is true <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+            <div class="yn-toggle" id="yn-javascript">
+              <button class="yn-opt selected" onclick="setYN('javascript','Yes')">Yes</button>
+              <button class="yn-opt" onclick="setYN('javascript','No')">No</button>
+            </div>
           </div>
         </div>
 
@@ -617,22 +629,32 @@
           <div class="sk-cb" id="cb-ruby" onclick="toggleSkill('ruby')"></div>
           <span class="sk-name">Ruby</span>
           <div class="sk-cond">
-            <span class="cond-tag">is true <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+            <div class="yn-toggle" id="yn-ruby">
+              <button class="yn-opt selected" onclick="setYN('ruby','Yes')">Yes</button>
+              <button class="yn-opt" onclick="setYN('ruby','No')">No</button>
+            </div>
           </div>
         </div>
 
-        <!-- Essentials group -->
+        <!-- Essentials group (Level type: Beginner / Intermediate / Expert) -->
         <div class="sk-group-label" id="sec-essentials">Essentials</div>
 
         <div class="sk-row" id="row-codereview">
           <div class="sk-cb" id="cb-codereview" onclick="toggleSkill('codereview')"></div>
           <span class="sk-name">Code Review Proficiency</span>
-          <div class="sk-cond">
-            <select class="cond-select" id="sel-codereview" onchange="updateSkillLevel('codereview', this.value)" disabled>
-              <option value="">Select…</option>
-              <option value="Basic">Basic</option>
+          <div class="sk-cond" style="gap:6px;">
+            <select class="cond-select" id="op-codereview" onchange="updateOp('codereview',this.value)" disabled>
+              <option value="Atleast">At least</option>
+              <option value="Atmost">At most</option>
+              <option value="Equals">Equals</option>
+              <option value="Not equals">Not equals</option>
+              <option value="Empty">Empty</option>
+              <option value="Not Empty">Not Empty</option>
+            </select>
+            <select class="cond-select" id="lv-codereview" onchange="updateLevel('codereview',this.value)" disabled>
+              <option value="">Level…</option>
+              <option value="Beginner">Beginner</option>
               <option value="Intermediate" selected>Intermediate</option>
-              <option value="Advanced">Advanced</option>
               <option value="Expert">Expert</option>
             </select>
           </div>
@@ -641,12 +663,19 @@
         <div class="sk-row" id="row-restapi">
           <div class="sk-cb" id="cb-restapi" onclick="toggleSkill('restapi')"></div>
           <span class="sk-name">REST API Development</span>
-          <div class="sk-cond">
-            <select class="cond-select" id="sel-restapi" onchange="updateSkillLevel('restapi', this.value)" disabled>
-              <option value="">Select…</option>
-              <option value="Basic">Basic</option>
+          <div class="sk-cond" style="gap:6px;">
+            <select class="cond-select" id="op-restapi" onchange="updateOp('restapi',this.value)" disabled>
+              <option value="Atleast">At least</option>
+              <option value="Atmost">At most</option>
+              <option value="Equals">Equals</option>
+              <option value="Not equals">Not equals</option>
+              <option value="Empty">Empty</option>
+              <option value="Not Empty">Not Empty</option>
+            </select>
+            <select class="cond-select" id="lv-restapi" onchange="updateLevel('restapi',this.value)" disabled>
+              <option value="">Level…</option>
+              <option value="Beginner">Beginner</option>
               <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
               <option value="Expert">Expert</option>
             </select>
           </div>
@@ -655,12 +684,19 @@
         <div class="sk-row" id="row-unittesting">
           <div class="sk-cb" id="cb-unittesting" onclick="toggleSkill('unittesting')"></div>
           <span class="sk-name">Unit &amp; Integration Testing</span>
-          <div class="sk-cond">
-            <select class="cond-select" id="sel-unittesting" onchange="updateSkillLevel('unittesting', this.value)" disabled>
-              <option value="">Select…</option>
-              <option value="Basic">Basic</option>
+          <div class="sk-cond" style="gap:6px;">
+            <select class="cond-select" id="op-unittesting" onchange="updateOp('unittesting',this.value)" disabled>
+              <option value="Atleast">At least</option>
+              <option value="Atmost">At most</option>
+              <option value="Equals">Equals</option>
+              <option value="Not equals">Not equals</option>
+              <option value="Empty">Empty</option>
+              <option value="Not Empty">Not Empty</option>
+            </select>
+            <select class="cond-select" id="lv-unittesting" onchange="updateLevel('unittesting',this.value)" disabled>
+              <option value="">Level…</option>
+              <option value="Beginner">Beginner</option>
               <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
               <option value="Expert">Expert</option>
             </select>
           </div>
@@ -669,12 +705,19 @@
         <div class="sk-row" id="row-saas">
           <div class="sk-cb" id="cb-saas" onclick="toggleSkill('saas')"></div>
           <span class="sk-name">SaaS Platform Customization</span>
-          <div class="sk-cond">
-            <select class="cond-select" id="sel-saas" onchange="updateSkillLevel('saas', this.value)" disabled>
-              <option value="">Select…</option>
-              <option value="Basic">Basic</option>
+          <div class="sk-cond" style="gap:6px;">
+            <select class="cond-select" id="op-saas" onchange="updateOp('saas',this.value)" disabled>
+              <option value="Atleast">At least</option>
+              <option value="Atmost">At most</option>
+              <option value="Equals">Equals</option>
+              <option value="Not equals">Not equals</option>
+              <option value="Empty">Empty</option>
+              <option value="Not Empty">Not Empty</option>
+            </select>
+            <select class="cond-select" id="lv-saas" onchange="updateLevel('saas',this.value)" disabled>
+              <option value="">Level…</option>
+              <option value="Beginner">Beginner</option>
               <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
               <option value="Expert">Expert</option>
             </select>
           </div>
@@ -713,27 +756,34 @@
 <script>
   // ─── Skill definitions ───
   const SKILLS = {
-    python:      { label: 'Python',                    type: 'boolean', condition: 'is true' },
-    javascript:  { label: 'Javascript',                type: 'boolean', condition: 'is true' },
-    ruby:        { label: 'Ruby',                      type: 'boolean', condition: 'is true' },
-    codereview:  { label: 'Code Review Proficiency',   type: 'proficiency', level: 'Intermediate' },
-    restapi:     { label: 'REST API Development',       type: 'proficiency', level: '' },
-    unittesting: { label: 'Unit & Integration Testing', type: 'proficiency', level: '' },
-    saas:        { label: 'SaaS Platform Customization',type: 'proficiency', level: '' },
+    python:      { label: 'Python',                     type: 'yesno' },
+    javascript:  { label: 'Javascript',                 type: 'yesno' },
+    ruby:        { label: 'Ruby',                       type: 'yesno' },
+    codereview:  { label: 'Code Review Proficiency',    type: 'level' },
+    restapi:     { label: 'REST API Development',        type: 'level' },
+    unittesting: { label: 'Unit & Integration Testing',  type: 'level' },
+    saas:        { label: 'SaaS Platform Customization', type: 'level' },
   };
 
-  // State: which skills are currently checked in the modal
+  // checked[id] = { op, level } for level-type; { value } for yesno-type
   let checked = {};
 
   // ─── Modal open / close ───
   function openModal() {
-    // Reset modal state each open
     checked = {};
     Object.keys(SKILLS).forEach(id => {
-      const cb = document.getElementById('cb-' + id);
-      if (cb) cb.classList.remove('checked');
-      const sel = document.getElementById('sel-' + id);
-      if (sel) { sel.disabled = true; sel.value = id === 'codereview' ? 'Intermediate' : ''; }
+      document.getElementById('cb-' + id).classList.remove('checked');
+      const skill = SKILLS[id];
+      if (skill.type === 'yesno') {
+        const yn = document.getElementById('yn-' + id);
+        yn.classList.remove('active');
+        yn.querySelectorAll('.yn-opt').forEach((b,i) => b.classList.toggle('selected', i === 0));
+      } else {
+        const op = document.getElementById('op-' + id);
+        const lv = document.getElementById('lv-' + id);
+        op.disabled = true; op.value = 'Atleast';
+        lv.disabled = true; lv.value = '';
+      }
     });
     renderSelectedPanel();
     document.getElementById('modal-backdrop').classList.add('open');
@@ -750,26 +800,63 @@
   // ─── Toggle a skill checkbox ───
   function toggleSkill(id) {
     const cb = document.getElementById('cb-' + id);
-    const sel = document.getElementById('sel-' + id);
+    const skill = SKILLS[id];
     if (checked[id]) {
       delete checked[id];
       cb.classList.remove('checked');
-      if (sel) sel.disabled = true;
+      if (skill.type === 'yesno') {
+        document.getElementById('yn-' + id).classList.remove('active');
+      } else {
+        document.getElementById('op-' + id).disabled = true;
+        document.getElementById('lv-' + id).disabled = true;
+      }
     } else {
-      const skill = SKILLS[id];
-      checked[id] = skill.type === 'boolean' ? 'is true' : (skill.level || '');
       cb.classList.add('checked');
-      if (sel) { sel.disabled = false; if (skill.level) sel.value = skill.level; }
+      if (skill.type === 'yesno') {
+        document.getElementById('yn-' + id).classList.add('active');
+        checked[id] = { value: 'Yes' };
+      } else {
+        const op = document.getElementById('op-' + id);
+        const lv = document.getElementById('lv-' + id);
+        op.disabled = false; op.value = 'Atleast';
+        lv.disabled = false; lv.value = '';
+        checked[id] = { op: 'Atleast', level: '' };
+        updateLevelVisibility(id, 'Atleast');
+      }
     }
     renderSelectedPanel();
   }
 
-  // ─── Update proficiency level from select ───
-  function updateSkillLevel(id, val) {
-    if (checked[id] !== undefined) {
-      checked[id] = val;
-      renderSelectedPanel();
-    }
+  // ─── Yes/No toggle ───
+  function setYN(id, val) {
+    if (!checked[id]) return; // not checked, ignore
+    checked[id].value = val;
+    const yn = document.getElementById('yn-' + id);
+    yn.querySelectorAll('.yn-opt').forEach(b => b.classList.toggle('selected', b.textContent === val));
+    renderSelectedPanel();
+  }
+
+  // ─── Operator changed ───
+  function updateOp(id, val) {
+    if (!checked[id]) return;
+    checked[id].op = val;
+    updateLevelVisibility(id, val);
+    renderSelectedPanel();
+  }
+
+  // ─── Level value changed ───
+  function updateLevel(id, val) {
+    if (!checked[id]) return;
+    checked[id].level = val;
+    renderSelectedPanel();
+  }
+
+  // Hide level select for Empty / Not Empty operators
+  function updateLevelVisibility(id, op) {
+    const lv = document.getElementById('lv-' + id);
+    const noLevel = op === 'Empty' || op === 'Not Empty';
+    lv.disabled = noLevel;
+    lv.style.visibility = noLevel ? 'hidden' : '';
   }
 
   // ─── Render right selected panel ───
@@ -778,20 +865,25 @@
     document.getElementById('sel-count').textContent = '(' + ids.length + ')';
     const list = document.getElementById('sel-list');
     const empty = document.getElementById('sel-empty');
+    list.querySelectorAll('.sel-item').forEach(el => el.remove());
     if (ids.length === 0) {
       empty.style.display = 'block';
-      // remove any sel-items
-      list.querySelectorAll('.sel-item').forEach(el => el.remove());
     } else {
       empty.style.display = 'none';
-      list.querySelectorAll('.sel-item').forEach(el => el.remove());
       ids.forEach(id => {
         const skill = SKILLS[id];
+        const state = checked[id];
+        let condText = '';
+        if (skill.type === 'yesno') {
+          condText = state.value === 'Yes' ? 'is true' : 'is false';
+        } else {
+          const opLabel = { Atleast: 'at least', Atmost: 'at most', Equals: 'equals', 'Not equals': 'not equals', Empty: 'is empty', 'Not Empty': 'is not empty' }[state.op] || state.op;
+          condText = (state.op === 'Empty' || state.op === 'Not Empty')
+            ? opLabel
+            : state.level ? `${opLabel} ${state.level}` : `${opLabel} …`;
+        }
         const div = document.createElement('div');
         div.className = 'sel-item';
-        const condText = skill.type === 'boolean'
-          ? 'is true'
-          : checked[id] ? 'is at least ' + checked[id] : 'is at least…';
         div.innerHTML = `<div class="sel-item-name">${skill.label}</div><div class="sel-item-cond">${condText}</div>`;
         list.appendChild(div);
       });
@@ -832,9 +924,14 @@
     tooltipList.innerHTML = '';
     ids.forEach(id => {
       const skill = SKILLS[id];
-      const condText = skill.type === 'boolean'
-        ? 'is true'
-        : checked[id] ? 'is at least ' + checked[id] : '';
+      const state = checked[id];
+      let condText = '';
+      if (skill.type === 'yesno') {
+        condText = state.value === 'Yes' ? 'is true' : 'is false';
+      } else {
+        const opLabel = { Atleast: 'at least', Atmost: 'at most', Equals: 'equals', 'Not equals': 'not equals', Empty: 'is empty', 'Not Empty': 'is not empty' }[state.op] || state.op;
+        condText = (state.op === 'Empty' || state.op === 'Not Empty') ? opLabel : state.level ? `${opLabel} ${state.level}` : opLabel;
+      }
       const li = document.createElement('li');
       li.textContent = skill.label + ' ' + condText;
       tooltipList.appendChild(li);
