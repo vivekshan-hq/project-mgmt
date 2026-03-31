@@ -184,6 +184,9 @@
     /* Conflict value chips — no strikethrough, neutral labels */
     .tree-val-prod { color: #525252; background: #f4f4f4; border: 1px solid #e0e0e0; padding: 0 5px; border-radius: 3px; font-size: 12px; }
     .tree-val-sand { color: #0043ce; background: #edf5ff; border: 1px solid #97c1ff; padding: 0 5px; border-radius: 3px; font-size: 12px; }
+    .tree-sheet-label { font-size: 12px; font-weight: 600; color: var(--text-2); padding: 6px 2px 4px; display: flex; align-items: center; gap: 6px; }
+    .tree-sheet-label-icon { color: var(--text-4); font-size: 11px; }
+    .tree-subitem { display: flex; align-items: baseline; gap: 8px; padding: 4px 2px 4px 22px; font-size: 13px; line-height: 18px; color: var(--text-1); border-left: 2px solid var(--border); margin-left: 7px; }
     .tree-arrow { color: var(--text-4); font-size: 11px; }
     .tree-badge-conflict { background: var(--conflict-bg); color: var(--conflict); }
     .tree-callout { display: flex; align-items: flex-start; gap: 8px; border-radius: 6px; padding: 9px 12px; margin-top: 8px; font-size: 12px; line-height: 16px; }
@@ -309,13 +312,13 @@
       <!-- Filter chips -->
       <div class="stat-chips">
         <button class="stat-chip all active" id="chip-all" onclick="filterBy('all')">
-          <span class="chip-count">19</span> All Changes
+          <span class="chip-count">21</span> All Changes
         </button>
         <button class="stat-chip new-c" id="chip-new" onclick="filterBy('new')">
           <span class="chip-count">4</span> New
         </button>
         <button class="stat-chip mod-c" id="chip-mod" onclick="filterBy('mod')">
-          <span class="chip-count">13</span> Modified
+          <span class="chip-count">15</span> Modified
         </button>
         <button class="stat-chip del-c" id="chip-del" onclick="filterBy('del')">
           <span class="chip-count">2</span> Deleted
@@ -340,7 +343,7 @@
       <div class="change-section" data-category="new">
         <div class="section-header">
           <span class="section-title">Project Templates</span>
-          <span class="section-count">10 changes</span>
+          <span class="section-count">11 changes</span>
         </div>
 
         <div class="change-row">
@@ -818,6 +821,53 @@
           </div>
         </div>
 
+        <!-- Sheet tab modification example: Implementation Pro -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-tpl-impl-pro', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Implementation Pro</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:var(--mod-color);font-weight:600;">~1 sheet</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--text-3)">2 tab changes</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-tpl-impl-pro">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-tpl-impl-pro">
+            <div class="tree-diff">
+              <div class="tree-group">
+                <div class="tree-group-header">Sheets <span class="tree-group-count" style="background:var(--mod-bg);color:var(--mod-color);">~1 modified</span></div>
+
+                <!-- Parent sheet label -->
+                <div class="tree-sheet-label">
+                  <span class="tree-sheet-label-icon">▸</span>
+                  Project Tracker
+                  <span style="color:var(--text-4);font-weight:400;font-size:11px;">2 of 3 tabs changed</span>
+                </div>
+
+                <!-- Tab 1: start offset changed -->
+                <div class="tree-subitem">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Timeline</span>
+                  <span class="tree-item-detail">Tab &nbsp;·&nbsp; Start offset: <span class="tree-val-old">Day 5</span> <span style="color:var(--text-4)">→</span> <span class="tree-val-new">Day 10</span></span>
+                </div>
+
+                <!-- Tab 2: automation trigger changed -->
+                <div class="tree-subitem">
+                  <div class="tree-badge tree-badge-mod">~</div>
+                  <span class="tree-item-name">Budget</span>
+                  <span class="tree-item-detail">Tab &nbsp;·&nbsp; Automation "Budget Alert" &nbsp;·&nbsp; Trigger: <span class="tree-val-old">Row added</span> <span style="color:var(--text-4)">→</span> <span class="tree-val-new">Budget utilisation &gt; 80%</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Automations (3 MOD, 1 NEW) -->
@@ -1021,7 +1071,7 @@
       <div class="change-section">
         <div class="section-header">
           <span class="section-title">Settings</span>
-          <span class="section-count">2 changes</span>
+          <span class="section-count">3 changes</span>
         </div>
         <div class="change-row">
           <div class="change-row-header" onclick="toggleDiff('diff-portal', this)">
@@ -1078,6 +1128,55 @@
                 <div class="diff-cell label">Duration</div>
                 <div class="diff-cell prod-val"><span class="diff-highlight-del">1 week</span></div>
                 <div class="diff-cell sand-val"><span class="diff-highlight-add">2 weeks</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Field: single-choice value added -->
+        <div class="change-row">
+          <div class="change-row-header" onclick="toggleDiff('diff-field-stage', this)">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">Project Stage</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:var(--text-3)">Project Field &nbsp;·&nbsp; Single choice</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--new-color);font-weight:600;">+1 value added</span>
+                </div>
+              </div>
+            </div>
+            <button class="expand-btn" id="btn-diff-field-stage">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="diff-area" id="diff-field-stage">
+            <div class="diff-table">
+              <div class="diff-row diff-row-header">
+                <div class="diff-cell label">Field</div>
+                <div class="diff-cell">Production</div>
+                <div class="diff-cell">Sandbox</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Field type</div>
+                <div class="diff-cell prod-val" style="color:var(--text-2)">Single choice</div>
+                <div class="diff-cell sand-val" style="color:var(--text-2)">Single choice</div>
+              </div>
+              <div class="diff-row">
+                <div class="diff-cell label">Values</div>
+                <div class="diff-cell prod-val" style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;">
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">Discovery</span>
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">In Progress</span>
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">UAT</span>
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">Completed</span>
+                </div>
+                <div class="diff-cell sand-val" style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;">
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">Discovery</span>
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">In Progress</span>
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">UAT</span>
+                  <span style="background:#f4f4f4;border:1px solid #e0e0e0;border-radius:4px;padding:1px 8px;font-size:12px;color:#525252;">Completed</span>
+                  <span style="background:var(--new-bg);border:1px solid var(--new-border);border-radius:4px;padding:1px 8px;font-size:12px;color:var(--new-color);font-weight:600;">+ Hypercare</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1164,7 +1263,7 @@
 <!-- Bottom bar -->
 <div class="bottom-bar">
   <div class="selection-summary" id="selectionSummary">
-    <strong id="selectedCount">17</strong> of 19 changes selected
+    <strong id="selectedCount">19</strong> of 21 changes selected
   </div>
   <div id="bottom-conflict-msg" style="font-size:14px;line-height:18px;color:var(--conflict);font-weight:600;display:flex;align-items:center;gap:5px;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
