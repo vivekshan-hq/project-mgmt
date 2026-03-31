@@ -105,8 +105,12 @@
     .mbr-info { flex: 1; min-width: 0; }
     .mbr-name { font-size: 13px; font-weight: 500; color: #161616; }
     .mbr-sub { font-size: 12px; color: #525252; display: flex; align-items: center; gap: 5px; margin-top: 1px; }
-    .skills-pill { font-size: 11px; color: #0f62fe; background: #edf5ff; border: 1px solid #97c1ff; border-radius: 10px; padding: 1px 7px; font-weight: 500; cursor: pointer; }
     .no-skills { font-size: 12px; color: #a8a8a8; }
+    .skill-chips { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+    .skill-chip { font-size: 11px; color: #525252; background: #f4f4f4; border: 1px solid #e0e0e0; border-radius: 4px; padding: 1px 7px; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    .skill-chip:hover { background: #e8e8e8; }
+    .skill-chip-more { font-size: 11px; color: #0f62fe; background: #edf5ff; border: 1px solid #97c1ff; border-radius: 4px; padding: 1px 7px; white-space: nowrap; cursor: pointer; flex-shrink: 0; }
+    .skill-chip-more:hover { background: #dbeafe; }
     .mbr-alloc { width: 88px; flex-shrink: 0; padding: 0 12px; font-size: 13px; font-weight: 500; color: #161616; text-align: right; }
 
     /* Action buttons (hover) */
@@ -472,8 +476,8 @@
               <div class="mbr-alloc">120h</div>
               <div class="mbr-actions">
                 <button class="act-btn" onclick="openModal()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><polyline points="17 11 19 13 23 9"/></svg>
-                  <span class="act-tip">Add/edit skills</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="act-tip">Skill filters</span>
                 </button>
                 <button class="act-btn">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
@@ -507,8 +511,8 @@
               <div class="mbr-alloc">120h</div>
               <div class="mbr-actions">
                 <button class="act-btn" onclick="openModal()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><polyline points="17 11 19 13 23 9"/></svg>
-                  <span class="act-tip">Add/edit skills</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="act-tip">Skill filters</span>
                 </button>
                 <button class="act-btn">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
@@ -539,21 +543,15 @@
               <div class="mbr-info">
                 <div class="mbr-name">Engineer</div>
                 <div class="mbr-sub" id="engineer-sub">
-                  <span class="no-skills" id="no-skills-label">No skills added</span>
-                  <div class="skills-tooltip-wrap" id="skills-pill-wrap" style="display:none;">
-                    <span class="skills-pill" id="skills-pill">0 skills</span>
-                    <div class="skills-tooltip" id="skills-tooltip">
-                      <div class="skills-tooltip-title">Match ALL skill filters</div>
-                      <ul id="tooltip-list"></ul>
-                    </div>
-                  </div>
+                  <span class="no-skills" id="no-skills-label">No skill filters</span>
+                  <div class="skill-chips" id="skill-chips" style="display:none;"></div>
                 </div>
               </div>
               <div class="mbr-alloc">120h</div>
               <div class="mbr-actions">
                 <button class="act-btn" onclick="openModal()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><polyline points="17 11 19 13 23 9"/></svg>
-                  <span class="act-tip">Add/edit skills</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="act-tip">Skill filters</span>
                 </button>
                 <button class="act-btn">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
@@ -1065,33 +1063,56 @@
     if (sec) document.getElementById(sec).scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ─── Apply → update placeholder row ───
+  // ─── Apply → update placeholder row with inline chips ───
   function applySkills() {
     const ids = Object.keys(state);
     closeModal();
     const noLabel = document.getElementById('no-skills-label');
-    const pillWrap = document.getElementById('skills-pill-wrap');
-    const pill = document.getElementById('skills-pill');
-    const tooltipList = document.getElementById('tooltip-list');
+    const chipsEl = document.getElementById('skill-chips');
+
     if (ids.length === 0) {
       noLabel.style.display = '';
-      pillWrap.style.display = 'none';
+      chipsEl.style.display = 'none';
+      chipsEl.innerHTML = '';
       return;
     }
-    tooltipList.innerHTML = '';
-    ids.forEach(id => {
+
+    // Build chip label: short skill name + condition
+    function chipLabel(id) {
       const skill = SKILLS[id];
       const s = state[id];
-      let label = skill.type === 'boolean'
-        ? `${skill.label} ${s.op}`
-        : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : `${skill.label} ${s.op}`;
-      const li = document.createElement('li');
-      li.textContent = label;
-      tooltipList.appendChild(li);
+      const name = skill.label.split(' ')[0]; // first word for brevity
+      if (skill.type === 'boolean') return `${name} ${s.op}`;
+      return s.val ? `${name} ≥ ${s.val}` : name;
+    }
+
+    chipsEl.innerHTML = '';
+    const SHOW = 2;
+    const visible = ids.slice(0, SHOW);
+    const extra = ids.length - SHOW;
+
+    visible.forEach(id => {
+      const chip = document.createElement('span');
+      chip.className = 'skill-chip';
+      chip.textContent = chipLabel(id);
+      chip.title = (() => {
+        const skill = SKILLS[id]; const s = state[id];
+        return skill.type === 'boolean' ? `${skill.label} ${s.op}` : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : skill.label;
+      })();
+      chip.onclick = openModal;
+      chipsEl.appendChild(chip);
     });
-    pill.textContent = ids.length + (ids.length === 1 ? ' skill' : ' skills');
+
+    if (extra > 0) {
+      const more = document.createElement('span');
+      more.className = 'skill-chip-more';
+      more.textContent = `+${extra} more`;
+      more.onclick = openModal;
+      chipsEl.appendChild(more);
+    }
+
     noLabel.style.display = 'none';
-    pillWrap.style.display = 'inline-flex';
+    chipsEl.style.display = 'flex';
   }
 </script>
 
