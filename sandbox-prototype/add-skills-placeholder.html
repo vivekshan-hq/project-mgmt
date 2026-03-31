@@ -158,46 +158,75 @@
     .modal-body { display: flex; flex: 1; overflow: hidden; }
 
     /* Groups panel */
-    .panel-groups { width: 188px; flex-shrink: 0; border-right: 1px solid #e0e0e0; padding: 14px 0; overflow-y: auto; }
-    .pg-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8d8d8d; padding: 0 14px 8px; }
-    .pg-item { display: flex; align-items: center; gap: 7px; padding: 6px 14px; font-size: 13px; color: #161616; cursor: pointer; border-left: 3px solid transparent; }
+    .panel-groups { width: 200px; flex-shrink: 0; border-right: 1px solid #e0e0e0; padding: 16px 0; overflow-y: auto; }
+    .pg-section-title { font-size: 14px; font-weight: 600; color: #161616; padding: 0 14px 10px; }
+    .pg-item { display: flex; align-items: center; gap: 7px; padding: 6px 14px; font-size: 13px; color: #161616; cursor: pointer; }
     .pg-item:hover { background: #f4f4f4; }
-    .pg-item.active { background: #edf5ff; color: #0f62fe; border-left-color: #0f62fe; }
-    .pg-item.parent { font-weight: 500; }
-    .pg-item.child { padding-left: 28px; color: #525252; }
-    .pg-item.child.active { color: #0f62fe; }
-    .pg-chevron { font-size: 10px; color: #8d8d8d; }
+    .pg-item.selected { background: #edf5ff; color: #0f62fe; }
+    .pg-item.parent { font-weight: 600; }
+    .pg-item.child { padding-left: 26px; font-weight: 400; color: #525252; }
+    .pg-item.child.selected { color: #0f62fe; }
+    .pg-item-icon { color: #525252; flex-shrink: 0; }
+    .pg-item.selected .pg-item-icon { color: #0f62fe; }
+    .pg-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pg-toggle { font-size: 11px; color: #8d8d8d; flex-shrink: 0; }
 
     /* Skills panel */
-    .panel-skills { flex: 1; overflow-y: auto; padding: 0 20px 16px; }
-    .sk-group-label { font-size: 11px; color: #8d8d8d; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; padding: 14px 0 8px; border-bottom: 1px solid #e0e0e0; margin-bottom: 4px; position: sticky; top: 0; background: #fff; }
-    .sk-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f4f4f4; }
+    .panel-skills { flex: 1; overflow-y: auto; padding: 0; }
+    .sk-panel-title { font-size: 14px; font-weight: 600; color: #161616; padding: 16px 20px 12px; border-bottom: 1px solid #e0e0e0; }
+    .sk-group-label { font-size: 12px; color: #8d8d8d; padding: 12px 20px 6px; }
+    .sk-row { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #f4f4f4; }
+    .sk-row:hover { background: #fafafa; }
     .sk-cb { width: 16px; height: 16px; border: 1.5px solid #a8a8a8; border-radius: 3px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
     .sk-cb.checked { background: #0f62fe; border-color: #0f62fe; }
     .sk-cb.checked::after { content: ''; display: block; width: 8px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
-    .sk-name { flex: 1; font-size: 13px; color: #161616; font-weight: 400; }
-    .sk-cond { display: flex; align-items: center; gap: 6px; }
-    .cond-tag { font-size: 12px; color: #525252; background: #f4f4f4; padding: 4px 10px; border-radius: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-    .cond-select { padding: 4px 26px 4px 8px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 12px; color: #161616; background: #fff; appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; }
-    .cond-select:disabled { color: #a8a8a8; background-color: #f4f4f4; cursor: default; }
-    /* Yes/No toggle */
-    .yn-toggle { display: flex; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; opacity: 0.4; pointer-events: none; }
-    .yn-toggle.active { opacity: 1; pointer-events: all; }
-    .yn-opt { padding: 4px 12px; font-size: 12px; cursor: pointer; color: #525252; background: #fff; border: none; transition: all 0.12s; }
-    .yn-opt:first-child { border-right: 1px solid #e0e0e0; }
-    .yn-opt.selected { background: #0f62fe; color: #fff; }
+    .sk-name { width: 170px; flex-shrink: 0; font-size: 13px; color: #161616; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sk-controls { display: flex; align-items: center; gap: 0; flex: 1; }
+
+    /* Custom operator dropdown */
+    .op-wrap { position: relative; }
+    .op-btn { display: flex; align-items: center; height: 32px; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff; cursor: pointer; font-size: 13px; color: #161616; white-space: nowrap; min-width: 130px; }
+    .op-btn.disabled { color: #a8a8a8; pointer-events: none; background: #fafafa; }
+    .op-btn-text { padding: 0 8px; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .op-btn-sep { width: 1px; height: 20px; background: #e0e0e0; flex-shrink: 0; }
+    .op-btn-chevron { padding: 0 7px; display: flex; align-items: center; color: #525252; }
+    .op-menu { position: absolute; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.14); z-index: 200; min-width: 160px; padding: 4px 0; display: none; }
+    .op-menu.open { display: block; }
+    .op-menu-item { padding: 8px 14px; font-size: 13px; color: #161616; cursor: pointer; white-space: nowrap; }
+    .op-menu-item:hover { background: #f4f4f4; }
+    .op-menu-item.active { background: #edf5ff; color: #0f62fe; }
+
+    /* Value controls */
+    .val-wrap { position: relative; margin-left: 6px; }
+    .val-btn { display: flex; align-items: center; height: 32px; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff; cursor: pointer; font-size: 13px; color: #525252; white-space: nowrap; min-width: 120px; }
+    .val-btn.hidden { visibility: hidden; pointer-events: none; }
+    .val-btn-text { padding: 0 8px; flex: 1; }
+    .val-btn-sep { width: 1px; height: 20px; background: #e0e0e0; flex-shrink: 0; }
+    .val-btn-chevron { padding: 0 7px; display: flex; align-items: center; color: #525252; }
+    .val-btn.disabled { color: #a8a8a8; pointer-events: none; background: #fafafa; }
+    .val-menu { position: absolute; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.14); z-index: 200; min-width: 140px; padding: 4px 0; display: none; }
+    .val-menu.open { display: block; }
+    .val-menu-item { padding: 8px 14px; font-size: 13px; color: #161616; cursor: pointer; }
+    .val-menu-item:hover { background: #f4f4f4; }
+    .val-menu-item.active { background: #edf5ff; color: #0f62fe; }
+    .val-input { height: 32px; border: 1px solid #e0e0e0; border-radius: 4px; padding: 0 10px; font-size: 13px; color: #161616; width: 80px; outline: none; margin-left: 6px; }
+    .val-input:focus { border-color: #0f62fe; }
+    .val-input.hidden { visibility: hidden; }
+    .val-input.disabled { background: #fafafa; color: #a8a8a8; pointer-events: none; }
 
     /* Selected panel */
-    .panel-selected { width: 232px; flex-shrink: 0; border-left: 1px solid #e0e0e0; padding: 14px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
-    .sel-header { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
-    .sel-title { font-size: 13px; font-weight: 600; color: #161616; }
-    .sel-count { font-size: 13px; color: #525252; }
-    .matches-row { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; font-size: 13px; color: #525252; }
-    .matches-sel { padding: 3px 22px 3px 8px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 13px; background: #fff; appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; }
-    .sel-empty { font-size: 13px; color: #a8a8a8; text-align: center; padding: 24px 0; }
-    .sel-item { padding: 8px 0; border-bottom: 1px solid #f4f4f4; font-size: 12px; }
-    .sel-item-name { font-weight: 500; color: #161616; margin-bottom: 2px; }
-    .sel-item-cond { color: #525252; }
+    .panel-selected { width: 240px; flex-shrink: 0; border-left: 1px solid #e0e0e0; padding: 16px; overflow-y: auto; }
+    .sel-header { font-size: 14px; font-weight: 600; color: #161616; margin-bottom: 12px; }
+    .matches-row { display: flex; align-items: center; gap: 0; margin-bottom: 14px; font-size: 13px; color: #525252; }
+    .matches-label { margin-right: 6px; }
+    .matches-sel { display: flex; align-items: center; gap: 4px; border: 1px solid #e0e0e0; border-radius: 4px; padding: 3px 8px; font-size: 13px; cursor: pointer; background: #fff; }
+    .matches-spacer { flex: 1; }
+    .sel-clear { font-size: 13px; color: #0f62fe; cursor: pointer; border: none; background: none; padding: 0; }
+    .sel-clear:hover { text-decoration: underline; }
+    .sel-empty { font-size: 13px; color: #a8a8a8; padding: 8px 0; }
+    .sel-chip { display: inline-flex; align-items: center; gap: 6px; background: #fff1f1; border: 1px solid #ffb3b3; color: #da1e28; border-radius: 4px; padding: 4px 8px; font-size: 12px; font-weight: 500; margin: 4px 0; width: 100%; }
+    .sel-chip-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sel-chip-remove { cursor: pointer; font-size: 14px; color: #da1e28; line-height: 1; flex-shrink: 0; border: none; background: none; padding: 0; }
 
     /* Modal footer */
     .modal-ft { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid #e0e0e0; }
@@ -572,7 +601,7 @@
   <div class="modal" onclick="event.stopPropagation()">
 
     <div class="modal-hd">
-      <span class="modal-title">Add/edit skills</span>
+      <span class="modal-title">Add fields</span>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
 
@@ -587,139 +616,247 @@
 
       <!-- Groups panel -->
       <div class="panel-groups">
-        <div class="pg-title">Groups</div>
-        <div class="pg-item parent active" onclick="selectGroup('all')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
-          Skills
-          <span class="pg-chevron">∧</span>
+        <div class="pg-section-title">Groups</div>
+        <div class="pg-item parent selected" onclick="selectGroup('skills')">
+          <span class="pg-item-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </span>
+          <span class="pg-item-label">Skills</span>
+          <span class="pg-toggle">∧</span>
         </div>
-        <div class="pg-item child" id="grp-languages" onclick="selectGroup('languages')">Languages</div>
-        <div class="pg-item child" id="grp-essentials" onclick="selectGroup('essentials')">Essentials</div>
+        <div class="pg-item child" id="grp-technical" onclick="selectGroup('technical')">Technical Skills</div>
+        <div class="pg-item child" id="grp-generic" onclick="selectGroup('generic')">Generic Skills</div>
+        <div class="pg-item child" id="grp-section6" onclick="selectGroup('section6')">Section 6</div>
+        <div class="pg-item parent" onclick="selectGroup('teammember')" style="margin-top:4px;">
+          <span class="pg-item-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </span>
+          <span class="pg-item-label">Team member fields</span>
+          <span class="pg-toggle">∧</span>
+        </div>
+        <div class="pg-item child" onclick="">Info</div>
+        <div class="pg-item child" onclick="">Contact Info</div>
+        <div class="pg-item child" onclick="">Test MBBR</div>
+        <div class="pg-item child" onclick="">Section 7</div>
+        <div class="pg-item child" onclick="">Employee ID- GR...</div>
+        <div class="pg-item child" onclick="">Team Member Info</div>
+        <div class="pg-item child" onclick="">Utilization</div>
+        <div class="pg-item child" onclick="">Default</div>
       </div>
 
       <!-- Skills panel -->
       <div class="panel-skills" id="skills-panel">
+        <div class="sk-panel-title">Skills</div>
 
-        <!-- Languages group (Yes/No type) -->
-        <div class="sk-group-label" id="sec-languages">Languages</div>
+        <!-- Technical Skills (boolean / level mix) -->
+        <div class="sk-group-label" id="sec-technical">Technical Skills</div>
+
+        <div class="sk-row" id="row-salesforce">
+          <div class="sk-cb" id="cb-salesforce" onclick="toggleSkill('salesforce')"></div>
+          <span class="sk-name">Salesforce Integration</span>
+          <div class="sk-controls">
+            <div class="op-wrap">
+              <div class="op-btn disabled" id="opbtn-salesforce" onclick="openOpMenu('salesforce',event)">
+                <span class="op-btn-text" id="optext-salesforce">is true</span>
+                <span class="op-btn-sep"></span>
+                <span class="op-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="op-menu" id="opmenu-salesforce">
+                <div class="op-menu-item active" onclick="setOp('salesforce','is true',this)">is true</div>
+                <div class="op-menu-item" onclick="setOp('salesforce','is false',this)">is false</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="sk-row" id="row-python">
           <div class="sk-cb" id="cb-python" onclick="toggleSkill('python')"></div>
           <span class="sk-name">Python</span>
-          <div class="sk-cond">
-            <div class="yn-toggle" id="yn-python">
-              <button class="yn-opt selected" onclick="setYN('python','Yes')">Yes</button>
-              <button class="yn-opt" onclick="setYN('python','No')">No</button>
+          <div class="sk-controls">
+            <div class="op-wrap">
+              <div class="op-btn disabled" id="opbtn-python" onclick="openOpMenu('python',event)">
+                <span class="op-btn-text" id="optext-python">is true</span>
+                <span class="op-btn-sep"></span>
+                <span class="op-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="op-menu" id="opmenu-python">
+                <div class="op-menu-item active" onclick="setOp('python','is true',this)">is true</div>
+                <div class="op-menu-item" onclick="setOp('python','is false',this)">is false</div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="sk-row" id="row-javascript">
-          <div class="sk-cb" id="cb-javascript" onclick="toggleSkill('javascript')"></div>
-          <span class="sk-name">Javascript</span>
-          <div class="sk-cond">
-            <div class="yn-toggle" id="yn-javascript">
-              <button class="yn-opt selected" onclick="setYN('javascript','Yes')">Yes</button>
-              <button class="yn-opt" onclick="setYN('javascript','No')">No</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="sk-row" id="row-ruby">
-          <div class="sk-cb" id="cb-ruby" onclick="toggleSkill('ruby')"></div>
-          <span class="sk-name">Ruby</span>
-          <div class="sk-cond">
-            <div class="yn-toggle" id="yn-ruby">
-              <button class="yn-opt selected" onclick="setYN('ruby','Yes')">Yes</button>
-              <button class="yn-opt" onclick="setYN('ruby','No')">No</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Essentials group (Level type: Beginner / Intermediate / Expert) -->
-        <div class="sk-group-label" id="sec-essentials">Essentials</div>
 
         <div class="sk-row" id="row-codereview">
           <div class="sk-cb" id="cb-codereview" onclick="toggleSkill('codereview')"></div>
           <span class="sk-name">Code Review Proficiency</span>
-          <div class="sk-cond" style="gap:6px;">
-            <select class="cond-select" id="op-codereview" onchange="updateOp('codereview',this.value)" disabled>
-              <option value="Atleast">At least</option>
-              <option value="Atmost">At most</option>
-              <option value="Equals">Equals</option>
-              <option value="Not equals">Not equals</option>
-              <option value="Empty">Empty</option>
-              <option value="Not Empty">Not Empty</option>
-            </select>
-            <select class="cond-select" id="lv-codereview" onchange="updateLevel('codereview',this.value)" disabled>
-              <option value="">Level…</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate" selected>Intermediate</option>
-              <option value="Expert">Expert</option>
-            </select>
+          <div class="sk-controls">
+            <div class="op-wrap">
+              <div class="op-btn disabled" id="opbtn-codereview" onclick="openOpMenu('codereview',event)">
+                <span class="op-btn-text" id="optext-codereview">is at least...</span>
+                <span class="op-btn-sep"></span>
+                <span class="op-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="op-menu" id="opmenu-codereview">
+                <div class="op-menu-item" onclick="setOp('codereview','is exactly...',this)">is exactly...</div>
+                <div class="op-menu-item" onclick="setOp('codereview','is not...',this)">is not...</div>
+                <div class="op-menu-item active" onclick="setOp('codereview','is at least...',this)">is at least...</div>
+                <div class="op-menu-item" onclick="setOp('codereview','is at most...',this)">is at most...</div>
+                <div class="op-menu-item" onclick="setOp('codereview','is empty',this)">is empty</div>
+                <div class="op-menu-item" onclick="setOp('codereview','is not empty',this)">is not empty</div>
+              </div>
+            </div>
+            <div class="val-wrap">
+              <div class="val-btn disabled" id="valbtn-codereview" onclick="openValMenu('codereview',event)">
+                <span class="val-btn-text" id="valtext-codereview">Select...</span>
+                <span class="val-btn-sep"></span>
+                <span class="val-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="val-menu" id="valmenu-codereview">
+                <div class="val-menu-item" onclick="setVal('codereview','Beginner',this)">Beginner</div>
+                <div class="val-menu-item" onclick="setVal('codereview','Intermediate',this)">Intermediate</div>
+                <div class="val-menu-item" onclick="setVal('codereview','Expert',this)">Expert</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-row" id="row-typing">
+          <div class="sk-cb" id="cb-typing" onclick="toggleSkill('typing')"></div>
+          <span class="sk-name">Typing Skill</span>
+          <div class="sk-controls">
+            <div class="op-wrap">
+              <div class="op-btn disabled" id="opbtn-typing" onclick="openOpMenu('typing',event)">
+                <span class="op-btn-text" id="optext-typing">is at least...</span>
+                <span class="op-btn-sep"></span>
+                <span class="op-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="op-menu" id="opmenu-typing">
+                <div class="op-menu-item" onclick="setOp('typing','is exactly...',this)">is exactly...</div>
+                <div class="op-menu-item" onclick="setOp('typing','is not...',this)">is not...</div>
+                <div class="op-menu-item active" onclick="setOp('typing','is at least...',this)">is at least...</div>
+                <div class="op-menu-item" onclick="setOp('typing','is at most...',this)">is at most...</div>
+                <div class="op-menu-item" onclick="setOp('typing','is empty',this)">is empty</div>
+                <div class="op-menu-item" onclick="setOp('typing','is not empty',this)">is not empty</div>
+              </div>
+            </div>
+            <div class="val-wrap">
+              <div class="val-btn disabled" id="valbtn-typing" onclick="openValMenu('typing',event)">
+                <span class="val-btn-text" id="valtext-typing">Select...</span>
+                <span class="val-btn-sep"></span>
+                <span class="val-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="val-menu" id="valmenu-typing">
+                <div class="val-menu-item" onclick="setVal('typing','Beginner',this)">Beginner</div>
+                <div class="val-menu-item" onclick="setVal('typing','Intermediate',this)">Intermediate</div>
+                <div class="val-menu-item" onclick="setVal('typing','Expert',this)">Expert</div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="sk-row" id="row-restapi">
           <div class="sk-cb" id="cb-restapi" onclick="toggleSkill('restapi')"></div>
           <span class="sk-name">REST API Development</span>
-          <div class="sk-cond" style="gap:6px;">
-            <select class="cond-select" id="op-restapi" onchange="updateOp('restapi',this.value)" disabled>
-              <option value="Atleast">At least</option>
-              <option value="Atmost">At most</option>
-              <option value="Equals">Equals</option>
-              <option value="Not equals">Not equals</option>
-              <option value="Empty">Empty</option>
-              <option value="Not Empty">Not Empty</option>
-            </select>
-            <select class="cond-select" id="lv-restapi" onchange="updateLevel('restapi',this.value)" disabled>
-              <option value="">Level…</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Expert">Expert</option>
-            </select>
+          <div class="sk-controls">
+            <div class="op-wrap">
+              <div class="op-btn disabled" id="opbtn-restapi" onclick="openOpMenu('restapi',event)">
+                <span class="op-btn-text" id="optext-restapi">is at least...</span>
+                <span class="op-btn-sep"></span>
+                <span class="op-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="op-menu" id="opmenu-restapi">
+                <div class="op-menu-item" onclick="setOp('restapi','is exactly...',this)">is exactly...</div>
+                <div class="op-menu-item" onclick="setOp('restapi','is not...',this)">is not...</div>
+                <div class="op-menu-item active" onclick="setOp('restapi','is at least...',this)">is at least...</div>
+                <div class="op-menu-item" onclick="setOp('restapi','is at most...',this)">is at most...</div>
+                <div class="op-menu-item" onclick="setOp('restapi','is empty',this)">is empty</div>
+                <div class="op-menu-item" onclick="setOp('restapi','is not empty',this)">is not empty</div>
+              </div>
+            </div>
+            <div class="val-wrap">
+              <div class="val-btn disabled" id="valbtn-restapi" onclick="openValMenu('restapi',event)">
+                <span class="val-btn-text" id="valtext-restapi">Select...</span>
+                <span class="val-btn-sep"></span>
+                <span class="val-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="val-menu" id="valmenu-restapi">
+                <div class="val-menu-item" onclick="setVal('restapi','Beginner',this)">Beginner</div>
+                <div class="val-menu-item" onclick="setVal('restapi','Intermediate',this)">Intermediate</div>
+                <div class="val-menu-item" onclick="setVal('restapi','Expert',this)">Expert</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="sk-row" id="row-unittesting">
-          <div class="sk-cb" id="cb-unittesting" onclick="toggleSkill('unittesting')"></div>
-          <span class="sk-name">Unit &amp; Integration Testing</span>
-          <div class="sk-cond" style="gap:6px;">
-            <select class="cond-select" id="op-unittesting" onchange="updateOp('unittesting',this.value)" disabled>
-              <option value="Atleast">At least</option>
-              <option value="Atmost">At most</option>
-              <option value="Equals">Equals</option>
-              <option value="Not equals">Not equals</option>
-              <option value="Empty">Empty</option>
-              <option value="Not Empty">Not Empty</option>
-            </select>
-            <select class="cond-select" id="lv-unittesting" onchange="updateLevel('unittesting',this.value)" disabled>
-              <option value="">Level…</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Expert">Expert</option>
-            </select>
+        <!-- Generic Skills -->
+        <div class="sk-group-label" id="sec-generic">Generic Skills</div>
+
+        <div class="sk-row" id="row-leadership">
+          <div class="sk-cb" id="cb-leadership" onclick="toggleSkill('leadership')"></div>
+          <span class="sk-name">Leadership</span>
+          <div class="sk-controls">
+            <div class="op-wrap">
+              <div class="op-btn disabled" id="opbtn-leadership" onclick="openOpMenu('leadership',event)">
+                <span class="op-btn-text" id="optext-leadership">is at least...</span>
+                <span class="op-btn-sep"></span>
+                <span class="op-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="op-menu" id="opmenu-leadership">
+                <div class="op-menu-item" onclick="setOp('leadership','is exactly...',this)">is exactly...</div>
+                <div class="op-menu-item" onclick="setOp('leadership','is not...',this)">is not...</div>
+                <div class="op-menu-item active" onclick="setOp('leadership','is at least...',this)">is at least...</div>
+                <div class="op-menu-item" onclick="setOp('leadership','is at most...',this)">is at most...</div>
+                <div class="op-menu-item" onclick="setOp('leadership','is empty',this)">is empty</div>
+                <div class="op-menu-item" onclick="setOp('leadership','is not empty',this)">is not empty</div>
+              </div>
+            </div>
+            <div class="val-wrap">
+              <div class="val-btn disabled" id="valbtn-leadership" onclick="openValMenu('leadership',event)">
+                <span class="val-btn-text" id="valtext-leadership">Select...</span>
+                <span class="val-btn-sep"></span>
+                <span class="val-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="val-menu" id="valmenu-leadership">
+                <div class="val-menu-item" onclick="setVal('leadership','Beginner',this)">Beginner</div>
+                <div class="val-menu-item" onclick="setVal('leadership','Intermediate',this)">Intermediate</div>
+                <div class="val-menu-item" onclick="setVal('leadership','Expert',this)">Expert</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="sk-row" id="row-saas">
-          <div class="sk-cb" id="cb-saas" onclick="toggleSkill('saas')"></div>
-          <span class="sk-name">SaaS Platform Customization</span>
-          <div class="sk-cond" style="gap:6px;">
-            <select class="cond-select" id="op-saas" onchange="updateOp('saas',this.value)" disabled>
-              <option value="Atleast">At least</option>
-              <option value="Atmost">At most</option>
-              <option value="Equals">Equals</option>
-              <option value="Not equals">Not equals</option>
-              <option value="Empty">Empty</option>
-              <option value="Not Empty">Not Empty</option>
-            </select>
-            <select class="cond-select" id="lv-saas" onchange="updateLevel('saas',this.value)" disabled>
-              <option value="">Level…</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Expert">Expert</option>
-            </select>
+        <div class="sk-row" id="row-communication">
+          <div class="sk-cb" id="cb-communication" onclick="toggleSkill('communication')"></div>
+          <span class="sk-name">Communication</span>
+          <div class="sk-controls">
+            <div class="op-wrap">
+              <div class="op-btn disabled" id="opbtn-communication" onclick="openOpMenu('communication',event)">
+                <span class="op-btn-text" id="optext-communication">is at least...</span>
+                <span class="op-btn-sep"></span>
+                <span class="op-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="op-menu" id="opmenu-communication">
+                <div class="op-menu-item" onclick="setOp('communication','is exactly...',this)">is exactly...</div>
+                <div class="op-menu-item" onclick="setOp('communication','is not...',this)">is not...</div>
+                <div class="op-menu-item active" onclick="setOp('communication','is at least...',this)">is at least...</div>
+                <div class="op-menu-item" onclick="setOp('communication','is at most...',this)">is at most...</div>
+                <div class="op-menu-item" onclick="setOp('communication','is empty',this)">is empty</div>
+                <div class="op-menu-item" onclick="setOp('communication','is not empty',this)">is not empty</div>
+              </div>
+            </div>
+            <div class="val-wrap">
+              <div class="val-btn disabled" id="valbtn-communication" onclick="openValMenu('communication',event)">
+                <span class="val-btn-text" id="valtext-communication">Select...</span>
+                <span class="val-btn-sep"></span>
+                <span class="val-btn-chevron"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </div>
+              <div class="val-menu" id="valmenu-communication">
+                <div class="val-menu-item" onclick="setVal('communication','Beginner',this)">Beginner</div>
+                <div class="val-menu-item" onclick="setVal('communication','Intermediate',this)">Intermediate</div>
+                <div class="val-menu-item" onclick="setVal('communication','Expert',this)">Expert</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -727,16 +864,12 @@
 
       <!-- Selected panel -->
       <div class="panel-selected">
-        <div class="sel-header">
-          <span class="sel-title">Selected filters</span>
-          <span class="sel-count" id="sel-count">(0)</span>
-        </div>
+        <div class="sel-header" id="sel-header">Selected filter (0)</div>
         <div class="matches-row">
-          Matches:
-          <select class="matches-sel">
-            <option>All</option>
-            <option>Any</option>
-          </select>
+          <span class="matches-label">Matches:</span>
+          <div class="matches-sel">All <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <div class="matches-spacer"></div>
+          <button class="sel-clear" id="sel-clear-btn" onclick="clearAll()" style="display:none;">Clear</button>
         </div>
         <div id="sel-list">
           <div class="sel-empty" id="sel-empty">No filters selected</div>
@@ -755,41 +888,43 @@
 
 <script>
   // ─── Skill definitions ───
+  // type: 'boolean' = is true/false; 'level' = is at least/most/exactly + Beginner/Intermediate/Expert
   const SKILLS = {
-    python:      { label: 'Python',                     type: 'yesno' },
-    javascript:  { label: 'Javascript',                 type: 'yesno' },
-    ruby:        { label: 'Ruby',                       type: 'yesno' },
-    codereview:  { label: 'Code Review Proficiency',    type: 'level' },
-    restapi:     { label: 'REST API Development',        type: 'level' },
-    unittesting: { label: 'Unit & Integration Testing',  type: 'level' },
-    saas:        { label: 'SaaS Platform Customization', type: 'level' },
+    salesforce:   { label: 'Salesforce Integration',    type: 'boolean' },
+    python:       { label: 'Python',                    type: 'boolean' },
+    codereview:   { label: 'Code Review Proficiency',   type: 'level' },
+    typing:       { label: 'Typing Skill',              type: 'level' },
+    restapi:      { label: 'REST API Development',       type: 'level' },
+    leadership:   { label: 'Leadership',                type: 'level' },
+    communication:{ label: 'Communication',             type: 'level' },
   };
 
-  // checked[id] = { op, level } for level-type; { value } for yesno-type
-  let checked = {};
+  // state[id] = { op, val } — op is the operator string, val is level or '' for boolean
+  let state = {};
 
   // ─── Modal open / close ───
   function openModal() {
-    checked = {};
+    state = {};
     Object.keys(SKILLS).forEach(id => {
       document.getElementById('cb-' + id).classList.remove('checked');
-      const skill = SKILLS[id];
-      if (skill.type === 'yesno') {
-        const yn = document.getElementById('yn-' + id);
-        yn.classList.remove('active');
-        yn.querySelectorAll('.yn-opt').forEach((b,i) => b.classList.toggle('selected', i === 0));
+      document.getElementById('opbtn-' + id).classList.add('disabled');
+      if (SKILLS[id].type === 'level') {
+        document.getElementById('valbtn-' + id).classList.add('disabled');
+        document.getElementById('valtext-' + id).textContent = 'Select...';
+        document.getElementById('optext-' + id).textContent = 'is at least...';
+        document.querySelectorAll('#opmenu-' + id + ' .op-menu-item').forEach((el,i) => el.classList.toggle('active', i===2));
       } else {
-        const op = document.getElementById('op-' + id);
-        const lv = document.getElementById('lv-' + id);
-        op.disabled = true; op.value = 'Atleast';
-        lv.disabled = true; lv.value = '';
+        document.getElementById('optext-' + id).textContent = 'is true';
+        document.querySelectorAll('#opmenu-' + id + ' .op-menu-item').forEach((el,i) => el.classList.toggle('active', i===0));
       }
+      closeAllMenus();
     });
     renderSelectedPanel();
     document.getElementById('modal-backdrop').classList.add('open');
   }
 
   function closeModal() {
+    closeAllMenus();
     document.getElementById('modal-backdrop').classList.remove('open');
   }
 
@@ -797,146 +932,163 @@
     if (e.target === document.getElementById('modal-backdrop')) closeModal();
   }
 
-  // ─── Toggle a skill checkbox ───
+  // Close all open menus
+  function closeAllMenus() {
+    document.querySelectorAll('.op-menu.open, .val-menu.open').forEach(m => m.classList.remove('open'));
+  }
+
+  // Close menus when clicking outside
+  document.addEventListener('click', () => closeAllMenus());
+
+  // ─── Toggle checkbox ───
   function toggleSkill(id) {
     const cb = document.getElementById('cb-' + id);
-    const skill = SKILLS[id];
-    if (checked[id]) {
-      delete checked[id];
+    const opBtn = document.getElementById('opbtn-' + id);
+    if (state[id]) {
+      delete state[id];
       cb.classList.remove('checked');
-      if (skill.type === 'yesno') {
-        document.getElementById('yn-' + id).classList.remove('active');
-      } else {
-        document.getElementById('op-' + id).disabled = true;
-        document.getElementById('lv-' + id).disabled = true;
-      }
+      opBtn.classList.add('disabled');
+      if (SKILLS[id].type === 'level') document.getElementById('valbtn-' + id).classList.add('disabled');
     } else {
+      const skill = SKILLS[id];
       cb.classList.add('checked');
-      if (skill.type === 'yesno') {
-        document.getElementById('yn-' + id).classList.add('active');
-        checked[id] = { value: 'Yes' };
+      opBtn.classList.remove('disabled');
+      if (skill.type === 'boolean') {
+        state[id] = { op: 'is true', val: '' };
       } else {
-        const op = document.getElementById('op-' + id);
-        const lv = document.getElementById('lv-' + id);
-        op.disabled = false; op.value = 'Atleast';
-        lv.disabled = false; lv.value = '';
-        checked[id] = { op: 'Atleast', level: '' };
-        updateLevelVisibility(id, 'Atleast');
+        state[id] = { op: 'is at least...', val: '' };
+        document.getElementById('valbtn-' + id).classList.remove('disabled');
       }
     }
     renderSelectedPanel();
   }
 
-  // ─── Yes/No toggle ───
-  function setYN(id, val) {
-    if (!checked[id]) return; // not checked, ignore
-    checked[id].value = val;
-    const yn = document.getElementById('yn-' + id);
-    yn.querySelectorAll('.yn-opt').forEach(b => b.classList.toggle('selected', b.textContent === val));
+  // ─── Operator menu ───
+  function openOpMenu(id, e) {
+    e.stopPropagation();
+    if (!state[id]) return;
+    const menu = document.getElementById('opmenu-' + id);
+    const wasOpen = menu.classList.contains('open');
+    closeAllMenus();
+    if (!wasOpen) menu.classList.add('open');
+  }
+
+  function setOp(id, val, el) {
+    if (!state[id]) return;
+    state[id].op = val;
+    document.getElementById('optext-' + id).textContent = val;
+    el.closest('.op-menu').querySelectorAll('.op-menu-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    // Hide val for is empty / is not empty
+    const noVal = val === 'is empty' || val === 'is not empty';
+    if (SKILLS[id].type === 'level') {
+      const vb = document.getElementById('valbtn-' + id);
+      vb.classList.toggle('hidden', noVal);
+      if (noVal) { state[id].val = ''; document.getElementById('valtext-' + id).textContent = 'Select...'; }
+    }
+    closeAllMenus();
     renderSelectedPanel();
   }
 
-  // ─── Operator changed ───
-  function updateOp(id, val) {
-    if (!checked[id]) return;
-    checked[id].op = val;
-    updateLevelVisibility(id, val);
-    renderSelectedPanel();
+  // ─── Value menu ───
+  function openValMenu(id, e) {
+    e.stopPropagation();
+    if (!state[id]) return;
+    const menu = document.getElementById('valmenu-' + id);
+    const wasOpen = menu.classList.contains('open');
+    closeAllMenus();
+    if (!wasOpen) menu.classList.add('open');
   }
 
-  // ─── Level value changed ───
-  function updateLevel(id, val) {
-    if (!checked[id]) return;
-    checked[id].level = val;
+  function setVal(id, val, el) {
+    if (!state[id]) return;
+    state[id].val = val;
+    document.getElementById('valtext-' + id).textContent = val;
+    el.closest('.val-menu').querySelectorAll('.val-menu-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    closeAllMenus();
     renderSelectedPanel();
-  }
-
-  // Hide level select for Empty / Not Empty operators
-  function updateLevelVisibility(id, op) {
-    const lv = document.getElementById('lv-' + id);
-    const noLevel = op === 'Empty' || op === 'Not Empty';
-    lv.disabled = noLevel;
-    lv.style.visibility = noLevel ? 'hidden' : '';
   }
 
   // ─── Render right selected panel ───
   function renderSelectedPanel() {
-    const ids = Object.keys(checked);
-    document.getElementById('sel-count').textContent = '(' + ids.length + ')';
+    const ids = Object.keys(state);
+    document.getElementById('sel-header').textContent = `Selected filter (${ids.length})`;
+    document.getElementById('sel-clear-btn').style.display = ids.length ? '' : 'none';
     const list = document.getElementById('sel-list');
     const empty = document.getElementById('sel-empty');
-    list.querySelectorAll('.sel-item').forEach(el => el.remove());
+    list.querySelectorAll('.sel-chip').forEach(el => el.remove());
     if (ids.length === 0) {
       empty.style.display = 'block';
     } else {
       empty.style.display = 'none';
       ids.forEach(id => {
         const skill = SKILLS[id];
-        const state = checked[id];
-        let condText = '';
-        if (skill.type === 'yesno') {
-          condText = state.value === 'Yes' ? 'is true' : 'is false';
+        const s = state[id];
+        let label = '';
+        if (skill.type === 'boolean') {
+          label = `${skill.label} ${s.op}`;
         } else {
-          const opLabel = { Atleast: 'at least', Atmost: 'at most', Equals: 'equals', 'Not equals': 'not equals', Empty: 'is empty', 'Not Empty': 'is not empty' }[state.op] || state.op;
-          condText = (state.op === 'Empty' || state.op === 'Not Empty')
-            ? opLabel
-            : state.level ? `${opLabel} ${state.level}` : `${opLabel} …`;
+          label = s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : `${skill.label} ${s.op}`;
         }
-        const div = document.createElement('div');
-        div.className = 'sel-item';
-        div.innerHTML = `<div class="sel-item-name">${skill.label}</div><div class="sel-item-cond">${condText}</div>`;
-        list.appendChild(div);
+        const chip = document.createElement('div');
+        chip.className = 'sel-chip';
+        chip.innerHTML = `<span class="sel-chip-text">${label}</span><button class="sel-chip-remove" onclick="removeSkill('${id}')">×</button>`;
+        list.appendChild(chip);
       });
     }
   }
 
-  // ─── Group filter (scroll into view) ───
-  function selectGroup(group) {
-    document.querySelectorAll('.pg-item').forEach(el => el.classList.remove('active'));
-    if (group === 'languages') {
-      document.getElementById('grp-languages').classList.add('active');
-      document.getElementById('sec-languages').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (group === 'essentials') {
-      document.getElementById('grp-essentials').classList.add('active');
-      document.getElementById('sec-essentials').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      document.querySelectorAll('.pg-item.parent').forEach(el => el.classList.add('active'));
+  function removeSkill(id) {
+    delete state[id];
+    document.getElementById('cb-' + id).classList.remove('checked');
+    document.getElementById('opbtn-' + id).classList.add('disabled');
+    if (SKILLS[id].type === 'level') {
+      document.getElementById('valbtn-' + id).classList.add('disabled');
+      document.getElementById('valtext-' + id).textContent = 'Select...';
     }
+    renderSelectedPanel();
   }
 
-  // ─── Apply skills → update placeholder row ───
-  function applySkills() {
-    const ids = Object.keys(checked);
-    closeModal();
+  function clearAll() {
+    Object.keys(state).forEach(id => removeSkill(id));
+  }
 
+  // ─── Group navigation ───
+  function selectGroup(group) {
+    document.querySelectorAll('.pg-item').forEach(el => el.classList.remove('selected'));
+    const secMap = { technical: 'sec-technical', generic: 'sec-generic', skills: 'sec-technical' };
+    const grpMap = { technical: 'grp-technical', generic: 'grp-generic' };
+    if (grpMap[group]) document.getElementById(grpMap[group]).classList.add('selected');
+    else document.querySelectorAll('.pg-item.parent').forEach(el => el.classList.add('selected'));
+    const sec = secMap[group];
+    if (sec) document.getElementById(sec).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ─── Apply → update placeholder row ───
+  function applySkills() {
+    const ids = Object.keys(state);
+    closeModal();
     const noLabel = document.getElementById('no-skills-label');
     const pillWrap = document.getElementById('skills-pill-wrap');
     const pill = document.getElementById('skills-pill');
     const tooltipList = document.getElementById('tooltip-list');
-
     if (ids.length === 0) {
       noLabel.style.display = '';
       pillWrap.style.display = 'none';
       return;
     }
-
-    // Build tooltip list
     tooltipList.innerHTML = '';
     ids.forEach(id => {
       const skill = SKILLS[id];
-      const state = checked[id];
-      let condText = '';
-      if (skill.type === 'yesno') {
-        condText = state.value === 'Yes' ? 'is true' : 'is false';
-      } else {
-        const opLabel = { Atleast: 'at least', Atmost: 'at most', Equals: 'equals', 'Not equals': 'not equals', Empty: 'is empty', 'Not Empty': 'is not empty' }[state.op] || state.op;
-        condText = (state.op === 'Empty' || state.op === 'Not Empty') ? opLabel : state.level ? `${opLabel} ${state.level}` : opLabel;
-      }
+      const s = state[id];
+      let label = skill.type === 'boolean'
+        ? `${skill.label} ${s.op}`
+        : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : `${skill.label} ${s.op}`;
       const li = document.createElement('li');
-      li.textContent = skill.label + ' ' + condText;
+      li.textContent = label;
       tooltipList.appendChild(li);
     });
-
     pill.textContent = ids.length + (ids.length === 1 ? ' skill' : ' skills');
     noLabel.style.display = 'none';
     pillWrap.style.display = 'inline-flex';
