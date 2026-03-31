@@ -106,8 +106,13 @@
     .mbr-name { font-size: 13px; font-weight: 500; color: #161616; }
     .mbr-sub { font-size: 12px; color: #525252; display: flex; align-items: center; gap: 5px; margin-top: 1px; }
     .no-skills { font-size: 12px; color: #a8a8a8; }
+    .skills-count-wrap { position: relative; display: inline-flex; }
     .skills-count { font-size: 12px; color: #0f62fe; cursor: pointer; }
     .skills-count:hover { text-decoration: underline; }
+    .skills-hover-tip { position: absolute; bottom: calc(100% + 7px); left: 0; background: #1d1d1f; color: #fff; border-radius: 6px; padding: 8px 12px; font-size: 12px; line-height: 18px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.12s; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .skills-count-wrap:hover .skills-hover-tip { opacity: 1; }
+    .skills-hover-tip-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+    .skills-hover-tip-item { color: rgba(255,255,255,0.88); padding: 1px 0; }
     .mbr-alloc { width: 88px; flex-shrink: 0; padding: 0 12px; font-size: 13px; font-weight: 500; color: #161616; text-align: right; }
 
     /* Action buttons (hover) */
@@ -541,7 +546,13 @@
                 <div class="mbr-name">Engineer</div>
                 <div class="mbr-sub" id="engineer-sub">
                   <span class="no-skills" id="no-skills-label">No skill filters</span>
-                  <span class="skills-count" id="skills-count" style="display:none;" onclick="openModal()">0 skills</span>
+                  <div class="skills-count-wrap" id="skills-count-wrap" style="display:none;">
+                    <span class="skills-count" id="skills-count" onclick="openModal()">0 skills</span>
+                    <div class="skills-hover-tip" id="skills-hover-tip">
+                      <div class="skills-hover-tip-title">Skill filters</div>
+                      <div id="skills-hover-tip-list"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="mbr-alloc">120h</div>
@@ -1065,15 +1076,24 @@
     const ids = Object.keys(state);
     closeModal();
     const noLabel = document.getElementById('no-skills-label');
+    const wrapEl = document.getElementById('skills-count-wrap');
     const countEl = document.getElementById('skills-count');
+    const tipList = document.getElementById('skills-hover-tip-list');
     if (ids.length === 0) {
       noLabel.style.display = '';
-      countEl.style.display = 'none';
+      wrapEl.style.display = 'none';
       return;
     }
     countEl.textContent = ids.length + (ids.length === 1 ? ' skill' : ' skills');
+    tipList.innerHTML = ids.map(id => {
+      const skill = SKILLS[id]; const s = state[id];
+      const label = skill.type === 'boolean'
+        ? `${skill.label} ${s.op}`
+        : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : skill.label;
+      return `<div class="skills-hover-tip-item">${label}</div>`;
+    }).join('');
     noLabel.style.display = 'none';
-    countEl.style.display = '';
+    wrapEl.style.display = 'inline-flex';
   }
 </script>
 
