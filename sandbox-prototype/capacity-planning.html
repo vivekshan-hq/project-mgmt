@@ -425,7 +425,7 @@ CS_HRS.attrition = CS_FTE.attrition.map(v => v * 160);
 CS_HRS.netGap = CS_FTE.netGap.map(v => Math.round(v * 160));
 
 let csUnit = 'fte';
-let csDemandOpen = true, csForecastOpen = true, csSupplyOpen = true;
+let csDemandOpen = true, csForecastOpen = true;
 
 function switchCsUnit(u) {
   csUnit = u;
@@ -469,25 +469,10 @@ function renderCS() {
   }
 
   // Total Supply
-  html += `<tr class="row-supply" onclick="toggleCsRow('supply')">
-    <td><button class="collapse-btn">${csSupplyOpen ? '▾' : '▸'}</button> &nbsp;- Total Supply</td>
+  html += `<tr class="row-supply">
+    <td style="padding-left:12px;">- Total Supply</td>
     ${d.totalSupply.map(v => `<td>${fmt(v)}</td>`).join('')}
   </tr>`;
-
-  if (csSupplyOpen) {
-    html += `<tr class="row-supply-child cs-i1">
-      <td>Headcount (${csUnit === 'fte' ? 'FTE' : 'Hours'})</td>
-      ${d.headcount.map(v => `<td>${fmt(v)}</td>`).join('')}
-    </tr>`;
-    html += `<tr class="row-supply-child cs-i1" id="joining-row">
-      <td>Joining HC (${csUnit === 'fte' ? 'FTE' : 'Hours'})</td>
-      ${d.joiningHC.map((v,i) => `<td><input class="cs-input" type="number" value="${v}" min="0" id="jh${i}"/></td>`).join('')}
-    </tr>`;
-    html += `<tr class="row-supply-child cs-i1">
-      <td>Attrition</td>
-      ${d.attrition.map(v => `<td class="${v > 0 ? 'cs-red' : ''}">${v}</td>`).join('')}
-    </tr>`;
-  }
 
   // Net Gap
   const gapClass = d.netGap.every(v => v >= 0) ? 'row-gap-pos' : 'row-gap';
@@ -502,7 +487,6 @@ function renderCS() {
 function toggleCsRow(which) {
   if (which === 'demand') csDemandOpen = !csDemandOpen;
   else if (which === 'forecast') csForecastOpen = !csForecastOpen;
-  else if (which === 'supply') csSupplyOpen = !csSupplyOpen;
   renderCS();
 }
 
