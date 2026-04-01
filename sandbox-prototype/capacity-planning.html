@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Capacity Planning – Resource Management</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#161616;font-size:14px;line-height:18px;letter-spacing:0.16px;overflow:hidden;height:100vh;display:flex;}
+
+/* ── Nav rail ── */
+.nav-rail{width:48px;background:#f2f2f2;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:4px;flex-shrink:0;border-right:1px solid #e8e8e8;}
+.nav-logo{width:24px;height:24px;border-radius:2px;background:#1d1d1f;margin-bottom:16px;}
+.nav-item{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#8d8d8d;cursor:pointer;}
+.nav-item:hover{background:rgba(0,0,0,0.06);}
+.nav-item.active{background:#fff;border-radius:8px;box-shadow:0px 0.8px 1.8px rgba(0,0,0,.13),0px 0.15px 0.45px rgba(0,0,0,.11);color:#1d1d1f;}
+
+/* ── Main layout ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── Page header ── */
+.page-header{padding:14px 24px 0;border-bottom:1px solid #f4f4f4;flex-shrink:0;}
+.page-title{font-size:20px;line-height:28px;font-weight:590;color:#161616;display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.tab-bar{display:flex;}
+.tab{padding:9px 16px;font-size:14px;line-height:18px;letter-spacing:0.16px;color:#525252;cursor:pointer;border-bottom:2px solid transparent;position:relative;top:1px;white-space:nowrap;}
+.tab:hover{color:#161616;}
+.tab.active{color:#0f62fe;border-bottom-color:#0f62fe;font-weight:590;}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:8px;padding:8px 24px;border-bottom:1px solid #f4f4f4;flex-shrink:0;}
+.tl-left{display:flex;align-items:center;gap:8px;flex:1;}
+.tl-right{display:flex;align-items:center;gap:8px;}
+.btn-tool{display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #e0e0e0;border-radius:4px;background:#fff;font-size:13px;color:#161616;cursor:pointer;height:30px;letter-spacing:0.16px;white-space:nowrap;}
+.btn-tool:hover{background:#f4f4f4;}
+.btn-tool svg{color:#525252;}
+.toggle-grp{display:flex;background:#f4f4f4;border-radius:4px;padding:2px;gap:2px;}
+.tgl{padding:3px 12px;border-radius:3px;font-size:13px;font-weight:590;cursor:pointer;border:none;background:none;color:#525252;height:26px;letter-spacing:0.16px;}
+.tgl.active{background:#1d1d1f;color:#fff;}
+.nav-arrows{display:flex;gap:4px;}
+.arrow-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid #e0e0e0;border-radius:4px;background:#fff;cursor:pointer;color:#525252;}
+.arrow-btn:hover{background:#f4f4f4;}
+.period-sel{display:flex;align-items:center;gap:6px;padding:0 10px;border:1px solid #e0e0e0;border-radius:4px;background:#fff;font-size:13px;color:#161616;cursor:pointer;height:30px;}
+.period-sel:hover{background:#f4f4f4;}
+
+/* ── Scrollable content ── */
+.content{flex:1;overflow-y:auto;}
+
+/* ── Section panels ── */
+.section{border-bottom:1px solid #e8e8e8;}
+.section-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;cursor:pointer;user-select:none;background:#fff;}
+.section-hd:hover{background:#fafafa;}
+.section-title{font-size:15px;line-height:20px;font-weight:590;color:#161616;display:flex;align-items:center;gap:8px;}
+.section-hd-right{display:flex;align-items:center;gap:12px;}
+.section-body{}
+.section-body.collapsed{display:none;}
+.chevron-icon{color:#8d8d8d;transition:transform 0.15s;}
+.chevron-icon.open{transform:rotate(180deg);}
+
+/* ── Stats bar ── */
+.stats-bar{display:flex;gap:24px;padding:12px 24px;border-bottom:1px solid #f4f4f4;background:#fafafa;}
+.stat-item{display:flex;flex-direction:column;gap:2px;}
+.stat-label{font-size:11px;color:#8d8d8d;letter-spacing:0.32px;text-transform:uppercase;font-weight:590;}
+.stat-val{font-size:18px;font-weight:590;color:#161616;line-height:24px;}
+.stat-val.red{color:#da1e28;}
+.stat-val.green{color:#24a148;}
+
+/* ── Generic table ── */
+.tbl-wrap{overflow-x:auto;}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl thead th{padding:8px 12px;text-align:right;font-size:11px;font-weight:590;color:#525252;letter-spacing:0.32px;text-transform:uppercase;background:#fafafa;border-bottom:1px solid #f4f4f4;white-space:nowrap;}
+.tbl thead th:first-child{text-align:left;}
+.tbl tbody td{padding:8px 12px;border-bottom:1px solid #f4f4f4;white-space:nowrap;text-align:right;}
+.tbl tbody td:first-child{text-align:left;}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover td{background:#fafafa;}
+
+/* ── Capacity Summary specifics ── */
+.cs-tgl{display:flex;gap:4px;}
+.cs-tgl-btn{padding:3px 10px;border-radius:4px;font-size:12px;font-weight:590;border:1px solid #e0e0e0;background:#fff;cursor:pointer;color:#525252;}
+.cs-tgl-btn.active{background:#edf5ff;border-color:#0f62fe;color:#0f62fe;}
+.cs-metric{font-size:13px;color:#161616;}
+.cs-month-hd{text-align:center !important;background:#f4f4f4;font-size:11px;font-weight:590;letter-spacing:0.32px;color:#525252;padding:6px 12px;}
+.cs-week-hd{text-align:right;font-size:11px;color:#8d8d8d;letter-spacing:0.16px;}
+.cs-today-hd{background:#fff8e1 !important;}
+.cs-today-badge{background:#f59e0b;color:#fff;border-radius:120px;padding:1px 7px;font-size:11px;font-weight:590;display:inline-block;}
+.cs-today-cell{background:#fffbf0;}
+
+/* Row type backgrounds */
+.row-demand>td{background:#f0f7ff;font-weight:590;}
+.row-demand-child>td{background:#f7faff;}
+.row-forecast>td{background:#f7faff;}
+.row-forecast-child>td{background:#fbfcff;}
+.row-supply>td{background:#f0fff4;font-weight:590;}
+.row-supply-child>td{background:#f7fff9;}
+.row-gap>td{background:#fff1f1;font-weight:700;color:#da1e28;}
+.row-gap-pos>td{background:#f0fff4;font-weight:700;color:#24a148;}
+
+.cs-i1>td:first-child{padding-left:28px;}
+.cs-i2>td:first-child{padding-left:44px;}
+.cs-red{color:#da1e28!important;}
+.cs-input{width:52px;border:1px solid #e0e0e0;border-radius:4px;padding:2px 6px;text-align:right;font-size:13px;color:#161616;background:#fff;outline:none;font-family:inherit;}
+.cs-input:focus{border-color:#0f62fe;}
+.collapse-btn{background:none;border:none;cursor:pointer;color:#8d8d8d;padding:0 2px;display:inline-flex;align-items:center;}
+
+/* ── Role summary specifics ── */
+.chart-area{padding:20px 24px 16px;border-bottom:1px solid #f4f4f4;}
+.chart-legend{display:flex;align-items:center;gap:20px;justify-content:flex-end;margin-bottom:12px;font-size:12px;color:#525252;}
+.legend-item{display:flex;align-items:center;gap:6px;}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.legend-dash{width:18px;height:2px;border-top:2px dashed #aaa;}
+.chart-canvas{height:200px;}
+
+.role-row>td{font-weight:590;cursor:pointer;}
+.role-row>td:first-child{display:flex;align-items:center;gap:8px;padding-left:12px;}
+.sub-row>td{color:#525252;}
+.sub-row>td:first-child{padding-left:48px;color:#525252;}
+.role-avatar{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+.pct{display:inline-block;padding:1px 8px;border-radius:120px;font-size:11px;font-weight:590;}
+.pct-green{background:#defbe6;color:#24a148;}
+.pct-yellow{background:#fdf4ce;color:#92400e;}
+.pct-red{background:#fff1f1;color:#da1e28;}
+.pct-over{background:#fde8ff;color:#9333ea;}
+.exp-icon{flex-shrink:0;transition:transform 0.15s;color:#8d8d8d;}
+.exp-icon.open{transform:rotate(90deg);}
+
+/* ── Skills Gap specifics ── */
+.sg-filters{display:flex;align-items:center;gap:8px;padding:12px 24px;border-bottom:1px solid #f4f4f4;}
+.sg-chip{padding:4px 12px;border-radius:120px;font-size:12px;font-weight:590;border:1px solid #e0e0e0;background:#fff;cursor:pointer;color:#525252;}
+.sg-chip.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f;}
+.sg-chip.short.active{background:#da1e28;border-color:#da1e28;color:#fff;}
+.sg-chip.met.active{background:#24a148;border-color:#24a148;color:#fff;}
+.sg-chip.surplus.active{background:#0f62fe;border-color:#0f62fe;color:#fff;}
+.gap-bar-wrap{width:64px;height:5px;background:#f0f0f0;border-radius:120px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px;}
+.gap-bar-fill{height:100%;border-radius:120px;}
+.gap-short{background:#da1e28;}
+.gap-ok{background:#24a148;}
+.gap-surplus{background:#0f62fe;}
+.status-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:120px;font-size:12px;font-weight:590;}
+.s-short{background:#fff1f1;color:#da1e28;}
+.s-met{background:#defbe6;color:#24a148;}
+.s-surplus{background:#edf5ff;color:#0f62fe;}
+.role-group-hd>td{background:#fafafa;font-size:11px;font-weight:590;color:#525252;letter-spacing:0.32px;text-transform:uppercase;padding:6px 12px!important;}
+.role-group-hd>td:first-child{text-align:left;}
+</style>
+</head>
+<body>
+
+<!-- Nav rail -->
+<nav class="nav-rail">
+  <div class="nav-logo"></div>
+  <div class="nav-item">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+  </div>
+  <div class="nav-item active">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </div>
+  <div class="nav-item">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  </div>
+  <div class="nav-item" style="margin-top:auto;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Resource management
+    </div>
+    <div class="tab-bar">
+      <div class="tab">People</div>
+      <div class="tab">Projects</div>
+      <div class="tab active">Capacity Planning</div>
+      <div class="tab">Apps</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="tl-left">
+      <button class="btn-tool">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Filter
+      </button>
+      <button class="btn-tool">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Time range: &nbsp;<strong>This quarter</strong>
+      </button>
+    </div>
+    <div class="tl-right">
+      <div class="toggle-grp">
+        <button class="tgl active" id="tgl-hours" onclick="switchUnit('hours')">HOURS</button>
+        <button class="tgl" id="tgl-fte" onclick="switchUnit('fte')">FTE</button>
+      </div>
+      <div class="period-sel">
+        Week
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="nav-arrows">
+        <button class="arrow-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="arrow-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <button class="arrow-btn" title="Help"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
+      <button class="arrow-btn" title="Settings"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 1. CAPACITY SUMMARY                            -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-hd" onclick="toggleSection('cs')">
+        <div class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Capacity Summary
+        </div>
+        <div class="section-hd-right">
+          <div class="cs-tgl">
+            <button class="cs-tgl-btn active" id="cs-fte-btn" onclick="event.stopPropagation();switchCsUnit('fte')">FTE</button>
+            <button class="cs-tgl-btn" id="cs-hrs-btn" onclick="event.stopPropagation();switchCsUnit('hrs')">Hours</button>
+          </div>
+          <svg class="chevron-icon open" id="chevron-cs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+      </div>
+      <div class="section-body" id="body-cs">
+        <div class="tbl-wrap">
+          <table class="tbl" id="cs-table">
+            <thead>
+              <tr>
+                <th style="width:200px;min-width:200px;">METRIC</th>
+                <th class="cs-month-hd" colspan="1">MAR-26</th>
+                <th class="cs-month-hd" colspan="1">APR-26</th>
+                <th class="cs-month-hd" colspan="1">MAY-26</th>
+                <th class="cs-month-hd" colspan="1">JUN-26</th>
+                <th class="cs-month-hd" colspan="1">JUL-26</th>
+                <th class="cs-month-hd" colspan="1">AUG-26</th>
+                <th class="cs-month-hd" colspan="1">SEP-26</th>
+                <th class="cs-month-hd" colspan="1">OCT-26</th>
+                <th class="cs-month-hd" colspan="1">NOV-26</th>
+                <th class="cs-month-hd" colspan="1">DEC-26</th>
+                <th class="cs-month-hd" colspan="1">JAN-27</th>
+                <th class="cs-month-hd" colspan="1">FEB-27</th>
+              </tr>
+            </thead>
+            <tbody id="cs-tbody">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 2. ROLE SUMMARY                                -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-hd" onclick="toggleSection('rs')">
+        <div class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Role Summary
+        </div>
+        <div class="section-hd-right">
+          <svg class="chevron-icon open" id="chevron-rs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+      </div>
+      <div class="section-body" id="body-rs">
+
+        <!-- Chart -->
+        <div class="chart-area">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:590;color:#161616;">Allocations (demand) vs Capacity (supply)</div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dash"></div><span>Total capacity</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;"></div><span>Holidays</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#cbd5e1;"></div><span>Time offs</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div><span>Available capacity</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#67e8f9;"></div><span>Unassigned allocations</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#2da196;"></div><span>Assigned allocations</span></div>
+            </div>
+          </div>
+          <div class="chart-canvas">
+            <canvas id="cap-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Role table -->
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr id="rs-month-row">
+                <th style="width:220px;min-width:220px;text-align:left;">Role</th>
+                <th class="cs-month-hd" colspan="4">Feb '26</th>
+                <th class="cs-month-hd" colspan="4">Mar '26</th>
+                <th class="cs-month-hd today-hd" colspan="1"><span class="cs-today-badge">30-03</span></th>
+                <th class="cs-month-hd" colspan="2">Apr '26</th>
+              </tr>
+              <tr>
+                <th style="text-align:left;font-size:11px;color:#8d8d8d;">—</th>
+                <th>02-06</th><th>09-13</th><th>16-20</th><th>23-27</th>
+                <th>02-06</th><th>09-13</th><th>16-20</th><th>23-27</th>
+                <th class="cs-today-hd">30-03</th>
+                <th>06-10</th><th>13-17</th>
+              </tr>
+            </thead>
+            <tbody id="rs-tbody">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 3. SKILLS GAP                                  -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-hd" onclick="toggleSection('sg')">
+        <div class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Skills Gap
+        </div>
+        <div class="section-hd-right">
+          <svg class="chevron-icon open" id="chevron-sg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+      </div>
+      <div class="section-body" id="body-sg">
+
+        <!-- Summary stats -->
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-label">Skills tracked</div>
+            <div class="stat-val">14</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Gaps (shortage)</div>
+            <div class="stat-val red">8</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Skills met</div>
+            <div class="stat-val">3</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Surplus</div>
+            <div class="stat-val green">3</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="sg-filters">
+          <span style="font-size:12px;color:#525252;font-weight:590;margin-right:4px;">Filter:</span>
+          <button class="sg-chip active" onclick="filterSg('all',this)">All</button>
+          <button class="sg-chip short" onclick="filterSg('short',this)">Shortage</button>
+          <button class="sg-chip met" onclick="filterSg('met',this)">Met</button>
+          <button class="sg-chip surplus" onclick="filterSg('surplus',this)">Surplus</button>
+        </div>
+
+        <!-- Skills gap table -->
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th style="width:180px;min-width:160px;">Role</th>
+                <th style="width:200px;min-width:160px;text-align:left;">Skill</th>
+                <th style="width:100px;">Required (FTE)</th>
+                <th style="width:100px;">Available (FTE)</th>
+                <th style="width:120px;">Gap</th>
+                <th style="width:140px;text-align:left;">Coverage</th>
+                <th style="width:100px;text-align:left;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="sg-tbody">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════════
+// Section collapse/expand
+// ══════════════════════════════════════════════════
+function toggleSection(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chevron-' + id);
+  body.classList.toggle('collapsed');
+  chev.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════
+// Capacity Summary data & render
+// ══════════════════════════════════════════════════
+const CS_MONTHS = ['Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27'];
+
+const CS_FTE = {
+  totalDemand:       [623.2,547.0,489.7,412.7,276.9,235.7,217.0,162.0,141.5,126.0,78.0,69.8],
+  confirmedDemand:   [581.1,475.7,409.7,331.8,213.4,188.1,172.5,127.7,110.2, 99.2,54.7,46.3],
+  forecastDemand:    [ 42.1, 71.3, 80.1, 80.9, 63.5, 47.6, 44.5, 34.3, 31.3, 26.8,23.3,23.5],
+  hardForecast:      [  4.9, 25.6, 30.3, 32.1, 22.8, 16.7, 17.8, 13.2, 10.7,  6.7, 6.7, 7.7],
+  softForecast:      [ 37.2, 45.7, 49.8, 48.7, 40.7, 30.9, 26.7, 21.1, 20.6, 20.1,16.6,15.9],
+  totalSupply:       [639.2,637.6,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0],
+  headcount:         [639.2,635.6,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0],
+  joiningHC:         [  0,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+  attrition:         [  5,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+  netGap:            [-15.9,-90.6,-147.3,-224.3,-360.1,-401.3,-420.0,-475.0,-495.5,-511.0,-559.0,-567.2],
+};
+
+// Hours = FTE * 160 (approx)
+const CS_HRS = {};
+['totalDemand','confirmedDemand','forecastDemand','hardForecast','softForecast','totalSupply','headcount'].forEach(k => {
+  CS_HRS[k] = CS_FTE[k].map(v => Math.round(v * 160));
+});
+CS_HRS.joiningHC = CS_FTE.joiningHC.map(v => v * 160);
+CS_HRS.attrition = CS_FTE.attrition.map(v => v * 160);
+CS_HRS.netGap = CS_FTE.netGap.map(v => Math.round(v * 160));
+
+let csUnit = 'fte';
+let csDemandOpen = true, csForecastOpen = true, csSupplyOpen = true;
+
+function switchCsUnit(u) {
+  csUnit = u;
+  document.getElementById('cs-fte-btn').classList.toggle('active', u === 'fte');
+  document.getElementById('cs-hrs-btn').classList.toggle('active', u === 'hrs');
+  renderCS();
+}
+
+function renderCS() {
+  const d = csUnit === 'fte' ? CS_FTE : CS_HRS;
+  const fmt = v => csUnit === 'fte' ? v.toFixed(1) : v.toLocaleString();
+  const cols = CS_MONTHS.length;
+
+  let html = '';
+
+  // Total Demand
+  html += `<tr class="row-demand" onclick="toggleCsRow('demand')">
+    <td><button class="collapse-btn">${csDemandOpen ? '▾' : '▸'}</button> &nbsp;- Total Demand</td>
+    ${d.totalDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
+  </tr>`;
+
+  if (csDemandOpen) {
+    html += `<tr class="row-demand-child cs-i1">
+      <td>Confirmed Demand</td>
+      ${d.confirmedDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
+    </tr>`;
+    html += `<tr class="row-forecast" onclick="toggleCsRow('forecast')">
+      <td class="cs-i1"><button class="collapse-btn">${csForecastOpen ? '▾' : '▸'}</button> &nbsp;- Forecast Demand</td>
+      ${d.forecastDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
+    </tr>`;
+    if (csForecastOpen) {
+      html += `<tr class="row-forecast-child cs-i2">
+        <td>Hard Forecast</td>
+        ${d.hardForecast.map(v => `<td>${fmt(v)}</td>`).join('')}
+      </tr>`;
+      html += `<tr class="row-forecast-child cs-i2">
+        <td>Soft Forecast</td>
+        ${d.softForecast.map(v => `<td>${fmt(v)}</td>`).join('')}
+      </tr>`;
+    }
+  }
+
+  // Total Supply
+  html += `<tr class="row-supply" onclick="toggleCsRow('supply')">
+    <td><button class="collapse-btn">${csSupplyOpen ? '▾' : '▸'}</button> &nbsp;- Total Supply</td>
+    ${d.totalSupply.map(v => `<td>${fmt(v)}</td>`).join('')}
+  </tr>`;
+
+  if (csSupplyOpen) {
+    html += `<tr class="row-supply-child cs-i1">
+      <td>Headcount (${csUnit === 'fte' ? 'FTE' : 'Hours'})</td>
+      ${d.headcount.map(v => `<td>${fmt(v)}</td>`).join('')}
+    </tr>`;
+    html += `<tr class="row-supply-child cs-i1" id="joining-row">
+      <td>Joining HC (${csUnit === 'fte' ? 'FTE' : 'Hours'})</td>
+      ${d.joiningHC.map((v,i) => `<td><input class="cs-input" type="number" value="${v}" min="0" id="jh${i}"/></td>`).join('')}
+    </tr>`;
+    html += `<tr class="row-supply-child cs-i1">
+      <td>Attrition</td>
+      ${d.attrition.map(v => `<td class="${v > 0 ? 'cs-red' : ''}">${v}</td>`).join('')}
+    </tr>`;
+  }
+
+  // Net Gap
+  const gapClass = d.netGap.every(v => v >= 0) ? 'row-gap-pos' : 'row-gap';
+  html += `<tr class="${gapClass}">
+    <td style="padding-left:12px;">Net Gap (${csUnit === 'fte' ? 'FTE' : 'Hours'})</td>
+    ${d.netGap.map(v => `<td>${fmt(v)}</td>`).join('')}
+  </tr>`;
+
+  document.getElementById('cs-tbody').innerHTML = html;
+}
+
+function toggleCsRow(which) {
+  if (which === 'demand') csDemandOpen = !csDemandOpen;
+  else if (which === 'forecast') csForecastOpen = !csForecastOpen;
+  else if (which === 'supply') csSupplyOpen = !csSupplyOpen;
+  renderCS();
+}
+
+// ══════════════════════════════════════════════════
+// Role Summary data & render
+// ══════════════════════════════════════════════════
+const WEEKS = ['02-06','09-13','16-20','23-27','02-06','09-13','16-20','23-27','30-03','06-10','13-17'];
+
+const ROLES = [
+  {
+    id:'ae', label:'Account Executive', initials:'AE', color:'#0f62fe',
+    alloc:  [178,212,108,172,233,214,97,44,44,52,44],
+    cap:    [1920,1920,1920,1970,2030,2054,2070,2102,2110,2110,2110],
+    surplus:[1742,1708,1812,1798,1797,1840,1973,2058,2066,2058,2066],
+  },
+  {
+    id:'ap', label:'Aimpoint Practice 1', initials:'AP', color:'#da1e28',
+    alloc:  [45,120,89,67,145,98,55,44,32,28,41],
+    cap:    [480,480,480,480,520,520,520,530,530,530,530],
+    surplus:[435,360,391,413,375,422,465,486,498,502,489],
+  },
+  {
+    id:'ai', label:'AlgoSec Impl. Consultant', initials:'AI', color:'#6929c4',
+    alloc:  [320,289,456,234,567,891,123,89,45,67,89],
+    cap:    [960,960,960,960,1020,1020,1020,1040,1040,1040,1040],
+    surplus:[640,671,504,726,453,129,897,951,995,973,951],
+  },
+  {
+    id:'pm', label:'Product Manager', initials:'PM', color:'#007d79',
+    alloc:  [560,432,678,521,389,445,312,298,245,267,289],
+    cap:    [720,720,720,740,780,780,780,800,800,800,800],
+    surplus:[160,288,42,219,391,335,468,502,555,533,511],
+  },
+  {
+    id:'sa', label:'Solutions Architect', initials:'SA', color:'#9f1853',
+    alloc:  [892,1204,756,934,1456,2890,678,445,312,289,345],
+    cap:    [1440,1440,1440,1480,1560,1560,1560,1600,1600,1600,1600],
+    surplus:[548,236,684,546,104,-1330,882,1155,1288,1311,1255],
+  },
+];
+
+const rsOpen = {};
+
+function renderRS() {
+  let html = '';
+  ROLES.forEach(r => {
+    const pcts = r.alloc.map((a,i) => Math.round(a / r.cap[i] * 100));
+    html += `<tr class="role-row" onclick="toggleRole('${r.id}')">
+      <td style="display:flex;align-items:center;gap:8px;">
+        <svg class="exp-icon ${rsOpen[r.id]?'open':''}" id="exp-${r.id}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="role-avatar" style="background:${r.color};">${r.initials}</div>
+        <span>${r.label}</span>
+      </td>
+      ${pcts.map((p,i) => {
+        const cls = p > 100 ? 'pct-over' : p > 85 ? 'pct-red' : p > 50 ? 'pct-yellow' : 'pct-green';
+        return `<td><span class="pct ${cls}">${p}%</span></td>`;
+      }).join('')}
+    </tr>`;
+    if (rsOpen[r.id]) {
+      html += `<tr class="sub-row"><td>Allocations</td>${r.alloc.map(v => `<td>${v}</td>`).join('')}</tr>`;
+      html += `<tr class="sub-row"><td>Capacity</td>${r.cap.map(v => `<td>${v.toLocaleString()}</td>`).join('')}</tr>`;
+      html += `<tr class="sub-row"><td>Surplus Capacity</td>${r.surplus.map(v => `<td style="${v<0?'color:#da1e28;':''}">${v.toLocaleString()}</td>`).join('')}</tr>`;
+    }
+  });
+  document.getElementById('rs-tbody').innerHTML = html;
+}
+
+function toggleRole(id) {
+  rsOpen[id] = !rsOpen[id];
+  renderRS();
+}
+
+// ══════════════════════════════════════════════════
+// Skills Gap data & render
+// ══════════════════════════════════════════════════
+const SG_DATA = [
+  { role:'Engineer',             skill:'Python',              req:12, avail:8  },
+  { role:'Engineer',             skill:'React',               req:8,  avail:5  },
+  { role:'Engineer',             skill:'Node.js',             req:6,  avail:9  },
+  { role:'Engineer',             skill:'DevOps / CI-CD',      req:5,  avail:3  },
+  { role:'Solutions Architect',  skill:'Salesforce',          req:10, avail:4  },
+  { role:'Solutions Architect',  skill:'AWS',                 req:8,  avail:8  },
+  { role:'Solutions Architect',  skill:'Integration Design',  req:7,  avail:4  },
+  { role:'Product Manager',      skill:'Agile / Scrum',       req:15, avail:15 },
+  { role:'Product Manager',      skill:'Stakeholder Mgmt',    req:12, avail:7  },
+  { role:'Product Manager',      skill:'Data Analysis',       req:6,  avail:8  },
+  { role:'Account Executive',    skill:'CRM',                 req:20, avail:17 },
+  { role:'Account Executive',    skill:'Negotiation',         req:15, avail:18 },
+  { role:'Designer',             skill:'Figma',               req:8,  avail:10 },
+  { role:'Designer',             skill:'User Research',       req:6,  avail:3  },
+];
+
+let sgFilter = 'all';
+
+function filterSg(f, btn) {
+  sgFilter = f;
+  document.querySelectorAll('.sg-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderSG();
+}
+
+function renderSG() {
+  const rows = SG_DATA.filter(d => {
+    const gap = d.avail - d.req;
+    if (sgFilter === 'short')   return gap < 0;
+    if (sgFilter === 'met')     return gap === 0;
+    if (sgFilter === 'surplus') return gap > 0;
+    return true;
+  });
+
+  let html = '';
+  let lastRole = '';
+  rows.forEach(d => {
+    const gap = d.avail - d.req;
+    const status = gap < 0 ? 'short' : gap === 0 ? 'met' : 'surplus';
+    const pct = Math.min(100, Math.round(d.avail / d.req * 100));
+    const barColor = status === 'short' ? 'gap-short' : status === 'surplus' ? 'gap-surplus' : 'gap-ok';
+    const chipCls = status === 'short' ? 's-short' : status === 'surplus' ? 's-surplus' : 's-met';
+    const chipLabel = status === 'short' ? 'Shortage' : status === 'surplus' ? 'Surplus' : 'Met';
+    const gapStr = gap > 0 ? `+${gap.toFixed(1)}` : gap.toFixed(1);
+    const gapCls = status === 'short' ? 'gap-negative' : status === 'surplus' ? 'gap-positive' : '';
+
+    if (d.role !== lastRole) {
+      html += `<tr class="role-group-hd"><td colspan="7">${d.role}</td></tr>`;
+      lastRole = d.role;
+    }
+
+    html += `<tr>
+      <td style="color:#8d8d8d;font-size:12px;"></td>
+      <td style="text-align:left;">${d.skill}</td>
+      <td>${d.req.toFixed(1)}</td>
+      <td>${d.avail.toFixed(1)}</td>
+      <td class="${gapCls}">${gapStr}</td>
+      <td style="text-align:left;">
+        <div class="gap-bar-wrap"><div class="gap-bar-fill ${barColor}" style="width:${pct}%;"></div></div>
+        <span style="font-size:12px;color:#525252;">${pct}%</span>
+      </td>
+      <td style="text-align:left;"><span class="status-chip ${chipCls}">${chipLabel}</span></td>
+    </tr>`;
+  });
+
+  if (!rows.length) {
+    html = `<tr><td colspan="7" style="text-align:center;color:#8d8d8d;padding:32px;">No results</td></tr>`;
+  }
+
+  document.getElementById('sg-tbody').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
+// Toolbar unit toggle (HOURS / FTE)
+// ══════════════════════════════════════════════════
+function switchUnit(u) {
+  document.getElementById('tgl-hours').classList.toggle('active', u === 'hours');
+  document.getElementById('tgl-fte').classList.toggle('active', u === 'fte');
+}
+
+// ══════════════════════════════════════════════════
+// Chart.js init
+// ══════════════════════════════════════════════════
+function initChart() {
+  const labels = [
+    '02-06 Feb','09-13 Feb','16-20 Feb','23-27 Feb',
+    '02-06 Mar','09-13 Mar','16-20 Mar','23-27 Mar',
+    '30-03 Apr','06-10 Apr','13-17 Apr',
+  ];
+  const availCap   = [15500,15800,15800,15500,17000,15500,17500,18000,19000,19000,19000];
+  const assignedAl = [1995, 3200, 1087, 1928, 2790, 25000,1265, 920,  678,  703,  808 ];
+  const unassignAl = [780,  210,  620,  510,  720,  310,  640,  490,  380,  290,  410 ];
+  const totalCap   = [17000,17200,17400,17600,18000,18200,18500,18800,19000,19200,19400];
+
+  const ctx = document.getElementById('cap-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Available capacity',
+          data: availCap,
+          backgroundColor: '#60a5fa',
+          borderRadius: 2,
+          order: 3,
+        },
+        {
+          label: 'Assigned allocations',
+          data: assignedAl,
+          backgroundColor: '#2da196',
+          borderRadius: 2,
+          order: 2,
+        },
+        {
+          label: 'Unassigned allocations',
+          data: unassignAl,
+          backgroundColor: '#67e8f9',
+          borderRadius: 2,
+          order: 1,
+        },
+        {
+          label: 'Total capacity',
+          data: totalCap,
+          type: 'line',
+          borderColor: '#aaa',
+          borderDash: [6,4],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: false,
+          order: 0,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1d1d1f',
+          titleFont: { size: 12, weight: 590 },
+          bodyFont: { size: 12 },
+          padding: 10,
+          cornerRadius: 6,
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}h`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 }, color: '#8d8d8d', maxRotation: 0 },
+          border: { color: '#f4f4f4' },
+        },
+        y: {
+          grid: { color: '#f4f4f4' },
+          ticks: {
+            font: { size: 11 },
+            color: '#8d8d8d',
+            callback: v => v >= 1000 ? `${v/1000}k` : v,
+          },
+          border: { display: false },
+          title: { display: true, text: 'Hours', font: { size: 11 }, color: '#8d8d8d' },
+        },
+      },
+    },
+  });
+}
+
+// ══════════════════════════════════════════════════
+// Init
+// ══════════════════════════════════════════════════
+renderCS();
+renderRS();
+renderSG();
+initChart();
+</script>
+</body>
+</html>
