@@ -558,7 +558,6 @@
               <div class="mbr-info">
                 <div class="mbr-name">Engineer</div>
                 <div class="mbr-sub" id="engineer-sub">
-                  <span class="no-skills" id="no-skills-label">No skill filters</span>
                   <div class="skills-count-wrap" id="skills-count-wrap" style="display:none;">
                     <span class="skills-count" id="skills-count" onclick="openModal('Engineer')">0 skills</span>
                     <div class="skills-hover-tip" id="skills-hover-tip">
@@ -1092,12 +1091,10 @@
   function applySkills() {
     const ids = Object.keys(state);
     closeModal();
-    const noLabel = document.getElementById('no-skills-label');
     const wrapEl = document.getElementById('skills-count-wrap');
     const countEl = document.getElementById('skills-count');
     const tipList = document.getElementById('skills-hover-tip-list');
     if (ids.length === 0) {
-      noLabel.style.display = '';
       wrapEl.style.display = 'none';
       return;
     }
@@ -1109,7 +1106,6 @@
         : s.val ? `${skill.label} ${s.op.replace('...','')} ${s.val}` : skill.label;
       return `<div class="skills-hover-tip-item">${label}</div>`;
     }).join('');
-    noLabel.style.display = 'none';
     wrapEl.style.display = 'inline-flex';
   }
 </script>
