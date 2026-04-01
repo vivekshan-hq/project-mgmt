@@ -162,6 +162,7 @@
     .modal-close:hover { background: #f4f4f4; color: #161616; }
 
     /* Search */
+    .modal-desc { padding: 4px 24px 12px; font-size: 13px; line-height: 18px; color: #525252; letter-spacing: 0.16px; }
     .modal-search { padding: 8px 24px; border-bottom: 1px solid #f4f4f4; }
     .modal-search-inner { display: flex; align-items: center; gap: 8px; background: #fafafa; border: 1px solid #f4f4f4; border-radius: 4px; padding: 6px 12px; }
     .modal-search-inner svg { color: #8d8d8d; flex-shrink: 0; }
@@ -489,7 +490,7 @@
               </div>
               <div class="mbr-alloc">120h</div>
               <div class="mbr-actions">
-                <button class="act-btn" onclick="openModal()">
+                <button class="act-btn" onclick="openModal('Developer')">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   <span class="act-tip">Skill filters</span>
                 </button>
@@ -524,7 +525,7 @@
               </div>
               <div class="mbr-alloc">120h</div>
               <div class="mbr-actions">
-                <button class="act-btn" onclick="openModal()">
+                <button class="act-btn" onclick="openModal('Customer Success')">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   <span class="act-tip">Skill filters</span>
                 </button>
@@ -559,7 +560,7 @@
                 <div class="mbr-sub" id="engineer-sub">
                   <span class="no-skills" id="no-skills-label">No skill filters</span>
                   <div class="skills-count-wrap" id="skills-count-wrap" style="display:none;">
-                    <span class="skills-count" id="skills-count" onclick="openModal()">0 skills</span>
+                    <span class="skills-count" id="skills-count" onclick="openModal('Engineer')">0 skills</span>
                     <div class="skills-hover-tip" id="skills-hover-tip">
                       <div class="skills-hover-tip-title">Skill filters</div>
                       <div id="skills-hover-tip-list"></div>
@@ -569,7 +570,7 @@
               </div>
               <div class="mbr-alloc">120h</div>
               <div class="mbr-actions">
-                <button class="act-btn" onclick="openModal()">
+                <button class="act-btn" onclick="openModal('Engineer')">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   <span class="act-tip">Skill filters</span>
                 </button>
@@ -622,6 +623,8 @@
       <span class="modal-title">Add fields</span>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
+
+    <div class="modal-desc" id="modal-desc">All the Skills linked to the <strong id="modal-role-name" style="font-weight:590;color:#161616;">Placeholder Role</strong> are shown below.</div>
 
     <div class="modal-search">
       <div class="modal-search-inner">
@@ -921,7 +924,9 @@
   let state = {};
 
   // ─── Modal open / close ───
-  function openModal() {
+  function openModal(roleName) {
+    const roleEl = document.getElementById('modal-role-name');
+    if (roleEl) roleEl.textContent = roleName || 'Placeholder Role';
     state = {};
     Object.keys(SKILLS).forEach(id => {
       document.getElementById('cb-' + id).classList.remove('checked');
