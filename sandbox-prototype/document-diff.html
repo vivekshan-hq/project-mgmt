@@ -23,10 +23,10 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .btn-close:hover{background:#f4f4f4;color:#161616;}
 
 /* ── Sticky column labels ── */
-.col-labels{display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #e0e0e0;}
-.cl{padding:8px 20px;font-size:11px;font-weight:590;letter-spacing:0.32px;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
-.cl-prod{color:#525252;border-right:1px solid #e0e0e0;}
-.cl-sand{color:#0f62fe;}
+.col-labels{display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;position:sticky;top:0;z-index:10;border-bottom:2px solid #e0e0e0;}
+.cl{padding:12px 20px;font-size:13px;font-weight:590;display:flex;align-items:center;gap:8px;}
+.cl-prod{color:#525252;background:#f4f4f4;border-right:1px solid #d0d0d0;}
+.cl-sand{color:#0f62fe;background:#edf5ff;}
 
 /* ── Scrollable content ── */
 .doc-scroll{flex:1;overflow-y:auto;}
@@ -36,9 +36,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .bp:last-child{border-bottom:none;}
 .bl,.br{padding:14px 20px;}
 .bl{border-right:1px solid #e0e0e0;}
-.bl.unch,.br.unch{background:#fff;}
-.bl.chgd{background:#fff8f8;}
-.br.chgd{background:#f8fff9;}
+.bl,.br{background:#fff;}
 
 /* ── Document typography ── */
 .doc-h1{font-size:17px;font-weight:590;color:#161616;line-height:24px;}
@@ -46,14 +44,14 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .doc-p.placeholder{color:#a8a8a8;font-style:italic;}
 
 /* ── Word-level diff ── */
-.del{background:#fff1f1;color:#da1e28;text-decoration:line-through;padding:0 2px;border-radius:2px;}
-.ins{background:#defbe6;color:#198038;padding:0 2px;border-radius:2px;}
+.del{color:#da1e28;text-decoration:line-through;}
+.ins{color:#198038;}
 
 /* ── Bullet lists ── */
 .doc-ul{padding-left:20px;list-style:disc;}
 .doc-ul li{font-size:13px;line-height:20px;margin-bottom:5px;}
-.doc-ul li.lc{padding-left:6px;border-left:2px solid #f59e0b;margin-left:-8px;}
-.doc-ul li.ln{padding-left:6px;border-left:2px solid #24a148;margin-left:-8px;}
+.doc-ul li.lc{}
+.doc-ul li.ln{}
 
 /* ── Smart fill chips ── */
 .sf{display:inline-flex;align-items:center;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:590;white-space:nowrap;border:1px solid;}
@@ -66,11 +64,11 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .doc-tbl thead th:first-child{text-align:left;width:36%;}
 .doc-tbl tbody td{padding:8px 10px;border:1px solid #e8e8e8;vertical-align:middle;text-align:center;}
 .doc-tbl tbody td:first-child{text-align:left;font-weight:590;background:#f4f6f9;font-size:12px;}
-.doc-tbl td.cp{background:#fff1f1!important;border-color:#f5c6c6;}
-.doc-tbl td.cs{background:#defbe6!important;border-color:#a7d7a9;}
-.doc-tbl tr.tn td{background:#f0fff4!important;border-color:#b7dfb8;}
-.doc-tbl tr.tn td:first-child{background:#e6f9ec!important;}
-.doc-tbl tr.tg td{background:#fafafa!important;border-color:#ebebeb;border-style:dashed;color:#c6c6c6;font-style:italic;font-size:11px;font-weight:400!important;}
+.doc-tbl td.cp{}
+.doc-tbl td.cs{}
+.doc-tbl tr.tn td{color:#198038;}
+.doc-tbl tr.tn td:first-child{color:#198038;}
+.doc-tbl tr.tg td{color:#c6c6c6;font-size:11px;font-weight:400!important;font-style:italic;border-color:#f0f0f0;}
 .new-tag{display:inline-block;font-size:9px;background:#24a148;color:#fff;border-radius:2px;padding:0 4px;font-weight:700;letter-spacing:0.2px;margin-bottom:2px;}
 
 /* ── Status dots ── */
@@ -81,9 +79,9 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .kv-tbl{width:100%;border-collapse:collapse;font-size:12px;}
 .kv-tbl td{padding:8px 10px;border:1px solid #e8e8e8;vertical-align:middle;}
 .kv-tbl td:first-child{font-weight:590;background:#f4f6f9;width:44%;}
-.kv-tbl tr.tn td{background:#f0fff4!important;border-color:#b7dfb8;}
-.kv-tbl tr.tn td:first-child{background:#e6f9ec!important;}
-.kv-tbl tr.tg td{background:#fafafa!important;border-style:dashed;border-color:#ebebeb;color:#c6c6c6;font-style:italic;font-size:11px;font-weight:400!important;}
+.kv-tbl tr.tn td{color:#198038;}
+.kv-tbl tr.tn td:first-child{color:#198038;}
+.kv-tbl tr.tg td{color:#c6c6c6;font-size:11px;font-weight:400!important;font-style:italic;border-color:#f0f0f0;}
 
 /* ── Footer ── */
 .ft{padding:10px 20px;border-top:1px solid #e8e8e8;flex-shrink:0;display:flex;justify-content:flex-end;background:#fff;}
@@ -132,18 +130,18 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
   <!-- ▸ Summary paragraph (unchanged) -->
   <div class="bp">
-    <div class="bl unch">
+    <div class="bl">
       <div class="doc-p">Hi All, here's this week's project update for <span class="sf sf-r">Project → Project Name</span>. Please review the highlights and reach out if you have any questions.</div>
     </div>
-    <div class="br unch">
+    <div class="br">
       <div class="doc-p">Hi All, here's this week's project update for <span class="sf sf-r">Project → Project Name</span>. Please review the highlights and reach out if you have any questions.</div>
     </div>
   </div>
 
   <!-- ▸ HEADING: Project Health (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">Project Health</div></div>
-    <div class="br unch"><div class="doc-h1">Project Health</div></div>
+    <div class="bl"><div class="doc-h1">Project Health</div></div>
+    <div class="br"><div class="doc-h1">Project Health</div></div>
   </div>
 
   <!-- ▸ TABLE: Project Health (2 cells changed in Current Week) -->
@@ -194,8 +192,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
   <!-- ▸ HEADING: Project Summary (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">Project Summary</div></div>
-    <div class="br unch"><div class="doc-h1">Project Summary</div></div>
+    <div class="bl"><div class="doc-h1">Project Summary</div></div>
+    <div class="br"><div class="doc-h1">Project Summary</div></div>
   </div>
 
   <!-- ▸ KV TABLE: Project Summary (2 new rows in sandbox) -->
@@ -236,19 +234,19 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
   <!-- ▸ HEADING: What we've accomplished (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">What we've accomplished</div></div>
-    <div class="br unch"><div class="doc-h1">What we've accomplished</div></div>
+    <div class="bl"><div class="doc-h1">What we've accomplished</div></div>
+    <div class="br"><div class="doc-h1">What we've accomplished</div></div>
   </div>
 
   <!-- ▸ BULLETS: Accomplished (unchanged) -->
   <div class="bp">
-    <div class="bl unch">
+    <div class="bl">
       <ul class="doc-ul">
         <li><span class="sf sf-r">AI Fill → Completed tasks summary</span></li>
         <li><span class="sf sf-r">AI Fill → Completed milestones summary</span></li>
       </ul>
     </div>
-    <div class="br unch">
+    <div class="br">
       <ul class="doc-ul">
         <li><span class="sf sf-r">AI Fill → Completed tasks summary</span></li>
         <li><span class="sf sf-r">AI Fill → Completed milestones summary</span></li>
@@ -258,18 +256,18 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
   <!-- ▸ HEADING: What's blocked (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">What's blocked</div></div>
-    <div class="br unch"><div class="doc-h1">What's blocked</div></div>
+    <div class="bl"><div class="doc-h1">What's blocked</div></div>
+    <div class="br"><div class="doc-h1">What's blocked</div></div>
   </div>
 
   <!-- ▸ BULLETS: Blocked (unchanged) -->
   <div class="bp">
-    <div class="bl unch">
+    <div class="bl">
       <ul class="doc-ul">
         <li><span class="sf sf-r">AI Fill → Blocked tasks summary</span></li>
       </ul>
     </div>
-    <div class="br unch">
+    <div class="br">
       <ul class="doc-ul">
         <li><span class="sf sf-r">AI Fill → Blocked tasks summary</span></li>
       </ul>
@@ -278,19 +276,19 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
   <!-- ▸ HEADING: What's next (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">What's next</div></div>
-    <div class="br unch"><div class="doc-h1">What's next</div></div>
+    <div class="bl"><div class="doc-h1">What's next</div></div>
+    <div class="br"><div class="doc-h1">What's next</div></div>
   </div>
 
   <!-- ▸ BULLETS: Next (unchanged) -->
   <div class="bp">
-    <div class="bl unch">
+    <div class="bl">
       <ul class="doc-ul">
         <li><span class="sf sf-r">AI Fill → Upcoming tasks summary</span></li>
         <li><span class="sf sf-r">AI Fill → Upcoming milestones summary</span></li>
       </ul>
     </div>
-    <div class="br unch">
+    <div class="br">
       <ul class="doc-ul">
         <li><span class="sf sf-r">AI Fill → Upcoming tasks summary</span></li>
         <li><span class="sf sf-r">AI Fill → Upcoming milestones summary</span></li>
@@ -300,52 +298,52 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
   <!-- ▸ HEADING: Milestones (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">Milestones (Completed &amp; Upcoming)</div></div>
-    <div class="br unch"><div class="doc-h1">Milestones (Completed &amp; Upcoming)</div></div>
+    <div class="bl"><div class="doc-h1">Milestones (Completed &amp; Upcoming)</div></div>
+    <div class="br"><div class="doc-h1">Milestones (Completed &amp; Upcoming)</div></div>
   </div>
 
   <!-- ▸ Milestones content (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-p placeholder">No milestones configured</div></div>
-    <div class="br unch"><div class="doc-p placeholder">No milestones configured</div></div>
+    <div class="bl"><div class="doc-p placeholder">No milestones configured</div></div>
+    <div class="br"><div class="doc-p placeholder">No milestones configured</div></div>
   </div>
 
   <!-- ▸ HEADING: Program Synopsis (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">Program Synopsis / Factors Impacting Status</div></div>
-    <div class="br unch"><div class="doc-h1">Program Synopsis / Factors Impacting Status</div></div>
+    <div class="bl"><div class="doc-h1">Program Synopsis / Factors Impacting Status</div></div>
+    <div class="br"><div class="doc-h1">Program Synopsis / Factors Impacting Status</div></div>
   </div>
 
   <!-- ▸ BULLETS: Program Synopsis (changed) -->
   <div class="bp">
-    <div class="bl chgd">
+    <div class="bl">
       <ul class="doc-ul">
-        <li class="lc"><span class="del">&lt;Add a new point&gt;</span></li>
-        <li class="lc"><span class="del">&lt;Add a new point&gt;</span></li>
+        <li><span class="del">&lt;Add a new point&gt;</span></li>
+        <li><span class="del">&lt;Add a new point&gt;</span></li>
         <li><span class="doc-p placeholder">&lt;Add a new point&gt;</span></li>
         <li><span class="doc-p placeholder">&lt;Add a new point&gt;</span></li>
       </ul>
     </div>
-    <div class="br chgd">
+    <div class="br">
       <ul class="doc-ul">
-        <li class="lc"><span class="ins">Successfully completed Phase 1 data migration and UAT sign-off.</span></li>
-        <li class="lc"><span class="ins">Salesforce integration in progress — estimated completion end of April.</span></li>
+        <li><span class="ins">Successfully completed Phase 1 data migration and UAT sign-off.</span></li>
+        <li><span class="ins">Salesforce integration in progress — estimated completion end of April.</span></li>
         <li><span class="doc-p placeholder">&lt;Add a new point&gt;</span></li>
         <li><span class="doc-p placeholder">&lt;Add a new point&gt;</span></li>
-        <li class="ln"><span class="ins">Customer stakeholder alignment meeting scheduled for next week.</span></li>
+        <li><span class="ins">Customer stakeholder alignment meeting scheduled for next week.</span></li>
       </ul>
     </div>
   </div>
 
   <!-- ▸ HEADING: Key Expectations (unchanged) -->
   <div class="bp">
-    <div class="bl unch"><div class="doc-h1">Key Expectations</div></div>
-    <div class="br unch"><div class="doc-h1">Key Expectations</div></div>
+    <div class="bl"><div class="doc-h1">Key Expectations</div></div>
+    <div class="br"><div class="doc-h1">Key Expectations</div></div>
   </div>
 
   <!-- ▸ KV TABLE: Key Expectations (unchanged) -->
   <div class="bp">
-    <div class="bl unch">
+    <div class="bl">
       <table class="kv-tbl">
         <tbody>
           <tr><td>Pain Areas</td><td><span class="doc-p placeholder">&lt;Area No. 1&gt;</span><br><span class="doc-p placeholder">&lt;Area No. 2&gt;</span></td></tr>
@@ -353,7 +351,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         </tbody>
       </table>
     </div>
-    <div class="br unch">
+    <div class="br">
       <table class="kv-tbl">
         <tbody>
           <tr><td>Pain Areas</td><td><span class="doc-p placeholder">&lt;Area No. 1&gt;</span><br><span class="doc-p placeholder">&lt;Area No. 2&gt;</span></td></tr>
