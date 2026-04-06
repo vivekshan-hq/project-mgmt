@@ -878,7 +878,7 @@
         </div>
 
         <div class="change-row">
-          <div class="change-row-header" onclick="toggleDiff('diff-put-project-update', this)">
+          <div class="change-row-header">
             <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
             <span class="type-badge type-mod">MOD</span>
             <div class="row-name">
@@ -891,19 +891,10 @@
                 </div>
               </div>
             </div>
-            <button class="expand-btn" id="btn-diff-put-project-update">View diff<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></button>
-          </div>
-          <div class="diff-area" id="diff-put-project-update">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#fafafa;border-radius:6px;border:1px solid var(--border);">
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:3px;">Free-form Content <span style="background:var(--mod-bg);color:var(--mod-color);font-size:11px;font-weight:700;padding:1px 7px;border-radius:120px;margin-left:4px;">MODIFIED</span></div>
-                <div style="font-size:12px;color:var(--text-3);">Document content has changed. View the side-by-side diff to review all changes.</div>
-              </div>
-              <a href="document-diff.html" target="_blank" style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--border-strong);border-radius:4px;background:#fff;font-size:13px;color:var(--text-1);text-decoration:none;white-space:nowrap;font-weight:500;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                View diff
-              </a>
-            </div>
+            <a href="document-diff.html" target="_blank" class="expand-btn" style="text-decoration:none;">
+              Compare templates
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </a>
           </div>
         </div>
 
