@@ -70,7 +70,11 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .doc-tbl tr.tn td{color:#198038;}
 .doc-tbl tr.tn td:first-child{color:#198038;}
 .doc-tbl tr.tg td{color:#c6c6c6;font-size:11px;font-weight:400!important;font-style:italic;border-color:#f0f0f0;}
-.new-tag{display:inline-block;font-size:9px;background:#24a148;color:#fff;border-radius:2px;padding:0 4px;font-weight:700;letter-spacing:0.2px;margin-bottom:2px;}
+.legend{display:flex;align-items:center;gap:16px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#525252;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ld-green{background:#198038;}
+.ld-red{background:#da1e28;}
 
 /* ── Status dots ── */
 .dot{width:11px;height:11px;border-radius:50%;display:inline-block;vertical-align:middle;margin:0 1px;}
@@ -110,6 +114,10 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
       Sandbox
     </span>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot ld-green"></div>New additions</div>
+      <div class="legend-item"><div class="legend-dot ld-red"></div>Removed</div>
+    </div>
     <a href="review-changes.html" class="btn-close" title="Back to Review Changes">×</a>
   </div>
 </div>
@@ -220,12 +228,12 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
           <tr><td>Professional Services Leader</td><td><span class="sf sf-n">Project → VP/General Manager → Full Name</span></td></tr>
           <tr class="tn">
             <td>Customer Advocacy Leader</td>
-            <td><div class="new-tag">+ NEW</div><br><span class="sf sf-g">Project → Customer Advocacy</span></td>
+            <td><span class="sf sf-g">Project → Customer Advocacy</span></td>
           </tr>
           <tr><td>Last Steer. Co. Date</td><td><span class="sf sf-n">Project → Last Steer. Co. Date</span></td></tr>
           <tr class="tn">
             <td>Next Steer. Co. Date</td>
-            <td><div class="new-tag">+ NEW</div><br><span class="sf sf-g">Project → Next Steer. Co. Date</span></td>
+            <td><span class="sf sf-g">Project → Next Steer. Co. Date</span></td>
           </tr>
           <tr><td>Progress Percentage</td><td><span class="sf sf-n">Project → Completion Percentage</span>&nbsp;%</td></tr>
         </tbody>
