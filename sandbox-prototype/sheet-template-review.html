@@ -147,6 +147,30 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .cr-resolved-note{padding:7px 12px;font-size:11px;color:var(--new-color);background:#f0fff4;border-top:1px solid var(--new-border);display:none;align-items:center;gap:5px;}
 .cr-resolved-note svg{width:12px;height:12px;}
 
+/* View toggle */
+.view-toggle{display:flex;gap:2px;background:#f0f0f0;border-radius:5px;padding:2px;margin-left:auto;}
+.vt-btn{padding:3px 10px;border-radius:3px;border:none;background:transparent;font-size:11px;font-weight:600;color:var(--text-3);cursor:pointer;font-family:inherit;transition:all .15s;}
+.vt-btn.active{background:#fff;color:var(--text-1);box-shadow:var(--shadow-sm);}
+
+/* Full table view */
+.ftv-tab{padding:14px 16px;}
+.ftv-legend{display:flex;gap:14px;margin-bottom:10px;}
+.ftv-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3);}
+.ftv-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.ftv-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.ftv-tbl thead th{padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);background:#fafafa;border:1px solid var(--border);text-align:left;white-space:nowrap;}
+.ftv-tbl thead th.rn{width:28px;text-align:center;color:var(--text-4);}
+.ftv-tbl tbody td{padding:7px 10px;border:1px solid var(--border);color:var(--text-1);vertical-align:middle;}
+.ftv-tbl tbody td.rn{text-align:center;color:var(--text-4);font-size:11px;background:#fafafa;}
+.ftv-tbl tr.tr-new td{background:#f0fff4;}
+.ftv-tbl tr.tr-new td.rn{background:#e6faea;}
+.ftv-tbl tr.tr-new td:not(.rn){color:var(--new-color);}
+.ftv-tbl tr.tr-del td{background:#fff5f5;text-decoration:line-through;color:#da1e28;}
+.ftv-tbl tr.tr-del td.rn{background:#ffe8e8;text-decoration:none;}
+.ftv-tbl td.td-mod{background:#fffbf0;}
+.ftv-tbl td.td-mod .val-old{font-size:11px;}
+.ftv-tbl td.td-mod .val-new{font-size:11px;}
+
 /* Tab sub-header inside group */
 .tab-sub{display:flex;align-items:center;gap:8px;padding:8px 16px 6px;background:#fafafa;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
 .tab-sub-icon{width:14px;height:14px;flex-shrink:0;color:var(--text-4);}
@@ -373,8 +397,15 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         <span class="eg-chip ec-mod">1 modified</span>
         <span class="eg-chip ec-del">2 deleted</span>
       </div>
+      <div class="view-toggle" onclick="event.stopPropagation()">
+        <button class="vt-btn active" onclick="switchDataView('list',this)">List</button>
+        <button class="vt-btn" onclick="switchDataView('table',this)">Table</button>
+      </div>
     </div>
     <div class="eg-body">
+
+      <!-- ══ LIST VIEW ══ -->
+      <div id="data-list-view">
 
       <!-- ── Main tab ── -->
       <div class="tab-sub">
@@ -512,6 +543,79 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         </div>
       </div>
 
+      </div><!-- /data-list-view -->
+
+      <!-- ══ TABLE VIEW ══ -->
+      <div id="data-table-view" style="display:none;">
+
+        <!-- Main tab table -->
+        <div class="ftv-tab">
+          <div class="tab-sub" style="margin:-14px -16px 12px;padding-left:16px;">
+            <svg class="tab-sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <span class="tab-sub-name">Main</span>
+            <div class="tab-sub-chips">
+              <span class="tab-sub-chip tsc-new">1 new</span>
+              <span class="tab-sub-chip tsc-mod">1 modified</span>
+              <span class="tab-sub-chip tsc-del">1 deleted</span>
+            </div>
+          </div>
+          <div class="ftv-legend">
+            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#a7f0ba;"></div>New row</div>
+            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#ffd7d9;"></div>Deleted row</div>
+            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#fffbf0;border:1px solid #ffbf00;"></div>Modified cell</div>
+          </div>
+          <table class="ftv-tbl">
+            <thead>
+              <tr><th class="rn">#</th><th>RAID Type</th><th>RAID Status</th><th>Impact</th><th>Mitigation</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="rn">1</td><td>Risk</td><td>Upcoming</td><td>Multi select 2</td><td>80%</td><td>To do</td></tr>
+              <tr><td class="rn">2</td><td>Issue</td><td>Completed</td><td>Multi select 1</td><td>45%</td><td>Completed</td></tr>
+              <tr><td class="rn">3</td><td>Assumption</td><td>Completed</td><td>Multi select 1</td><td>65%</td><td class="td-mod"><span class="val-old">To do</span> → <span class="val-new">In progress</span></td></tr>
+              <tr><td class="rn">4</td><td>Dependency</td><td>Live</td><td>Multi select 2</td><td>12%</td><td>Blocked</td></tr>
+              <tr><td class="rn">5</td><td>Risk</td><td>Upcoming</td><td>Multi select 1</td><td>53%</td><td>Completed</td></tr>
+              <tr><td class="rn">6</td><td>Assumption</td><td>Upcoming</td><td>Multi select 1</td><td>56%</td><td>To do</td></tr>
+              <tr class="tr-del"><td class="rn">7</td><td>Issue</td><td>Postponed</td><td>Multi select 2</td><td>89%</td><td>To do</td></tr>
+              <tr><td class="rn">8</td><td>Dependency</td><td>Blocked</td><td>Multi select 1</td><td>86%</td><td>In progress</td></tr>
+              <tr><td class="rn">9</td><td>Risk</td><td>Upcoming</td><td>Multi select 2</td><td>56%</td><td>Blocked</td></tr>
+              <tr><td class="rn">10</td><td>Assumption</td><td>Live</td><td>Multi select 1</td><td>87%</td><td>Completed</td></tr>
+              <tr><td class="rn">11</td><td>Risk</td><td>Postponed</td><td>Multi select 2</td><td>89%</td><td>In progress</td></tr>
+              <tr><td class="rn">12</td><td>Assumption</td><td>Blocked</td><td>Multi select 1</td><td>90%</td><td>Blocked</td></tr>
+              <tr class="tr-new"><td class="rn">13</td><td>Risk</td><td>Upcoming</td><td>Multi select 1</td><td>73%</td><td>In progress</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Overview tab table -->
+        <div class="ftv-tab" style="border-top:1px solid var(--border);">
+          <div class="tab-sub" style="margin:-14px -16px 12px;padding-left:16px;">
+            <svg class="tab-sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <span class="tab-sub-name">Overview</span>
+            <div class="tab-sub-chips">
+              <span class="tab-sub-chip tsc-new">1 new</span>
+              <span class="tab-sub-chip tsc-del">1 deleted</span>
+            </div>
+          </div>
+          <div class="ftv-legend">
+            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#a7f0ba;"></div>New row</div>
+            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#ffd7d9;"></div>Deleted row</div>
+          </div>
+          <table class="ftv-tbl">
+            <thead>
+              <tr><th class="rn">#</th><th>Owner</th><th>Category</th><th>Priority</th><th>Due Date</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="rn">1</td><td>Michael C.</td><td>Governance</td><td>High</td><td>15 Jan 2026</td><td>Completed</td></tr>
+              <tr class="tr-del"><td class="rn">2</td><td>James L.</td><td>Data Migration</td><td>Medium</td><td>15 Mar 2026</td><td>Completed</td></tr>
+              <tr><td class="rn">3</td><td>Emma R.</td><td>Training</td><td>Low</td><td>30 Mar 2026</td><td>In progress</td></tr>
+              <tr><td class="rn">4</td><td>David P.</td><td>Security</td><td>High</td><td>20 Apr 2026</td><td>Not started</td></tr>
+              <tr class="tr-new"><td class="rn">5</td><td>Sarah K.</td><td>Integration</td><td>High</td><td>30 Apr 2026</td><td>Not started</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /data-table-view -->
+
     </div>
   </div>
 
@@ -646,6 +750,14 @@ function resolveConflict(resolverId, itemId, version, versionEl) {
   cb.onclick = function() { toggleCb(this); };
   conflictResolved = true;
   updateCounts();
+}
+
+// ── Data view toggle ──
+function switchDataView(view, btn) {
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('data-list-view').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('data-table-view').style.display = view === 'table' ? '' : 'none';
 }
 
 // ── Filter ──
