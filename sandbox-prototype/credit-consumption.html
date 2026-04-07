@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credit Consumption · Settings · Rocketlane</title>
+  <style>
+    :root {
+      --brand: #0f62fe; --brand-dark: #0043ce; --brand-light: #edf5ff; --brand-muted: #97c1ff;
+      --bg: #f4f4f4; --surface: #fff; --border: #e0e0e0; --border-strong: #c6c6c6;
+      --text-1: #161616; --text-2: #525252; --text-3: #6f6f6f; --text-4: #a8a8a8;
+      --success: #24a148; --success-bg: #defbe6; --success-border: #a7f0ba;
+      --warning: #e07b00; --warning-bg: #fff8e1; --warning-border: #ffd54f;
+      --danger: #da1e28; --danger-bg: #fff1f1; --danger-border: #ffd7d9;
+      --info: #0f62fe; --info-bg: #edf5ff; --info-border: #97c1ff;
+      --radius: 8px; --radius-sm: 4px;
+      --shadow-sm: 0px 0.8px 1.8px rgba(0,0,0,0.13), 0px 0.15px 0.45px rgba(0,0,0,0.11);
+      --shadow: 0px 1.6px 3.6px rgba(0,0,0,0.13), 0px 0.3px 0.9px rgba(0,0,0,0.11);
+      --shadow-md: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11);
+      --shadow-lg: 0px 6.4px 14.4px rgba(0,0,0,0.13), 0px 1.2px 3.6px rgba(0,0,0,0.11);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 18px; color: var(--text-1); background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Left nav rail ── */
+    .nav-rail { width: 48px; flex-shrink: 0; background: #f2f2f2; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 4px; }
+    .nav-icon { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; cursor: pointer; color: var(--text-3); transition: all 0.12s; }
+    .nav-icon:hover { color: var(--text-1); background: rgba(0,0,0,0.05); }
+    .nav-icon.active { background: var(--surface); color: var(--text-1); box-shadow: var(--shadow-sm); }
+    .nav-icon svg { width: 16px; height: 16px; stroke-width: 1.75; }
+    .nav-spacer { flex: 1; }
+    .nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #525252; color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; cursor: pointer; margin-bottom: 4px; }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .topbar { height: 48px; background: var(--surface); border-bottom: 1px solid #f4f4f4; display: flex; align-items: center; padding: 0 24px 0 16px; gap: 8px; flex-shrink: 0; }
+    .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--text-2); }
+    .breadcrumb a { color: var(--brand); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--brand-dark); }
+    .breadcrumb-sep { color: #e3e3e3; }
+    .breadcrumb-current { color: var(--text-1); }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 700; color: #fff; cursor: pointer; flex-shrink: 0; }
+
+    /* ── Settings layout ── */
+    .settings-layout { flex: 1; display: flex; overflow: hidden; }
+    .settings-sidebar { width: 232px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 0; }
+    .settings-search-wrap { padding: 10px 10px 8px; border-bottom: 1px solid var(--border); }
+    .settings-search { width: 100%; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--text-2); outline: none; background: var(--bg); font-family: inherit; }
+    .settings-search:focus { border-color: var(--brand); }
+    .settings-nav-section { padding: 12px 12px 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-4); }
+    .settings-nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 13px; color: var(--text-2); text-decoration: none; transition: all 0.12s; border-left: 2px solid transparent; cursor: pointer; }
+    .settings-nav-item:hover { color: var(--text-1); background: var(--bg); }
+    .settings-nav-item.active { color: var(--brand); font-weight: 600; border-left-color: var(--brand); background: var(--brand-light); }
+    .settings-nav-item.sub { padding-left: 32px; }
+    .settings-nav-item svg { width: 14px; height: 14px; stroke-width: 1.75; flex-shrink: 0; }
+
+    /* ── Content ── */
+    .content { flex: 1; overflow-y: auto; }
+    .content-inner { padding: 28px 32px; max-width: 1100px; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+    .page-title { font-size: 18px; font-weight: 600; line-height: 24px; }
+    .page-desc { font-size: 13px; color: var(--text-3); margin-top: 3px; }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius-sm); font-size: 13px; line-height: 18px; letter-spacing: 0.16px; font-weight: 590; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; font-family: inherit; }
+    .btn-primary { background: #1d1d1f; color: #fff; box-shadow: var(--shadow-sm); }
+    .btn-primary:hover { background: #2d2d2f; }
+    .btn-default { background: var(--surface); color: var(--text-1); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .btn-default:hover { background: var(--bg); border-color: var(--border-strong); }
+    .btn-ghost { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text-1); }
+    .btn-icon { padding: 6px; width: 28px; height: 28px; border-radius: var(--radius-sm); background: transparent; border: none; color: var(--text-3); cursor: pointer; display: grid; place-items: center; transition: all 0.12s; }
+    .btn-icon:hover { background: var(--bg); color: var(--text-1); }
+    .btn-icon svg { width: 14px; height: 14px; stroke-width: 1.75; }
+    .btn svg { width: 13px; height: 13px; stroke-width: 2; flex-shrink: 0; }
+
+    /* ── Stats grid ── */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow-sm); }
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-4); margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 600; line-height: 1.1; color: var(--text-1); }
+    .stat-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+    .progress-fill { height: 100%; background: var(--brand); border-radius: 4px; transition: width 0.3s; }
+    .progress-label { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+    /* ── Mini stats ── */
+    .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    .mini-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow-sm); }
+    .mini-stat-icon { width: 20px; height: 20px; margin-bottom: 8px; }
+    .mini-stat-icon svg { width: 16px; height: 16px; stroke-width: 1.75; color: var(--brand); }
+    .mini-stat-val { font-size: 22px; font-weight: 600; color: var(--text-1); line-height: 1.1; }
+    .mini-stat-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    /* ── Period selector ── */
+    .period-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .period-select { padding: 5px 28px 5px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; color: var(--text-1); background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236f6f6f' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center; -webkit-appearance: none; outline: none; cursor: pointer; }
+    .period-nav { display: flex; align-items: center; gap: 6px; }
+    .period-nav-btn { width: 26px; height: 26px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-2); display: grid; place-items: center; cursor: pointer; transition: all 0.12s; }
+    .period-nav-btn:hover { background: var(--bg); border-color: var(--border-strong); }
+    .period-nav-btn svg { width: 12px; height: 12px; stroke-width: 2.5; }
+    .period-range { font-size: 13px; font-weight: 500; color: var(--text-1); }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; gap: 0; }
+    .tab { padding: 8px 0; margin-right: 20px; font-size: 13px; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.12s; user-select: none; }
+    .tab:hover { color: var(--text-1); }
+    .tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
+
+    /* ── Filters row ── */
+    .filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .filter-group { display: flex; align-items: center; gap: 6px; }
+    .filter-label { font-size: 12px; color: var(--text-3); }
+    .filter-select { padding: 5px 26px 5px 9px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; font-family: inherit; color: var(--text-1); background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236f6f6f' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 6px center; -webkit-appearance: none; outline: none; cursor: pointer; height: 28px; }
+    .attribution-btns { display: flex; align-items: center; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+    .attr-btn { padding: 5px 10px; font-size: 12px; font-family: inherit; cursor: pointer; border: none; background: var(--surface); color: var(--text-2); transition: all 0.12s; white-space: nowrap; }
+    .attr-btn.active { background: var(--text-1); color: #fff; }
+    .attr-label { font-size: 12px; color: var(--text-3); }
+    .filters-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+
+    /* ── Table ── */
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 9px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); background: #fafafa; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    thead th.sortable { cursor: pointer; user-select: none; }
+    thead th.sortable:hover { color: var(--text-1); }
+    thead th .sort-icon { display: inline-flex; vertical-align: middle; margin-left: 3px; opacity: 0.4; }
+    thead th.sorted .sort-icon { opacity: 1; color: var(--brand); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+    tbody td { padding: 11px 14px; font-size: 13px; color: var(--text-1); vertical-align: middle; }
+    .td-muted { color: var(--text-3); font-size: 12px; }
+    .table-footer { padding: 10px 14px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--border); background: #fafafa; display: flex; align-items: center; justify-content: space-between; }
+
+    /* ── Agent badge ── */
+    .agent-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 120px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .badge-signal-creation { background: #edf5ff; color: #0043ce; }
+    .badge-signal-detection { background: #defbe6; color: #0e6027; }
+    .badge-doc-gen { background: #f3e8ff; color: #6927da; }
+    .badge-doc-update { background: #fff8e1; color: #b45309; }
+    .badge-analysis { background: #fce7f3; color: #9d174d; }
+    .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    /* ── Credit chip ── */
+    .credit-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--text-1); }
+    .credit-chip svg { width: 13px; height: 13px; color: var(--brand); stroke-width: 2; }
+
+    /* ── User cell ── */
+    .user-cell { display: flex; align-items: center; gap: 7px; }
+    .user-avatar { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 8px; font-weight: 700; color: #fff; flex-shrink: 0; }
+
+    /* ── Action cell ── */
+    .action-cell { font-size: 13px; color: var(--text-1); }
+    .action-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+    /* ── Modal overlay ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; display: flex; align-items: flex-end; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-panel { width: 480px; height: 100%; background: var(--surface); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+    .modal-overlay.open .modal-panel { transform: translateX(0); }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .modal-title { font-size: 15px; font-weight: 600; color: var(--text-1); }
+    .modal-meta { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .modal-close { width: 28px; height: 28px; border: none; background: transparent; cursor: pointer; display: grid; place-items: center; border-radius: var(--radius-sm); color: var(--text-3); transition: all 0.12s; }
+    .modal-close:hover { background: var(--bg); color: var(--text-1); }
+    .modal-close svg { width: 16px; height: 16px; stroke-width: 2; }
+    .modal-body { flex: 1; overflow-y: auto; padding: 0; }
+    .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; background: #fafafa; }
+    .modal-footer-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 13px; }
+    .modal-footer-row.total { font-size: 15px; font-weight: 600; color: var(--text-1); padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
+    .modal-footer-label { color: var(--text-2); }
+    .modal-footer-value { font-weight: 600; color: var(--text-1); }
+
+    /* ── Timeline ── */
+    .timeline { padding: 0; }
+    .tl-item { display: flex; gap: 0; position: relative; }
+    .tl-item:not(:last-child) .tl-line { position: absolute; left: 30px; top: 44px; bottom: 0; width: 1px; background: var(--border); }
+    .tl-left { width: 60px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding-top: 16px; }
+    .tl-icon { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; z-index: 1; }
+    .tl-icon-user { background: #edf5ff; color: var(--brand); }
+    .tl-icon-system { background: #f2f2f2; color: var(--text-3); }
+    .tl-icon svg { width: 13px; height: 13px; stroke-width: 2; }
+    .tl-content { flex: 1; padding: 14px 20px 20px 0; border-bottom: 1px solid var(--border); }
+    .tl-item:last-child .tl-content { border-bottom: none; }
+    .tl-role-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .tl-role { font-size: 12px; font-weight: 600; color: var(--text-2); }
+    .tl-num { width: 18px; height: 18px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--text-3); flex-shrink: 0; }
+    .tl-desc { font-size: 13px; line-height: 20px; color: var(--text-1); margin-bottom: 6px; }
+    .tl-calc { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-3); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; margin-bottom: 6px; }
+    .tl-calc strong { color: var(--text-2); }
+    .tl-meta { font-size: 11px; color: var(--text-4); display: flex; align-items: center; gap: 6px; }
+    .tl-credits-col { flex-shrink: 0; width: 72px; text-align: right; padding: 14px 20px 20px 0; font-size: 14px; font-weight: 600; color: var(--text-1); }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-3); }
+    .empty-state svg { width: 32px; height: 32px; stroke-width: 1.25; margin-bottom: 10px; }
+    .empty-state p { font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<!-- Left nav rail -->
+<nav class="nav-rail">
+  <div class="nav-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  </div>
+  <div class="nav-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 17H5a2 2 0 0 0-2 2v2h18v-2a2 2 0 0 0-2-2h-4"/><circle cx="12" cy="7" r="4"/></svg>
+  </div>
+  <div class="nav-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v4M16 4v4M3 10h18"/></svg>
+  </div>
+  <div class="nav-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="nav-icon active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+  </div>
+  <div class="nav-avatar">SC</div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="#">Settings</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">Nitro</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">Credit consumption</span>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" style="background:#0f62fe;">SC</div>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+    <!-- Settings sidebar -->
+    <aside class="settings-sidebar">
+      <div class="settings-search-wrap">
+        <input class="settings-search" type="text" placeholder="Search settings...">
+      </div>
+      <div class="settings-nav-section">Personal</div>
+      <a class="settings-nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profile
+      </a>
+      <a class="settings-nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </a>
+      <div class="settings-nav-section">Account</div>
+      <a class="settings-nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Plans &amp; Billing
+      </a>
+      <a class="settings-nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Team members
+      </a>
+      <a class="settings-nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Roles &amp; Placeholders
+      </a>
+      <div class="settings-nav-section">Nitro</div>
+      <a class="settings-nav-item active" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Credit consumption
+      </a>
+      <a class="settings-nav-item sub" href="#">Budget alerts</a>
+      <a class="settings-nav-item sub" href="#">Usage by agent</a>
+    </aside>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="content-inner">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Credit consumption</div>
+            <div class="page-desc">Track Nitro AI credit usage across agents, users, and runs.</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-default">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export
+            </button>
+            <button class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Buy credits
+            </button>
+          </div>
+        </div>
+
+        <!-- Balance stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Balance now</div>
+            <div class="stat-value">2,728</div>
+            <div class="stat-sub">credits remaining</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:73%"></div></div>
+            <div class="progress-label">73% used</div>
+            <div style="font-size:11px;color:var(--text-4);margin-top:6px;">Live balance. Not affected by time filter.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pool limit</div>
+            <div class="stat-value">10,000</div>
+            <div class="stat-sub">Rollover: 0 &nbsp;·&nbsp; New: 10,000</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:8px;">5 licenses × 2,000 credits</div>
+          </div>
+        </div>
+
+        <!-- Period selector -->
+        <div class="period-bar">
+          <select class="period-select">
+            <option>This month</option>
+            <option>Last month</option>
+            <option>Last 7 days</option>
+            <option>Custom range</option>
+          </select>
+          <div class="period-nav">
+            <button class="period-nav-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="period-range">Apr 1, 2026 – Apr 7, 2026</span>
+            <button class="period-nav-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mini stats -->
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <div class="mini-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="mini-stat-val">2,875</div>
+            <div class="mini-stat-label">Credits used in period</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="mini-stat-val">411</div>
+            <div class="mini-stat-label">Avg daily</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="mini-stat-val">3</div>
+            <div class="mini-stat-label">Active users</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="mini-stat-val">7</div>
+            <div class="mini-stat-label">Total runs</div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this, 'log')">Usage Log</div>
+          <div class="tab" onclick="switchTab(this, 'analytics')">Analytics</div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row">
+          <div class="filter-group">
+            <span class="filter-label">Agent</span>
+            <select class="filter-select">
+              <option>All</option>
+              <option>Doc Generation</option>
+              <option>Doc Update</option>
+              <option>Analysis</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">User</span>
+            <select class="filter-select">
+              <option>All</option>
+              <option>AJ</option>
+              <option>Vivek</option>
+              <option>Sarah Chen</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Credits</span>
+            <select class="filter-select">
+              <option>All</option>
+              <option>0–100</option>
+              <option>100–500</option>
+              <option>500+</option>
+            </select>
+          </div>
+          <div class="filter-group" style="gap:8px;">
+            <span class="attr-label" style="font-size:12px;color:var(--text-3);">Attribution mode</span>
+            <div class="attribution-btns">
+              <button class="attr-btn">Full run totals</button>
+              <button class="attr-btn active">Credits in range</button>
+            </div>
+          </div>
+          <div class="filters-right">
+            <button class="btn-icon" title="Search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </button>
+            <button class="btn-icon" title="Download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <table id="usage-table">
+            <thead>
+              <tr>
+                <th class="sortable sorted">Created On <span class="sort-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span></th>
+                <th class="sortable">Last Updated <span class="sort-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span></th>
+                <th>Created By</th>
+                <th>Last Updated By</th>
+                <th>Agent</th>
+                <th>Action</th>
+                <th class="sortable" style="text-align:right;">Credits <span class="sort-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span></th>
+                <th style="width:40px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1 -->
+              <tr>
+                <td>
+                  <div style="font-size:13px;">Apr 10, 8:15 PM IST</div>
+                </td>
+                <td>
+                  <div style="font-size:13px;">Apr 20, 9:10 AM IST</div>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#0f62fe;">AJ</div>
+                    <span>AJ</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#24a148;">VK</div>
+                    <span>Vivek</span>
+                  </div>
+                </td>
+                <td><span class="agent-badge badge-doc-gen"><span class="badge-dot"></span>Doc Generation</span></td>
+                <td>
+                  <div class="action-cell">Q2 Renewal Playbook</div>
+                  <div class="action-sub">3 runs · 23 turns</div>
+                </td>
+                <td style="text-align:right;">
+                  <div class="credit-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    2,875
+                  </div>
+                </td>
+                <td>
+                  <button class="btn-icon" onclick="openModal('Q2 Renewal Playbook', 'Apr 10 – Apr 20, 2026', 0)" title="View detail">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </td>
+              </tr>
+              <!-- Row 2 -->
+              <tr>
+                <td><div style="font-size:13px;">Apr 8, 10:00 PM IST</div></td>
+                <td><div style="font-size:13px;">Apr 8, 10:30 PM IST</div></td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#6927da;">SC</div>
+                    <span>Sarah Chen</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#6f6f6f;font-size:7px;">SYS</div>
+                    <span style="color:var(--text-3);">System</span>
+                  </div>
+                </td>
+                <td><span class="agent-badge badge-signal-detection"><span class="badge-dot"></span>Signal Detection</span></td>
+                <td>
+                  <div class="action-cell">Meeting: Acme Corp QBR</div>
+                  <div class="action-sub">1 run · 9 turns</div>
+                </td>
+                <td style="text-align:right;">
+                  <div class="credit-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    100
+                  </div>
+                </td>
+                <td>
+                  <button class="btn-icon" onclick="openModal('Meeting: Acme Corp QBR', 'Apr 8, 2026', 1)" title="View detail">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </td>
+              </tr>
+              <!-- Row 3 -->
+              <tr>
+                <td><div style="font-size:13px;">Apr 6, 3:30 AM IST</div></td>
+                <td><div style="font-size:13px;">Apr 6, 3:30 AM IST</div></td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#24a148;">VK</div>
+                    <span>Vivek</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#24a148;">VK</div>
+                    <span>Vivek</span>
+                  </div>
+                </td>
+                <td><span class="agent-badge badge-signal-creation"><span class="badge-dot"></span>Signal Creation</span></td>
+                <td>
+                  <div class="action-cell">Churn Risk Detection</div>
+                  <div class="action-sub">2 runs · 6 turns</div>
+                </td>
+                <td style="text-align:right;">
+                  <div class="credit-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    230
+                  </div>
+                </td>
+                <td>
+                  <button class="btn-icon" onclick="openModal('Churn Risk Detection', 'Apr 6, 2026', 2)" title="View detail">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </td>
+              </tr>
+              <!-- Row 4 -->
+              <tr>
+                <td><div style="font-size:13px;">Apr 5, 1:00 AM IST</div></td>
+                <td><div style="font-size:13px;">Apr 5, 1:01 AM IST</div></td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#6f6f6f;font-size:7px;">SYS</div>
+                    <span style="color:var(--text-3);">System</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#6f6f6f;font-size:7px;">SYS</div>
+                    <span style="color:var(--text-3);">System</span>
+                  </div>
+                </td>
+                <td><span class="agent-badge badge-signal-detection"><span class="badge-dot"></span>Signal Detection</span></td>
+                <td>
+                  <div class="action-cell">Email: Renewal discussion (Globex)</div>
+                  <div class="action-sub">1 run · 11 turns</div>
+                </td>
+                <td style="text-align:right;">
+                  <div class="credit-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    325
+                  </div>
+                </td>
+                <td>
+                  <button class="btn-icon" onclick="openModal('Email: Renewal discussion (Globex)', 'Apr 5, 2026', 3)" title="View detail">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </td>
+              </tr>
+              <!-- Row 5 -->
+              <tr>
+                <td><div style="font-size:13px;">Apr 3, 11:20 AM IST</div></td>
+                <td><div style="font-size:13px;">Apr 4, 2:15 PM IST</div></td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#0f62fe;">AJ</div>
+                    <span>AJ</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" style="background:#0f62fe;">AJ</div>
+                    <span>AJ</span>
+                  </div>
+                </td>
+                <td><span class="agent-badge badge-doc-update"><span class="badge-dot"></span>Doc Update</span></td>
+                <td>
+                  <div class="action-cell">Onboarding Checklist v3</div>
+                  <div class="action-sub">2 runs · 8 turns</div>
+                </td>
+                <td style="text-align:right;">
+                  <div class="credit-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    345
+                  </div>
+                </td>
+                <td>
+                  <button class="btn-icon" onclick="openModal('Onboarding Checklist v3', 'Apr 3–4, 2026', 4)" title="View detail">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-footer">
+            <span>5 runs · 57 turns</span>
+            <span style="font-weight:600;color:var(--text-1);">2,875 credits</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal-panel" id="modal-panel">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Run detail</div>
+        <div class="modal-meta" id="modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+  // ── Tab switching ──
+  function switchTab(el, name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── Modal data ──
+  const runData = [
+    {
+      subtotalLabel: '3 runs · 23 turns',
+      total: 2875,
+      turns: [
+        {
+          role: 'User',
+          type: 'user',
+          desc: 'Document created by manual run.',
+          detail: '100 sections × 25 credits',
+          credits: 2500,
+          by: 'AJ',
+          time: 'Apr 10, 8:15 PM IST'
+        },
+        {
+          role: 'System',
+          type: 'system',
+          desc: 'Document updated by System.',
+          detail: '5 sections updated × 25 credits',
+          credits: 125,
+          by: 'System',
+          time: 'Apr 15, 2:20 PM IST'
+        },
+        {
+          role: 'User',
+          type: 'user',
+          desc: 'Document updated by Vivek manually.',
+          detail: '10 sections updated × 25 credits',
+          credits: 250,
+          by: 'Vivek',
+          time: 'Apr 20, 9:10 AM IST'
+        }
+      ]
+    },
+    {
+      subtotalLabel: '1 run · 9 turns',
+      total: 100,
+      turns: [
+        {
+          role: 'System',
+          type: 'system',
+          desc: 'Signal detection triggered by meeting transcript.',
+          detail: '9 turns × ~11 credits',
+          credits: 100,
+          by: 'System',
+          time: 'Apr 8, 10:00 PM IST'
+        }
+      ]
+    },
+    {
+      subtotalLabel: '2 runs · 6 turns',
+      total: 230,
+      turns: [
+        {
+          role: 'User',
+          type: 'user',
+          desc: 'Create a signal to detect churn risk based on recent activity patterns.',
+          detail: '4 turns × ~12 credits',
+          credits: 5,
+          by: 'Vivek',
+          time: 'Apr 6, 3:15 AM IST'
+        },
+        {
+          role: 'Agent',
+          type: 'system',
+          desc: "Built Churn Risk Detection signal with the following configuration: Data Sources — login frequency, feature adoption, support tickets.",
+          detail: '4 turns processed',
+          credits: 90,
+          by: 'Nitro Agent',
+          time: 'Apr 6, 3:15 AM IST'
+        },
+        {
+          role: 'User',
+          type: 'user',
+          desc: 'Refine the signal to include additional data sources.',
+          detail: '2 turns',
+          credits: 5,
+          by: 'Vivek',
+          time: 'Apr 6, 3:16 AM IST'
+        },
+        {
+          role: 'Agent',
+          type: 'system',
+          desc: 'Updated signal to include support ticket frequency — added Zendesk ticket volume (last 30 days) as a weighted input.',
+          detail: '2 turns processed',
+          credits: 130,
+          by: 'Nitro Agent',
+          time: 'Apr 6, 3:16 AM IST'
+        }
+      ]
+    },
+    {
+      subtotalLabel: '1 run · 11 turns',
+      total: 325,
+      turns: [
+        {
+          role: 'System',
+          type: 'system',
+          desc: 'Renewal risk signal detected in email thread with Globex.',
+          detail: '6 turns processed',
+          credits: 175,
+          by: 'System',
+          time: 'Apr 5, 1:00 AM IST'
+        },
+        {
+          role: 'System',
+          type: 'system',
+          desc: 'Sentiment analysis and deal stage extraction completed.',
+          detail: '5 turns processed',
+          credits: 150,
+          by: 'System',
+          time: 'Apr 5, 1:01 AM IST'
+        }
+      ]
+    },
+    {
+      subtotalLabel: '2 runs · 8 turns',
+      total: 345,
+      turns: [
+        {
+          role: 'User',
+          type: 'user',
+          desc: 'Document created by manual run.',
+          detail: '8 sections × 25 credits',
+          credits: 200,
+          by: 'AJ',
+          time: 'Apr 3, 11:20 AM IST'
+        },
+        {
+          role: 'System',
+          type: 'system',
+          desc: 'Document auto-updated by scheduled system run.',
+          detail: '3 sections updated × 25 credits',
+          credits: 75,
+          by: 'System',
+          time: 'Apr 4, 12:00 AM IST'
+        },
+        {
+          role: 'User',
+          type: 'user',
+          desc: 'Document updated by AJ manually.',
+          detail: '2 sections updated × 25 credits + 20 credits overhead',
+          credits: 70,
+          by: 'AJ',
+          time: 'Apr 4, 2:15 PM IST'
+        }
+      ]
+    }
+  ];
+
+  function roleIcon(type) {
+    if (type === 'user') {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+    }
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>`;
+  }
+
+  function openModal(title, meta, idx) {
+    const data = runData[idx];
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-meta').textContent = meta + ' · ' + data.subtotalLabel;
+
+    // column header
+    let bodyHtml = `
+      <div style="display:flex;align-items:center;padding:8px 20px 8px 0;border-bottom:1px solid var(--border);background:#fafafa;">
+        <div style="width:60px;flex-shrink:0;"></div>
+        <div style="flex:1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-4);">Description</div>
+        <div style="width:72px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-4);padding-right:20px;">Credits</div>
+      </div>
+      <div class="timeline">`;
+    data.turns.forEach((turn, i) => {
+      const isLast = i === data.turns.length - 1;
+      bodyHtml += `
+        <div class="tl-item" style="position:relative;">
+          ${!isLast ? '<div class="tl-line"></div>' : ''}
+          <div class="tl-left">
+            <div class="tl-icon tl-icon-${turn.type === 'user' ? 'user' : 'system'}">${roleIcon(turn.type)}</div>
+          </div>
+          <div class="tl-content">
+            <div class="tl-role-row">
+              <div class="tl-num">${i + 1}</div>
+              <div class="tl-role">${turn.role}</div>
+            </div>
+            <div class="tl-desc">${turn.desc}</div>
+            <div class="tl-calc"><strong>${turn.detail}</strong></div>
+            <div class="tl-meta">
+              <span>${turn.by}</span>
+              <span style="color:var(--border-strong);">·</span>
+              <span>${turn.time}</span>
+            </div>
+          </div>
+          <div class="tl-credits-col">${turn.credits.toLocaleString()}</div>
+        </div>`;
+    });
+    bodyHtml += '</div></div>';
+
+    document.getElementById('modal-body').innerHTML = bodyHtml;
+
+    const subtotal = data.turns.reduce((sum, t) => sum + t.credits, 0);
+    document.getElementById('modal-footer').innerHTML = `
+      <div class="modal-footer-row">
+        <span class="modal-footer-label">Subtotal (${data.turns.length} turn${data.turns.length !== 1 ? 's' : ''})</span>
+        <span class="modal-footer-value">${subtotal.toLocaleString()}</span>
+      </div>
+      <div class="modal-footer-row total">
+        <span>Total credits</span>
+        <span>${data.total.toLocaleString()}</span>
+      </div>`;
+
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>
