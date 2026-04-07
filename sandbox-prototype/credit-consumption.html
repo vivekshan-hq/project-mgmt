@@ -632,7 +632,7 @@
   // ── Modal data ──
   const runData = [
     {
-      subtotalLabel: '3 runs · 23 turns',
+      runs: 3, subtotalLabel: '3 runs · 23 turns',
       total: 2875,
       turns: [
         {
@@ -665,7 +665,7 @@
       ]
     },
     {
-      subtotalLabel: '1 run · 9 turns',
+      runs: 1, subtotalLabel: '1 run · 9 turns',
       total: 100,
       turns: [
         {
@@ -680,7 +680,7 @@
       ]
     },
     {
-      subtotalLabel: '2 runs · 6 turns',
+      runs: 2, subtotalLabel: '2 runs · 6 turns',
       total: 230,
       turns: [
         {
@@ -722,7 +722,7 @@
       ]
     },
     {
-      subtotalLabel: '1 run · 11 turns',
+      runs: 1, subtotalLabel: '1 run · 11 turns',
       total: 325,
       turns: [
         {
@@ -746,7 +746,7 @@
       ]
     },
     {
-      subtotalLabel: '2 runs · 8 turns',
+      runs: 2, subtotalLabel: '2 runs · 8 turns',
       total: 345,
       turns: [
         {
@@ -831,7 +831,7 @@
     const subtotal = data.turns.reduce((sum, t) => sum + t.credits, 0);
     document.getElementById('modal-footer').innerHTML = `
       <div class="modal-footer-row">
-        <span class="modal-footer-label">Subtotal (${data.turns.length} turn${data.turns.length !== 1 ? 's' : ''})</span>
+        <span class="modal-footer-label">Subtotal (${data.runs} run${data.runs !== 1 ? 's' : ''})</span>
         <span class="modal-footer-value">${subtotal.toLocaleString()}</span>
       </div>
       <div class="modal-footer-row total">
