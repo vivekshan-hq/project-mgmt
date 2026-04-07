@@ -312,13 +312,13 @@
       <!-- Filter chips -->
       <div class="stat-chips">
         <button class="stat-chip all active" id="chip-all" onclick="filterBy('all')">
-          <span class="chip-count">22</span> All Changes
+          <span class="chip-count">23</span> All Changes
         </button>
         <button class="stat-chip new-c" id="chip-new" onclick="filterBy('new')">
           <span class="chip-count">4</span> New
         </button>
         <button class="stat-chip mod-c" id="chip-mod" onclick="filterBy('mod')">
-          <span class="chip-count">16</span> Modified
+          <span class="chip-count">17</span> Modified
         </button>
         <button class="stat-chip del-c" id="chip-del" onclick="filterBy('del')">
           <span class="chip-count">2</span> Deleted
@@ -870,7 +870,37 @@
 
       </div>
 
-      <!-- Project Update Templates (1 MOD) -->
+      <!-- Sheet Templates (1 MOD) -->
+      <div class="change-section" data-category="mod">
+        <div class="section-header">
+          <span class="section-title">Sheet Templates</span>
+          <span class="section-count">1 change</span>
+        </div>
+
+        <div class="change-row">
+          <div class="change-row-header">
+            <div class="custom-cb checked" onclick="toggleCb(this);event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="type-badge type-mod">MOD</span>
+            <div class="row-name">
+              <div>
+                <div class="row-name-text">RAID Sheet</div>
+                <div class="row-name-sub" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="color:var(--mod-color);font-weight:600;">1 tab · 4 columns · 3 data rows · 1 highlight rule · 1 automation</span>
+                  <span style="color:var(--text-4)">·</span>
+                  <span style="color:var(--conflict);font-weight:600;">1 conflict</span>
+                </div>
+              </div>
+            </div>
+            <a href="sheet-template-review.html" target="_blank" class="expand-btn" style="text-decoration:none;">
+              Review changes
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bi-weekly Update Templates (1 MOD) -->
       <div class="change-section" data-category="mod">
         <div class="section-header">
           <span class="section-title">Bi-weekly Update Templates</span>
