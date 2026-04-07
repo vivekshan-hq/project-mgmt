@@ -806,7 +806,7 @@
     const subtotal = data.turns.reduce((sum, t) => sum + t.credits, 0);
     document.getElementById('modal-footer').innerHTML = `
       <div class="modal-footer-row">
-        <span class="modal-footer-label">Subtotal (${data.runs} run${data.runs !== 1 ? 's' : ''})</span>
+        <span class="modal-footer-label">Total (${data.runs} run${data.runs !== 1 ? 's' : ''})</span>
         <span class="modal-footer-value">${subtotal.toLocaleString()}</span>
       </div>
       <div class="modal-footer-row total">
