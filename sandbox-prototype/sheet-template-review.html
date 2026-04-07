@@ -152,24 +152,45 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .vt-btn{padding:3px 10px;border-radius:3px;border:none;background:transparent;font-size:11px;font-weight:600;color:var(--text-3);cursor:pointer;font-family:inherit;transition:all .15s;}
 .vt-btn.active{background:#fff;color:var(--text-1);box-shadow:var(--shadow-sm);}
 
-/* Full table view */
-.ftv-tab{padding:14px 16px;}
-.ftv-legend{display:flex;gap:14px;margin-bottom:10px;}
-.ftv-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3);}
-.ftv-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
-.ftv-tbl{width:100%;border-collapse:collapse;font-size:12px;}
-.ftv-tbl thead th{padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);background:#fafafa;border:1px solid var(--border);text-align:left;white-space:nowrap;}
-.ftv-tbl thead th.rn{width:28px;text-align:center;color:var(--text-4);}
-.ftv-tbl tbody td{padding:7px 10px;border:1px solid var(--border);color:var(--text-1);vertical-align:middle;}
-.ftv-tbl tbody td.rn{text-align:center;color:var(--text-4);font-size:11px;background:#fafafa;}
-.ftv-tbl tr.tr-new td{background:#f0fff4;}
-.ftv-tbl tr.tr-new td.rn{background:#e6faea;}
-.ftv-tbl tr.tr-new td:not(.rn){color:var(--new-color);}
-.ftv-tbl tr.tr-del td{background:#fff5f5;text-decoration:line-through;color:#da1e28;}
-.ftv-tbl tr.tr-del td.rn{background:#ffe8e8;text-decoration:none;}
-.ftv-tbl td.td-mod{background:#fffbf0;}
-.ftv-tbl td.td-mod .val-old{font-size:11px;}
-.ftv-tbl td.td-mod .val-new{font-size:11px;}
+/* Side-by-side table view */
+.sdiff-wrap{border:1px solid var(--border);border-radius:6px;overflow:hidden;font-size:12px;}
+/* Env header */
+.sdiff-env{display:grid;grid-template-columns:1fr 1fr;}
+.sdiff-env-prod{padding:7px 12px;background:#f4f4f4;color:#525252;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;border-right:2px solid var(--border-strong);}
+.sdiff-env-sand{padding:7px 12px;background:#edf5ff;color:#0f62fe;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;}
+/* Column headers */
+.sdiff-col-hd{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);border-bottom:2px solid var(--border-strong);}
+.sdiff-side{display:grid;grid-template-columns:26px repeat(5,1fr);}
+.sdiff-side.s-prod{border-right:2px solid var(--border-strong);}
+.sdiff-ch{padding:5px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);background:#fafafa;border-right:1px solid #f0f0f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sdiff-ch:last-child{border-right:none;}
+.sdiff-ch.rn{text-align:center;color:var(--text-4);}
+/* Data rows */
+.sdiff-row{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);}
+.sdiff-row .sdiff-side{display:grid;grid-template-columns:26px repeat(5,1fr);}
+.sdiff-row .sdiff-side.s-prod{border-right:2px solid var(--border-strong);}
+.sdiff-cell{padding:6px 8px;color:var(--text-1);border-right:1px solid #f0f0f0;font-size:12px;overflow:hidden;text-overflow:ellipsis;}
+.sdiff-cell:last-child{border-right:none;}
+.sdiff-cell.rn{text-align:center;color:var(--text-4);background:#fafafa;font-size:11px;}
+/* Row states */
+.sdiff-row.r-unchanged{}
+.sdiff-row.r-new .s-prod .sdiff-cell:not(.rn){color:var(--text-4);background:#fafafa;font-style:italic;}
+.sdiff-row.r-new .s-prod .rn{color:#e0e0e0;}
+.sdiff-row.r-new .s-sand .sdiff-cell:not(.rn){background:#f0fff4;color:var(--new-color);}
+.sdiff-row.r-new .s-sand .rn{background:#e6faea;color:var(--new-color);}
+.sdiff-row.r-del .s-prod .sdiff-cell:not(.rn){background:#fff5f5;color:var(--del-color);text-decoration:line-through;}
+.sdiff-row.r-del .s-prod .rn{background:#ffe8e8;text-decoration:none;color:var(--del-color);}
+.sdiff-row.r-del .s-sand .sdiff-cell:not(.rn){color:var(--text-4);background:#fafafa;font-style:italic;}
+.sdiff-row.r-del .s-sand .rn{color:#e0e0e0;}
+/* Modified cell */
+.sdiff-cell.c-old{background:#ffd7d9;color:var(--del-color);text-decoration:line-through;}
+.sdiff-cell.c-new{background:#defbe6;color:var(--new-color);}
+/* Legend */
+.sdiff-legend{display:flex;gap:14px;padding:8px 12px;background:#fafafa;border-top:1px solid var(--border);}
+.sdiff-leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3);}
+.sdiff-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid transparent;}
+/* Tab section in table view */
+.sdiff-tab-wrap{padding:12px 16px 14px;}
 
 /* Tab sub-header inside group */
 .tab-sub{display:flex;align-items:center;gap:8px;padding:8px 16px 6px;background:#fafafa;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
@@ -548,9 +569,9 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       <!-- ══ TABLE VIEW ══ -->
       <div id="data-table-view" style="display:none;">
 
-        <!-- Main tab table -->
-        <div class="ftv-tab">
-          <div class="tab-sub" style="margin:-14px -16px 12px;padding-left:16px;">
+        <!-- ── Main tab ── -->
+        <div class="sdiff-tab-wrap">
+          <div class="tab-sub" style="margin:-12px -16px 12px;padding-left:16px;">
             <svg class="tab-sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             <span class="tab-sub-name">Main</span>
             <div class="tab-sub-chips">
@@ -559,36 +580,95 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
               <span class="tab-sub-chip tsc-del">1 deleted</span>
             </div>
           </div>
-          <div class="ftv-legend">
-            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#a7f0ba;"></div>New row</div>
-            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#ffd7d9;"></div>Deleted row</div>
-            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#fffbf0;border:1px solid #ffbf00;"></div>Modified cell</div>
+          <div class="sdiff-wrap">
+            <!-- Env header -->
+            <div class="sdiff-env">
+              <div class="sdiff-env-prod">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                Production
+              </div>
+              <div class="sdiff-env-sand">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                Sandbox
+              </div>
+            </div>
+            <!-- Column headers -->
+            <div class="sdiff-col-hd">
+              <div class="sdiff-side s-prod">
+                <div class="sdiff-ch rn">#</div><div class="sdiff-ch">RAID Type</div><div class="sdiff-ch">RAID Status</div><div class="sdiff-ch">Impact</div><div class="sdiff-ch">Mitigation</div><div class="sdiff-ch">Status</div>
+              </div>
+              <div class="sdiff-side s-sand">
+                <div class="sdiff-ch rn">#</div><div class="sdiff-ch">RAID Type</div><div class="sdiff-ch">RAID Status</div><div class="sdiff-ch">Impact</div><div class="sdiff-ch">Mitigation</div><div class="sdiff-ch">Status</div>
+              </div>
+            </div>
+            <!-- Rows: unchanged -->
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">1</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">80%</div><div class="sdiff-cell">To do</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">1</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">80%</div><div class="sdiff-cell">To do</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">2</div><div class="sdiff-cell">Issue</div><div class="sdiff-cell">Completed</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">45%</div><div class="sdiff-cell">Completed</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">2</div><div class="sdiff-cell">Issue</div><div class="sdiff-cell">Completed</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">45%</div><div class="sdiff-cell">Completed</div></div>
+            </div>
+            <!-- Row 3: modified (Status cell) -->
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">3</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Completed</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">65%</div><div class="sdiff-cell c-old">To do</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">3</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Completed</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">65%</div><div class="sdiff-cell c-new">In progress</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">4</div><div class="sdiff-cell">Dependency</div><div class="sdiff-cell">Live</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">12%</div><div class="sdiff-cell">Blocked</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">4</div><div class="sdiff-cell">Dependency</div><div class="sdiff-cell">Live</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">12%</div><div class="sdiff-cell">Blocked</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">5</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">53%</div><div class="sdiff-cell">Completed</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">5</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">53%</div><div class="sdiff-cell">Completed</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">6</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">56%</div><div class="sdiff-cell">To do</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">6</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">56%</div><div class="sdiff-cell">To do</div></div>
+            </div>
+            <!-- Row 7: deleted -->
+            <div class="sdiff-row r-del">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">7</div><div class="sdiff-cell">Issue</div><div class="sdiff-cell">Postponed</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">89%</div><div class="sdiff-cell">To do</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">—</div><div class="sdiff-cell">—</div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">8</div><div class="sdiff-cell">Dependency</div><div class="sdiff-cell">Blocked</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">86%</div><div class="sdiff-cell">In progress</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">8</div><div class="sdiff-cell">Dependency</div><div class="sdiff-cell">Blocked</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">86%</div><div class="sdiff-cell">In progress</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">9</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">56%</div><div class="sdiff-cell">Blocked</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">9</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">56%</div><div class="sdiff-cell">Blocked</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">10</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Live</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">87%</div><div class="sdiff-cell">Completed</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">10</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Live</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">87%</div><div class="sdiff-cell">Completed</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">11</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Postponed</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">89%</div><div class="sdiff-cell">In progress</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">11</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Postponed</div><div class="sdiff-cell">Multi select 2</div><div class="sdiff-cell">89%</div><div class="sdiff-cell">In progress</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">12</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Blocked</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">90%</div><div class="sdiff-cell">Blocked</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">12</div><div class="sdiff-cell">Assumption</div><div class="sdiff-cell">Blocked</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">90%</div><div class="sdiff-cell">Blocked</div></div>
+            </div>
+            <!-- Row 13: new in sandbox -->
+            <div class="sdiff-row r-new">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">—</div><div class="sdiff-cell">—</div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">13</div><div class="sdiff-cell">Risk</div><div class="sdiff-cell">Upcoming</div><div class="sdiff-cell">Multi select 1</div><div class="sdiff-cell">73%</div><div class="sdiff-cell">In progress</div></div>
+            </div>
+            <!-- Legend -->
+            <div class="sdiff-legend">
+              <div class="sdiff-leg"><div class="sdiff-dot" style="background:#defbe6;border-color:#a7f0ba;"></div>New in Sandbox</div>
+              <div class="sdiff-leg"><div class="sdiff-dot" style="background:#ffd7d9;border-color:#f5c6c6;"></div>Removed in Sandbox</div>
+              <div class="sdiff-leg"><div class="sdiff-dot" style="background:#ffd7d9;border-color:#f5c6c6;"></div><span style="text-decoration:line-through;margin-right:3px;">Old value</span> / <div class="sdiff-dot" style="background:#defbe6;border-color:#a7f0ba;margin-left:3px;"></div>New value</div>
+            </div>
           </div>
-          <table class="ftv-tbl">
-            <thead>
-              <tr><th class="rn">#</th><th>RAID Type</th><th>RAID Status</th><th>Impact</th><th>Mitigation</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td class="rn">1</td><td>Risk</td><td>Upcoming</td><td>Multi select 2</td><td>80%</td><td>To do</td></tr>
-              <tr><td class="rn">2</td><td>Issue</td><td>Completed</td><td>Multi select 1</td><td>45%</td><td>Completed</td></tr>
-              <tr><td class="rn">3</td><td>Assumption</td><td>Completed</td><td>Multi select 1</td><td>65%</td><td class="td-mod"><span class="val-old">To do</span> → <span class="val-new">In progress</span></td></tr>
-              <tr><td class="rn">4</td><td>Dependency</td><td>Live</td><td>Multi select 2</td><td>12%</td><td>Blocked</td></tr>
-              <tr><td class="rn">5</td><td>Risk</td><td>Upcoming</td><td>Multi select 1</td><td>53%</td><td>Completed</td></tr>
-              <tr><td class="rn">6</td><td>Assumption</td><td>Upcoming</td><td>Multi select 1</td><td>56%</td><td>To do</td></tr>
-              <tr class="tr-del"><td class="rn">7</td><td>Issue</td><td>Postponed</td><td>Multi select 2</td><td>89%</td><td>To do</td></tr>
-              <tr><td class="rn">8</td><td>Dependency</td><td>Blocked</td><td>Multi select 1</td><td>86%</td><td>In progress</td></tr>
-              <tr><td class="rn">9</td><td>Risk</td><td>Upcoming</td><td>Multi select 2</td><td>56%</td><td>Blocked</td></tr>
-              <tr><td class="rn">10</td><td>Assumption</td><td>Live</td><td>Multi select 1</td><td>87%</td><td>Completed</td></tr>
-              <tr><td class="rn">11</td><td>Risk</td><td>Postponed</td><td>Multi select 2</td><td>89%</td><td>In progress</td></tr>
-              <tr><td class="rn">12</td><td>Assumption</td><td>Blocked</td><td>Multi select 1</td><td>90%</td><td>Blocked</td></tr>
-              <tr class="tr-new"><td class="rn">13</td><td>Risk</td><td>Upcoming</td><td>Multi select 1</td><td>73%</td><td>In progress</td></tr>
-            </tbody>
-          </table>
         </div>
 
-        <!-- Overview tab table -->
-        <div class="ftv-tab" style="border-top:1px solid var(--border);">
-          <div class="tab-sub" style="margin:-14px -16px 12px;padding-left:16px;">
+        <!-- ── Overview tab ── -->
+        <div class="sdiff-tab-wrap" style="border-top:1px solid var(--border);">
+          <div class="tab-sub" style="margin:-12px -16px 12px;padding-left:16px;">
             <svg class="tab-sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             <span class="tab-sub-name">Overview</span>
             <div class="tab-sub-chips">
@@ -596,22 +676,52 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
               <span class="tab-sub-chip tsc-del">1 deleted</span>
             </div>
           </div>
-          <div class="ftv-legend">
-            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#a7f0ba;"></div>New row</div>
-            <div class="ftv-leg-item"><div class="ftv-dot" style="background:#ffd7d9;"></div>Deleted row</div>
+          <div class="sdiff-wrap">
+            <div class="sdiff-env">
+              <div class="sdiff-env-prod">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                Production
+              </div>
+              <div class="sdiff-env-sand">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                Sandbox
+              </div>
+            </div>
+            <div class="sdiff-col-hd">
+              <div class="sdiff-side s-prod">
+                <div class="sdiff-ch rn">#</div><div class="sdiff-ch">Owner</div><div class="sdiff-ch">Category</div><div class="sdiff-ch">Priority</div><div class="sdiff-ch">Due Date</div><div class="sdiff-ch">Status</div>
+              </div>
+              <div class="sdiff-side s-sand">
+                <div class="sdiff-ch rn">#</div><div class="sdiff-ch">Owner</div><div class="sdiff-ch">Category</div><div class="sdiff-ch">Priority</div><div class="sdiff-ch">Due Date</div><div class="sdiff-ch">Status</div>
+              </div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">1</div><div class="sdiff-cell">Michael C.</div><div class="sdiff-cell">Governance</div><div class="sdiff-cell">High</div><div class="sdiff-cell">15 Jan 2026</div><div class="sdiff-cell">Completed</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">1</div><div class="sdiff-cell">Michael C.</div><div class="sdiff-cell">Governance</div><div class="sdiff-cell">High</div><div class="sdiff-cell">15 Jan 2026</div><div class="sdiff-cell">Completed</div></div>
+            </div>
+            <!-- Row 2: deleted -->
+            <div class="sdiff-row r-del">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">2</div><div class="sdiff-cell">James L.</div><div class="sdiff-cell">Data Migration</div><div class="sdiff-cell">Medium</div><div class="sdiff-cell">15 Mar 2026</div><div class="sdiff-cell">Completed</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">—</div><div class="sdiff-cell">—</div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">3</div><div class="sdiff-cell">Emma R.</div><div class="sdiff-cell">Training</div><div class="sdiff-cell">Low</div><div class="sdiff-cell">30 Mar 2026</div><div class="sdiff-cell">In progress</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">3</div><div class="sdiff-cell">Emma R.</div><div class="sdiff-cell">Training</div><div class="sdiff-cell">Low</div><div class="sdiff-cell">30 Mar 2026</div><div class="sdiff-cell">In progress</div></div>
+            </div>
+            <div class="sdiff-row r-unchanged">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">4</div><div class="sdiff-cell">David P.</div><div class="sdiff-cell">Security</div><div class="sdiff-cell">High</div><div class="sdiff-cell">20 Apr 2026</div><div class="sdiff-cell">Not started</div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">4</div><div class="sdiff-cell">David P.</div><div class="sdiff-cell">Security</div><div class="sdiff-cell">High</div><div class="sdiff-cell">20 Apr 2026</div><div class="sdiff-cell">Not started</div></div>
+            </div>
+            <!-- Row 5: new -->
+            <div class="sdiff-row r-new">
+              <div class="sdiff-side s-prod"><div class="sdiff-cell rn">—</div><div class="sdiff-cell">—</div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div><div class="sdiff-cell"></div></div>
+              <div class="sdiff-side s-sand"><div class="sdiff-cell rn">5</div><div class="sdiff-cell">Sarah K.</div><div class="sdiff-cell">Integration</div><div class="sdiff-cell">High</div><div class="sdiff-cell">30 Apr 2026</div><div class="sdiff-cell">Not started</div></div>
+            </div>
+            <div class="sdiff-legend">
+              <div class="sdiff-leg"><div class="sdiff-dot" style="background:#defbe6;border-color:#a7f0ba;"></div>New in Sandbox</div>
+              <div class="sdiff-leg"><div class="sdiff-dot" style="background:#ffd7d9;border-color:#f5c6c6;"></div>Removed in Sandbox</div>
+            </div>
           </div>
-          <table class="ftv-tbl">
-            <thead>
-              <tr><th class="rn">#</th><th>Owner</th><th>Category</th><th>Priority</th><th>Due Date</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td class="rn">1</td><td>Michael C.</td><td>Governance</td><td>High</td><td>15 Jan 2026</td><td>Completed</td></tr>
-              <tr class="tr-del"><td class="rn">2</td><td>James L.</td><td>Data Migration</td><td>Medium</td><td>15 Mar 2026</td><td>Completed</td></tr>
-              <tr><td class="rn">3</td><td>Emma R.</td><td>Training</td><td>Low</td><td>30 Mar 2026</td><td>In progress</td></tr>
-              <tr><td class="rn">4</td><td>David P.</td><td>Security</td><td>High</td><td>20 Apr 2026</td><td>Not started</td></tr>
-              <tr class="tr-new"><td class="rn">5</td><td>Sarah K.</td><td>Integration</td><td>High</td><td>30 Apr 2026</td><td>Not started</td></tr>
-            </tbody>
-          </table>
         </div>
 
       </div><!-- /data-table-view -->
