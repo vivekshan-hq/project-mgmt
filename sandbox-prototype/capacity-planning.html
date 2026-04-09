@@ -706,21 +706,33 @@ function switchUnit(u) {
 // Skill Demand Breakdown data & render
 // ══════════════════════════════════════════════════
 const SDB_DATA = [
-  { role:'Engineer',            skill:'Python',             assigned:7,  unassigned:5, avail:8  },
-  { role:'Engineer',            skill:'React',              assigned:6,  unassigned:2, avail:5  },
-  { role:'Engineer',            skill:'Node.js',            assigned:4,  unassigned:2, avail:9  },
-  { role:'Engineer',            skill:'DevOps / CI-CD',     assigned:3,  unassigned:2, avail:3  },
-  { role:'Solutions Architect', skill:'Salesforce',         assigned:6,  unassigned:4, avail:4  },
-  { role:'Solutions Architect', skill:'AWS',                assigned:5,  unassigned:3, avail:8  },
-  { role:'Solutions Architect', skill:'Integration Design', assigned:5,  unassigned:2, avail:4  },
-  { role:'Product Manager',     skill:'Agile / Scrum',      assigned:10, unassigned:5, avail:15 },
-  { role:'Product Manager',     skill:'Stakeholder Mgmt',   assigned:8,  unassigned:4, avail:7  },
-  { role:'Product Manager',     skill:'Data Analysis',      assigned:4,  unassigned:2, avail:8  },
-  { role:'Account Executive',   skill:'CRM',                assigned:14, unassigned:6, avail:17 },
-  { role:'Account Executive',   skill:'Negotiation',        assigned:12, unassigned:3, avail:18 },
-  { role:'Designer',            skill:'Figma',              assigned:6,  unassigned:2, avail:10 },
-  { role:'Designer',            skill:'User Research',      assigned:4,  unassigned:2, avail:3  },
+  { role:'Engineer',            skill:'Python',             assignedHard:5, assignedSoft:2, unassignedHard:3, unassignedSoft:2, avail:8  },
+  { role:'Engineer',            skill:'React',              assignedHard:4, assignedSoft:2, unassignedHard:1, unassignedSoft:1, avail:5  },
+  { role:'Engineer',            skill:'Node.js',            assignedHard:3, assignedSoft:1, unassignedHard:1, unassignedSoft:1, avail:9  },
+  { role:'Engineer',            skill:'DevOps / CI-CD',     assignedHard:2, assignedSoft:1, unassignedHard:1, unassignedSoft:1, avail:3  },
+  { role:'Solutions Architect', skill:'Salesforce',         assignedHard:4, assignedSoft:2, unassignedHard:2, unassignedSoft:2, avail:4  },
+  { role:'Solutions Architect', skill:'AWS',                assignedHard:3, assignedSoft:2, unassignedHard:2, unassignedSoft:1, avail:8  },
+  { role:'Solutions Architect', skill:'Integration Design', assignedHard:3, assignedSoft:2, unassignedHard:1, unassignedSoft:1, avail:4  },
+  { role:'Product Manager',     skill:'Agile / Scrum',      assignedHard:7, assignedSoft:3, unassignedHard:3, unassignedSoft:2, avail:15 },
+  { role:'Product Manager',     skill:'Stakeholder Mgmt',   assignedHard:5, assignedSoft:3, unassignedHard:2, unassignedSoft:2, avail:7  },
+  { role:'Product Manager',     skill:'Data Analysis',      assignedHard:2, assignedSoft:2, unassignedHard:1, unassignedSoft:1, avail:8  },
+  { role:'Account Executive',   skill:'CRM',                assignedHard:9, assignedSoft:5, unassignedHard:4, unassignedSoft:2, avail:17 },
+  { role:'Account Executive',   skill:'Negotiation',        assignedHard:8, assignedSoft:4, unassignedHard:2, unassignedSoft:1, avail:18 },
+  { role:'Designer',            skill:'Figma',              assignedHard:4, assignedSoft:2, unassignedHard:1, unassignedSoft:1, avail:10 },
+  { role:'Designer',            skill:'User Research',      assignedHard:3, assignedSoft:1, unassignedHard:1, unassignedSoft:1, avail:3  },
 ];
+
+// collapse state: key = 'role::skill', value = { skill, assigned, unassigned }
+const sdbOpen = {};
+function getSdbState(key) {
+  if (!sdbOpen[key]) sdbOpen[key] = { skill:false, assigned:true, unassigned:true };
+  return sdbOpen[key];
+}
+function toggleSdbRow(key, section) {
+  const s = getSdbState(key);
+  s[section] = !s[section];
+  renderSDB();
+}
 
 let sdbFilter = 'all';
 
@@ -733,18 +745,17 @@ function filterSdb(f, btn) {
 
 function renderSDB() {
   const isHrs = csUnit === 'hrs';
-  const mul = isHrs ? 160 : 1;
+  const mul = isHrs ? 40 : 1;
   const fmt = v => isHrs ? Math.round(v * mul).toLocaleString() : v.toFixed(1);
   const unitLabel = isHrs ? 'Hours' : 'FTE';
 
-  document.getElementById('sdb-req-hd').textContent = `Total Req (${unitLabel})`;
-  document.getElementById('sdb-assigned-hd').textContent = `Assigned (${unitLabel})`;
-  document.getElementById('sdb-unassigned-hd').textContent = `Unassigned (${unitLabel})`;
-  document.getElementById('sdb-avail-hd').textContent = `Available (${unitLabel})`;
+  document.getElementById('sdb-req-hd').textContent      = `Total Req (${unitLabel})`;
+  document.getElementById('sdb-assigned-hd').textContent  = `Assigned (${unitLabel})`;
+  document.getElementById('sdb-unassigned-hd').textContent= `Unassigned (${unitLabel})`;
+  document.getElementById('sdb-avail-hd').textContent     = `Available (${unitLabel})`;
 
   const rows = SDB_DATA.filter(d => {
-    const req = d.assigned + d.unassigned;
-    const gap = d.avail - req;
+    const gap = d.avail - (d.assignedHard + d.assignedSoft + d.unassignedHard + d.unassignedSoft);
     if (sdbFilter === 'short')   return gap < 0;
     if (sdbFilter === 'met')     return gap === 0;
     if (sdbFilter === 'surplus') return gap > 0;
@@ -754,31 +765,87 @@ function renderSDB() {
   let html = '';
   let lastRole = '';
   rows.forEach(d => {
-    const req = d.assigned + d.unassigned;
-    const gap = d.avail - req;
-    const status = gap < 0 ? 'short' : gap === 0 ? 'met' : 'surplus';
-    const chipCls = status === 'short' ? 's-short' : status === 'surplus' ? 's-surplus' : 's-met';
-    const chipLabel = status === 'short' ? 'Shortage' : status === 'surplus' ? 'Surplus' : 'Met';
-    const gapFmt = (gap * mul);
-    const gapStr = (isHrs ? Math.round(gapFmt) : gapFmt.toFixed(1));
-    const gapDisplay = gap > 0 ? `+${gapStr}` : `${gapStr}`;
-    const gapColor = status === 'short' ? 'color:#da1e28;' : status === 'surplus' ? 'color:#24a148;' : '';
+    const assigned   = d.assignedHard + d.assignedSoft;
+    const unassigned = d.unassignedHard + d.unassignedSoft;
+    const req        = assigned + unassigned;
+    const gap        = d.avail - req;
+    const status     = gap < 0 ? 'short' : gap === 0 ? 'met' : 'surplus';
+    const chipCls    = status === 'short' ? 's-short' : status === 'surplus' ? 's-surplus' : 's-met';
+    const chipLabel  = status === 'short' ? 'Shortage' : status === 'surplus' ? 'Surplus' : 'Met';
+    const gapVal     = gap * mul;
+    const gapDisplay = gap > 0 ? `+${isHrs ? Math.round(gapVal) : gapVal.toFixed(1)}` : `${isHrs ? Math.round(gapVal) : gapVal.toFixed(1)}`;
+    const gapColor   = status === 'short' ? 'color:#da1e28;' : status === 'surplus' ? 'color:#24a148;' : '';
+    const key        = `${d.role}::${d.skill}`;
+    const s          = getSdbState(key);
 
     if (d.role !== lastRole) {
       html += `<tr class="role-group-hd"><td colspan="8">${d.role}</td></tr>`;
       lastRole = d.role;
     }
 
-    html += `<tr>
+    // Skill row (parent)
+    html += `<tr class="role-row" onclick="toggleSdbRow('${key}','skill')" style="cursor:pointer;">
       <td style="color:#8d8d8d;font-size:12px;"></td>
-      <td style="text-align:left;">${d.skill}</td>
+      <td style="text-align:left;display:flex;align-items:center;gap:6px;">
+        <svg class="exp-icon ${s.skill?'open':''}" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        ${d.skill}
+      </td>
       <td class="sdb-demand-col">${fmt(req)}</td>
-      <td class="sdb-demand-col">${fmt(d.assigned)}</td>
-      <td class="sdb-demand-col sdb-unassigned">${fmt(d.unassigned)}</td>
+      <td class="sdb-demand-col">${fmt(assigned)}</td>
+      <td class="sdb-demand-col sdb-unassigned">${fmt(unassigned)}</td>
       <td>${fmt(d.avail)}</td>
       <td style="${gapColor}font-weight:590;">${gapDisplay}</td>
       <td style="text-align:left;"><span class="status-chip ${chipCls}">${chipLabel}</span></td>
     </tr>`;
+
+    if (s.skill) {
+      // Assigned subtotal
+      html += `<tr class="row-demand-child" onclick="toggleSdbRow('${key}','assigned')" style="cursor:pointer;">
+        <td></td>
+        <td style="text-align:left;padding-left:28px;display:flex;align-items:center;gap:6px;">
+          <button class="collapse-btn">${s.assigned?'▾':'▸'}</button> Assigned
+        </td>
+        <td class="sdb-demand-col">${fmt(assigned)}</td>
+        <td class="sdb-demand-col">${fmt(assigned)}</td>
+        <td class="sdb-demand-col"></td>
+        <td></td><td></td><td></td>
+      </tr>`;
+      if (s.assigned) {
+        html += `<tr class="row-forecast-child">
+          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Hard Allocation</td>
+          <td class="sdb-demand-col"></td><td class="sdb-demand-col">${fmt(d.assignedHard)}</td><td class="sdb-demand-col"></td>
+          <td></td><td></td><td></td>
+        </tr>`;
+        html += `<tr class="row-forecast-child">
+          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Soft Allocation</td>
+          <td class="sdb-demand-col"></td><td class="sdb-demand-col">${fmt(d.assignedSoft)}</td><td class="sdb-demand-col"></td>
+          <td></td><td></td><td></td>
+        </tr>`;
+      }
+      // Unassigned subtotal
+      html += `<tr class="row-forecast" onclick="toggleSdbRow('${key}','unassigned')" style="cursor:pointer;">
+        <td></td>
+        <td style="text-align:left;padding-left:28px;display:flex;align-items:center;gap:6px;">
+          <button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> Unassigned
+        </td>
+        <td class="sdb-demand-col"></td>
+        <td class="sdb-demand-col"></td>
+        <td class="sdb-demand-col sdb-unassigned">${fmt(unassigned)}</td>
+        <td></td><td></td><td></td>
+      </tr>`;
+      if (s.unassigned) {
+        html += `<tr class="row-forecast-child">
+          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Hard Allocation</td>
+          <td class="sdb-demand-col"></td><td class="sdb-demand-col"></td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedHard)}</td>
+          <td></td><td></td><td></td>
+        </tr>`;
+        html += `<tr class="row-forecast-child">
+          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Soft Allocation</td>
+          <td class="sdb-demand-col"></td><td class="sdb-demand-col"></td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedSoft)}</td>
+          <td></td><td></td><td></td>
+        </tr>`;
+      }
+    }
   });
 
   if (!rows.length) {
