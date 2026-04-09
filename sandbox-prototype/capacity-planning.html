@@ -96,6 +96,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
 .cs-i1>td:first-child{padding-left:28px;}
 .cs-i2>td:first-child{padding-left:44px;}
+.cs-i3>td:first-child{padding-left:60px;}
 .cs-red{color:#da1e28!important;}
 .cs-input{width:52px;border:1px solid #e0e0e0;border-radius:4px;padding:2px 6px;text-align:right;font-size:13px;color:#161616;background:#fff;outline:none;font-family:inherit;}
 .cs-input:focus{border-color:#0f62fe;}
@@ -376,6 +377,7 @@ function switchCsUnit(u) {
   document.getElementById('tgl-hours').classList.toggle('active', u === 'hrs');
   document.getElementById('tgl-fte').classList.toggle('active', u === 'fte');
   renderCS();
+  renderRS();
   renderSDB();
 }
 
@@ -456,64 +458,157 @@ const WEEKS = ['02-06','09-13','16-20','23-27','02-06','09-13','16-20','23-27','
 const ROLES = [
   {
     id:'ae', label:'Account Executive', initials:'AE', color:'#0f62fe',
-    alloc:  [178,212,108,172,233,214,97,44,44,52,44],
-    cap:    [1920,1920,1920,1970,2030,2054,2070,2102,2110,2110,2110],
-    surplus:[1742,1708,1812,1798,1797,1840,1973,2058,2066,2058,2066],
+    allocAssignedHard:   [110,130, 65,104,140,128, 58, 26, 26, 31, 26],
+    allocAssignedSoft:   [ 40, 50, 26, 40, 56, 52, 22, 10, 10, 12, 10],
+    allocUnassignedHard: [ 18, 20, 10, 17, 23, 21,  9,  4,  4,  5,  4],
+    allocUnassignedSoft: [ 10, 12,  7, 11, 14, 13,  8,  4,  4,  4,  4],
+    capTeamMembers:      [2000,2000,2000,2050,2120,2154,2160,2202,2200,2200,2200],
+    capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+    capTimeOff:          [  60,  60,  60,  60,  70,  80,  70,  70,  60,  60,  60],
+    capHolidays:         [  20,  20,  20,  20,  20,  20,  20,  30,  30,  30,  30],
   },
   {
     id:'ap', label:'Aimpoint Practice 1', initials:'AP', color:'#da1e28',
-    alloc:  [45,120,89,67,145,98,55,44,32,28,41],
-    cap:    [480,480,480,480,520,520,520,530,530,530,530],
-    surplus:[435,360,391,413,375,422,465,486,498,502,489],
+    allocAssignedHard:   [ 28, 75, 55, 42, 90, 60, 34, 27, 20, 17, 25],
+    allocAssignedSoft:   [ 10, 28, 21, 15, 35, 24, 13, 11,  7,  6, 10],
+    allocUnassignedHard: [  5, 12,  9,  7, 13,  9,  5,  4,  3,  3,  4],
+    allocUnassignedSoft: [  2,  5,  4,  3,  7,  5,  3,  2,  2,  2,  2],
+    capTeamMembers:      [ 500, 500, 500, 500, 545, 545, 545, 560, 560, 560, 560],
+    capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+    capTimeOff:          [  10,  10,  10,  10,  15,  15,  15,  20,  20,  20,  20],
+    capHolidays:         [  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10],
   },
   {
     id:'ai', label:'AlgoSec Impl. Consultant', initials:'AI', color:'#6929c4',
-    alloc:  [320,289,456,234,567,891,123,89,45,67,89],
-    cap:    [960,960,960,960,1020,1020,1020,1040,1040,1040,1040],
-    surplus:[640,671,504,726,453,129,897,951,995,973,951],
+    allocAssignedHard:   [200,180,285,146,354,556, 77, 56, 28, 42, 56],
+    allocAssignedSoft:   [ 72, 65,103, 53,130,203, 28, 20, 10, 15, 20],
+    allocUnassignedHard: [ 32, 29, 46, 24, 57, 89, 12,  9,  5,  7,  9],
+    allocUnassignedSoft: [ 16, 15, 22, 11, 26, 43,  6,  4,  2,  3,  4],
+    capTeamMembers:      [ 960, 960, 960, 960,1020,1020,1020,1040,1040,1040,1040],
+    capPartners:         [  40,  40,  40,  40,  40,  40,  40,  45,  45,  45,  45],
+    capTimeOff:          [  30,  30,  30,  30,  30,  30,  30,  35,  35,  35,  35],
+    capHolidays:         [  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10],
   },
   {
     id:'pm', label:'Product Manager', initials:'PM', color:'#007d79',
-    alloc:  [560,432,678,521,389,445,312,298,245,267,289],
-    cap:    [720,720,720,740,780,780,780,800,800,800,800],
-    surplus:[160,288,42,219,391,335,468,502,555,533,511],
+    allocAssignedHard:   [350,270,424,326,243,278,195,186,153,167,181],
+    allocAssignedSoft:   [126, 97,153,117, 87,100, 70, 67, 55, 60, 65],
+    allocUnassignedHard: [ 56, 43, 68, 52, 39, 45, 31, 30, 25, 27, 29],
+    allocUnassignedSoft: [ 28, 22, 33, 26, 20, 22, 16, 15, 12, 13, 14],
+    capTeamMembers:      [ 760, 760, 760, 785, 820, 820, 820, 845, 845, 845, 845],
+    capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+    capTimeOff:          [  30,  30,  30,  35,  30,  30,  30,  35,  35,  35,  35],
+    capHolidays:         [  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10],
   },
   {
     id:'sa', label:'Solutions Architect', initials:'SA', color:'#9f1853',
-    alloc:  [892,1204,756,934,1456,2890,678,445,312,289,345],
-    cap:    [1440,1440,1440,1480,1560,1560,1560,1600,1600,1600,1600],
-    surplus:[548,236,684,546,104,-1330,882,1155,1288,1311,1255],
+    allocAssignedHard:   [557,753,473,584,910,1806,424,278,195,181,216],
+    allocAssignedSoft:   [201,271,170,210,327, 650,153,100, 70, 65, 78],
+    allocUnassignedHard: [ 89,120, 76, 93,146, 289, 68, 45, 31, 29, 35],
+    allocUnassignedSoft: [ 45, 60, 37, 47, 73, 145, 33, 22, 16, 14, 16],
+    capTeamMembers:      [1520,1520,1520,1560,1640,1640,1640,1680,1680,1680,1680],
+    capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+    capTimeOff:          [  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60],
+    capHolidays:         [  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20],
   },
 ];
 
-const rsOpen = {};
+// Derived totals helpers
+function rTotalAlloc(r)      { return r.allocAssignedHard.map((_,i) => r.allocAssignedHard[i]+r.allocAssignedSoft[i]+r.allocUnassignedHard[i]+r.allocUnassignedSoft[i]); }
+function rAssignedAlloc(r)   { return r.allocAssignedHard.map((_,i) => r.allocAssignedHard[i]+r.allocAssignedSoft[i]); }
+function rUnassignedAlloc(r) { return r.allocUnassignedHard.map((_,i) => r.allocUnassignedHard[i]+r.allocUnassignedSoft[i]); }
+function rTotalCap(r)        { return r.capTeamMembers.map((_,i) => r.capTeamMembers[i]+r.capPartners[i]-r.capTimeOff[i]-r.capHolidays[i]); }
+
+const rsOpen = {}; // rsOpen[id] = { role, alloc, assigned, unassigned, cap }
+function getRsState(id) {
+  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, assigned:true, unassigned:true, cap:true };
+  return rsOpen[id];
+}
 
 function renderRS() {
+  const isHrs = csUnit === 'hrs';
+  const div   = isHrs ? 1 : 40;
+  const fmt   = v => isHrs ? Math.round(v).toLocaleString() : (v/40).toFixed(1);
+
   let html = '';
   ROLES.forEach(r => {
-    const pcts = r.alloc.map((a,i) => Math.round(a / r.cap[i] * 100));
-    html += `<tr class="role-row" onclick="toggleRole('${r.id}')">
+    const s       = getRsState(r.id);
+    const alloc   = rTotalAlloc(r);
+    const cap     = rTotalCap(r);
+    const gap     = cap.map((c,i) => c - alloc[i]);
+    const assigned   = rAssignedAlloc(r);
+    const unassigned = rUnassignedAlloc(r);
+    const pcts    = alloc.map((a,i) => Math.round(a / cap[i] * 100));
+
+    // Role header row — shows utilization %
+    html += `<tr class="role-row" onclick="toggleRole('${r.id}','role')">
       <td style="display:flex;align-items:center;gap:8px;">
-        <svg class="exp-icon ${rsOpen[r.id]?'open':''}" id="exp-${r.id}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg class="exp-icon ${s.role?'open':''}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         <div class="role-avatar" style="background:${r.color};">${r.initials}</div>
         <span>${r.label}</span>
       </td>
-      ${pcts.map((p,i) => {
+      ${pcts.map(p => {
         const cls = p > 100 ? 'pct-over' : p > 85 ? 'pct-red' : p > 50 ? 'pct-yellow' : 'pct-green';
         return `<td><span class="pct ${cls}">${p}%</span></td>`;
       }).join('')}
     </tr>`;
-    if (rsOpen[r.id]) {
-      html += `<tr class="sub-row"><td>Allocations</td>${r.alloc.map(v => `<td>${v}</td>`).join('')}</tr>`;
-      html += `<tr class="sub-row"><td>Capacity</td>${r.cap.map(v => `<td>${v.toLocaleString()}</td>`).join('')}</tr>`;
-      html += `<tr class="sub-row"><td>Surplus Capacity</td>${r.surplus.map(v => `<td style="${v<0?'color:#da1e28;':''}">${v.toLocaleString()}</td>`).join('')}</tr>`;
+
+    if (!s.role) return;
+
+    // ── Allocations ──
+    html += `<tr class="row-demand cs-i1" onclick="toggleRole('${r.id}','alloc')">
+      <td><button class="collapse-btn">${s.alloc?'▾':'▸'}</button> &nbsp;Allocations</td>
+      ${alloc.map(v=>`<td>${fmt(v)}</td>`).join('')}
+    </tr>`;
+
+    if (s.alloc) {
+      // Assigned
+      html += `<tr class="row-demand-child cs-i2" onclick="toggleRole('${r.id}','assigned')">
+        <td><button class="collapse-btn">${s.assigned?'▾':'▸'}</button> &nbsp;Assigned</td>
+        ${assigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
+      </tr>`;
+      if (s.assigned) {
+        html += `<tr class="row-forecast-child cs-i3"><td>Hard Allocation</td>${r.allocAssignedHard.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
+        html += `<tr class="row-forecast-child cs-i3"><td>Soft Allocation</td>${r.allocAssignedSoft.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
+      }
+      // Unassigned
+      html += `<tr class="row-forecast cs-i2" onclick="toggleRole('${r.id}','unassigned')">
+        <td><button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> &nbsp;Unassigned</td>
+        ${unassigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
+      </tr>`;
+      if (s.unassigned) {
+        html += `<tr class="row-forecast-child cs-i3"><td>Hard Allocation</td>${r.allocUnassignedHard.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
+        html += `<tr class="row-forecast-child cs-i3"><td>Soft Allocation</td>${r.allocUnassignedSoft.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
+      }
     }
+
+    // ── Capacity ──
+    html += `<tr class="row-supply cs-i1" onclick="toggleRole('${r.id}','cap')">
+      <td><button class="collapse-btn">${s.cap?'▾':'▸'}</button> &nbsp;Capacity</td>
+      ${cap.map(v=>`<td>${fmt(v)}</td>`).join('')}
+    </tr>`;
+
+    if (s.cap) {
+      html += `<tr class="row-supply-child cs-i2"><td>Team Members</td>${r.capTeamMembers.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
+      if (r.capPartners.some(v=>v>0))
+        html += `<tr class="row-supply-child cs-i2"><td>Partners</td>${r.capPartners.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
+      html += `<tr class="row-supply-child cs-i2"><td style="color:#da1e28;">Time Off</td>${r.capTimeOff.map(v=>`<td style="color:#da1e28;">-${fmt(v)}</td>`).join('')}</tr>`;
+      html += `<tr class="row-supply-child cs-i2"><td style="color:#da1e28;">Holidays</td>${r.capHolidays.map(v=>`<td style="color:#da1e28;">-${fmt(v)}</td>`).join('')}</tr>`;
+    }
+
+    // ── Net Gap ──
+    html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
+      <td>Net Gap</td>
+      ${gap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
+    </tr>`;
   });
+
   document.getElementById('rs-tbody').innerHTML = html;
 }
 
-function toggleRole(id) {
-  rsOpen[id] = !rsOpen[id];
+function toggleRole(id, section) {
+  const s = getRsState(id);
+  s[section] = !s[section];
   renderRS();
 }
 
