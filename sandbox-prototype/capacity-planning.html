@@ -785,10 +785,12 @@ function renderSDB() {
 
     // Skill row (parent)
     html += `<tr class="role-row" onclick="toggleSdbRow('${key}','skill')" style="cursor:pointer;">
-      <td style="color:#8d8d8d;font-size:12px;"></td>
-      <td style="text-align:left;display:flex;align-items:center;gap:6px;">
-        <svg class="exp-icon ${s.skill?'open':''}" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-        ${d.skill}
+      <td></td>
+      <td style="text-align:left;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <svg class="exp-icon ${s.skill?'open':''}" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          ${d.skill}
+        </div>
       </td>
       <td class="sdb-demand-col">${fmt(req)}</td>
       <td class="sdb-demand-col">${fmt(assigned)}</td>
@@ -802,22 +804,22 @@ function renderSDB() {
       // Assigned subtotal
       html += `<tr class="row-demand-child" onclick="toggleSdbRow('${key}','assigned')" style="cursor:pointer;">
         <td></td>
-        <td style="text-align:left;padding-left:28px;display:flex;align-items:center;gap:6px;">
+        <td style="text-align:left;padding-left:20px;">
           <button class="collapse-btn">${s.assigned?'▾':'▸'}</button> Assigned
         </td>
-        <td class="sdb-demand-col">${fmt(assigned)}</td>
-        <td class="sdb-demand-col">${fmt(assigned)}</td>
+        <td class="sdb-demand-col"></td>
+        <td class="sdb-demand-col" style="font-weight:590;">${fmt(assigned)}</td>
         <td class="sdb-demand-col"></td>
         <td></td><td></td><td></td>
       </tr>`;
       if (s.assigned) {
         html += `<tr class="row-forecast-child">
-          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Hard Allocation</td>
+          <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Hard Allocation</td>
           <td class="sdb-demand-col"></td><td class="sdb-demand-col">${fmt(d.assignedHard)}</td><td class="sdb-demand-col"></td>
           <td></td><td></td><td></td>
         </tr>`;
         html += `<tr class="row-forecast-child">
-          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Soft Allocation</td>
+          <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Soft Allocation</td>
           <td class="sdb-demand-col"></td><td class="sdb-demand-col">${fmt(d.assignedSoft)}</td><td class="sdb-demand-col"></td>
           <td></td><td></td><td></td>
         </tr>`;
@@ -825,22 +827,22 @@ function renderSDB() {
       // Unassigned subtotal
       html += `<tr class="row-forecast" onclick="toggleSdbRow('${key}','unassigned')" style="cursor:pointer;">
         <td></td>
-        <td style="text-align:left;padding-left:28px;display:flex;align-items:center;gap:6px;">
+        <td style="text-align:left;padding-left:20px;">
           <button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> Unassigned
         </td>
         <td class="sdb-demand-col"></td>
         <td class="sdb-demand-col"></td>
-        <td class="sdb-demand-col sdb-unassigned">${fmt(unassigned)}</td>
+        <td class="sdb-demand-col sdb-unassigned" style="font-weight:590;">${fmt(unassigned)}</td>
         <td></td><td></td><td></td>
       </tr>`;
       if (s.unassigned) {
         html += `<tr class="row-forecast-child">
-          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Hard Allocation</td>
+          <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Hard Allocation</td>
           <td class="sdb-demand-col"></td><td class="sdb-demand-col"></td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedHard)}</td>
           <td></td><td></td><td></td>
         </tr>`;
         html += `<tr class="row-forecast-child">
-          <td></td><td style="text-align:left;padding-left:44px;color:#525252;">Soft Allocation</td>
+          <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Soft Allocation</td>
           <td class="sdb-demand-col"></td><td class="sdb-demand-col"></td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedSoft)}</td>
           <td></td><td></td><td></td>
         </tr>`;
