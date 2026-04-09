@@ -79,7 +79,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .cs-tgl-btn.active{background:#edf5ff;border-color:#0f62fe;color:#0f62fe;}
 .cs-metric{font-size:13px;color:#161616;}
 .cs-month-hd{text-align:center !important;background:#f4f4f4;font-size:11px;font-weight:590;letter-spacing:0.32px;color:#525252;padding:6px 12px;}
-.cs-week-hd{text-align:right;font-size:11px;color:#8d8d8d;letter-spacing:0.16px;}
+.cs-week-hd{text-align:center;font-size:11px;color:#8d8d8d;letter-spacing:0.16px;padding:6px 12px;background:#fafafa;}
 .cs-today-hd{background:#fff8e1 !important;}
 .cs-today-badge{background:#f59e0b;color:#fff;border-radius:120px;padding:1px 7px;font-size:11px;font-weight:590;display:inline-block;}
 .cs-today-cell{background:#fffbf0;}
@@ -241,19 +241,24 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         <table class="tbl" id="cs-table">
           <thead>
             <tr>
-              <th style="width:200px;min-width:200px;">METRIC</th>
-              <th class="cs-month-hd">MAR-26</th>
-              <th class="cs-month-hd">APR-26</th>
-              <th class="cs-month-hd">MAY-26</th>
-              <th class="cs-month-hd">JUN-26</th>
-              <th class="cs-month-hd">JUL-26</th>
-              <th class="cs-month-hd">AUG-26</th>
-              <th class="cs-month-hd">SEP-26</th>
-              <th class="cs-month-hd">OCT-26</th>
-              <th class="cs-month-hd">NOV-26</th>
-              <th class="cs-month-hd">DEC-26</th>
-              <th class="cs-month-hd">JAN-27</th>
-              <th class="cs-month-hd">FEB-27</th>
+              <th style="width:200px;min-width:200px;" rowspan="2">METRIC</th>
+              <th class="cs-month-hd" colspan="4">Apr '26</th>
+              <th class="cs-month-hd" colspan="4">May '26</th>
+              <th class="cs-month-hd" colspan="4">Jun '26</th>
+            </tr>
+            <tr>
+              <th class="cs-week-hd cs-today-hd"><span class="cs-today-badge">06-12</span></th>
+              <th class="cs-week-hd">13-19</th>
+              <th class="cs-week-hd">20-26</th>
+              <th class="cs-week-hd">27-03</th>
+              <th class="cs-week-hd">04-10</th>
+              <th class="cs-week-hd">11-17</th>
+              <th class="cs-week-hd">18-24</th>
+              <th class="cs-week-hd">25-31</th>
+              <th class="cs-week-hd">01-07</th>
+              <th class="cs-week-hd">08-14</th>
+              <th class="cs-week-hd">15-21</th>
+              <th class="cs-week-hd">22-28</th>
             </tr>
           </thead>
           <tbody id="cs-tbody"></tbody>
@@ -345,29 +350,30 @@ function switchSubTab(id) {
 // ══════════════════════════════════════════════════
 const CS_MONTHS = ['Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27'];
 
+// 12 weeks: Apr 06-12, 13-19, 20-26, 27-03 | May 04-10, 11-17, 18-24, 25-31 | Jun 01-07, 08-14, 15-21, 22-28
 const CS_FTE = {
-  totalDemand:        [623.2,547.0,489.7,412.7,276.9,235.7,217.0,162.0,141.5,126.0, 78.0, 69.8],
-  assignedDemand:     [481.1,375.7,309.7,251.8,163.4,148.1,132.5, 97.7, 80.2, 79.2, 44.7, 36.3],
-  assignedHard:       [390.2,290.1,229.4,183.7,116.6,107.2, 94.7, 68.4, 55.5, 53.1, 28.0, 22.4],
-  assignedSoft:       [ 90.9, 85.6, 80.3, 68.1, 46.8, 40.9, 37.8, 29.3, 24.7, 26.1, 16.7, 13.9],
-  unassignedDemand:   [142.1,171.3,180.0,160.9,113.5, 87.6, 84.5, 64.3, 61.3, 46.8, 33.3, 33.5],
-  unassignedHard:     [ 54.9, 75.6, 80.2, 72.1, 52.8, 36.7, 37.8, 33.2, 30.7, 16.7, 16.7, 17.7],
-  unassignedSoft:     [ 87.2, 95.7, 99.8, 88.8, 60.7, 50.9, 46.7, 31.1, 30.6, 30.1, 16.6, 15.8],
-  totalSupply:        [639.2,637.6,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0],
-  headcount:          [639.2,635.6,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0],
-  joiningHC:          [  0,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-  attrition:          [  5,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-  netGap:             [-15.9,-90.6,-147.3,-224.3,-360.1,-401.3,-420.0,-475.0,-495.5,-511.0,-559.0,-567.2],
+  totalDemand:      [138.0,137.0,136.0,136.0, 124.0,123.0,122.0,121.0, 105.0,104.0,103.0,101.0],
+  assignedDemand:   [ 95.0, 94.0, 94.0, 93.0,  78.0, 78.0, 77.0, 77.0,  63.0, 63.0, 63.0, 62.0],
+  assignedHard:     [ 73.0, 72.0, 72.0, 72.0,  57.0, 57.0, 57.0, 57.0,  46.0, 46.0, 46.0, 46.0],
+  assignedSoft:     [ 22.0, 22.0, 22.0, 21.0,  21.0, 21.0, 20.0, 20.0,  17.0, 17.0, 17.0, 16.0],
+  unassignedDemand: [ 43.0, 43.0, 42.0, 43.0,  46.0, 45.0, 45.0, 44.0,  42.0, 41.0, 40.0, 39.0],
+  unassignedHard:   [ 19.0, 19.0, 18.0, 19.0,  20.0, 20.0, 20.0, 20.0,  18.0, 18.0, 18.0, 18.0],
+  unassignedSoft:   [ 24.0, 24.0, 24.0, 24.0,  26.0, 25.0, 25.0, 24.0,  24.0, 23.0, 22.0, 21.0],
+  totalSupply:      [159.0,159.0,159.0,159.0, 159.0,159.0,159.0,159.0, 159.0,159.0,159.0,159.0],
+  headcount:        [159.0,159.0,159.0,159.0, 159.0,159.0,159.0,159.0, 159.0,159.0,159.0,159.0],
+  joiningHC:        [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+  attrition:        [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+  netGap:           [-21.0,-22.0,-23.0,-23.0, -35.0,-36.0,-37.0,-38.0, -54.0,-55.0,-56.0,-58.0],
 };
 
-// Hours = FTE * 160 (approx)
+// Hours = FTE * 40 (weekly: 1 FTE = 40 hrs/week)
 const CS_HRS = {};
 ['totalDemand','assignedDemand','assignedHard','assignedSoft','unassignedDemand','unassignedHard','unassignedSoft','totalSupply','headcount'].forEach(k => {
-  CS_HRS[k] = CS_FTE[k].map(v => Math.round(v * 160));
+  CS_HRS[k] = CS_FTE[k].map(v => Math.round(v * 40));
 });
-CS_HRS.joiningHC = CS_FTE.joiningHC.map(v => v * 160);
-CS_HRS.attrition  = CS_FTE.attrition.map(v => v * 160);
-CS_HRS.netGap     = CS_FTE.netGap.map(v => Math.round(v * 160));
+CS_HRS.joiningHC = CS_FTE.joiningHC.map(v => v * 40);
+CS_HRS.attrition  = CS_FTE.attrition.map(v => v * 40);
+CS_HRS.netGap     = CS_FTE.netGap.map(v => Math.round(v * 40));
 
 let csUnit = 'hrs';
 let csDemandOpen = true, csAssignedOpen = true, csUnassignedOpen = true;
