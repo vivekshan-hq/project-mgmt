@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Capacity Planning – Resource Management</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#161616;font-size:14px;line-height:18px;letter-spacing:0.16px;overflow:hidden;height:100vh;display:flex;}
@@ -142,6 +141,16 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .role-group-hd>td{background:#fafafa;font-size:11px;font-weight:590;color:#525252;letter-spacing:0.32px;text-transform:uppercase;padding:6px 12px!important;}
 .role-group-hd>td:first-child{text-align:left;}
 
+/* ── Sub-tab bar ── */
+.sub-tab-bar{display:flex;padding:0 24px;border-bottom:1px solid #e8e8e8;background:#fff;flex-shrink:0;}
+.sub-tab{padding:10px 16px;font-size:13px;font-weight:590;color:#525252;cursor:pointer;border-bottom:2px solid transparent;position:relative;top:1px;white-space:nowrap;letter-spacing:0.16px;}
+.sub-tab:hover{color:#161616;}
+.sub-tab.active{color:#0f62fe;border-bottom-color:#0f62fe;}
+.sub-tab-disabled{padding:10px 16px;font-size:13px;font-weight:590;color:#c6c6c6;cursor:not-allowed;border-bottom:2px solid transparent;position:relative;top:1px;white-space:nowrap;letter-spacing:0.16px;}
+
+/* ── Tab panels ── */
+.tab-panel{flex:1;}
+
 /* ── Skill Demand Breakdown specifics ── */
 .sdb-demand-parent th{background:#edf5ff;color:#0f62fe;text-align:center;font-size:11px;font-weight:590;letter-spacing:0.32px;text-transform:uppercase;padding:5px 12px;border-bottom:1px solid #d0e6ff;}
 .sdb-demand-col{background:#f7faff;}
@@ -214,163 +223,101 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
     </div>
   </div>
 
+  <!-- Sub-tab bar -->
+  <div class="sub-tab-bar">
+    <div class="sub-tab active" onclick="switchSubTab('summary')">Summary</div>
+    <div class="sub-tab" onclick="switchSubTab('role')">Role</div>
+    <div class="sub-tab" onclick="switchSubTab('role-skill')">Role + Skill</div>
+    <div class="sub-tab sub-tab-disabled">Role + Skill + Level</div>
+  </div>
+
   <!-- Content -->
   <div class="content">
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- 1. CAPACITY SUMMARY                            -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="section">
-      <div class="section-hd" onclick="toggleSection('cs')">
-        <div class="section-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-          Capacity Summary
-        </div>
-        <div class="section-hd-right">
-          <div class="cs-tgl">
-            <button class="cs-tgl-btn active" id="cs-hrs-btn" onclick="event.stopPropagation();switchCsUnit('hrs')">Hours</button>
-            <button class="cs-tgl-btn" id="cs-fte-btn" onclick="event.stopPropagation();switchCsUnit('fte')">FTE</button>
-          </div>
-          <svg class="chevron-icon open" id="chevron-cs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-        </div>
-      </div>
-      <div class="section-body" id="body-cs">
-        <div class="tbl-wrap">
-          <table class="tbl" id="cs-table">
-            <thead>
-              <tr>
-                <th style="width:200px;min-width:200px;">METRIC</th>
-                <th class="cs-month-hd" colspan="1">MAR-26</th>
-                <th class="cs-month-hd" colspan="1">APR-26</th>
-                <th class="cs-month-hd" colspan="1">MAY-26</th>
-                <th class="cs-month-hd" colspan="1">JUN-26</th>
-                <th class="cs-month-hd" colspan="1">JUL-26</th>
-                <th class="cs-month-hd" colspan="1">AUG-26</th>
-                <th class="cs-month-hd" colspan="1">SEP-26</th>
-                <th class="cs-month-hd" colspan="1">OCT-26</th>
-                <th class="cs-month-hd" colspan="1">NOV-26</th>
-                <th class="cs-month-hd" colspan="1">DEC-26</th>
-                <th class="cs-month-hd" colspan="1">JAN-27</th>
-                <th class="cs-month-hd" colspan="1">FEB-27</th>
-              </tr>
-            </thead>
-            <tbody id="cs-tbody">
-              <!-- filled by JS -->
-            </tbody>
-          </table>
-        </div>
+    <!-- ── Summary tab ── -->
+    <div class="tab-panel" id="panel-summary">
+      <div class="tbl-wrap">
+        <table class="tbl" id="cs-table">
+          <thead>
+            <tr>
+              <th style="width:200px;min-width:200px;">METRIC</th>
+              <th class="cs-month-hd">MAR-26</th>
+              <th class="cs-month-hd">APR-26</th>
+              <th class="cs-month-hd">MAY-26</th>
+              <th class="cs-month-hd">JUN-26</th>
+              <th class="cs-month-hd">JUL-26</th>
+              <th class="cs-month-hd">AUG-26</th>
+              <th class="cs-month-hd">SEP-26</th>
+              <th class="cs-month-hd">OCT-26</th>
+              <th class="cs-month-hd">NOV-26</th>
+              <th class="cs-month-hd">DEC-26</th>
+              <th class="cs-month-hd">JAN-27</th>
+              <th class="cs-month-hd">FEB-27</th>
+            </tr>
+          </thead>
+          <tbody id="cs-tbody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- 2. ROLE SUMMARY                                -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="section">
-      <div class="section-hd" onclick="toggleSection('rs')">
-        <div class="section-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Role Summary
-        </div>
-        <div class="section-hd-right">
-          <svg class="chevron-icon open" id="chevron-rs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-        </div>
-      </div>
-      <div class="section-body" id="body-rs">
-
-        <!-- Chart -->
-        <div class="chart-area">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <div style="font-size:13px;font-weight:590;color:#161616;">Allocations (demand) vs Capacity (supply)</div>
-            <div class="chart-legend">
-              <div class="legend-item"><div class="legend-dash"></div><span>Total capacity</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;"></div><span>Holidays</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:#cbd5e1;"></div><span>Time offs</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div><span>Available capacity</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:#67e8f9;"></div><span>Unassigned allocations</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:#2da196;"></div><span>Assigned allocations</span></div>
-            </div>
-          </div>
-          <div class="chart-canvas">
-            <canvas id="cap-chart"></canvas>
-          </div>
-        </div>
-
-        <!-- Role table -->
-        <div class="tbl-wrap">
-          <table class="tbl">
-            <thead>
-              <tr id="rs-month-row">
-                <th style="width:220px;min-width:220px;text-align:left;">Role</th>
-                <th class="cs-month-hd" colspan="4">Feb '26</th>
-                <th class="cs-month-hd" colspan="4">Mar '26</th>
-                <th class="cs-month-hd today-hd" colspan="1"><span class="cs-today-badge">30-03</span></th>
-                <th class="cs-month-hd" colspan="2">Apr '26</th>
-              </tr>
-              <tr>
-                <th style="text-align:left;font-size:11px;color:#8d8d8d;">—</th>
-                <th>02-06</th><th>09-13</th><th>16-20</th><th>23-27</th>
-                <th>02-06</th><th>09-13</th><th>16-20</th><th>23-27</th>
-                <th class="cs-today-hd">30-03</th>
-                <th>06-10</th><th>13-17</th>
-              </tr>
-            </thead>
-            <tbody id="rs-tbody">
-              <!-- filled by JS -->
-            </tbody>
-          </table>
-        </div>
+    <!-- ── Role tab ── -->
+    <div class="tab-panel" id="panel-role" style="display:none;">
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width:220px;min-width:220px;text-align:left;">Role</th>
+              <th class="cs-month-hd" colspan="4">Feb '26</th>
+              <th class="cs-month-hd" colspan="4">Mar '26</th>
+              <th class="cs-month-hd today-hd" colspan="1"><span class="cs-today-badge">30-03</span></th>
+              <th class="cs-month-hd" colspan="2">Apr '26</th>
+            </tr>
+            <tr>
+              <th style="text-align:left;font-size:11px;color:#8d8d8d;">—</th>
+              <th>02-06</th><th>09-13</th><th>16-20</th><th>23-27</th>
+              <th>02-06</th><th>09-13</th><th>16-20</th><th>23-27</th>
+              <th class="cs-today-hd">30-03</th>
+              <th>06-10</th><th>13-17</th>
+            </tr>
+          </thead>
+          <tbody id="rs-tbody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- 4. SKILL DEMAND BREAKDOWN                      -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="section">
-      <div class="section-hd" onclick="toggleSection('sdb')">
-        <div class="section-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-          Skill Demand Breakdown
-        </div>
-        <div class="section-hd-right">
-          <svg class="chevron-icon open" id="chevron-sdb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-        </div>
+    <!-- ── Role + Skill tab ── -->
+    <div class="tab-panel" id="panel-role-skill" style="display:none;">
+      <div class="sg-filters">
+        <span style="font-size:12px;color:#525252;font-weight:590;margin-right:4px;">Filter:</span>
+        <button class="sg-chip active" onclick="filterSdb('all',this)">All</button>
+        <button class="sg-chip short" onclick="filterSdb('short',this)">Shortage</button>
+        <button class="sg-chip met" onclick="filterSdb('met',this)">Met</button>
+        <button class="sg-chip surplus" onclick="filterSdb('surplus',this)">Surplus</button>
       </div>
-      <div class="section-body" id="body-sdb">
-        <!-- Filters -->
-        <div class="sg-filters">
-          <span style="font-size:12px;color:#525252;font-weight:590;margin-right:4px;">Filter:</span>
-          <button class="sg-chip active" onclick="filterSdb('all',this)">All</button>
-          <button class="sg-chip short" onclick="filterSdb('short',this)">Shortage</button>
-          <button class="sg-chip met" onclick="filterSdb('met',this)">Met</button>
-          <button class="sg-chip surplus" onclick="filterSdb('surplus',this)">Surplus</button>
-        </div>
-        <div class="tbl-wrap">
-          <table class="tbl" id="sdb-table">
-            <thead>
-              <tr class="sdb-demand-parent">
-                <th style="width:180px;min-width:160px;background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
-                <th style="width:200px;min-width:160px;background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
-                <th colspan="3">Demand</th>
-                <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
-                <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
-                <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
-              </tr>
-              <tr>
-                <th style="width:180px;min-width:160px;text-align:left;">Role</th>
-                <th style="width:200px;min-width:160px;text-align:left;">Skill</th>
-                <th style="width:110px;" id="sdb-req-hd">Total Req</th>
-                <th style="width:110px;" id="sdb-assigned-hd">Assigned</th>
-                <th style="width:120px;" id="sdb-unassigned-hd">Unassigned</th>
-                <th style="width:110px;" id="sdb-avail-hd">Available</th>
-                <th style="width:90px;">Gap</th>
-                <th style="width:100px;text-align:left;">Status</th>
-              </tr>
-            </thead>
-            <tbody id="sdb-tbody">
-              <!-- filled by JS -->
-            </tbody>
-          </table>
-        </div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="sdb-table">
+          <thead>
+            <tr class="sdb-demand-parent">
+              <th style="width:180px;min-width:160px;background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+              <th style="width:200px;min-width:160px;background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+              <th colspan="3">Demand</th>
+              <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+              <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+              <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+            </tr>
+            <tr>
+              <th style="width:180px;min-width:160px;text-align:left;">Role</th>
+              <th style="width:200px;min-width:160px;text-align:left;">Skill</th>
+              <th style="width:110px;" id="sdb-req-hd">Total Req</th>
+              <th style="width:110px;" id="sdb-assigned-hd">Assigned</th>
+              <th style="width:120px;" id="sdb-unassigned-hd">Unassigned</th>
+              <th style="width:110px;" id="sdb-avail-hd">Available</th>
+              <th style="width:90px;">Gap</th>
+              <th style="width:100px;text-align:left;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="sdb-tbody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -379,13 +326,17 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
 <script>
 // ══════════════════════════════════════════════════
-// Section collapse/expand
+// Sub-tab switching
 // ══════════════════════════════════════════════════
-function toggleSection(id) {
-  const body = document.getElementById('body-' + id);
-  const chev = document.getElementById('chevron-' + id);
-  body.classList.toggle('collapsed');
-  chev.classList.toggle('open');
+const SUB_TABS = ['summary','role','role-skill'];
+
+function switchSubTab(id) {
+  SUB_TABS.forEach(t => {
+    document.getElementById('panel-' + t).style.display = t === id ? '' : 'none';
+  });
+  document.querySelectorAll('.sub-tab').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('onclick') === `switchSubTab('${id}')`);
+  });
 }
 
 // ══════════════════════════════════════════════════
@@ -420,9 +371,6 @@ let csDemandOpen = true, csForecastOpen = true;
 
 function switchCsUnit(u) {
   csUnit = u;
-  document.getElementById('cs-hrs-btn').classList.toggle('active', u === 'hrs');
-  document.getElementById('cs-fte-btn').classList.toggle('active', u === 'fte');
-  // keep toolbar in sync
   document.getElementById('tgl-hours').classList.toggle('active', u === 'hrs');
   document.getElementById('tgl-fte').classList.toggle('active', u === 'fte');
   renderCS();
@@ -639,99 +587,6 @@ function switchUnit(u) {
 }
 
 // ══════════════════════════════════════════════════
-// Chart.js init
-// ══════════════════════════════════════════════════
-function initChart() {
-  const labels = [
-    '02-06 Feb','09-13 Feb','16-20 Feb','23-27 Feb',
-    '02-06 Mar','09-13 Mar','16-20 Mar','23-27 Mar',
-    '30-03 Apr','06-10 Apr','13-17 Apr',
-  ];
-  const availCap   = [15500,15800,15800,15500,17000,15500,17500,18000,19000,19000,19000];
-  const assignedAl = [1995, 3200, 1087, 1928, 2790, 25000,1265, 920,  678,  703,  808 ];
-  const unassignAl = [780,  210,  620,  510,  720,  310,  640,  490,  380,  290,  410 ];
-  const totalCap   = [17000,17200,17400,17600,18000,18200,18500,18800,19000,19200,19400];
-
-  const ctx = document.getElementById('cap-chart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Available capacity',
-          data: availCap,
-          backgroundColor: '#60a5fa',
-          borderRadius: 2,
-          order: 3,
-        },
-        {
-          label: 'Assigned allocations',
-          data: assignedAl,
-          backgroundColor: '#2da196',
-          borderRadius: 2,
-          order: 2,
-        },
-        {
-          label: 'Unassigned allocations',
-          data: unassignAl,
-          backgroundColor: '#67e8f9',
-          borderRadius: 2,
-          order: 1,
-        },
-        {
-          label: 'Total capacity',
-          data: totalCap,
-          type: 'line',
-          borderColor: '#aaa',
-          borderDash: [6,4],
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0.4,
-          fill: false,
-          order: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1d1d1f',
-          titleFont: { size: 12, weight: 590 },
-          bodyFont: { size: 12 },
-          padding: 10,
-          cornerRadius: 6,
-          callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}h`,
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { font: { size: 11 }, color: '#8d8d8d', maxRotation: 0 },
-          border: { color: '#f4f4f4' },
-        },
-        y: {
-          grid: { color: '#f4f4f4' },
-          ticks: {
-            font: { size: 11 },
-            color: '#8d8d8d',
-            callback: v => v >= 1000 ? `${v/1000}k` : v,
-          },
-          border: { display: false },
-          title: { display: true, text: 'Hours', font: { size: 11 }, color: '#8d8d8d' },
-        },
-      },
-    },
-  });
-}
-
-// ══════════════════════════════════════════════════
 // Skill Demand Breakdown data & render
 // ══════════════════════════════════════════════════
 const SDB_DATA = [
@@ -755,7 +610,7 @@ let sdbFilter = 'all';
 
 function filterSdb(f, btn) {
   sdbFilter = f;
-  document.querySelectorAll('#body-sdb .sg-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#panel-role-skill .sg-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   renderSDB();
 }
@@ -823,7 +678,6 @@ function renderSDB() {
 renderCS();
 renderRS();
 renderSDB();
-initChart();
 </script>
 </body>
 </html>
