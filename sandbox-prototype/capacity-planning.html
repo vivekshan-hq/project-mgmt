@@ -345,29 +345,31 @@ function switchSubTab(id) {
 const CS_MONTHS = ['Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27'];
 
 const CS_FTE = {
-  totalDemand:       [623.2,547.0,489.7,412.7,276.9,235.7,217.0,162.0,141.5,126.0,78.0,69.8],
-  confirmedDemand:   [581.1,475.7,409.7,331.8,213.4,188.1,172.5,127.7,110.2, 99.2,54.7,46.3],
-  forecastDemand:    [ 42.1, 71.3, 80.1, 80.9, 63.5, 47.6, 44.5, 34.3, 31.3, 26.8,23.3,23.5],
-  hardForecast:      [  4.9, 25.6, 30.3, 32.1, 22.8, 16.7, 17.8, 13.2, 10.7,  6.7, 6.7, 7.7],
-  softForecast:      [ 37.2, 45.7, 49.8, 48.7, 40.7, 30.9, 26.7, 21.1, 20.6, 20.1,16.6,15.9],
-  totalSupply:       [639.2,637.6,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0],
-  headcount:         [639.2,635.6,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0],
-  joiningHC:         [  0,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-  attrition:         [  5,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-  netGap:            [-15.9,-90.6,-147.3,-224.3,-360.1,-401.3,-420.0,-475.0,-495.5,-511.0,-559.0,-567.2],
+  totalDemand:        [623.2,547.0,489.7,412.7,276.9,235.7,217.0,162.0,141.5,126.0, 78.0, 69.8],
+  assignedDemand:     [481.1,375.7,309.7,251.8,163.4,148.1,132.5, 97.7, 80.2, 79.2, 44.7, 36.3],
+  assignedHard:       [390.2,290.1,229.4,183.7,116.6,107.2, 94.7, 68.4, 55.5, 53.1, 28.0, 22.4],
+  assignedSoft:       [ 90.9, 85.6, 80.3, 68.1, 46.8, 40.9, 37.8, 29.3, 24.7, 26.1, 16.7, 13.9],
+  unassignedDemand:   [142.1,171.3,180.0,160.9,113.5, 87.6, 84.5, 64.3, 61.3, 46.8, 33.3, 33.5],
+  unassignedHard:     [ 54.9, 75.6, 80.2, 72.1, 52.8, 36.7, 37.8, 33.2, 30.7, 16.7, 16.7, 17.7],
+  unassignedSoft:     [ 87.2, 95.7, 99.8, 88.8, 60.7, 50.9, 46.7, 31.1, 30.6, 30.1, 16.6, 15.8],
+  totalSupply:        [639.2,637.6,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0,637.0],
+  headcount:          [639.2,635.6,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0,635.0],
+  joiningHC:          [  0,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+  attrition:          [  5,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+  netGap:             [-15.9,-90.6,-147.3,-224.3,-360.1,-401.3,-420.0,-475.0,-495.5,-511.0,-559.0,-567.2],
 };
 
 // Hours = FTE * 160 (approx)
 const CS_HRS = {};
-['totalDemand','confirmedDemand','forecastDemand','hardForecast','softForecast','totalSupply','headcount'].forEach(k => {
+['totalDemand','assignedDemand','assignedHard','assignedSoft','unassignedDemand','unassignedHard','unassignedSoft','totalSupply','headcount'].forEach(k => {
   CS_HRS[k] = CS_FTE[k].map(v => Math.round(v * 160));
 });
 CS_HRS.joiningHC = CS_FTE.joiningHC.map(v => v * 160);
-CS_HRS.attrition = CS_FTE.attrition.map(v => v * 160);
-CS_HRS.netGap = CS_FTE.netGap.map(v => Math.round(v * 160));
+CS_HRS.attrition  = CS_FTE.attrition.map(v => v * 160);
+CS_HRS.netGap     = CS_FTE.netGap.map(v => Math.round(v * 160));
 
 let csUnit = 'hrs';
-let csDemandOpen = true, csForecastOpen = true;
+let csDemandOpen = true, csAssignedOpen = true, csUnassignedOpen = true;
 
 function switchCsUnit(u) {
   csUnit = u;
@@ -386,27 +388,39 @@ function renderCS() {
 
   // Total Demand
   html += `<tr class="row-demand" onclick="toggleCsRow('demand')">
-    <td><button class="collapse-btn">${csDemandOpen ? '▾' : '▸'}</button> &nbsp;- Total Demand</td>
+    <td><button class="collapse-btn">${csDemandOpen ? '▾' : '▸'}</button> &nbsp;Total Demand</td>
     ${d.totalDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
   </tr>`;
 
   if (csDemandOpen) {
-    html += `<tr class="row-demand-child cs-i1">
-      <td>Confirmed Demand</td>
-      ${d.confirmedDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
+    // Assigned Demand
+    html += `<tr class="row-demand-child" onclick="toggleCsRow('assigned')">
+      <td class="cs-i1"><button class="collapse-btn">${csAssignedOpen ? '▾' : '▸'}</button> &nbsp;Assigned Demand</td>
+      ${d.assignedDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
     </tr>`;
-    html += `<tr class="row-forecast" onclick="toggleCsRow('forecast')">
-      <td class="cs-i1"><button class="collapse-btn">${csForecastOpen ? '▾' : '▸'}</button> &nbsp;- Forecast Demand</td>
-      ${d.forecastDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
-    </tr>`;
-    if (csForecastOpen) {
+    if (csAssignedOpen) {
       html += `<tr class="row-forecast-child cs-i2">
-        <td>Hard Forecast</td>
-        ${d.hardForecast.map(v => `<td>${fmt(v)}</td>`).join('')}
+        <td>Hard Allocation</td>
+        ${d.assignedHard.map(v => `<td>${fmt(v)}</td>`).join('')}
       </tr>`;
       html += `<tr class="row-forecast-child cs-i2">
-        <td>Soft Forecast</td>
-        ${d.softForecast.map(v => `<td>${fmt(v)}</td>`).join('')}
+        <td>Soft Allocation</td>
+        ${d.assignedSoft.map(v => `<td>${fmt(v)}</td>`).join('')}
+      </tr>`;
+    }
+    // Unassigned Demand
+    html += `<tr class="row-forecast" onclick="toggleCsRow('unassigned')">
+      <td class="cs-i1"><button class="collapse-btn">${csUnassignedOpen ? '▾' : '▸'}</button> &nbsp;Unassigned Demand</td>
+      ${d.unassignedDemand.map(v => `<td>${fmt(v)}</td>`).join('')}
+    </tr>`;
+    if (csUnassignedOpen) {
+      html += `<tr class="row-forecast-child cs-i2">
+        <td>Hard Allocation</td>
+        ${d.unassignedHard.map(v => `<td>${fmt(v)}</td>`).join('')}
+      </tr>`;
+      html += `<tr class="row-forecast-child cs-i2">
+        <td>Soft Allocation</td>
+        ${d.unassignedSoft.map(v => `<td>${fmt(v)}</td>`).join('')}
       </tr>`;
     }
   }
@@ -428,8 +442,9 @@ function renderCS() {
 }
 
 function toggleCsRow(which) {
-  if (which === 'demand') csDemandOpen = !csDemandOpen;
-  else if (which === 'forecast') csForecastOpen = !csForecastOpen;
+  if (which === 'demand')      csDemandOpen      = !csDemandOpen;
+  else if (which === 'assigned')   csAssignedOpen   = !csAssignedOpen;
+  else if (which === 'unassigned') csUnassignedOpen = !csUnassignedOpen;
   renderCS();
 }
 
