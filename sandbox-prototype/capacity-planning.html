@@ -609,7 +609,7 @@ function renderSG() {
   rows.forEach(d => {
     const gap = d.avail - d.req;
     const status = gap < 0 ? 'short' : gap === 0 ? 'met' : 'surplus';
-    const pct = Math.min(100, Math.round(d.avail / d.req * 100));
+    const pct = Math.round(d.avail / d.req * 100);
     const barColor = status === 'short' ? 'gap-short' : status === 'surplus' ? 'gap-surplus' : 'gap-ok';
     const chipCls = status === 'short' ? 's-short' : status === 'surplus' ? 's-surplus' : 's-met';
     const chipLabel = status === 'short' ? 'Shortage' : status === 'surplus' ? 'Surplus' : 'Met';
@@ -628,7 +628,7 @@ function renderSG() {
       <td>${d.avail.toFixed(1)}</td>
       <td class="${gapCls}">${gapStr}</td>
       <td style="text-align:left;">
-        <div class="gap-bar-wrap"><div class="gap-bar-fill ${barColor}" style="width:${pct}%;"></div></div>
+        <div class="gap-bar-wrap"><div class="gap-bar-fill ${barColor}" style="width:${Math.min(100,pct)}%;"></div></div>
         <span style="font-size:12px;color:#525252;">${pct}%</span>
       </td>
       <td style="text-align:left;"><span class="status-chip ${chipCls}">${chipLabel}</span></td>
