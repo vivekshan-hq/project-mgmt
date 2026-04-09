@@ -223,8 +223,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         </div>
         <div class="section-hd-right">
           <div class="cs-tgl">
-            <button class="cs-tgl-btn active" id="cs-fte-btn" onclick="event.stopPropagation();switchCsUnit('fte')">FTE</button>
-            <button class="cs-tgl-btn" id="cs-hrs-btn" onclick="event.stopPropagation();switchCsUnit('hrs')">Hours</button>
+            <button class="cs-tgl-btn active" id="cs-hrs-btn" onclick="event.stopPropagation();switchCsUnit('hrs')">Hours</button>
+            <button class="cs-tgl-btn" id="cs-fte-btn" onclick="event.stopPropagation();switchCsUnit('fte')">FTE</button>
           </div>
           <svg class="chevron-icon open" id="chevron-cs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
         </div>
@@ -368,8 +368,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
               <tr>
                 <th style="width:180px;min-width:160px;">Role</th>
                 <th style="width:200px;min-width:160px;text-align:left;">Skill</th>
-                <th style="width:100px;">Required (FTE)</th>
-                <th style="width:100px;">Available (FTE)</th>
+                <th style="width:100px;" id="sg-req-hd">Required (Hours)</th>
+                <th style="width:100px;" id="sg-avail-hd">Available (Hours)</th>
                 <th style="width:120px;">Gap</th>
                 <th style="width:140px;text-align:left;">Coverage</th>
                 <th style="width:100px;text-align:left;">Status</th>
@@ -424,13 +424,20 @@ CS_HRS.joiningHC = CS_FTE.joiningHC.map(v => v * 160);
 CS_HRS.attrition = CS_FTE.attrition.map(v => v * 160);
 CS_HRS.netGap = CS_FTE.netGap.map(v => Math.round(v * 160));
 
-let csUnit = 'fte';
+let csUnit = 'hrs';
 let csDemandOpen = true, csForecastOpen = true;
 
 function switchCsUnit(u) {
   csUnit = u;
-  document.getElementById('cs-fte-btn').classList.toggle('active', u === 'fte');
   document.getElementById('cs-hrs-btn').classList.toggle('active', u === 'hrs');
+  document.getElementById('cs-fte-btn').classList.toggle('active', u === 'fte');
+  // keep toolbar in sync
+  document.getElementById('tgl-hours').classList.toggle('active', u === 'hrs');
+  document.getElementById('tgl-fte').classList.toggle('active', u === 'fte');
+  // update Skills Gap column headers
+  const unitLabel = u === 'hrs' ? 'Hours' : 'FTE';
+  document.getElementById('sg-req-hd').textContent = `Required (${unitLabel})`;
+  document.getElementById('sg-avail-hd').textContent = `Available (${unitLabel})`;
   renderCS();
 }
 
@@ -639,8 +646,8 @@ function renderSG() {
 // Toolbar unit toggle (HOURS / FTE)
 // ══════════════════════════════════════════════════
 function switchUnit(u) {
-  document.getElementById('tgl-hours').classList.toggle('active', u === 'hours');
-  document.getElementById('tgl-fte').classList.toggle('active', u === 'fte');
+  // toolbar toggle drives the Capacity Summary unit
+  switchCsUnit(u === 'hours' ? 'hrs' : 'fte');
 }
 
 // ══════════════════════════════════════════════════
