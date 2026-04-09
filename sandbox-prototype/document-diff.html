@@ -88,6 +88,14 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .kv-tbl tr.tn td:first-child{color:#198038;}
 .kv-tbl tr.tg td{color:#c6c6c6;font-size:11px;font-weight:400!important;font-style:italic;border-color:#f0f0f0;}
 
+/* Column order: Sandbox left, Production right */
+.col-labels{display:flex;}
+.cl-prod{order:2;flex:1;border-right:none;border-left:1px solid #d0d0d0;}
+.cl-sand{order:1;flex:1;border-right:1px solid #d0d0d0;}
+.bp{display:flex;}
+.bl{order:2;flex:1;border-right:none;border-left:1px solid #e0e0e0;}
+.br{order:1;flex:1;border-right:1px solid #e0e0e0;}
+
 /* ── Footer ── */
 .ft{padding:10px 20px;border-top:1px solid #e8e8e8;flex-shrink:0;display:flex;justify-content:flex-end;background:#fff;}
 .btn-done{height:32px;padding:0 16px;background:#1d1d1f;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:590;cursor:pointer;font-family:inherit;}
@@ -105,14 +113,14 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
     <span class="hd-sub">Bi-weekly Update</span>
   </div>
   <div class="hd-right">
-    <span class="env-pill ep-prod">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-      Production
-    </span>
-    <span class="vs">vs</span>
     <span class="env-pill ep-sand">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
       Sandbox
+    </span>
+    <span class="vs">vs</span>
+    <span class="env-pill ep-prod">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+      Production
     </span>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot ld-green"></div>New additions</div>

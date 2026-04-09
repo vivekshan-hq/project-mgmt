@@ -213,6 +213,17 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .tsc-mod{background:var(--mod-bg);color:var(--mod-color);}
 .tsc-del{background:var(--del-bg);color:var(--del-color);}
 
+/* Column order: Sandbox left, Production right */
+.sdiff-env{display:flex;}
+.sdiff-env-prod{order:2;flex:1;border-right:none;border-left:2px solid var(--border-strong);}
+.sdiff-env-sand{order:1;flex:1;border-right:2px solid var(--border-strong);}
+.sdiff-col-hd{display:flex;}
+.sdiff-col-hd .sdiff-side.s-prod{order:2;flex:1;border-right:none;border-left:2px solid var(--border-strong);}
+.sdiff-col-hd .sdiff-side.s-sand{order:1;flex:1;}
+.sdiff-row{display:flex;}
+.sdiff-row .sdiff-side.s-prod{order:2;flex:1;border-right:none;border-left:2px solid var(--border-strong);}
+.sdiff-row .sdiff-side.s-sand{order:1;flex:1;}
+
 /* Automation display */
 .auto-display{margin-top:8px;background:#f8f8f8;border:1px solid var(--border);border-radius:6px;overflow:hidden;font-size:12px;}
 .auto-trigger{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fff;border-bottom:1px solid var(--border);}
@@ -257,17 +268,17 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       RAID Sheet
       <span class="hd-ttype">Sheet Template</span>
     </div>
-    <div class="hd-meta">Sandbox changes ready to merge → Production</div>
+    <div class="hd-meta">Merging Sandbox changes → Production</div>
   </div>
   <div class="env-pills">
-    <span class="ep ep-prod">
-      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-      Production
-    </span>
-    <span class="ep-arr">→</span>
     <span class="ep ep-sand">
       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
       Sandbox
+    </span>
+    <span class="ep-arr">→</span>
+    <span class="ep ep-prod">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+      Production
     </span>
   </div>
   <a href="review-changes.html" class="btn-close" title="Close">×</a>
