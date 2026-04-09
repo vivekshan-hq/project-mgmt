@@ -323,72 +323,6 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
     </div>
 
     <!-- ═══════════════════════════════════════════════ -->
-    <!-- 3. SKILLS GAP                                  -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="section">
-      <div class="section-hd" onclick="toggleSection('sg')">
-        <div class="section-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          Skills Gap
-        </div>
-        <div class="section-hd-right">
-          <svg class="chevron-icon open" id="chevron-sg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-        </div>
-      </div>
-      <div class="section-body" id="body-sg">
-
-        <!-- Summary stats -->
-        <div class="stats-bar">
-          <div class="stat-item">
-            <div class="stat-label">Skills tracked</div>
-            <div class="stat-val">14</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Gaps (shortage)</div>
-            <div class="stat-val red">8</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Skills met</div>
-            <div class="stat-val">3</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Surplus</div>
-            <div class="stat-val green">3</div>
-          </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="sg-filters">
-          <span style="font-size:12px;color:#525252;font-weight:590;margin-right:4px;">Filter:</span>
-          <button class="sg-chip active" onclick="filterSg('all',this)">All</button>
-          <button class="sg-chip short" onclick="filterSg('short',this)">Shortage</button>
-          <button class="sg-chip met" onclick="filterSg('met',this)">Met</button>
-          <button class="sg-chip surplus" onclick="filterSg('surplus',this)">Surplus</button>
-        </div>
-
-        <!-- Skills gap table -->
-        <div class="tbl-wrap">
-          <table class="tbl">
-            <thead>
-              <tr>
-                <th style="width:180px;min-width:160px;">Role</th>
-                <th style="width:200px;min-width:160px;text-align:left;">Skill</th>
-                <th style="width:100px;" id="sg-req-hd">Required (Hours)</th>
-                <th style="width:100px;" id="sg-avail-hd">Available (Hours)</th>
-                <th style="width:120px;">Gap</th>
-                <th style="width:140px;text-align:left;">Coverage</th>
-                <th style="width:100px;text-align:left;">Status</th>
-              </tr>
-            </thead>
-            <tbody id="sg-tbody">
-              <!-- filled by JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════ -->
     <!-- 4. SKILL DEMAND BREAKDOWN                      -->
     <!-- ═══════════════════════════════════════════════ -->
     <div class="section">
@@ -491,10 +425,6 @@ function switchCsUnit(u) {
   // keep toolbar in sync
   document.getElementById('tgl-hours').classList.toggle('active', u === 'hrs');
   document.getElementById('tgl-fte').classList.toggle('active', u === 'fte');
-  // update Skills Gap column headers
-  const unitLabel = u === 'hrs' ? 'Hours' : 'FTE';
-  document.getElementById('sg-req-hd').textContent = `Required (${unitLabel})`;
-  document.getElementById('sg-avail-hd').textContent = `Available (${unitLabel})`;
   renderCS();
   renderSDB();
 }
@@ -892,7 +822,6 @@ function renderSDB() {
 // ══════════════════════════════════════════════════
 renderCS();
 renderRS();
-renderSG();
 renderSDB();
 initChart();
 </script>
