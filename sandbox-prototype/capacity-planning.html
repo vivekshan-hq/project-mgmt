@@ -141,6 +141,11 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .s-surplus{background:#edf5ff;color:#0f62fe;}
 .role-group-hd>td{background:#fafafa;font-size:11px;font-weight:590;color:#525252;letter-spacing:0.32px;text-transform:uppercase;padding:6px 12px!important;}
 .role-group-hd>td:first-child{text-align:left;}
+
+/* ── Skill Demand Breakdown specifics ── */
+.sdb-demand-parent th{background:#edf5ff;color:#0f62fe;text-align:center;font-size:11px;font-weight:590;letter-spacing:0.32px;text-transform:uppercase;padding:5px 12px;border-bottom:1px solid #d0e6ff;}
+.sdb-demand-col{background:#f7faff;}
+.sdb-unassigned{color:#8d8d8d;}
 </style>
 </head>
 <body>
@@ -383,6 +388,58 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 4. SKILL DEMAND BREAKDOWN                      -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-hd" onclick="toggleSection('sdb')">
+        <div class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Skill Demand Breakdown
+        </div>
+        <div class="section-hd-right">
+          <svg class="chevron-icon open" id="chevron-sdb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+      </div>
+      <div class="section-body" id="body-sdb">
+        <!-- Filters -->
+        <div class="sg-filters">
+          <span style="font-size:12px;color:#525252;font-weight:590;margin-right:4px;">Filter:</span>
+          <button class="sg-chip active" onclick="filterSdb('all',this)">All</button>
+          <button class="sg-chip short" onclick="filterSdb('short',this)">Shortage</button>
+          <button class="sg-chip met" onclick="filterSdb('met',this)">Met</button>
+          <button class="sg-chip surplus" onclick="filterSdb('surplus',this)">Surplus</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl" id="sdb-table">
+            <thead>
+              <tr class="sdb-demand-parent">
+                <th style="width:180px;min-width:160px;background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+                <th style="width:200px;min-width:160px;background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+                <th colspan="3">Demand</th>
+                <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+                <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+                <th style="background:#fafafa;border-bottom:1px solid #f4f4f4;"></th>
+              </tr>
+              <tr>
+                <th style="width:180px;min-width:160px;text-align:left;">Role</th>
+                <th style="width:200px;min-width:160px;text-align:left;">Skill</th>
+                <th style="width:110px;" id="sdb-req-hd">Total Req</th>
+                <th style="width:110px;" id="sdb-assigned-hd">Assigned</th>
+                <th style="width:120px;" id="sdb-unassigned-hd">Unassigned</th>
+                <th style="width:110px;" id="sdb-avail-hd">Available</th>
+                <th style="width:90px;">Gap</th>
+                <th style="width:100px;text-align:left;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="sdb-tbody">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -439,6 +496,7 @@ function switchCsUnit(u) {
   document.getElementById('sg-req-hd').textContent = `Required (${unitLabel})`;
   document.getElementById('sg-avail-hd').textContent = `Available (${unitLabel})`;
   renderCS();
+  renderSDB();
 }
 
 function renderCS() {
@@ -744,11 +802,98 @@ function initChart() {
 }
 
 // ══════════════════════════════════════════════════
+// Skill Demand Breakdown data & render
+// ══════════════════════════════════════════════════
+const SDB_DATA = [
+  { role:'Engineer',            skill:'Python',             assigned:7,  unassigned:5, avail:8  },
+  { role:'Engineer',            skill:'React',              assigned:6,  unassigned:2, avail:5  },
+  { role:'Engineer',            skill:'Node.js',            assigned:4,  unassigned:2, avail:9  },
+  { role:'Engineer',            skill:'DevOps / CI-CD',     assigned:3,  unassigned:2, avail:3  },
+  { role:'Solutions Architect', skill:'Salesforce',         assigned:6,  unassigned:4, avail:4  },
+  { role:'Solutions Architect', skill:'AWS',                assigned:5,  unassigned:3, avail:8  },
+  { role:'Solutions Architect', skill:'Integration Design', assigned:5,  unassigned:2, avail:4  },
+  { role:'Product Manager',     skill:'Agile / Scrum',      assigned:10, unassigned:5, avail:15 },
+  { role:'Product Manager',     skill:'Stakeholder Mgmt',   assigned:8,  unassigned:4, avail:7  },
+  { role:'Product Manager',     skill:'Data Analysis',      assigned:4,  unassigned:2, avail:8  },
+  { role:'Account Executive',   skill:'CRM',                assigned:14, unassigned:6, avail:17 },
+  { role:'Account Executive',   skill:'Negotiation',        assigned:12, unassigned:3, avail:18 },
+  { role:'Designer',            skill:'Figma',              assigned:6,  unassigned:2, avail:10 },
+  { role:'Designer',            skill:'User Research',      assigned:4,  unassigned:2, avail:3  },
+];
+
+let sdbFilter = 'all';
+
+function filterSdb(f, btn) {
+  sdbFilter = f;
+  document.querySelectorAll('#body-sdb .sg-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderSDB();
+}
+
+function renderSDB() {
+  const isHrs = csUnit === 'hrs';
+  const mul = isHrs ? 160 : 1;
+  const fmt = v => isHrs ? Math.round(v * mul).toLocaleString() : v.toFixed(1);
+  const unitLabel = isHrs ? 'Hours' : 'FTE';
+
+  document.getElementById('sdb-req-hd').textContent = `Total Req (${unitLabel})`;
+  document.getElementById('sdb-assigned-hd').textContent = `Assigned (${unitLabel})`;
+  document.getElementById('sdb-unassigned-hd').textContent = `Unassigned (${unitLabel})`;
+  document.getElementById('sdb-avail-hd').textContent = `Available (${unitLabel})`;
+
+  const rows = SDB_DATA.filter(d => {
+    const req = d.assigned + d.unassigned;
+    const gap = d.avail - req;
+    if (sdbFilter === 'short')   return gap < 0;
+    if (sdbFilter === 'met')     return gap === 0;
+    if (sdbFilter === 'surplus') return gap > 0;
+    return true;
+  });
+
+  let html = '';
+  let lastRole = '';
+  rows.forEach(d => {
+    const req = d.assigned + d.unassigned;
+    const gap = d.avail - req;
+    const status = gap < 0 ? 'short' : gap === 0 ? 'met' : 'surplus';
+    const chipCls = status === 'short' ? 's-short' : status === 'surplus' ? 's-surplus' : 's-met';
+    const chipLabel = status === 'short' ? 'Shortage' : status === 'surplus' ? 'Surplus' : 'Met';
+    const gapFmt = (gap * mul);
+    const gapStr = (isHrs ? Math.round(gapFmt) : gapFmt.toFixed(1));
+    const gapDisplay = gap > 0 ? `+${gapStr}` : `${gapStr}`;
+    const gapColor = status === 'short' ? 'color:#da1e28;' : status === 'surplus' ? 'color:#24a148;' : '';
+
+    if (d.role !== lastRole) {
+      html += `<tr class="role-group-hd"><td colspan="8">${d.role}</td></tr>`;
+      lastRole = d.role;
+    }
+
+    html += `<tr>
+      <td style="color:#8d8d8d;font-size:12px;"></td>
+      <td style="text-align:left;">${d.skill}</td>
+      <td class="sdb-demand-col">${fmt(req)}</td>
+      <td class="sdb-demand-col">${fmt(d.assigned)}</td>
+      <td class="sdb-demand-col sdb-unassigned">${fmt(d.unassigned)}</td>
+      <td>${fmt(d.avail)}</td>
+      <td style="${gapColor}font-weight:590;">${gapDisplay}</td>
+      <td style="text-align:left;"><span class="status-chip ${chipCls}">${chipLabel}</span></td>
+    </tr>`;
+  });
+
+  if (!rows.length) {
+    html = `<tr><td colspan="8" style="text-align:center;color:#8d8d8d;padding:32px;">No results</td></tr>`;
+  }
+
+  document.getElementById('sdb-tbody').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
 // Init
 // ══════════════════════════════════════════════════
 renderCS();
 renderRS();
 renderSG();
+renderSDB();
 initChart();
 </script>
 </body>
