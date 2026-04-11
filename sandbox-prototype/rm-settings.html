@@ -266,7 +266,7 @@
     .tag-ui { background: var(--bg); color: var(--text-3); border-color: var(--border); }
     .tag-merge { background: var(--brand-light); color: var(--brand); border-color: var(--brand-muted); }
     .tag-api { background: #f6f2ff; color: #6929c4; border-color: #d4bbff; }
-    .log-ip { font-size: 11px; line-height: 16px; color: var(--text-4); font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; }
+    .log-source { font-size: 13px; line-height: 18px; color: var(--text-4); font-weight: 400; }
 
     /* Drawer empty */
     .drawer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 60px 20px; color: var(--text-4); text-align: center; }
@@ -558,12 +558,9 @@
           <span class="log-actor">Vivek S</span>
           <span class="log-time">14 mins ago</span>
         </div>
-        <div class="log-desc">Changed <strong>Allocation time unit</strong></div>
+        <div class="log-desc">Changed <strong>Allocation time unit</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
           <span class="d-old">Hours/Week</span><span class="d-arr">→</span><span class="d-new">Hours/Day</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-ui">UI</span>
         </div>
       </div>
     </div>
@@ -575,12 +572,9 @@
           <span class="log-actor">Vivek S</span>
           <span class="log-time">31 mins ago</span>
         </div>
-        <div class="log-desc">Enabled <strong>Soft allocations</strong></div>
+        <div class="log-desc">Enabled <strong>Soft allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
           <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-ui">UI</span>
         </div>
       </div>
     </div>
@@ -594,12 +588,9 @@
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 10, 4:22 PM</span>
         </div>
-        <div class="log-desc">Changed <strong>Allocation time unit</strong> via Sandbox merge</div>
+        <div class="log-desc">Changed <strong>Allocation time unit</strong> <span class="log-source">via Sandbox merge</span></div>
         <div class="log-diff">
           <span class="d-old">Hours/Day</span><span class="d-arr">→</span><span class="d-new">Hours/Week</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-merge">Sandbox merge</span>
         </div>
       </div>
     </div>
@@ -611,12 +602,9 @@
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 10, 4:22 PM</span>
         </div>
-        <div class="log-desc">Changed <strong>Effort planning level</strong> via Sandbox merge</div>
+        <div class="log-desc">Changed <strong>Effort planning level</strong> <span class="log-source">via Sandbox merge</span></div>
         <div class="log-diff">
           <span class="d-old">At phase level</span><span class="d-arr">→</span><span class="d-new">At task level</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-merge">Sandbox merge</span>
         </div>
       </div>
     </div>
@@ -630,12 +618,9 @@
           <span class="log-actor">Riya K</span>
           <span class="log-time">Apr 8, 11:05 AM</span>
         </div>
-        <div class="log-desc">Disabled <strong>Collaborator access to allocations</strong></div>
+        <div class="log-desc">Disabled <strong>Collaborator access to allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
           <span class="d-on">On</span><span class="d-arr">→</span><span class="d-off">Off</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-ui">UI</span>
         </div>
       </div>
     </div>
@@ -647,12 +632,9 @@
           <span class="log-actor">Riya K</span>
           <span class="log-time">Apr 8, 10:58 AM</span>
         </div>
-        <div class="log-desc">Enabled <strong>Collaborator access to allocations</strong></div>
+        <div class="log-desc">Enabled <strong>Collaborator access to allocations</strong> <span class="log-source">via API</span></div>
         <div class="log-diff">
           <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-api">API</span>
         </div>
       </div>
     </div>
@@ -666,12 +648,9 @@
           <span class="log-actor">Sam A</span>
           <span class="log-time">Apr 5, 3:14 PM</span>
         </div>
-        <div class="log-desc">Changed <strong>Effort planning level</strong></div>
+        <div class="log-desc">Changed <strong>Effort planning level</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
           <span class="d-old">At task level</span><span class="d-arr">→</span><span class="d-new">At phase level</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-ui">UI</span>
         </div>
       </div>
     </div>
@@ -683,12 +662,9 @@
           <span class="log-actor">Sam A</span>
           <span class="log-time">Apr 5, 3:10 PM</span>
         </div>
-        <div class="log-desc">Enabled <strong>Create new projects from templates with soft allocations</strong></div>
+        <div class="log-desc">Enabled <strong>Create new projects from templates with soft allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
           <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-ui">UI</span>
         </div>
       </div>
     </div>
@@ -700,12 +676,9 @@
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 5, 9:00 AM</span>
         </div>
-        <div class="log-desc">Disabled <strong>Soft allocations</strong></div>
+        <div class="log-desc">Disabled <strong>Soft allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
           <span class="d-on">On</span><span class="d-arr">→</span><span class="d-off">Off</span>
-        </div>
-        <div class="log-tags">
-          <span class="tag tag-ui">UI</span>
         </div>
       </div>
     </div>
