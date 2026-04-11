@@ -500,9 +500,8 @@
     <div class="content-actions">
       <button class="btn btn-ghost" onclick="openDrawer()">
         <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
-        View history
+        View audit log
       </button>
-      <button class="btn btn-primary" id="save-btn" disabled onclick="saveSettings()">Save changes</button>
     </div>
   </div>
 
@@ -930,13 +929,6 @@
 
   </div><!-- /content-body -->
 </div><!-- /main -->
-
-<!-- ══ Save bar ══ -->
-<div class="save-bar" id="save-bar">
-  <span class="save-bar-text"><strong>Unsaved changes</strong> — Review before saving.</span>
-  <button class="btn btn-ghost" onclick="discardChanges()">Discard</button>
-  <button class="btn btn-primary" onclick="saveSettings()">Save changes</button>
-</div>
 
 <!-- ══ Drawer overlay ══ -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
