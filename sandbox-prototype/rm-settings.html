@@ -7,12 +7,13 @@
   <style>
     :root {
       --brand: #0f62fe; --brand-dark: #0043ce; --brand-light: #edf5ff; --brand-muted: #97c1ff;
-      --bg: #f4f4f4; --surface: #fff; --border: #e0e0e0; --border-strong: #c6c6c6;
+      --bg: #fafafa; --surface: #fff; --border: #e0e0e0; --border-subtle: #f4f4f4;
+      --border-strong: #c6c6c6;
       --text-1: #161616; --text-2: #525252; --text-3: #6f6f6f; --text-4: #a8a8a8;
       --success: #24a148; --success-bg: #defbe6; --success-border: #a7f0ba;
       --warning: #ffbf00; --warning-bg: #fffbf0; --warning-border: #f1c21b;
       --danger: #da1e28; --danger-bg: #fff1f1; --danger-border: #ffd7d9;
-      --info: #0f62fe; --info-bg: #edf5ff; --info-border: #97c1ff;
+      --info-bg: #edf5ff; --info-border: #97c1ff;
       --radius: 8px; --radius-sm: 4px;
       --shadow-sm: 0px 0.8px 1.8px rgba(0,0,0,0.13), 0px 0.15px 0.45px rgba(0,0,0,0.11);
       --shadow: 0px 1.6px 3.6px rgba(0,0,0,0.13), 0px 0.3px 0.9px rgba(0,0,0,0.11);
@@ -20,657 +21,723 @@
       --shadow-lg: 0px 6.4px 14.4px rgba(0,0,0,0.13), 0px 1.2px 3.6px rgba(0,0,0,0.11);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 18px; color: var(--text-1); background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+    body {
+      font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 20px; color: var(--text-1);
+      background: var(--surface); display: flex; height: 100vh; overflow: hidden;
+    }
 
-    /* ── Rail nav ── */
-    .sidebar { width: 48px; flex-shrink: 0; background: #f2f2f2; display: flex; flex-direction: column; align-items: center; padding: 24px 0; }
-    .sidebar-logo { width: 24px; height: 24px; background: #1d1d1f; border-radius: 2px; display: grid; place-items: center; margin-bottom: 24px; flex-shrink: 0; }
-    .sidebar-logo svg { width: 12px; height: 12px; color: #fff; }
-    .sidebar-icons { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; padding: 0 8px; }
-    .nav-icon { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; cursor: pointer; color: var(--text-3); transition: all 0.15s; position: relative; text-decoration: none; }
-    .nav-icon:hover { background: rgba(0,0,0,0.06); color: var(--text-1); }
-    .nav-icon.active { background: #fff; color: var(--text-1); box-shadow: var(--shadow); border-radius: 8px; }
-    .nav-icon svg { width: 16px; height: 16px; stroke-width: 1.75; flex-shrink: 0; fill: none; stroke: currentColor; }
-    .sidebar-bottom { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 8px; }
-    .sidebar-user { width: 28px; height: 28px; border-radius: 50%; background: #525252; color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; cursor: pointer; }
+    /* ════════════════════════════
+       ICON RAIL (leftmost, 40px)
+    ════════════════════════════ */
+    .rail { width: 40px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 2px; }
+    .rail-logo { width: 24px; height: 24px; background: #1d1d1f; border-radius: 4px; display: grid; place-items: center; margin-bottom: 10px; flex-shrink: 0; }
+    .rail-logo svg { width: 11px; height: 11px; color: #fff; fill: none; stroke: currentColor; stroke-width: 2; }
+    .rail-icon { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; cursor: pointer; color: var(--text-4); transition: all 0.12s; }
+    .rail-icon:hover { background: var(--bg); color: var(--text-2); }
+    .rail-icon.active { background: #e8e8e8; color: var(--text-1); }
+    .rail-icon svg { width: 16px; height: 16px; stroke-width: 1.75; fill: none; stroke: currentColor; }
+    .rail-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .rail-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--text-2); color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; cursor: pointer; }
+    .rail-badge { position: relative; }
+    .rail-badge-dot { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; border: 1.5px solid var(--surface); font-size: 9px; color: #fff; display: grid; place-items: center; font-weight: 700; line-height: 1; }
 
-    /* ── Main ── */
-    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .topbar { height: 50px; background: var(--surface); border-bottom: 1px solid #f4f4f4; display: flex; align-items: center; padding: 0 24px 0 16px; gap: 12px; flex-shrink: 0; }
-    .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 14px; line-height: 18px; color: var(--text-2); }
-    .breadcrumb a { color: var(--brand); text-decoration: none; transition: color 0.12s; }
-    .breadcrumb a:hover { color: var(--brand-dark); }
-    .breadcrumb-sep { color: #e3e3e3; }
-    .breadcrumb-current { color: var(--text-1); }
-    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-    .avatar { width: 30px; height: 30px; border-radius: 50%; background: #525252; color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; cursor: pointer; }
+    /* ════════════════════════════
+       SETTINGS SIDEBAR (280px)
+    ════════════════════════════ */
+    .settings-sidebar {
+      width: 280px; flex-shrink: 0; background: var(--surface);
+      border-right: 1px solid var(--border); overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .ss-title { padding: 20px 20px 12px; font-size: 20px; font-weight: 600; line-height: 28px; letter-spacing: 0px; color: var(--text-1); flex-shrink: 0; }
+    .ss-search { padding: 0 12px 10px; flex-shrink: 0; }
+    .ss-search-input {
+      width: 100%; padding: 6px 10px 6px 30px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 14px; line-height: 18px; color: var(--text-2); outline: none; background: var(--bg);
+      font-family: inherit; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 9px center;
+    }
+    .ss-search-input:focus { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-light); }
+    .ss-section-label { padding: 10px 20px 4px; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.32px; color: var(--text-4); text-transform: none; }
+    .ss-divider { height: 1px; background: var(--border); margin: 8px 12px; }
+    .ss-item {
+      display: flex; align-items: center; gap: 10px; padding: 7px 20px;
+      font-size: 14px; line-height: 18px; color: var(--text-2);
+      cursor: pointer; transition: all 0.1s; border-radius: 0; position: relative;
+      text-decoration: none;
+    }
+    .ss-item:hover { background: var(--bg); color: var(--text-1); }
+    .ss-item.active { background: var(--brand-light); color: var(--brand); font-weight: 600; }
+    .ss-item.active::after {
+      content: '';
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      width: 6px; height: 6px; border-top: 1.5px solid var(--brand); border-right: 1.5px solid var(--brand);
+      transform: translateY(-50%) rotate(45deg);
+    }
+    /* Colored setting icons */
+    .ss-icon { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; flex-shrink: 0; }
+    .ss-icon svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 2; }
+    .ic-orange { background: linear-gradient(135deg,#ffbe7a,#f98000); }
+    .ic-blue { background: linear-gradient(135deg,#78a9ff,#0f62fe); }
+    .ic-teal { background: linear-gradient(135deg,#3ddbd9,#009d9a); }
+    .ic-green { background: linear-gradient(135deg,#6fdc8c,#24a148); }
+    .ic-purple { background: linear-gradient(135deg,#be95ff,#6929c4); }
+    .ic-yellow { background: linear-gradient(135deg,#ffdf7e,#ffbf00); }
+    .ic-red { background: linear-gradient(135deg,#ff8389,#fa4d56); }
+    .ic-magenta { background: linear-gradient(135deg,#ff7eb6,#d12771); }
+    .ic-gray { background: linear-gradient(135deg,#e0e0e0,#c1c1c1); }
+    .ss-chevron { margin-left: auto; color: var(--text-4); flex-shrink: 0; }
+    .ss-chevron svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-    /* ── Settings layout ── */
-    .settings-layout { flex: 1; display: flex; overflow: hidden; position: relative; }
-    .settings-sidebar { width: 224px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px 0; }
-    .settings-nav-section { padding: 8px 16px 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.32px; color: var(--text-4); margin-top: 8px; line-height: 16px; }
-    .settings-nav-section:first-child { margin-top: 0; }
-    .settings-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; font-size: 14px; line-height: 18px; color: var(--text-2); text-decoration: none; transition: all 0.12s; border-left: 2px solid transparent; cursor: pointer; }
-    .settings-nav-item:hover { color: var(--text-1); background: var(--bg); }
-    .settings-nav-item.active { color: var(--brand); font-weight: 600; border-left-color: var(--brand); background: var(--brand-light); }
+    /* ════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════ */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
 
-    /* ── Content ── */
-    .content { flex: 1; overflow-y: auto; padding: 28px 32px 60px; }
-    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
-    .page-header-left {}
-    .page-title { font-size: 20px; font-weight: 600; line-height: 28px; }
-    .page-desc { font-size: 14px; line-height: 18px; color: var(--text-3); margin-top: 4px; }
-    .page-header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    /* Content header */
+    .content-header {
+      padding: 24px 32px 0;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+      flex-shrink: 0;
+    }
+    .content-title-row { display: flex; align-items: center; gap: 10px; }
+    .content-icon { width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; flex-shrink: 0; }
+    .content-icon svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 1.75; }
+    .content-title { font-size: 20px; font-weight: 600; line-height: 28px; letter-spacing: 0px; color: var(--text-1); }
+    .content-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-top: 2px; }
 
-    /* ── Buttons ── */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: var(--radius-sm); font-size: 14px; line-height: 18px; letter-spacing: 0.16px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: all 0.15s; white-space: nowrap; font-family: inherit; height: 32px; }
-    .btn-primary { background: #1d1d1f; color: #fff; box-shadow: var(--shadow-sm); }
+    /* Scrollable content */
+    .content-body { flex: 1; overflow-y: auto; padding: 24px 32px 80px; }
+
+    /* ════════════════════════════
+       SETTING SECTIONS (flat)
+    ════════════════════════════ */
+    .setting-section { padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .setting-section:last-child { border-bottom: none; }
+
+    /* Checkbox setting row */
+    .cb-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 0; }
+    .cb-row + .cb-row { margin-top: 12px; }
+    .cb-row.sub { padding-left: 26px; margin-top: 10px; }
+    .cb-row.sub.disabled { opacity: 0.45; pointer-events: none; }
+
+    /* Native-style checkbox */
+    .cb-box {
+      width: 16px; height: 16px; border-radius: 3px; border: 1.5px solid var(--border-strong);
+      flex-shrink: 0; display: grid; place-items: center; cursor: pointer;
+      transition: all 0.12s; margin-top: 2px; background: var(--surface);
+    }
+    .cb-box.checked { background: var(--brand); border-color: var(--brand); }
+    .cb-box svg { display: none; width: 10px; height: 10px; stroke-width: 2.5; color: #fff; fill: none; stroke: currentColor; }
+    .cb-box.checked svg { display: block; }
+
+    .cb-label { font-size: 14px; line-height: 20px; color: var(--text-1); cursor: pointer; }
+    .cb-label strong { font-weight: 600; }
+    .cb-label .cb-desc { color: var(--text-2); font-weight: 400; }
+
+    /* Radio setting row */
+    .radio-section-label { font-size: 14px; font-weight: 600; line-height: 20px; color: var(--text-1); margin-bottom: 4px; }
+    .radio-section-desc { font-size: 14px; line-height: 20px; color: var(--text-2); margin-bottom: 12px; }
+    .radio-rows { display: flex; flex-direction: column; gap: 8px; }
+    .radio-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .radio-btn {
+      width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      flex-shrink: 0; display: grid; place-items: center; background: var(--surface); transition: all 0.12s;
+    }
+    .radio-btn.selected { border-color: var(--brand); border-width: 4.5px; background: var(--surface); }
+    .radio-label { font-size: 14px; line-height: 20px; color: var(--text-1); }
+
+    /* Impact warning */
+    .impact-warn {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: var(--warning-bg); border: 1px solid var(--warning-border);
+      border-radius: var(--radius-sm); padding: 10px 12px;
+      margin-top: 10px; font-size: 12px; line-height: 16px; color: #6f4c00;
+    }
+    .impact-warn svg { width: 13px; height: 13px; color: var(--warning); flex-shrink: 0; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* ════════════════════════════
+       BUTTONS
+    ════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 0 12px;
+      height: 32px; border-radius: var(--radius-sm);
+      font-size: 14px; line-height: 18px; letter-spacing: 0.16px; font-weight: 590;
+      cursor: pointer; border: none; text-decoration: none;
+      transition: all 0.12s; white-space: nowrap; font-family: inherit;
+    }
+    .btn-primary { background: #1d1d1f; color: #fff; }
     .btn-primary:hover { background: #2d2d2f; }
-    .btn-default { background: var(--surface); color: var(--text-1); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-    .btn-default:hover { background: var(--bg); border-color: var(--border-strong); }
+    .btn-primary:disabled { opacity: 0.45; pointer-events: none; }
     .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
-    .btn-ghost:hover { background: var(--bg); color: var(--text-1); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
     .btn svg { width: 14px; height: 14px; stroke-width: 2; flex-shrink: 0; fill: none; stroke: currentColor; }
 
-    /* ── Setting section card ── */
-    .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
-    .section-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #fafafa; display: flex; align-items: center; justify-content: space-between; }
-    .section-card-title { font-size: 14px; line-height: 18px; font-weight: 600; letter-spacing: 0.16px; color: var(--text-1); }
-    .section-card-desc { font-size: 12px; line-height: 16px; color: var(--text-3); margin-top: 2px; }
-    .section-card-body { padding: 0; }
+    /* ════════════════════════════
+       SAVE BAR
+    ════════════════════════════ */
+    .save-bar {
+      position: fixed; bottom: 0; left: 321px; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 10px 32px; display: flex; align-items: center; gap: 12px;
+      z-index: 100; box-shadow: 0 -1px 0 var(--border);
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .save-bar.visible { opacity: 1; pointer-events: all; }
+    .save-bar-text { font-size: 13px; color: var(--text-3); flex: 1; }
+    .save-bar-text strong { color: var(--text-1); }
 
-    /* ── Setting row ── */
-    .setting-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
-    .setting-row:last-child { border-bottom: none; }
-    .setting-row.sub { padding-left: 44px; background: #fafafa; }
-    .setting-row.sub .setting-label { color: var(--text-2); }
-    .setting-info { flex: 1; min-width: 0; }
-    .setting-label { font-size: 14px; line-height: 18px; font-weight: 600; letter-spacing: 0.16px; color: var(--text-1); }
-    .setting-help { font-size: 12px; line-height: 16px; color: var(--text-3); margin-top: 3px; }
-    .setting-control { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
-
-    /* ── Toggle ── */
-    .toggle { position: relative; width: 36px; height: 20px; cursor: pointer; }
-    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-    .toggle-track { position: absolute; inset: 0; background: var(--border-strong); border-radius: 99px; transition: background 0.2s; }
-    .toggle input:checked ~ .toggle-track { background: var(--brand); }
-    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: var(--shadow-sm); }
-    .toggle input:checked ~ .toggle-thumb { transform: translateX(16px); }
-    .toggle-label { font-size: 12px; line-height: 16px; color: var(--text-3); }
-
-    /* ── Radio group ── */
-    .radio-group { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-    .radio-opt { display: flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 13px; line-height: 18px; color: var(--text-2); cursor: pointer; border-right: 1px solid var(--border); transition: all 0.12s; background: var(--surface); white-space: nowrap; }
-    .radio-opt:last-child { border-right: none; }
-    .radio-opt.selected { background: var(--brand-light); color: var(--brand); font-weight: 600; }
-    .radio-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.12s; }
-    .radio-opt.selected .radio-dot { border-color: var(--brand); background: var(--brand); }
-    .radio-dot-inner { width: 5px; height: 5px; background: #fff; border-radius: 50%; display: none; }
-    .radio-opt.selected .radio-dot-inner { display: block; }
-
-    /* ── Impact warn ── */
-    .impact-warn { display: flex; align-items: flex-start; gap: 8px; background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 8px; font-size: 12px; line-height: 16px; color: #6f4c00; }
-    .impact-warn svg { width: 14px; height: 14px; color: var(--warning); flex-shrink: 0; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 2; }
-
-    /* ── Modified badge ── */
-    .mod-badge { display: inline-flex; align-items: center; gap: 4px; background: #fffbf0; color: #b28600; border: 1px solid #f1c21b; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.04em; }
-
-    /* ─────────────────────────────────────────
+    /* ════════════════════════════
        AUDIT DRAWER
-    ───────────────────────────────────────── */
-    .drawer-overlay { position: fixed; inset: 0; background: rgba(10,12,26,0.3); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+    ════════════════════════════ */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(22,22,22,0.4);
+      z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    }
     .drawer-overlay.open { opacity: 1; pointer-events: all; }
 
-    .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 520px; background: var(--surface); z-index: 201; display: flex; flex-direction: column; box-shadow: 0 0 0 1px rgba(0,0,0,0.06), -6.4px 0 14.4px rgba(0,0,0,0.13), -1.2px 0 3.6px rgba(0,0,0,0.11); transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 500px;
+      background: var(--surface); z-index: 201; display: flex; flex-direction: column;
+      box-shadow: -6.4px 0 14.4px rgba(0,0,0,0.13), -1.2px 0 3.6px rgba(0,0,0,0.11);
+      transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      border-left: 1px solid var(--border);
+    }
     .drawer.open { transform: translateX(0); }
 
     /* Drawer header */
-    .drawer-header { padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
-    .drawer-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .drawer-title { font-size: 16px; line-height: 22px; font-weight: 600; }
-    .drawer-close { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: none; cursor: pointer; display: grid; place-items: center; color: var(--text-3); transition: all 0.12s; }
+    .drawer-hd {
+      padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .drawer-hd-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .drawer-title { font-size: 16px; line-height: 22px; font-weight: 600; color: var(--text-1); }
+    .drawer-subtitle { font-size: 12px; line-height: 16px; color: var(--text-3); margin-top: 1px; }
+    .drawer-close { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: none; cursor: pointer; display: grid; place-items: center; color: var(--text-3); transition: all 0.1s; }
     .drawer-close:hover { background: var(--bg); color: var(--text-1); }
-    .drawer-close svg { width: 14px; height: 14px; stroke-width: 2; fill: none; stroke: currentColor; }
+    .drawer-close svg { width: 13px; height: 13px; stroke-width: 2; fill: none; stroke: currentColor; }
 
     /* Drawer toolbar */
-    .drawer-toolbar { display: flex; align-items: center; gap: 8px; }
-    .filter-chips { display: flex; gap: 4px; flex: 1; }
-    .filter-chip { padding: 4px 10px; border-radius: 999px; font-size: 12px; line-height: 16px; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.12s; white-space: nowrap; font-family: inherit; }
-    .filter-chip.active { background: var(--brand-light); border-color: var(--brand-muted); color: var(--brand); }
-    .filter-chip:hover:not(.active) { background: var(--bg); }
-    .export-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: var(--radius-sm); font-size: 12px; line-height: 16px; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.12s; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .drawer-toolbar { display: flex; align-items: center; gap: 6px; }
+    .filter-chips { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+    .fchip { padding: 3px 10px; border-radius: 999px; font-size: 12px; line-height: 16px; font-weight: 590; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.1s; font-family: inherit; }
+    .fchip.active { background: var(--brand-light); border-color: var(--brand-muted); color: var(--brand); }
+    .fchip:hover:not(.active) { background: var(--bg); border-color: var(--border-strong); }
+    .export-btn { display: inline-flex; align-items: center; gap: 5px; padding: 0 10px; height: 28px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 590; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.1s; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
     .export-btn:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
     .export-btn svg { width: 12px; height: 12px; stroke-width: 2; fill: none; stroke: currentColor; }
 
     /* Drawer scroll */
     .drawer-scroll { flex: 1; overflow-y: auto; }
 
-    /* Date group */
-    .log-date-group { padding: 10px 20px 4px; font-size: 11px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.32px; color: var(--text-4); position: sticky; top: 0; background: var(--bg); z-index: 1; border-bottom: 1px solid var(--border); }
+    /* Date group header */
+    .log-date-hd { padding: 8px 20px 6px; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.32px; color: var(--text-4); background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
 
     /* Log entry */
-    .log-entry { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
-    .log-entry:hover { background: #fafafa; }
-    .log-entry:last-child { border-bottom: none; }
+    .log-entry { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); transition: background 0.1s; }
+    .log-entry:hover { background: var(--bg); }
 
-    /* Actor avatar */
-    .log-avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; margin-top: 1px; }
-    .av-blue { background: #0f62fe; }
-    .av-teal { background: #007d79; }
-    .av-purple { background: #6929c4; }
-    .av-gray { background: #525252; }
+    /* Avatar */
+    .log-av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; margin-top: 1px; }
+    .av-b { background: #0f62fe; } .av-t { background: #007d79; }
+    .av-p { background: #6929c4; } .av-g { background: #525252; }
 
-    /* Log body */
+    /* Entry body */
     .log-body { flex: 1; min-width: 0; }
-    .log-actor-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; flex-wrap: wrap; }
+    .log-actor-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; }
     .log-actor { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--text-1); }
     .log-time { font-size: 12px; line-height: 16px; color: var(--text-4); margin-left: auto; flex-shrink: 0; }
-    .log-action { font-size: 13px; line-height: 18px; color: var(--text-2); margin-bottom: 6px; }
-    .log-action strong { color: var(--text-1); font-weight: 600; }
+    .log-desc { font-size: 13px; line-height: 18px; color: var(--text-2); margin-bottom: 7px; }
+    .log-desc strong { color: var(--text-1); font-weight: 590; }
 
-    /* Inline diff */
-    .log-diff { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; line-height: 16px; font-family: -apple-system, 'SF Pro Text', sans-serif; }
-    .diff-old { color: var(--danger); text-decoration: line-through; background: var(--danger-bg); padding: 1px 5px; border-radius: 2px; }
-    .diff-new { color: var(--success); background: var(--success-bg); padding: 1px 5px; border-radius: 2px; }
-    .diff-arrow { color: var(--text-4); font-size: 11px; }
-    .diff-toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; }
-    .toggle-off { color: var(--danger); background: var(--danger-bg); padding: 1px 7px; border-radius: 2px; font-weight: 600; }
-    .toggle-on { color: var(--success); background: var(--success-bg); padding: 1px 7px; border-radius: 2px; font-weight: 600; }
+    /* Inline diff pill */
+    .log-diff { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; line-height: 16px; }
+    .d-old { color: var(--danger); text-decoration: line-through; background: var(--danger-bg); padding: 1px 5px; border-radius: 2px; }
+    .d-new { color: var(--success); background: var(--success-bg); padding: 1px 5px; border-radius: 2px; }
+    .d-arr { color: var(--text-4); font-size: 11px; }
+    .d-off { color: var(--danger); background: var(--danger-bg); padding: 1px 7px; border-radius: 2px; font-weight: 600; }
+    .d-on { color: var(--success); background: var(--success-bg); padding: 1px 7px; border-radius: 2px; font-weight: 600; }
 
-    /* Log meta */
-    .log-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
-    .log-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; line-height: 16px; padding: 2px 7px; border-radius: 999px; border: 1px solid; font-weight: 600; letter-spacing: 0.04em; }
+    /* Tags */
+    .log-tags { display: flex; align-items: center; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; line-height: 16px; padding: 2px 7px; border-radius: 999px; border: 1px solid; font-weight: 600; letter-spacing: 0.04em; }
     .tag-mod { background: #fffbf0; color: #b28600; border-color: #f1c21b; }
-    .tag-new { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
-    .tag-del { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
     .tag-ui { background: var(--bg); color: var(--text-3); border-color: var(--border); }
     .tag-merge { background: var(--brand-light); color: var(--brand); border-color: var(--brand-muted); }
     .tag-api { background: #f6f2ff; color: #6929c4; border-color: #d4bbff; }
     .log-ip { font-size: 11px; line-height: 16px; color: var(--text-4); font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, monospace; }
 
-    /* ── Entity type label ── */
-    .entity-label { font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.32px; color: var(--text-4); text-transform: uppercase; margin-bottom: 2px; }
+    /* Drawer empty */
+    .drawer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 60px 20px; color: var(--text-4); text-align: center; }
+    .drawer-empty svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+    .drawer-empty p { font-size: 13px; color: var(--text-3); }
 
-    /* ── Drawer empty state ── */
-    .drawer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 200px; color: var(--text-4); text-align: center; }
-    .drawer-empty svg { width: 32px; height: 32px; color: var(--text-4); fill: none; stroke: currentColor; stroke-width: 1.5; }
-    .drawer-empty-title { font-size: 14px; font-weight: 600; color: var(--text-3); }
-    .drawer-empty-desc { font-size: 12px; color: var(--text-4); }
+    /* ── Access note ── */
+    .access-note { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 12px; font-size: 12px; line-height: 16px; color: var(--text-3); }
+    .access-note svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; color: var(--text-4); flex-shrink: 0; }
+    .role-pill { display: inline-flex; background: var(--text-1); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; margin: 0 1px; }
 
-    /* ── Role access info bar ── */
-    .role-bar { display: flex; align-items: center; gap: 10px; background: var(--info-bg); border: 1px solid var(--info-border); border-radius: 8px; padding: 10px 16px; margin-bottom: 24px; }
-    .role-bar svg { width: 16px; height: 16px; color: var(--brand); flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; }
-    .role-bar-text { font-size: 14px; line-height: 18px; color: var(--brand-dark); flex: 1; }
-    .role-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--brand); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
-
-    /* ── Save bar ── */
-    .save-bar { position: fixed; bottom: 0; left: 48px; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 32px; display: flex; align-items: center; gap: 12px; z-index: 100; box-shadow: 0 -1px 0 var(--border); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-    .save-bar.visible { opacity: 1; pointer-events: all; }
-    .save-bar-text { font-size: 13px; color: var(--text-3); flex: 1; }
-    .save-bar-text strong { color: var(--text-1); }
+    /* ── Modified badge on section ── */
+    .mod-pill { display: inline-flex; align-items: center; gap: 4px; background: #fffbf0; color: #b28600; border: 1px solid #f1c21b; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; letter-spacing: 0.04em; vertical-align: middle; margin-left: 8px; }
   </style>
 </head>
 <body>
 
-<!-- ── Rail sidebar ── -->
-<nav class="sidebar">
-  <div class="sidebar-logo">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+<!-- ══ Icon rail ══ -->
+<nav class="rail">
+  <div class="rail-logo">
+    <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
   </div>
-  <div class="sidebar-icons">
-    <a href="#" class="nav-icon" title="Home">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </a>
-    <a href="#" class="nav-icon" title="Projects">
-      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    </a>
-    <a href="#" class="nav-icon" title="Resources">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    </a>
-    <a href="#" class="nav-icon active" title="Settings">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </a>
+  <div class="rail-icon" title="Notifications">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
   </div>
-  <div class="sidebar-bottom">
-    <div class="sidebar-user">VS</div>
+  <div class="rail-icon active" title="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </div>
+  <div class="rail-icon" title="Projects">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+  </div>
+  <div class="rail-icon" title="Resources">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </div>
+  <div class="rail-icon" title="List">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+  </div>
+  <div class="rail-icon" title="Analytics">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  </div>
+  <div class="rail-icon" title="Grid">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  </div>
+  <div class="rail-icon" title="AI">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  </div>
+  <div class="rail-bottom">
+    <div class="rail-badge">
+      <div class="rail-icon" title="Gift" style="margin:0">
+        <svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      </div>
+      <div class="rail-badge-dot">8</div>
+    </div>
+    <div class="rail-icon" title="Chat">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="rail-avatar">VS</div>
   </div>
 </nav>
 
-<!-- ── Main ── -->
+<!-- ══ Settings sidebar ══ -->
+<aside class="settings-sidebar">
+  <div class="ss-title">Settings</div>
+  <div class="ss-search">
+    <input class="ss-search-input" type="text" placeholder="Search">
+  </div>
+
+  <div class="ss-item">
+    <div class="ss-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    Members
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+    Project settings
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    Automations
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-purple"><svg viewBox="0 0 24 24"><path d="M4 20h16M4 4h16M9 4v16M15 4v16"/></svg></div>
+    Email intelligence
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+    Knowledge Base
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Operations and financials</div>
+
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    Time tracking
+  </div>
+  <div class="ss-item active">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    Resource management
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+    Financial management
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-yellow"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+    Currencies
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    Revenue recognition ledger
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-red"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+    Rate cards
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-magenta"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+    Invoicing
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-yellow"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    Taxes
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+    Expenses
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Sprints</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    Sprint settings
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg></div>
+    Sprint fields
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-purple"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+    Epic fields
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Fields</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-magenta"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+    Project fields
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-yellow"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+    Task fields
+  </div>
+</aside>
+
+<!-- ══ Main content ══ -->
 <div class="main">
-  <div class="topbar">
-    <div class="breadcrumb">
-      <a href="#">Settings</a>
-      <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">Resource Management</span>
+  <div class="content-header">
+    <div class="content-title-row">
+      <div class="content-icon ic-green">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h1 class="content-title">Resource management</h1>
     </div>
-    <div class="topbar-right">
-      <div class="avatar">VS</div>
+    <div class="content-actions">
+      <button class="btn btn-ghost" onclick="openDrawer()">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.17"/></svg>
+        View history
+      </button>
+      <button class="btn btn-primary" id="save-btn" disabled onclick="saveSettings()">Save changes</button>
     </div>
   </div>
 
-  <div class="settings-layout">
+  <div class="content-body">
 
-    <!-- ── Settings left nav ── -->
-    <aside class="settings-sidebar">
-      <div class="settings-nav-section">Workspace</div>
-      <div class="settings-nav-item">General</div>
-      <div class="settings-nav-item">Members & Roles</div>
-      <div class="settings-nav-item">Billing</div>
-      <div class="settings-nav-section">Product</div>
-      <div class="settings-nav-item">Projects</div>
-      <div class="settings-nav-item active">Resource Management</div>
-      <div class="settings-nav-item">Automations</div>
-      <div class="settings-nav-item">Custom Fields</div>
-      <div class="settings-nav-item">Dashboards</div>
-      <div class="settings-nav-item">Integrations</div>
-      <div class="settings-nav-section">Security</div>
-      <div class="settings-nav-item">Audit Log</div>
-      <div class="settings-nav-item">SSO & SCIM</div>
-    </aside>
-
-    <!-- ── Main content ── -->
-    <div class="content">
-      <div class="page-header">
-        <div class="page-header-left">
-          <div class="page-title">Resource Management</div>
-          <div class="page-desc">Control how allocations, effort planning, and collaborator access work across your workspace.</div>
+    <!-- 1 · Soft allocations -->
+    <div class="setting-section">
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-soft" onclick="toggleCb('cb-soft','sub-soft-row','warn-soft',true)">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div class="page-header-right">
-          <button class="btn btn-ghost" onclick="openDrawer()">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" stroke="none"/></svg>
-            <svg viewBox="0 0 24 24" style="margin-left:-4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.17"/></svg>
-            View History
-          </button>
-          <button class="btn btn-primary" id="save-btn" onclick="saveSettings()" disabled style="opacity:.45;pointer-events:none;">Save changes</button>
-        </div>
-      </div>
-
-      <!-- Role access info bar -->
-      <div class="role-bar">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div class="role-bar-text">Audit history is visible to <span class="role-badge">Admin</span> and <span class="role-badge">Owner</span> roles. Members and Collaborators cannot access this log.</div>
-      </div>
-
-      <!-- 1. Soft Allocations -->
-      <div class="section-card">
-        <div class="section-card-header">
-          <div>
-            <div class="section-card-title">Soft Allocations</div>
-            <div class="section-card-desc">Allow tentative time to be allocated without committing resources fully</div>
-          </div>
-          <span class="mod-badge">~ Modified</span>
-        </div>
-        <div class="section-card-body">
-          <div class="setting-row">
-            <div class="setting-info">
-              <div class="setting-label">Enable soft allocations</div>
-              <div class="setting-help">When enabled, team members and placeholders can receive tentative allocations on projects. Existing soft allocations remain visible if disabled.</div>
-              <div class="impact-warn" id="soft-alloc-warn" style="display:none;">
-                <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Existing soft allocations will remain visible but no new soft allocations can be created.
-              </div>
-            </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="soft-alloc-toggle" checked onchange="onToggle('soft-alloc-toggle','soft-alloc-warn',true)">
-                <div class="toggle-track"></div>
-                <div class="toggle-thumb"></div>
-              </label>
-            </div>
-          </div>
-          <div class="setting-row sub" id="soft-alloc-sub">
-            <div class="setting-info">
-              <div class="setting-label">Create new projects from templates with soft allocations</div>
-              <div class="setting-help">New projects created from templates will inherit soft allocations defined in the template. Only applies when soft allocations are enabled.</div>
-            </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="template-soft-toggle" onchange="markDirty()">
-                <div class="toggle-track"></div>
-                <div class="toggle-thumb"></div>
-              </label>
-            </div>
+        <div class="cb-label" onclick="toggleCb('cb-soft','sub-soft-row','warn-soft',true)">
+          <strong>Enable soft allocations</strong><span class="cb-desc">: Soft allocations help you to tentatively allocate time for your team members or placeholders on a project.</span>
+          <span class="mod-pill">~ Modified</span>
+          <div class="impact-warn" id="warn-soft" style="display:none;margin-top:8px;">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Existing soft allocations will remain visible but no new soft allocations can be created.
           </div>
         </div>
       </div>
-
-      <!-- 2. Collaborator Access -->
-      <div class="section-card">
-        <div class="section-card-header">
-          <div>
-            <div class="section-card-title">Collaborator Access</div>
-            <div class="section-card-desc">Control whether collaborators can view and manage their own allocations</div>
-          </div>
+      <div class="cb-row sub" id="sub-soft-row">
+        <div class="cb-box" id="cb-tmpl" onclick="toggleCb('cb-tmpl')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div class="section-card-body">
-          <div class="setting-row">
-            <div class="setting-info">
-              <div class="setting-label">Enable collaborator access to allocations</div>
-              <div class="setting-help">When enabled, collaborators can view and manage their own time allocations. When disabled, allocation visibility is restricted to internal team members only.</div>
-            </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="collab-toggle" checked onchange="markDirty()">
-                <div class="toggle-track"></div>
-                <div class="toggle-thumb"></div>
-              </label>
-            </div>
-          </div>
+        <div class="cb-label" onclick="toggleCb('cb-tmpl')">
+          Create new projects from templates with soft allocations
         </div>
       </div>
+    </div>
 
-      <!-- 3. Allocation Time Unit -->
-      <div class="section-card">
-        <div class="section-card-header">
-          <div>
-            <div class="section-card-title">Allocation Time Unit</div>
-            <div class="section-card-desc">How team member time allocations are expressed across the workspace</div>
-          </div>
-          <span class="mod-badge">~ Modified</span>
+    <!-- 2 · Collaborator access -->
+    <div class="setting-section">
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-collab" onclick="toggleCb('cb-collab')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div class="section-card-body">
-          <div class="setting-row">
-            <div class="setting-info">
-              <div class="setting-label">Time unit</div>
-              <div class="setting-help">Changing the unit affects how all existing and future allocations are displayed. Numeric values are converted automatically.</div>
-              <div class="impact-warn" id="time-unit-warn" style="margin-top:8px;">
-                <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Changing the allocation unit affects how all existing and future allocations are displayed across the workspace. Numeric values are converted automatically.
-              </div>
-            </div>
-            <div class="setting-control">
-              <div class="radio-group" id="time-unit-group">
-                <div class="radio-opt selected" onclick="selectRadio('time-unit-group', this)">
-                  <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                  Hours/Day
-                </div>
-                <div class="radio-opt" onclick="selectRadio('time-unit-group', this)">
-                  <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                  Hours/Week
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="cb-label" onclick="toggleCb('cb-collab')">
+          <strong>Enable for collaborators</strong><span class="cb-desc">: Allow collaborators to view and manage their allocations</span>
         </div>
       </div>
+    </div>
 
-      <!-- 4. Effort Planning Level -->
-      <div class="section-card">
-        <div class="section-card-header">
-          <div>
-            <div class="section-card-title">Effort Planning Level</div>
-            <div class="section-card-desc">Controls how the auto-allocate algorithm distributes time across team members</div>
-          </div>
+    <!-- 3 · Allocation time unit -->
+    <div class="setting-section">
+      <div class="radio-section-label">
+        Allocate time for your team members in
+        <span class="mod-pill">~ Modified</span>
+      </div>
+      <div class="radio-rows" style="margin-top:10px;">
+        <div class="radio-row" onclick="selectRadio('rg-unit', 0)">
+          <div class="radio-btn selected" id="rg-unit-0"></div>
+          <span class="radio-label">Hours/Day</span>
         </div>
-        <div class="section-card-body">
-          <div class="setting-row">
-            <div class="setting-info">
-              <div class="setting-label">Planning level for auto-allocate</div>
-              <div class="setting-help">Changing the effort planning level affects how the auto-allocate algorithm distributes time. Existing manually set allocations are not retroactively recalculated.</div>
-            </div>
-            <div class="setting-control">
-              <div class="radio-group" id="effort-group">
-                <div class="radio-opt selected" onclick="selectRadio('effort-group', this)">
-                  <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                  At task level
-                </div>
-                <div class="radio-opt" onclick="selectRadio('effort-group', this)">
-                  <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                  At phase level
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="radio-row" onclick="selectRadio('rg-unit', 1)">
+          <div class="radio-btn" id="rg-unit-1"></div>
+          <span class="radio-label">Hours/Week</span>
         </div>
       </div>
+    </div>
 
-    </div><!-- /content -->
-  </div><!-- /settings-layout -->
+    <!-- 4 · Effort planning level -->
+    <div class="setting-section">
+      <div class="radio-section-label">Set effort planning level:</div>
+      <div class="radio-section-desc">The auto-allocate algorithm uses efforts planned for task or phases to automatically create allocations for team members. It also keeps these allocations in sync with tasks or phases when timelines change.</div>
+      <div class="radio-rows">
+        <div class="radio-row" onclick="selectRadio('rg-effort', 0)">
+          <div class="radio-btn selected" id="rg-effort-0"></div>
+          <span class="radio-label">At task level</span>
+        </div>
+        <div class="radio-row" onclick="selectRadio('rg-effort', 1)">
+          <div class="radio-btn" id="rg-effort-1"></div>
+          <span class="radio-label">At phase level</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-body -->
 </div><!-- /main -->
 
-<!-- ── Save bar ── -->
+<!-- ══ Save bar ══ -->
 <div class="save-bar" id="save-bar">
-  <span class="save-bar-text"><strong>Unsaved changes</strong> — Review your changes before saving.</span>
+  <span class="save-bar-text"><strong>Unsaved changes</strong> — Review before saving.</span>
   <button class="btn btn-ghost" onclick="discardChanges()">Discard</button>
   <button class="btn btn-primary" onclick="saveSettings()">Save changes</button>
 </div>
 
-<!-- ── Drawer overlay ── -->
+<!-- ══ Drawer overlay ══ -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
 
-<!-- ── Audit History Drawer ── -->
+<!-- ══ Audit history drawer ══ -->
 <div class="drawer" id="audit-drawer">
-  <div class="drawer-header">
-    <div class="drawer-title-row">
-      <div class="drawer-title">Change History — Resource Management</div>
+  <div class="drawer-hd">
+    <div class="drawer-hd-row">
+      <div>
+        <div class="drawer-title">Change history</div>
+        <div class="drawer-subtitle">Resource Management Settings</div>
+      </div>
       <button class="drawer-close" onclick="closeDrawer()">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="drawer-toolbar">
       <div class="filter-chips">
-        <button class="filter-chip active" onclick="filterLogs('all', this)">All</button>
-        <button class="filter-chip" onclick="filterLogs('soft', this)">Soft Allocations</button>
-        <button class="filter-chip" onclick="filterLogs('collab', this)">Collaborators</button>
-        <button class="filter-chip" onclick="filterLogs('unit', this)">Time Unit</button>
-        <button class="filter-chip" onclick="filterLogs('effort', this)">Effort Level</button>
+        <button class="fchip active" onclick="filterLogs('all',this)">All</button>
+        <button class="fchip" onclick="filterLogs('soft',this)">Soft allocations</button>
+        <button class="fchip" onclick="filterLogs('collab',this)">Collaborators</button>
+        <button class="fchip" onclick="filterLogs('unit',this)">Time unit</button>
+        <button class="fchip" onclick="filterLogs('effort',this)">Effort level</button>
       </div>
       <button class="export-btn" onclick="exportCSV()">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export CSV
       </button>
     </div>
+    <div class="access-note">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Visible to <span class="role-pill">Admin</span> and <span class="role-pill">Owner</span> roles only. Configurable in Members &amp; Roles.
+    </div>
   </div>
 
   <div class="drawer-scroll" id="drawer-scroll">
 
-    <!-- ── Today ── -->
-    <div class="log-date-group" data-group="today">Today · Apr 11, 2026</div>
+    <div class="log-date-hd" data-group="today">Today · Apr 11, 2026</div>
 
     <div class="log-entry" data-field="unit">
-      <div class="log-avatar av-blue">VS</div>
+      <div class="log-av av-b">VS</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Vivek S</span>
           <span class="log-time">14 mins ago</span>
         </div>
-        <div class="log-action">Changed <strong>Allocation time unit</strong></div>
+        <div class="log-desc">Changed <strong>Allocation time unit</strong></div>
         <div class="log-diff">
-          <span class="diff-old">Hours/Week</span>
-          <span class="diff-arrow">→</span>
-          <span class="diff-new">Hours/Day</span>
+          <span class="d-old">Hours/Week</span><span class="d-arr">→</span><span class="d-new">Hours/Day</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-ui">UI</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-ui">UI</span>
           <span class="log-ip">192.168.1.4</span>
         </div>
       </div>
     </div>
 
     <div class="log-entry" data-field="soft">
-      <div class="log-avatar av-blue">VS</div>
+      <div class="log-av av-b">VS</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Vivek S</span>
           <span class="log-time">31 mins ago</span>
         </div>
-        <div class="log-action">Enabled <strong>Soft allocations</strong></div>
+        <div class="log-desc">Enabled <strong>Soft allocations</strong></div>
         <div class="log-diff">
-          <span class="diff-toggle">
-            <span class="toggle-off">Off</span>
-            <span class="diff-arrow">→</span>
-            <span class="toggle-on">On</span>
-          </span>
+          <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-ui">UI</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-ui">UI</span>
           <span class="log-ip">192.168.1.4</span>
         </div>
       </div>
     </div>
 
-    <!-- ── Yesterday ── -->
-    <div class="log-date-group" data-group="yesterday">Yesterday · Apr 10, 2026</div>
+    <div class="log-date-hd" data-group="yesterday">Yesterday · Apr 10, 2026</div>
 
     <div class="log-entry" data-field="unit">
-      <div class="log-avatar av-teal">AM</div>
+      <div class="log-av av-t">AM</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 10, 4:22 PM</span>
         </div>
-        <div class="log-action">Changed <strong>Allocation time unit</strong> via Sandbox merge</div>
+        <div class="log-desc">Changed <strong>Allocation time unit</strong> via Sandbox merge</div>
         <div class="log-diff">
-          <span class="diff-old">Hours/Day</span>
-          <span class="diff-arrow">→</span>
-          <span class="diff-new">Hours/Week</span>
+          <span class="d-old">Hours/Day</span><span class="d-arr">→</span><span class="d-new">Hours/Week</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-merge">Sandbox merge</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-merge">Sandbox merge</span>
           <span class="log-ip">10.0.0.21</span>
         </div>
       </div>
     </div>
 
     <div class="log-entry" data-field="effort">
-      <div class="log-avatar av-teal">AM</div>
+      <div class="log-av av-t">AM</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 10, 4:22 PM</span>
         </div>
-        <div class="log-action">Changed <strong>Effort planning level</strong> via Sandbox merge</div>
+        <div class="log-desc">Changed <strong>Effort planning level</strong> via Sandbox merge</div>
         <div class="log-diff">
-          <span class="diff-old">At phase level</span>
-          <span class="diff-arrow">→</span>
-          <span class="diff-new">At task level</span>
+          <span class="d-old">At phase level</span><span class="d-arr">→</span><span class="d-new">At task level</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-merge">Sandbox merge</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-merge">Sandbox merge</span>
           <span class="log-ip">10.0.0.21</span>
         </div>
       </div>
     </div>
 
-    <!-- ── Apr 8 ── -->
-    <div class="log-date-group" data-group="apr8">Apr 8, 2026</div>
+    <div class="log-date-hd" data-group="apr8">Apr 8, 2026</div>
 
     <div class="log-entry" data-field="collab">
-      <div class="log-avatar av-purple">RK</div>
+      <div class="log-av av-p">RK</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Riya K</span>
           <span class="log-time">Apr 8, 11:05 AM</span>
         </div>
-        <div class="log-action">Disabled <strong>Collaborator access to allocations</strong></div>
+        <div class="log-desc">Disabled <strong>Collaborator access to allocations</strong></div>
         <div class="log-diff">
-          <span class="diff-toggle">
-            <span class="toggle-on">On</span>
-            <span class="diff-arrow">→</span>
-            <span class="toggle-off">Off</span>
-          </span>
+          <span class="d-on">On</span><span class="d-arr">→</span><span class="d-off">Off</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-ui">UI</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-ui">UI</span>
           <span class="log-ip">203.0.113.47</span>
         </div>
       </div>
     </div>
 
     <div class="log-entry" data-field="collab">
-      <div class="log-avatar av-purple">RK</div>
+      <div class="log-av av-p">RK</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Riya K</span>
           <span class="log-time">Apr 8, 10:58 AM</span>
         </div>
-        <div class="log-action">Enabled <strong>Collaborator access to allocations</strong></div>
+        <div class="log-desc">Enabled <strong>Collaborator access to allocations</strong></div>
         <div class="log-diff">
-          <span class="diff-toggle">
-            <span class="toggle-off">Off</span>
-            <span class="diff-arrow">→</span>
-            <span class="toggle-on">On</span>
-          </span>
+          <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-api">API</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-api">API</span>
           <span class="log-ip">203.0.113.47</span>
         </div>
       </div>
     </div>
 
-    <!-- ── Apr 5 ── -->
-    <div class="log-date-group" data-group="apr5">Apr 5, 2026</div>
+    <div class="log-date-hd" data-group="apr5">Apr 5, 2026</div>
 
     <div class="log-entry" data-field="effort">
-      <div class="log-avatar av-gray">SA</div>
+      <div class="log-av av-g">SA</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Sam A</span>
           <span class="log-time">Apr 5, 3:14 PM</span>
         </div>
-        <div class="log-action">Changed <strong>Effort planning level</strong></div>
+        <div class="log-desc">Changed <strong>Effort planning level</strong></div>
         <div class="log-diff">
-          <span class="diff-old">At task level</span>
-          <span class="diff-arrow">→</span>
-          <span class="diff-new">At phase level</span>
+          <span class="d-old">At task level</span><span class="d-arr">→</span><span class="d-new">At phase level</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-ui">UI</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-ui">UI</span>
           <span class="log-ip">172.16.0.9</span>
         </div>
       </div>
     </div>
 
     <div class="log-entry" data-field="soft">
-      <div class="log-avatar av-gray">SA</div>
+      <div class="log-av av-g">SA</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Sam A</span>
           <span class="log-time">Apr 5, 3:10 PM</span>
         </div>
-        <div class="log-action">Enabled <strong>Create new projects from templates with soft allocations</strong></div>
+        <div class="log-desc">Enabled <strong>Create new projects from templates with soft allocations</strong></div>
         <div class="log-diff">
-          <span class="diff-toggle">
-            <span class="toggle-off">Off</span>
-            <span class="diff-arrow">→</span>
-            <span class="toggle-on">On</span>
-          </span>
+          <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-ui">UI</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-ui">UI</span>
           <span class="log-ip">172.16.0.9</span>
         </div>
       </div>
     </div>
 
     <div class="log-entry" data-field="soft">
-      <div class="log-avatar av-teal">AM</div>
+      <div class="log-av av-t">AM</div>
       <div class="log-body">
         <div class="log-actor-row">
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 5, 9:00 AM</span>
         </div>
-        <div class="log-action">Disabled <strong>Soft allocations</strong></div>
+        <div class="log-desc">Disabled <strong>Soft allocations</strong></div>
         <div class="log-diff">
-          <span class="diff-toggle">
-            <span class="toggle-on">On</span>
-            <span class="diff-arrow">→</span>
-            <span class="toggle-off">Off</span>
-          </span>
+          <span class="d-on">On</span><span class="d-arr">→</span><span class="d-off">Off</span>
         </div>
-        <div class="log-meta">
-          <span class="log-tag tag-mod">Modified</span>
-          <span class="log-tag tag-ui">UI</span>
+        <div class="log-tags">
+          <span class="tag tag-mod">Modified</span>
+          <span class="tag tag-ui">UI</span>
           <span class="log-ip">10.0.0.21</span>
         </div>
       </div>
@@ -680,6 +747,34 @@
 </div><!-- /drawer -->
 
 <script>
+  // ── Checkbox toggle ──
+  function toggleCb(id, subRowId, warnId, showWarnWhenUnchecked) {
+    const box = document.getElementById(id);
+    const isChecked = box.classList.toggle('checked');
+    markDirty();
+
+    if (warnId) {
+      const warn = document.getElementById(warnId);
+      if (warn) warn.style.display = (!isChecked && showWarnWhenUnchecked) ? 'flex' : 'none';
+    }
+    if (subRowId) {
+      const sub = document.getElementById(subRowId);
+      if (sub) {
+        sub.classList.toggle('disabled', !isChecked);
+      }
+    }
+  }
+
+  // ── Radio group ──
+  function selectRadio(group, idx) {
+    const count = group === 'rg-unit' ? 2 : 2;
+    for (let i = 0; i < count; i++) {
+      const el = document.getElementById(group + '-' + i);
+      if (el) el.classList.toggle('selected', i === idx);
+    }
+    markDirty();
+  }
+
   // ── Drawer ──
   function openDrawer() {
     document.getElementById('drawer-overlay').classList.add('open');
@@ -691,27 +786,20 @@
   }
 
   // ── Filter ──
-  const fieldMap = { soft: 'soft', collab: 'collab', unit: 'unit', effort: 'effort' };
   function filterLogs(field, btn) {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.fchip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
-
-    const entries = document.querySelectorAll('.log-entry');
-    const groups = document.querySelectorAll('.log-date-group');
-
-    entries.forEach(e => {
+    document.querySelectorAll('.log-entry').forEach(e => {
       e.style.display = (field === 'all' || e.dataset.field === field) ? '' : 'none';
     });
-
-    // hide empty date groups
-    groups.forEach(g => {
+    document.querySelectorAll('.log-date-hd').forEach(g => {
       let next = g.nextElementSibling;
-      let hasVisible = false;
-      while (next && !next.classList.contains('log-date-group')) {
-        if (next.style.display !== 'none') hasVisible = true;
+      let has = false;
+      while (next && !next.classList.contains('log-date-hd')) {
+        if (next.style.display !== 'none') has = true;
         next = next.nextElementSibling;
       }
-      g.style.display = hasVisible ? '' : 'none';
+      g.style.display = has ? '' : 'none';
     });
   }
 
@@ -719,15 +807,15 @@
   function exportCSV() {
     const rows = [
       ['timestamp','actor_name','actor_id','entity_type','field_name','old_value','new_value','action_type','source','ip_address'],
-      ['2026-04-11T08:46:00Z','Vivek S','usr_vivek','RM Settings','allocation_time_unit','Hours/Week','Hours/Day','Updated','UI','192.168.1.4'],
-      ['2026-04-11T08:29:00Z','Vivek S','usr_vivek','RM Settings','soft_allocations_enabled','false','true','Updated','UI','192.168.1.4'],
-      ['2026-04-10T10:22:00Z','Alex M','usr_alexm','RM Settings','allocation_time_unit','Hours/Day','Hours/Week','Updated','Sandbox Merge','10.0.0.21'],
-      ['2026-04-10T10:22:00Z','Alex M','usr_alexm','RM Settings','effort_planning_level','At phase level','At task level','Updated','Sandbox Merge','10.0.0.21'],
-      ['2026-04-08T07:05:00Z','Riya K','usr_riyak','RM Settings','collaborator_access_enabled','true','false','Updated','UI','203.0.113.47'],
-      ['2026-04-08T06:58:00Z','Riya K','usr_riyak','RM Settings','collaborator_access_enabled','false','true','Updated','API','203.0.113.47'],
-      ['2026-04-05T09:14:00Z','Sam A','usr_sama','RM Settings','effort_planning_level','At task level','At phase level','Updated','UI','172.16.0.9'],
-      ['2026-04-05T09:10:00Z','Sam A','usr_sama','RM Settings','template_soft_alloc_enabled','false','true','Updated','UI','172.16.0.9'],
-      ['2026-04-05T05:00:00Z','Alex M','usr_alexm','RM Settings','soft_allocations_enabled','true','false','Updated','UI','10.0.0.21'],
+      ['2026-04-11T08:46:00Z','Vivek S','usr_vivek','RM_Settings','allocation_time_unit','Hours/Week','Hours/Day','Updated','UI','192.168.1.4'],
+      ['2026-04-11T08:29:00Z','Vivek S','usr_vivek','RM_Settings','soft_allocations_enabled','false','true','Updated','UI','192.168.1.4'],
+      ['2026-04-10T10:22:00Z','Alex M','usr_alexm','RM_Settings','allocation_time_unit','Hours/Day','Hours/Week','Updated','Sandbox Merge','10.0.0.21'],
+      ['2026-04-10T10:22:00Z','Alex M','usr_alexm','RM_Settings','effort_planning_level','At phase level','At task level','Updated','Sandbox Merge','10.0.0.21'],
+      ['2026-04-08T07:05:00Z','Riya K','usr_riyak','RM_Settings','collaborator_access_enabled','true','false','Updated','UI','203.0.113.47'],
+      ['2026-04-08T06:58:00Z','Riya K','usr_riyak','RM_Settings','collaborator_access_enabled','false','true','Updated','API','203.0.113.47'],
+      ['2026-04-05T09:14:00Z','Sam A','usr_sama','RM_Settings','effort_planning_level','At task level','At phase level','Updated','UI','172.16.0.9'],
+      ['2026-04-05T09:10:00Z','Sam A','usr_sama','RM_Settings','template_soft_alloc_enabled','false','true','Updated','UI','172.16.0.9'],
+      ['2026-04-05T05:00:00Z','Alex M','usr_alexm','RM_Settings','soft_allocations_enabled','true','false','Updated','UI','10.0.0.21'],
     ];
     const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
     const a = document.createElement('a');
@@ -736,45 +824,20 @@
     a.click();
   }
 
-  // ── Toggle helpers ──
-  function onToggle(toggleId, warnId, showWhenOff) {
-    markDirty();
-    const checked = document.getElementById(toggleId).checked;
-    const warn = document.getElementById(warnId);
-    if (warn) warn.style.display = (showWhenOff && !checked) ? 'flex' : 'none';
-    // Disable sub-option when soft alloc is off
-    if (toggleId === 'soft-alloc-toggle') {
-      const sub = document.getElementById('soft-alloc-sub');
-      sub.style.opacity = checked ? '1' : '0.45';
-      sub.style.pointerEvents = checked ? '' : 'none';
-    }
-  }
-
-  // ── Radio group ──
-  function selectRadio(groupId, clicked) {
-    document.querySelectorAll('#' + groupId + ' .radio-opt').forEach(o => o.classList.remove('selected'));
-    clicked.classList.add('selected');
-    markDirty();
-  }
-
-  // ── Save bar ──
+  // ── Save / discard ──
   function markDirty() {
     document.getElementById('save-bar').classList.add('visible');
   }
   function discardChanges() {
     document.getElementById('save-bar').classList.remove('visible');
-    // reset toggles
-    document.getElementById('soft-alloc-toggle').checked = true;
-    document.getElementById('template-soft-toggle').checked = false;
-    document.getElementById('collab-toggle').checked = true;
-    document.getElementById('soft-alloc-warn').style.display = 'none';
-    document.getElementById('soft-alloc-sub').style.opacity = '1';
-    document.getElementById('soft-alloc-sub').style.pointerEvents = '';
+    // reset checkboxes
+    ['cb-soft','cb-collab'].forEach(id => document.getElementById(id).classList.add('checked'));
+    document.getElementById('cb-tmpl').classList.remove('checked');
+    document.getElementById('warn-soft').style.display = 'none';
+    document.getElementById('sub-soft-row').classList.remove('disabled');
     // reset radios
-    ['time-unit-group','effort-group'].forEach(gid => {
-      const opts = document.querySelectorAll('#' + gid + ' .radio-opt');
-      opts.forEach((o,i) => o.classList.toggle('selected', i === 0));
-    });
+    selectRadio('rg-unit', 0); selectRadio('rg-effort', 0);
+    document.getElementById('save-bar').classList.remove('visible');
   }
   function saveSettings() {
     document.getElementById('save-bar').classList.remove('visible');
