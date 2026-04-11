@@ -256,8 +256,6 @@
     .d-old { text-decoration: line-through; color: var(--text-4); }
     .d-new { color: var(--text-1); }
     .d-arr { color: var(--text-4); font-size: 11px; }
-    .d-off { text-decoration: line-through; color: var(--text-4); }
-    .d-on { color: var(--text-1); }
 
     /* Tags */
     .log-tags { display: flex; align-items: center; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
@@ -612,7 +610,7 @@
         </div>
         <div class="log-desc">Enabled <strong>Soft allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
-          <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
         </div>
       </div>
     </div>
@@ -658,7 +656,7 @@
         </div>
         <div class="log-desc">Disabled <strong>Collaborator access to allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
-          <span class="d-on">On</span><span class="d-arr">→</span><span class="d-off">Off</span>
+          <span class="d-old">On</span><span class="d-arr">→</span><span class="d-new">Off</span>
         </div>
       </div>
     </div>
@@ -672,7 +670,7 @@
         </div>
         <div class="log-desc">Enabled <strong>Collaborator access to allocations</strong> <span class="log-source">via API</span></div>
         <div class="log-diff">
-          <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
         </div>
       </div>
     </div>
@@ -702,7 +700,7 @@
         </div>
         <div class="log-desc">Enabled <strong>Create new projects from templates with soft allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
-          <span class="d-off">Off</span><span class="d-arr">→</span><span class="d-on">On</span>
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
         </div>
       </div>
     </div>
@@ -716,7 +714,7 @@
         </div>
         <div class="log-desc">Disabled <strong>Soft allocations</strong> <span class="log-source">via UI</span></div>
         <div class="log-diff">
-          <span class="d-on">On</span><span class="d-arr">→</span><span class="d-off">Off</span>
+          <span class="d-old">On</span><span class="d-arr">→</span><span class="d-new">Off</span>
         </div>
       </div>
     </div>
