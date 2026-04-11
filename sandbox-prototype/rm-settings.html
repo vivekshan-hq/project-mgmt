@@ -540,21 +540,10 @@
       </button>
     </div>
     <div class="drawer-toolbar">
-      <div class="filter-chips">
-        <button class="fchip active" onclick="filterLogs('all',this)">All</button>
-        <button class="fchip" onclick="filterLogs('soft',this)">Soft allocations</button>
-        <button class="fchip" onclick="filterLogs('collab',this)">Collaborators</button>
-        <button class="fchip" onclick="filterLogs('unit',this)">Time unit</button>
-        <button class="fchip" onclick="filterLogs('effort',this)">Effort level</button>
-      </div>
       <button class="export-btn" onclick="exportCSV()">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export CSV
       </button>
-    </div>
-    <div class="access-note">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Visible to <span class="role-pill">Admin</span> and <span class="role-pill">Owner</span> roles only. Configurable in Members &amp; Roles.
     </div>
   </div>
 
