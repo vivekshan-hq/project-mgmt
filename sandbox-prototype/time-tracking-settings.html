@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Tracking · Settings · Rocketlane</title>
+  <style>
+    :root {
+      --brand: #0f62fe; --brand-dark: #0043ce; --brand-light: #edf5ff; --brand-muted: #97c1ff;
+      --bg: #fafafa; --surface: #fff; --border: #e0e0e0; --border-subtle: #f4f4f4;
+      --border-strong: #c6c6c6;
+      --text-1: #161616; --text-2: #525252; --text-3: #6f6f6f; --text-4: #a8a8a8;
+      --success: #24a148; --success-bg: #defbe6; --success-border: #a7f0ba;
+      --warning: #ffbf00; --warning-bg: #fffbf0; --warning-border: #f1c21b;
+      --danger: #da1e28; --danger-bg: #fff1f1; --danger-border: #ffd7d9;
+      --info-bg: #edf5ff; --info-border: #97c1ff;
+      --radius: 8px; --radius-sm: 4px;
+      --shadow-sm: 0px 0.8px 1.8px rgba(0,0,0,0.13), 0px 0.15px 0.45px rgba(0,0,0,0.11);
+      --shadow: 0px 1.6px 3.6px rgba(0,0,0,0.13), 0px 0.3px 0.9px rgba(0,0,0,0.11);
+      --shadow-md: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11);
+      --shadow-lg: 0px 6.4px 14.4px rgba(0,0,0,0.13), 0px 1.2px 3.6px rgba(0,0,0,0.11);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 20px; color: var(--text-1);
+      background: var(--surface); display: flex; height: 100vh; overflow: hidden;
+    }
+
+    /* ════════════════════════════
+       ICON RAIL (leftmost, 40px)
+    ════════════════════════════ */
+    .rail { width: 40px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 2px; }
+    .rail-logo { width: 24px; height: 24px; background: #1d1d1f; border-radius: 4px; display: grid; place-items: center; margin-bottom: 10px; flex-shrink: 0; }
+    .rail-logo svg { width: 11px; height: 11px; color: #fff; fill: none; stroke: currentColor; stroke-width: 2; }
+    .rail-icon { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; cursor: pointer; color: var(--text-4); transition: all 0.12s; }
+    .rail-icon:hover { background: var(--bg); color: var(--text-2); }
+    .rail-icon.active { background: #e8e8e8; color: var(--text-1); }
+    .rail-icon svg { width: 16px; height: 16px; stroke-width: 1.75; fill: none; stroke: currentColor; }
+    .rail-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .rail-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--text-2); color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; cursor: pointer; }
+    .rail-badge { position: relative; }
+    .rail-badge-dot { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; border: 1.5px solid var(--surface); font-size: 9px; color: #fff; display: grid; place-items: center; font-weight: 700; line-height: 1; }
+
+    /* ════════════════════════════
+       SETTINGS SIDEBAR (280px)
+    ════════════════════════════ */
+    .settings-sidebar {
+      width: 280px; flex-shrink: 0; background: var(--surface);
+      border-right: 1px solid var(--border); overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .ss-title { padding: 20px 20px 12px; font-size: 20px; font-weight: 600; line-height: 28px; color: var(--text-1); flex-shrink: 0; }
+    .ss-search { padding: 0 12px 10px; flex-shrink: 0; }
+    .ss-search-input {
+      width: 100%; padding: 6px 10px 6px 30px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 14px; line-height: 18px; color: var(--text-2); outline: none; background: var(--bg);
+      font-family: inherit;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 9px center;
+    }
+    .ss-search-input:focus { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-light); }
+    .ss-section-label { padding: 10px 20px 4px; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.32px; color: var(--text-4); }
+    .ss-divider { height: 1px; background: var(--border); margin: 8px 12px; }
+    .ss-item {
+      display: flex; align-items: center; gap: 10px; padding: 7px 20px;
+      font-size: 14px; line-height: 18px; color: var(--text-2);
+      cursor: pointer; transition: all 0.1s; position: relative; text-decoration: none;
+    }
+    .ss-item:hover { background: var(--bg); color: var(--text-1); }
+    .ss-item.active { background: var(--brand-light); color: var(--brand); font-weight: 600; }
+    .ss-item.active::after {
+      content: ''; position: absolute; right: 12px; top: 50%;
+      width: 6px; height: 6px; border-top: 1.5px solid var(--brand); border-right: 1.5px solid var(--brand);
+      transform: translateY(-50%) rotate(45deg);
+    }
+    .ss-icon { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; flex-shrink: 0; }
+    .ss-icon svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 2; }
+    .ic-orange { background: linear-gradient(135deg,#ffbe7a,#f98000); }
+    .ic-blue { background: linear-gradient(135deg,#78a9ff,#0f62fe); }
+    .ic-teal { background: linear-gradient(135deg,#3ddbd9,#009d9a); }
+    .ic-green { background: linear-gradient(135deg,#6fdc8c,#24a148); }
+    .ic-purple { background: linear-gradient(135deg,#be95ff,#6929c4); }
+    .ic-yellow { background: linear-gradient(135deg,#ffdf7e,#ffbf00); }
+    .ic-red { background: linear-gradient(135deg,#ff8389,#fa4d56); }
+    .ic-magenta { background: linear-gradient(135deg,#ff7eb6,#d12771); }
+    .ic-gray { background: linear-gradient(135deg,#e0e0e0,#c1c1c1); }
+    .ss-chevron { margin-left: auto; color: var(--text-4); flex-shrink: 0; }
+    .ss-chevron svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* ════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════ */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
+    .content-header {
+      padding: 24px 32px 0;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-shrink: 0;
+    }
+    .content-title-row { display: flex; align-items: center; gap: 10px; }
+    .content-icon { width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; flex-shrink: 0; }
+    .content-icon svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 1.75; }
+    .content-title { font-size: 20px; font-weight: 600; line-height: 28px; color: var(--text-1); }
+    .content-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-top: 2px; }
+    .content-body { flex: 1; overflow-y: auto; padding: 24px 32px 80px; }
+
+    /* ════════════════════════════
+       SETTING SECTIONS (flat)
+    ════════════════════════════ */
+    .setting-section { padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .setting-section:last-child { border-bottom: none; }
+    .section-label { font-size: 14px; font-weight: 600; line-height: 20px; color: var(--text-1); margin-bottom: 4px; }
+    .section-desc { font-size: 14px; line-height: 20px; color: var(--text-2); margin-bottom: 14px; }
+
+    /* Inline selects */
+    .inline-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .inline-label { font-size: 14px; line-height: 20px; color: var(--text-2); }
+    .inline-select {
+      appearance: none; -webkit-appearance: none;
+      padding: 0 28px 0 10px; height: 32px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px; line-height: 20px;
+      color: var(--text-1); background: var(--surface); cursor: pointer; font-family: inherit;
+      outline: none; transition: border-color 0.12s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center;
+    }
+    .inline-select:focus { border-color: var(--brand); }
+
+    /* Checkbox setting row */
+    .cb-row { display: flex; align-items: flex-start; gap: 10px; }
+    .cb-row + .cb-row { margin-top: 12px; }
+    .cb-row.sub { padding-left: 26px; margin-top: 10px; }
+    .cb-row.sub.disabled { opacity: 0.45; pointer-events: none; }
+    .cb-box {
+      width: 16px; height: 16px; border-radius: 3px; border: 1.5px solid var(--border-strong);
+      flex-shrink: 0; display: grid; place-items: center; cursor: pointer;
+      transition: all 0.12s; margin-top: 2px; background: var(--surface);
+    }
+    .cb-box.checked { background: var(--brand); border-color: var(--brand); }
+    .cb-box svg { display: none; width: 10px; height: 10px; stroke-width: 2.5; color: #fff; fill: none; stroke: currentColor; }
+    .cb-box.checked svg { display: block; }
+    .cb-label { font-size: 14px; line-height: 20px; color: var(--text-1); cursor: pointer; }
+    .cb-label strong { font-weight: 600; }
+    .cb-label .cb-desc { color: var(--text-2); font-weight: 400; }
+
+    /* Radio setting row */
+    .radio-section-label { font-size: 14px; font-weight: 600; line-height: 20px; color: var(--text-1); margin-bottom: 4px; }
+    .radio-section-desc { font-size: 14px; line-height: 20px; color: var(--text-2); margin-bottom: 12px; }
+    .radio-rows { display: flex; flex-direction: column; gap: 8px; }
+    .radio-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .radio-btn {
+      width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      flex-shrink: 0; display: grid; place-items: center; background: var(--surface); transition: all 0.12s;
+    }
+    .radio-btn.selected { border-color: var(--brand); border-width: 4.5px; background: var(--surface); }
+    .radio-label { font-size: 14px; line-height: 20px; color: var(--text-1); }
+
+    /* Number input */
+    .num-input {
+      width: 72px; height: 32px; padding: 0 10px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+      color: var(--text-1); outline: none; text-align: center;
+    }
+    .num-input:focus { border-color: var(--brand); }
+    .num-input:disabled { opacity: 0.4; pointer-events: none; }
+
+    /* Impact warning */
+    .impact-warn {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: var(--warning-bg); border: 1px solid var(--warning-border);
+      border-radius: var(--radius-sm); padding: 10px 12px;
+      margin-top: 10px; font-size: 12px; line-height: 16px; color: #6f4c00;
+    }
+    .impact-warn svg { width: 13px; height: 13px; color: var(--warning); flex-shrink: 0; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* Toggle switch */
+    .toggle-row { display: flex; align-items: flex-start; gap: 12px; }
+    .toggle { width: 36px; height: 20px; border-radius: 999px; background: var(--border-strong); cursor: pointer; transition: background 0.15s; flex-shrink: 0; position: relative; margin-top: 1px; }
+    .toggle.on { background: var(--brand); }
+    .toggle::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: transform 0.15s; box-shadow: var(--shadow-sm); }
+    .toggle.on::after { transform: translateX(16px); }
+    .toggle-label { font-size: 14px; line-height: 20px; color: var(--text-1); cursor: pointer; }
+    .toggle-label strong { font-weight: 600; }
+    .toggle-label .cb-desc { color: var(--text-2); font-weight: 400; }
+
+    /* Lock date row */
+    .lock-date-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-left: 26px; }
+    .lock-date-label { font-size: 14px; line-height: 20px; color: var(--text-2); }
+    .lock-date-input {
+      height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: inherit; color: var(--text-1); outline: none; cursor: pointer;
+    }
+    .lock-date-input:focus { border-color: var(--brand); }
+
+    /* Tag chips */
+    .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border);
+      background: var(--bg); font-size: 13px; line-height: 18px; color: var(--text-2);
+    }
+    .tag-chip svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; color: var(--text-4); cursor: pointer; }
+
+    /* Activities table */
+    .act-table { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 12px; overflow: hidden; }
+    .act-table-hd { display: flex; align-items: center; padding: 8px 14px; background: var(--bg); border-bottom: 1px solid var(--border); gap: 0; }
+    .act-col-name { flex: 1; font-size: 12px; font-weight: 700; color: var(--text-3); letter-spacing: 0.32px; }
+    .act-col-cat { width: 140px; font-size: 12px; font-weight: 700; color: var(--text-3); letter-spacing: 0.32px; }
+    .act-col-bill { width: 80px; font-size: 12px; font-weight: 700; color: var(--text-3); letter-spacing: 0.32px; text-align: center; }
+    .act-row { display: flex; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--border-subtle); gap: 0; }
+    .act-row:last-child { border-bottom: none; }
+    .act-row:hover { background: var(--bg); }
+    .act-name { flex: 1; font-size: 13px; line-height: 18px; color: var(--text-1); }
+    .act-cat { width: 140px; }
+    .act-bill { width: 80px; display: flex; justify-content: center; }
+    .act-badge { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .act-badge-internal { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+    .act-badge-ext { background: var(--brand-light); color: var(--brand); border: 1px solid var(--brand-muted); }
+    .act-table-group { font-size: 12px; font-weight: 700; color: var(--text-4); letter-spacing: 0.32px; padding: 10px 14px 4px; background: var(--bg); border-bottom: 1px solid var(--border-subtle); }
+    .act-add-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 13px; color: var(--brand); background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; }
+    .act-add-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* Member exclusion table */
+    .member-search { width: 100%; max-width: 320px; margin-bottom: 12px; }
+    .member-search-input {
+      width: 100%; height: 32px; padding: 0 10px 0 32px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--text-2);
+      outline: none; background: var(--bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 9px center;
+    }
+    .member-search-input:focus { border-color: var(--brand); }
+    .mem-table { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .mem-table-hd { display: flex; align-items: center; padding: 8px 14px; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .mem-col-name { flex: 1; font-size: 12px; font-weight: 700; color: var(--text-3); letter-spacing: 0.32px; }
+    .mem-col-role { width: 180px; font-size: 12px; font-weight: 700; color: var(--text-3); letter-spacing: 0.32px; }
+    .mem-col-act { width: 32px; }
+    .mem-row { display: flex; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--border-subtle); gap: 0; }
+    .mem-row:last-child { border-bottom: none; }
+    .mem-row:hover { background: var(--bg); }
+    .mem-name { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-1); }
+    .mem-av { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .mem-role { width: 180px; font-size: 13px; color: var(--text-3); }
+    .mem-remove { width: 32px; display: flex; justify-content: center; }
+    .mem-remove-btn { background: none; border: none; cursor: pointer; color: var(--text-4); padding: 4px; border-radius: 3px; display: grid; place-items: center; }
+    .mem-remove-btn:hover { background: var(--danger-bg); color: var(--danger); }
+    .mem-remove-btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* Reminder row */
+    .reminder-sub { margin-top: 10px; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; }
+    .reminder-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); }
+
+    /* ════════════════════════════
+       BUTTONS
+    ════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 0 12px;
+      height: 32px; border-radius: var(--radius-sm);
+      font-size: 14px; line-height: 18px; letter-spacing: 0.16px; font-weight: 590;
+      cursor: pointer; border: none; text-decoration: none;
+      transition: all 0.12s; white-space: nowrap; font-family: inherit;
+    }
+    .btn-primary { background: #1d1d1f; color: #fff; }
+    .btn-primary:hover { background: #2d2d2f; }
+    .btn-primary:disabled { opacity: 0.45; pointer-events: none; }
+    .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
+    .btn svg { width: 14px; height: 14px; stroke-width: 2; flex-shrink: 0; fill: none; stroke: currentColor; }
+
+    /* ════════════════════════════
+       SAVE BAR
+    ════════════════════════════ */
+    .save-bar {
+      position: fixed; bottom: 0; left: 321px; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 10px 32px; display: flex; align-items: center; gap: 12px;
+      z-index: 100;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .save-bar.visible { opacity: 1; pointer-events: all; }
+    .save-bar-text { font-size: 13px; color: var(--text-3); flex: 1; }
+    .save-bar-text strong { color: var(--text-1); }
+
+    /* ════════════════════════════
+       AUDIT DRAWER
+    ════════════════════════════ */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(22,22,22,0.4);
+      z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 500px;
+      background: var(--surface); z-index: 201; display: flex; flex-direction: column;
+      box-shadow: -6.4px 0 14.4px rgba(0,0,0,0.13), -1.2px 0 3.6px rgba(0,0,0,0.11);
+      transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      border-left: 1px solid var(--border);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-hd { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .drawer-hd-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .drawer-title { font-size: 16px; line-height: 22px; font-weight: 600; color: var(--text-1); }
+    .drawer-subtitle { font-size: 12px; line-height: 16px; color: var(--text-3); margin-top: 1px; }
+    .drawer-close { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: none; cursor: pointer; display: grid; place-items: center; color: var(--text-3); transition: all 0.1s; }
+    .drawer-close:hover { background: var(--bg); color: var(--text-1); }
+    .drawer-close svg { width: 13px; height: 13px; stroke-width: 2; fill: none; stroke: currentColor; }
+    .drawer-filters { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+    .filter-select {
+      appearance: none; -webkit-appearance: none;
+      padding: 0 28px 0 10px; height: 30px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 13px; line-height: 18px;
+      color: var(--text-2); background: var(--surface); cursor: pointer;
+      font-family: inherit; outline: none; transition: border-color 0.12s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center;
+    }
+    .filter-select:focus { border-color: var(--brand); }
+    .filter-select.active { border-color: var(--brand); color: var(--brand); background-color: var(--brand-light); }
+    .filter-divider { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; margin: 0 2px; }
+    .export-btn { display: inline-flex; align-items: center; gap: 5px; padding: 0 10px; height: 28px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 590; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.1s; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .export-btn:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
+    .export-btn svg { width: 12px; height: 12px; stroke-width: 2; fill: none; stroke: currentColor; }
+    .drawer-scroll { flex: 1; overflow-y: auto; }
+    .log-date-hd { padding: 8px 20px 6px; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.32px; color: var(--text-4); background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
+    .log-entry { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); transition: background 0.1s; }
+    .log-entry:hover { background: var(--bg); }
+    .log-av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; margin-top: 1px; }
+    .av-b { background: #0f62fe; } .av-t { background: #007d79; }
+    .av-p { background: #6929c4; } .av-g { background: #525252; }
+    .log-body { flex: 1; min-width: 0; }
+    .log-actor-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; }
+    .log-actor { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--text-1); }
+    .log-time { font-size: 12px; line-height: 16px; color: var(--text-4); margin-left: auto; flex-shrink: 0; }
+    .log-desc { font-size: 13px; line-height: 18px; color: var(--text-2); margin-bottom: 7px; }
+    .log-desc strong { color: var(--text-1); font-weight: 590; }
+    .log-diff { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; line-height: 16px; color: var(--text-2); }
+    .d-old { text-decoration: line-through; color: var(--text-4); }
+    .d-new { color: var(--text-1); }
+    .d-arr { color: var(--text-4); font-size: 11px; }
+    .log-source { font-size: 13px; line-height: 18px; color: var(--text-4); font-weight: 400; }
+    .drawer-empty { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 60px 32px; text-align: center; }
+    .drawer-empty.visible { display: flex; }
+    .drawer-empty-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; }
+    .drawer-empty-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; color: var(--text-4); }
+    .drawer-empty-title { font-size: 14px; font-weight: 600; line-height: 18px; color: var(--text-2); }
+    .drawer-empty-desc { font-size: 13px; line-height: 18px; color: var(--text-4); max-width: 260px; }
+    .drawer-footer { padding: 10px 20px; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--bg); }
+    .drawer-footer-text { font-size: 12px; line-height: 16px; color: var(--text-4); }
+  </style>
+</head>
+<body>
+
+<!-- ══ Icon rail ══ -->
+<nav class="rail">
+  <div class="rail-logo">
+    <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+  </div>
+  <div class="rail-icon" title="Notifications">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </div>
+  <div class="rail-icon active" title="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </div>
+  <div class="rail-icon" title="Projects">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+  </div>
+  <div class="rail-icon" title="Resources">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </div>
+  <div class="rail-icon" title="List">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+  </div>
+  <div class="rail-icon" title="Analytics">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  </div>
+  <div class="rail-icon" title="Grid">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  </div>
+  <div class="rail-icon" title="AI">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  </div>
+  <div class="rail-bottom">
+    <div class="rail-badge">
+      <div class="rail-icon" title="Gift" style="margin:0">
+        <svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      </div>
+      <div class="rail-badge-dot">8</div>
+    </div>
+    <div class="rail-icon" title="Chat">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="rail-avatar">VS</div>
+  </div>
+</nav>
+
+<!-- ══ Settings sidebar ══ -->
+<aside class="settings-sidebar">
+  <div class="ss-title">Settings</div>
+  <div class="ss-search">
+    <input class="ss-search-input" type="text" placeholder="Search">
+  </div>
+
+  <div class="ss-item">
+    <div class="ss-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    Members
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+    Project settings
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    Automations
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-purple"><svg viewBox="0 0 24 24"><path d="M4 20h16M4 4h16M9 4v16M15 4v16"/></svg></div>
+    Email intelligence
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+    Knowledge Base
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Operations and financials</div>
+
+  <div class="ss-item active">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    Time tracking
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    Resource management
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+    Financial management
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-yellow"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+    Currencies
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    Revenue recognition ledger
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-red"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+    Rate cards
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-magenta"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+    Invoicing
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-yellow"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    Taxes
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+    Expenses
+    <span class="ss-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Sprints</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    Sprint settings
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg></div>
+    Sprint fields
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Fields</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-magenta"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+    Project fields
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-yellow"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+    Task fields
+  </div>
+</aside>
+
+<!-- ══ Main content ══ -->
+<div class="main">
+  <div class="content-header">
+    <div class="content-title-row">
+      <div class="content-icon ic-blue">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h1 class="content-title">Time tracking</h1>
+    </div>
+    <div class="content-actions">
+      <button class="btn btn-ghost" onclick="openDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+        View history
+      </button>
+      <button class="btn btn-primary" id="save-btn" disabled onclick="saveSettings()">Save changes</button>
+    </div>
+  </div>
+
+  <div class="content-body">
+
+    <!-- 1 · Timesheet due -->
+    <div class="setting-section">
+      <div class="section-label">Timesheet due</div>
+      <div class="section-desc" style="margin-bottom:12px;">Set the day and time by which team members must submit their timesheets each week.</div>
+      <div class="inline-row">
+        <span class="inline-label">Timesheets are due every</span>
+        <select class="inline-select" onchange="markDirty()">
+          <option>Friday</option>
+          <option>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Saturday</option>
+          <option>Sunday</option>
+        </select>
+        <span class="inline-label">at</span>
+        <select class="inline-select" onchange="markDirty()">
+          <option>14:00</option>
+          <option>08:00</option>
+          <option>09:00</option>
+          <option>10:00</option>
+          <option>12:00</option>
+          <option>17:00</option>
+          <option>18:00</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 2 · Send reminders -->
+    <div class="setting-section">
+      <div class="section-label">Send reminders</div>
+      <div class="section-desc" style="margin-bottom:10px;">Automatically notify team members to fill in their timesheets.</div>
+      <div class="reminder-sub">
+        <div class="reminder-row">
+          <select class="inline-select" onchange="markDirty()">
+            <option>6 hours</option>
+            <option>1 hour</option>
+            <option>2 hours</option>
+            <option>12 hours</option>
+            <option>24 hours</option>
+          </select>
+          <span>before timesheet is due</span>
+        </div>
+        <div class="reminder-row">
+          <select class="inline-select" onchange="markDirty()">
+            <option>1 hour</option>
+            <option>2 hours</option>
+            <option>6 hours</option>
+            <option>12 hours</option>
+            <option>24 hours</option>
+          </select>
+          <span>after timesheet is overdue</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 · Approval settings -->
+    <div class="setting-section">
+      <div class="radio-section-label">Approval settings</div>
+      <div class="radio-section-desc">Choose who approves timesheets for your team members.</div>
+      <div class="radio-rows">
+        <div class="radio-row" onclick="selectRadio('rg-approval', 0)">
+          <div class="radio-btn selected" id="rg-approval-0"></div>
+          <span class="radio-label">Project owners</span>
+        </div>
+        <div class="radio-row" onclick="selectRadio('rg-approval', 1)">
+          <div class="radio-btn" id="rg-approval-1"></div>
+          <span class="radio-label">Timesheet approver</span>
+        </div>
+      </div>
+      <div class="cb-row sub" id="sub-approval-hierarchy" style="margin-top:14px;">
+        <div class="cb-box" id="cb-hierarchy" onclick="toggleCb('cb-hierarchy')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-hierarchy')">
+          <strong>Enable approver hierarchy</strong><span class="cb-desc">: Route approval through designated approver levels before final sign-off</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 · Non-billable hours -->
+    <div class="setting-section">
+      <div class="section-label" style="margin-bottom:4px;">Non-billable hours</div>
+      <div class="section-desc" style="margin-bottom:12px;">Choose which contract types allow team members to log non-billable hours.</div>
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-nb-tm" onclick="toggleCb('cb-nb-tm')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-nb-tm')"><strong>Time &amp; material</strong></div>
+      </div>
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-nb-ff" onclick="toggleCb('cb-nb-ff')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-nb-ff')"><strong>Fixed fee</strong></div>
+      </div>
+      <div class="cb-row">
+        <div class="cb-box" id="cb-nb-sub" onclick="toggleCb('cb-nb-sub')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-nb-sub')"><strong>Subscription</strong></div>
+      </div>
+    </div>
+
+    <!-- 5 · Rejected hours -->
+    <div class="setting-section">
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-rejected" onclick="toggleCb('cb-rejected')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-rejected')">
+          <strong>Allow re-submission of rejected hours</strong><span class="cb-desc">: Team members can edit and resubmit time entries that were rejected by approvers</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 · Cap time tracking -->
+    <div class="setting-section">
+      <div class="cb-row">
+        <div class="cb-box" id="cb-cap" onclick="toggleCb('cb-cap')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-cap')">
+          <strong>Cap time tracking to budgeted hours</strong><span class="cb-desc">: Prevent team members from logging hours beyond the budgeted hours for a task or phase</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 · Time off -->
+    <div class="setting-section">
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-timeoff" onclick="toggleCb('cb-timeoff')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-timeoff')">
+          <strong>Include time off in timesheets</strong><span class="cb-desc">: Show approved time-off entries alongside logged work hours in the timesheet view</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8 · Track time against -->
+    <div class="setting-section">
+      <div class="section-label" style="margin-bottom:4px;">Track time against</div>
+      <div class="section-desc" style="margin-bottom:12px;">Choose the entities your team can log time against.</div>
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-tt-projects" onclick="toggleCb('cb-tt-projects')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-tt-projects')"><strong>Projects</strong></div>
+      </div>
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-tt-phases" onclick="toggleCb('cb-tt-phases')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-tt-phases')"><strong>Phases</strong></div>
+      </div>
+      <div class="cb-row">
+        <div class="cb-box" id="cb-tt-milestones" onclick="toggleCb('cb-tt-milestones')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-tt-milestones')"><strong>Milestones</strong></div>
+      </div>
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-tt-tasks" onclick="toggleCb('cb-tt-tasks')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-tt-tasks')"><strong>Tasks</strong></div>
+      </div>
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-tt-activities" onclick="toggleCb('cb-tt-activities')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-tt-activities')"><strong>Activities</strong></div>
+      </div>
+      <div style="margin-top:16px; padding-left:0;">
+        <div class="section-label" style="font-size:13px;margin-bottom:8px;color:var(--text-2);">Restrict time tracking to assigned entities only</div>
+        <div class="cb-row sub">
+          <div class="cb-box" id="cb-restrict-tasks" onclick="toggleCb('cb-restrict-tasks')">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="cb-label" onclick="toggleCb('cb-restrict-tasks')">Only assigned tasks</div>
+        </div>
+        <div class="cb-row sub">
+          <div class="cb-box" id="cb-restrict-projects" onclick="toggleCb('cb-restrict-projects')">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="cb-label" onclick="toggleCb('cb-restrict-projects')">Only assigned projects</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9 · Activities -->
+    <div class="setting-section">
+      <div class="toggle-row">
+        <div class="toggle on" id="toggle-activities" onclick="toggleSwitch('toggle-activities')"></div>
+        <div class="toggle-label" onclick="toggleSwitch('toggle-activities')">
+          <strong>Activities</strong><span class="cb-desc">: Predefined task types team members can log time against (e.g. Development, Design, QA)</span>
+        </div>
+      </div>
+
+      <div id="activities-section" style="margin-top:16px;">
+        <div class="act-table">
+          <div class="act-table-group">Project activities</div>
+          <div class="act-table-hd">
+            <div class="act-col-name">Name</div>
+            <div class="act-col-cat">Category</div>
+            <div class="act-col-bill">Billable</div>
+          </div>
+          <div class="act-row">
+            <div class="act-name">Development</div>
+            <div class="act-cat"><span class="act-badge act-badge-ext">External</span></div>
+            <div class="act-bill">
+              <div class="cb-box checked" style="margin-top:0" onclick="markDirty()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+          <div class="act-row">
+            <div class="act-name">Design</div>
+            <div class="act-cat"><span class="act-badge act-badge-ext">External</span></div>
+            <div class="act-bill">
+              <div class="cb-box checked" style="margin-top:0" onclick="markDirty()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+          <div class="act-row">
+            <div class="act-name">QA &amp; Testing</div>
+            <div class="act-cat"><span class="act-badge act-badge-ext">External</span></div>
+            <div class="act-bill">
+              <div class="cb-box checked" style="margin-top:0" onclick="markDirty()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+          <div class="act-row">
+            <div class="act-name">Project Management</div>
+            <div class="act-cat"><span class="act-badge act-badge-internal">Internal</span></div>
+            <div class="act-bill">
+              <div class="cb-box" style="margin-top:0" onclick="markDirty()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+          <div class="act-table-group" style="border-top:1px solid var(--border);">Non-project activities</div>
+          <div class="act-row">
+            <div class="act-name">Internal meetings</div>
+            <div class="act-cat"><span class="act-badge act-badge-internal">Internal</span></div>
+            <div class="act-bill">
+              <div class="cb-box" style="margin-top:0" onclick="markDirty()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+          <div class="act-row">
+            <div class="act-name">Training</div>
+            <div class="act-cat"><span class="act-badge act-badge-internal">Internal</span></div>
+            <div class="act-bill">
+              <div class="cb-box" style="margin-top:0" onclick="markDirty()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <button class="act-add-btn" onclick="markDirty()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add activity
+        </button>
+      </div>
+    </div>
+
+    <!-- 10 · Time entry categories -->
+    <div class="setting-section">
+      <div class="cb-row" style="margin-bottom:0;">
+        <div class="cb-box checked" id="cb-categories" onclick="toggleCb('cb-categories','','','')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-categories')">
+          <strong>Require time entry category</strong><span class="cb-desc">: Team members must select a category when logging time</span>
+        </div>
+      </div>
+      <div class="tag-chips">
+        <div class="tag-chip">Billable <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        <div class="tag-chip">Non-billable <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        <div class="tag-chip">Internal <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        <div class="tag-chip">Overhead <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        <div class="tag-chip">Training <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        <button class="act-add-btn" style="margin-top:0;" onclick="markDirty()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add category
+        </button>
+      </div>
+    </div>
+
+    <!-- 11 · Lock time entries -->
+    <div class="setting-section">
+      <div class="cb-row">
+        <div class="cb-box checked" id="cb-lock" onclick="toggleCb('cb-lock','lock-details','','')">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cb-label" onclick="toggleCb('cb-lock','lock-details','','')">
+          <strong>Lock time entries</strong><span class="cb-desc">: Prevent edits to time entries after a specified date</span>
+        </div>
+      </div>
+      <div id="lock-details">
+        <div class="lock-date-row">
+          <span class="lock-date-label">Lock entries before</span>
+          <input type="date" class="lock-date-input" value="2026-03-31" onchange="markDirty()">
+        </div>
+        <div class="cb-row sub" style="margin-top:10px;">
+          <div class="cb-box" id="cb-lock-approvers" onclick="toggleCb('cb-lock-approvers')">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="cb-label" onclick="toggleCb('cb-lock-approvers')">
+            Restrict approvers from editing locked entries
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12 · Calendar integration -->
+    <div class="setting-section">
+      <div class="toggle-row">
+        <div class="toggle" id="toggle-calendar" onclick="toggleSwitch('toggle-calendar')"></div>
+        <div class="toggle-label" onclick="toggleSwitch('toggle-calendar')">
+          <strong>Calendar integration</strong><span class="cb-desc">: Sync calendar events to prefill time entries automatically</span>
+        </div>
+      </div>
+      <div id="calendar-section" style="display:none; margin-top:16px;">
+        <div class="radio-rows" style="margin-bottom:14px;">
+          <div class="radio-row" onclick="selectRadio('rg-cal', 0)">
+            <div class="radio-btn selected" id="rg-cal-0"></div>
+            <span class="radio-label">Google Calendar</span>
+          </div>
+          <div class="radio-row" onclick="selectRadio('rg-cal', 1)">
+            <div class="radio-btn" id="rg-cal-1"></div>
+            <span class="radio-label">Microsoft Outlook</span>
+          </div>
+        </div>
+        <div class="cb-row">
+          <div class="cb-box checked" id="cb-track-calendar" onclick="toggleCb('cb-track-calendar')">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="cb-label" onclick="toggleCb('cb-track-calendar')">
+            Automatically track calendar events as time entries
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13 · Hours to be reported -->
+    <div class="setting-section">
+      <div class="radio-section-label">Hours to be reported</div>
+      <div class="radio-section-desc">Set a rule for how many hours team members must log per week.</div>
+      <div class="radio-rows">
+        <div class="radio-row" onclick="selectRadio('rg-hours', 0); updateHoursInput();">
+          <div class="radio-btn selected" id="rg-hours-0"></div>
+          <span class="radio-label">No requirement</span>
+        </div>
+        <div class="radio-row" onclick="selectRadio('rg-hours', 1); updateHoursInput();" style="gap:10px;">
+          <div class="radio-btn" id="rg-hours-1"></div>
+          <span class="radio-label">Cannot submit less than</span>
+          <input type="number" class="num-input" id="hours-min" value="40" min="1" max="168" disabled onchange="markDirty()">
+          <span class="radio-label" style="color:var(--text-2)">hours / week</span>
+        </div>
+        <div class="radio-row" onclick="selectRadio('rg-hours', 2); updateHoursInput();" style="gap:10px;">
+          <div class="radio-btn" id="rg-hours-2"></div>
+          <span class="radio-label">Cannot submit more than</span>
+          <input type="number" class="num-input" id="hours-max" value="50" min="1" max="168" disabled onchange="markDirty()">
+          <span class="radio-label" style="color:var(--text-2)">hours / week</span>
+        </div>
+        <div class="radio-row" onclick="selectRadio('rg-hours', 3); updateHoursInput();" style="gap:10px;">
+          <div class="radio-btn" id="rg-hours-3"></div>
+          <span class="radio-label">Must submit exactly</span>
+          <input type="number" class="num-input" id="hours-exact" value="40" min="1" max="168" disabled onchange="markDirty()">
+          <span class="radio-label" style="color:var(--text-2)">hours / week</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14 · Timesheet exclusion -->
+    <div class="setting-section">
+      <div class="section-label" style="margin-bottom:4px;">Timesheet exclusion</div>
+      <div class="section-desc" style="margin-bottom:12px;">Exclude specific members from timesheet tracking. These members will not receive reminders or be required to submit timesheets.</div>
+      <div class="member-search">
+        <input type="text" class="member-search-input" placeholder="Search members to exclude...">
+      </div>
+      <div class="mem-table">
+        <div class="mem-table-hd">
+          <div class="mem-col-name">Name</div>
+          <div class="mem-col-role">Role</div>
+          <div class="mem-col-act"></div>
+        </div>
+        <div class="mem-row">
+          <div class="mem-name">
+            <div class="mem-av" style="background:#6929c4;">PK</div>
+            Priya Kumar
+          </div>
+          <div class="mem-role">Finance Manager</div>
+          <div class="mem-remove">
+            <button class="mem-remove-btn" onclick="markDirty()" title="Remove">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="mem-row">
+          <div class="mem-name">
+            <div class="mem-av" style="background:#007d79;">NR</div>
+            Nikhil Rao
+          </div>
+          <div class="mem-role">Executive / C-Level</div>
+          <div class="mem-remove">
+            <button class="mem-remove-btn" onclick="markDirty()" title="Remove">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="mem-row">
+          <div class="mem-name">
+            <div class="mem-av" style="background:#0f62fe;">SR</div>
+            Sneha Reddy
+          </div>
+          <div class="mem-role">Advisor</div>
+          <div class="mem-remove">
+            <button class="mem-remove-btn" onclick="markDirty()" title="Remove">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-body -->
+</div><!-- /main -->
+
+<!-- ══ Save bar ══ -->
+<div class="save-bar" id="save-bar">
+  <span class="save-bar-text"><strong>Unsaved changes</strong> — Review before saving.</span>
+  <button class="btn btn-ghost" onclick="discardChanges()">Discard</button>
+  <button class="btn btn-primary" onclick="saveSettings()">Save changes</button>
+</div>
+
+<!-- ══ Drawer overlay ══ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- ══ Audit history drawer ══ -->
+<div class="drawer" id="audit-drawer">
+  <div class="drawer-hd">
+    <div class="drawer-hd-row">
+      <div>
+        <div class="drawer-title">Change history</div>
+        <div class="drawer-subtitle">Time Tracking Settings</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="drawer-filters">
+    <select class="filter-select" id="filter-setting" onchange="applyFilters()">
+      <option value="">All settings</option>
+      <option value="due">Timesheet due</option>
+      <option value="reminders">Send reminders</option>
+      <option value="approval">Approval settings</option>
+      <option value="nonbillable">Non-billable hours</option>
+      <option value="lock">Lock time entries</option>
+      <option value="calendar">Calendar integration</option>
+      <option value="hours">Hours to be reported</option>
+      <option value="activities">Activities</option>
+      <option value="categories">Time entry categories</option>
+      <option value="trackagainst">Track time against</option>
+      <option value="exclusion">Timesheet exclusion</option>
+    </select>
+    <select class="filter-select" id="filter-user" onchange="applyFilters()">
+      <option value="">All users</option>
+      <option value="VS">Vivek S</option>
+      <option value="AM">Alex M</option>
+      <option value="RK">Riya K</option>
+      <option value="SA">Sam A</option>
+    </select>
+    <div class="filter-divider"></div>
+    <button class="export-btn" onclick="exportCSV()">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <div class="drawer-scroll" id="drawer-scroll">
+
+    <div class="log-date-hd" data-group="today">Today · Apr 9, 2026</div>
+
+    <div class="log-entry" data-field="due" data-user="VS">
+      <div class="log-av av-b">VS</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Vivek S</span>
+          <span class="log-time">2 hours ago</span>
+        </div>
+        <div class="log-desc">Changed <strong>Timesheet due day</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Thursday</span><span class="d-arr">→</span><span class="d-new">Friday</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="approval" data-user="VS">
+      <div class="log-av av-b">VS</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Vivek S</span>
+          <span class="log-time">3 hours ago</span>
+        </div>
+        <div class="log-desc">Changed <strong>Approval settings</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Timesheet approver</span><span class="d-arr">→</span><span class="d-new">Project owners</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="apr7">Apr 7, 2026</div>
+
+    <div class="log-entry" data-field="lock" data-user="AM">
+      <div class="log-av av-t">AM</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Alex M</span>
+          <span class="log-time">Apr 7, 5:10 PM</span>
+        </div>
+        <div class="log-desc">Changed <strong>Lock time entries date</strong> <span class="log-source">via sandbox (NiCE_Sandbox)</span></div>
+        <div class="log-diff">
+          <span class="d-old">Feb 28, 2026</span><span class="d-arr">→</span><span class="d-new">Mar 31, 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="activities" data-user="AM">
+      <div class="log-av av-t">AM</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Alex M</span>
+          <span class="log-time">Apr 7, 4:50 PM</span>
+        </div>
+        <div class="log-desc">Added activity <strong>QA &amp; Testing</strong> <span class="log-source">via sandbox (NiCE_Sandbox)</span></div>
+        <div class="log-diff">
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="apr5">Apr 5, 2026</div>
+
+    <div class="log-entry" data-field="nonbillable" data-user="RK">
+      <div class="log-av av-p">RK</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Riya K</span>
+          <span class="log-time">Apr 5, 2:30 PM</span>
+        </div>
+        <div class="log-desc">Changed <strong>Non-billable hours – Fixed fee</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="hours" data-user="RK">
+      <div class="log-av av-p">RK</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Riya K</span>
+          <span class="log-time">Apr 5, 2:15 PM</span>
+        </div>
+        <div class="log-desc">Changed <strong>Hours to be reported</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">No requirement</span><span class="d-arr">→</span><span class="d-new">Cannot submit less than 40 hrs/week</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="apr2">Apr 2, 2026</div>
+
+    <div class="log-entry" data-field="calendar" data-user="SA">
+      <div class="log-av av-g">SA</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Sam A</span>
+          <span class="log-time">Apr 2, 11:00 AM</span>
+        </div>
+        <div class="log-desc">Enabled <strong>Calendar integration</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="trackagainst" data-user="SA">
+      <div class="log-av av-g">SA</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Sam A</span>
+          <span class="log-time">Apr 2, 10:45 AM</span>
+        </div>
+        <div class="log-desc">Changed <strong>Track time against – Milestones</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">On</span><span class="d-arr">→</span><span class="d-new">Off</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="mar28">Mar 28, 2026</div>
+
+    <div class="log-entry" data-field="reminders" data-user="AM">
+      <div class="log-av av-t">AM</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Alex M</span>
+          <span class="log-time">Mar 28, 3:20 PM</span>
+        </div>
+        <div class="log-desc">Changed <strong>Reminder – before due</strong> <span class="log-source">via API</span></div>
+        <div class="log-diff">
+          <span class="d-old">24 hours</span><span class="d-arr">→</span><span class="d-new">6 hours</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="categories" data-user="VS">
+      <div class="log-av av-b">VS</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Vivek S</span>
+          <span class="log-time">Mar 28, 9:05 AM</span>
+        </div>
+        <div class="log-desc">Added category <strong>Overhead</strong> to <strong>Time entry categories</strong> <span class="log-source">via UI</span></div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="exclusion" data-user="VS">
+      <div class="log-av av-b">VS</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Vivek S</span>
+          <span class="log-time">Mar 28, 9:00 AM</span>
+        </div>
+        <div class="log-desc">Added <strong>Sneha Reddy</strong> to <strong>Timesheet exclusion</strong> <span class="log-source">via UI</span></div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="drawer-empty" id="drawer-empty">
+      <div class="drawer-empty-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+      </div>
+      <div class="drawer-empty-title">No changes found</div>
+      <div class="drawer-empty-desc">Try adjusting your filters, or no changes match the selected setting and user.</div>
+    </div>
+
+  </div><!-- /drawer-scroll -->
+
+  <div class="drawer-footer">
+    <span class="drawer-footer-text">Showing last 90 days · Jan 9, 2026 – Apr 9, 2026</span>
+  </div>
+</div><!-- /drawer -->
+
+<script>
+  // ── Checkbox toggle ──
+  function toggleCb(id, subRowId, warnId, showWarnWhenUnchecked) {
+    const box = document.getElementById(id);
+    const isChecked = box.classList.toggle('checked');
+    markDirty();
+    if (warnId) {
+      const warn = document.getElementById(warnId);
+      if (warn) warn.style.display = (!isChecked && showWarnWhenUnchecked) ? 'flex' : 'none';
+    }
+    if (subRowId) {
+      const sub = document.getElementById(subRowId);
+      if (sub) sub.classList.toggle('disabled', !isChecked);
+    }
+  }
+
+  // ── Toggle switch ──
+  function toggleSwitch(id) {
+    const el = document.getElementById(id);
+    const isOn = el.classList.toggle('on');
+    markDirty();
+    // Show/hide dependent sections
+    if (id === 'toggle-calendar') {
+      document.getElementById('calendar-section').style.display = isOn ? '' : 'none';
+    }
+  }
+
+  // ── Radio group ──
+  function selectRadio(group, idx) {
+    const counts = { 'rg-approval': 2, 'rg-cal': 2, 'rg-hours': 4 };
+    const count = counts[group] || 4;
+    for (let i = 0; i < count; i++) {
+      const el = document.getElementById(group + '-' + i);
+      if (el) el.classList.toggle('selected', i === idx);
+    }
+    markDirty();
+  }
+
+  // ── Hours input enable/disable ──
+  function updateHoursInput() {
+    const selected = ['rg-hours-0','rg-hours-1','rg-hours-2','rg-hours-3'].findIndex(id =>
+      document.getElementById(id).classList.contains('selected')
+    );
+    document.getElementById('hours-min').disabled = selected !== 1;
+    document.getElementById('hours-max').disabled = selected !== 2;
+    document.getElementById('hours-exact').disabled = selected !== 3;
+  }
+
+  // ── Drawer ──
+  function openDrawer() {
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('audit-drawer').classList.add('open');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('audit-drawer').classList.remove('open');
+  }
+
+  // ── Filters ──
+  function applyFilters() {
+    const settingVal = document.getElementById('filter-setting').value;
+    const userVal = document.getElementById('filter-user').value;
+    document.getElementById('filter-setting').classList.toggle('active', !!settingVal);
+    document.getElementById('filter-user').classList.toggle('active', !!userVal);
+    let visibleCount = 0;
+    document.querySelectorAll('.log-entry').forEach(e => {
+      const fieldMatch = !settingVal || e.dataset.field === settingVal;
+      const userMatch = !userVal || e.dataset.user === userVal;
+      const show = fieldMatch && userMatch;
+      e.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+    document.querySelectorAll('.log-date-hd').forEach(g => {
+      let next = g.nextElementSibling;
+      let has = false;
+      while (next && !next.classList.contains('log-date-hd') && next.id !== 'drawer-empty') {
+        if (next.style.display !== 'none' && next.classList.contains('log-entry')) has = true;
+        next = next.nextElementSibling;
+      }
+      g.style.display = has ? '' : 'none';
+    });
+    document.getElementById('drawer-empty').classList.toggle('visible', visibleCount === 0);
+  }
+
+  // ── Export CSV ──
+  function exportCSV() {
+    const rows = [
+      ['timestamp','actor_name','actor_id','entity_type','field_name','old_value','new_value','source'],
+      ['2026-04-09T07:00:00Z','Vivek S','usr_vivek','TT_Settings','timesheet_due_day','Thursday','Friday','UI'],
+      ['2026-04-09T06:00:00Z','Vivek S','usr_vivek','TT_Settings','approval_settings','Timesheet approver','Project owners','UI'],
+      ['2026-04-07T13:10:00Z','Alex M','usr_alexm','TT_Settings','lock_time_entries_date','2026-02-28','2026-03-31','Sandbox Merge'],
+      ['2026-04-07T12:50:00Z','Alex M','usr_alexm','TT_Settings','activities_qa_testing','false','true','Sandbox Merge'],
+      ['2026-04-05T10:30:00Z','Riya K','usr_riyak','TT_Settings','non_billable_fixed_fee','false','true','UI'],
+      ['2026-04-05T10:15:00Z','Riya K','usr_riyak','TT_Settings','hours_to_be_reported','No requirement','Cannot submit less than 40','UI'],
+      ['2026-04-02T09:00:00Z','Sam A','usr_sama','TT_Settings','calendar_integration_enabled','false','true','UI'],
+      ['2026-04-02T08:45:00Z','Sam A','usr_sama','TT_Settings','track_against_milestones','true','false','UI'],
+      ['2026-03-28T13:20:00Z','Alex M','usr_alexm','TT_Settings','reminder_before_due','24 hours','6 hours','API'],
+      ['2026-03-28T09:05:00Z','Vivek S','usr_vivek','TT_Settings','categories_overhead_added','','Overhead','UI'],
+      ['2026-03-28T09:00:00Z','Vivek S','usr_vivek','TT_Settings','exclusion_sneha_reddy_added','','Sneha Reddy','UI'],
+    ];
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'tt-settings-audit-log.csv';
+    a.click();
+  }
+
+  // ── Save / discard ──
+  function markDirty() {
+    document.getElementById('save-bar').classList.add('visible');
+  }
+  function discardChanges() {
+    location.reload();
+  }
+  function saveSettings() {
+    document.getElementById('save-bar').classList.remove('visible');
+  }
+</script>
+</body>
+</html>
