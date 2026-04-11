@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpectraDetect — Pipeline</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f5f5f3;
+      --color-background-tertiary: #eeede8;
+      --color-background-info: #e6f1fb;
+      --color-background-success: #eaf3de;
+      --color-background-warning: #fdf3e0;
+      --color-background-danger: #fcebeb;
+      --color-text-primary: #1a1a18;
+      --color-text-secondary: #5f5e5a;
+      --color-text-tertiary: #888780;
+      --color-text-info: #185fa5;
+      --color-text-success: #3b6d11;
+      --color-text-warning: #854f0b;
+      --color-text-danger: #a32d2d;
+      --color-border-tertiary: rgba(0,0,0,0.10);
+      --color-border-secondary: rgba(0,0,0,0.20);
+      --color-accent-blue: #378ADD;
+      --color-accent-green: #639922;
+      --color-accent-amber: #BA7517;
+      --color-accent-red: #E24B4A;
+      --border-radius-sm: 5px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-background-primary: #1e1e1c;
+        --color-background-secondary: #2a2a27;
+        --color-background-tertiary: #161614;
+        --color-background-info: #0c2e50;
+        --color-background-success: #172d0a;
+        --color-background-warning: #2d1f06;
+        --color-background-danger: #3a1010;
+        --color-text-primary: #e8e6de;
+        --color-text-secondary: #9c9a92;
+        --color-text-tertiary: #6b6a64;
+        --color-text-info: #85b7eb;
+        --color-text-success: #c0dd97;
+        --color-text-warning: #e8b46e;
+        --color-text-danger: #e88080;
+        --color-border-tertiary: rgba(255,255,255,0.08);
+        --color-border-secondary: rgba(255,255,255,0.18);
+      }
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-background-tertiary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      display: flex;
+      height: 720px;
+      width: 100%;
+      max-width: 1280px;
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      background: var(--color-background-tertiary);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: var(--color-background-primary);
+      border-right: 0.5px solid var(--color-border-tertiary);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 16px 16px 12px;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+    }
+    .sidebar-title { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+    .sidebar-sub   { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+
+    .nav-section {
+      padding: 12px 14px 5px;
+      font-size: 10px; font-weight: 600;
+      color: var(--color-text-tertiary);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 14px;
+      font-size: 12px; color: var(--color-text-secondary);
+      cursor: pointer; border-radius: 6px;
+      margin: 1px 6px; transition: background 0.13s;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+    .nav-item.active { background: var(--color-background-info); color: var(--color-text-info); font-weight: 500; }
+    .nav-item.done   { color: var(--color-text-success); }
+    .nav-item.locked { color: var(--color-text-tertiary); opacity: 0.5; cursor: default; pointer-events: none; }
+
+    .step-indicator {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700;
+    }
+    .step-pending  { background: var(--color-background-secondary); color: var(--color-text-tertiary); border: 0.5px solid var(--color-border-secondary); }
+    .step-active   { background: #378ADD; color: #fff; }
+    .step-done     { background: #639922; color: #fff; }
+
+    .nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .dot-blue  { background: #378ADD; }
+    .dot-teal  { background: #1D9E75; }
+    .dot-amber { background: #BA7517; }
+    .dot-gray  { background: #c0bfb8; }
+
+    .dataset-panel {
+      padding: 11px 12px; border-top: 0.5px solid var(--color-border-tertiary); margin-top: auto;
+    }
+    .ds-label { font-size: 10px; font-weight: 600; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+    .ds-chip {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 9px; border-radius: 6px;
+      border: 0.5px solid var(--color-border-tertiary);
+      background: var(--color-background-secondary);
+      margin-bottom: 5px; cursor: pointer;
+      transition: border-color 0.13s;
+    }
+    .ds-chip:hover { border-color: var(--color-border-secondary); }
+    .ds-chip-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .ds-chip-name { font-size: 11px; color: var(--color-text-primary); font-weight: 500; }
+    .ds-chip-type { font-size: 10px; color: var(--color-text-secondary); margin-left: auto; }
+    .ds-empty { font-size: 11px; color: var(--color-text-tertiary); font-style: italic; padding: 4px 2px; }
+
+    /* ─── MAIN ─── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ─── TOOLBAR ─── */
+    .toolbar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      background: var(--color-background-primary); flex-shrink: 0;
+    }
+    .toolbar-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+    .toolbar-sep   { width: 0.5px; height: 16px; background: var(--color-border-tertiary); margin: 0 2px; }
+    .toolbar-step  { font-size: 11px; color: var(--color-text-secondary); }
+    .spacer { flex: 1; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 11px; font-size: 11px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 6px; cursor: pointer;
+      background: transparent; color: var(--color-text-secondary);
+      transition: background 0.13s; font-family: var(--font-sans);
+    }
+    .btn:hover { background: var(--color-background-secondary); }
+    .btn-primary { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; font-weight: 500; }
+    .btn-primary:hover { opacity: 0.85; background: var(--color-background-info); }
+    .btn-success { background: var(--color-background-success); color: var(--color-text-success); border-color: transparent; font-weight: 500; }
+    .btn-danger  { background: var(--color-background-danger); color: var(--color-text-danger); border-color: transparent; font-weight: 500; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 10px; font-weight: 500;
+    }
+    .pill-running { background: var(--color-background-info); color: var(--color-text-info); }
+    .pill-done    { background: var(--color-background-success); color: var(--color-text-success); }
+    .pill-error   { background: var(--color-background-danger); color: var(--color-text-danger); }
+    .status-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .dot-running { background: #378ADD; animation: pulse 1.2s ease-in-out infinite; }
+    .dot-done    { background: #639922; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ─── PANELS (steps) ─── */
+    .step-panel { display: none; flex: 1; overflow: hidden; }
+    .step-panel.active { display: flex; flex-direction: column; }
+
+    /* ════════════════════════════════
+       STEP 1 — LOAD
+    ════════════════════════════════ */
+    .load-body {
+      flex: 1; overflow-y: auto;
+      padding: 24px 28px;
+      display: flex; flex-direction: column; gap: 20px;
+      background: var(--color-background-secondary);
+    }
+
+    .section-card {
+      background: var(--color-background-primary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 11px 14px;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .card-header-title { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+    .card-header-sub   { font-size: 11px; color: var(--color-text-secondary); margin-left: auto; }
+    .card-body { padding: 14px; }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 1.5px dashed var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: 28px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: var(--color-background-secondary);
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--color-accent-blue);
+      background: var(--color-background-info);
+    }
+    .drop-zone.has-file {
+      border-style: solid;
+      border-color: var(--color-accent-green);
+      background: var(--color-background-success);
+    }
+    .drop-zone.has-error {
+      border-color: var(--color-accent-red);
+      background: var(--color-background-danger);
+    }
+    .drop-icon { font-size: 24px; margin-bottom: 8px; opacity: 0.55; }
+    .drop-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+    .drop-sub   { font-size: 11px; color: var(--color-text-secondary); }
+    .drop-formats {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 12px;
+    }
+    .format-tag {
+      padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 500; font-family: var(--font-mono);
+      background: var(--color-background-tertiary);
+      color: var(--color-text-secondary);
+      border: 0.5px solid var(--color-border-tertiary);
+    }
+    .file-info {
+      display: none; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .file-info.visible { display: flex; }
+    .file-name { font-size: 12px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-mono); }
+    .file-meta { font-size: 11px; color: var(--color-text-secondary); }
+    .file-clear {
+      margin-left: auto; font-size: 10px; color: var(--color-text-danger);
+      cursor: pointer; padding: 2px 7px; border-radius: 4px;
+      border: 0.5px solid var(--color-border-tertiary); background: transparent;
+      font-family: var(--font-sans);
+    }
+    .file-clear:hover { background: var(--color-background-danger); }
+
+    .error-banner {
+      display: none; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 6px;
+      background: var(--color-background-danger);
+      border: 0.5px solid rgba(162,45,45,0.25);
+      font-size: 11px; color: var(--color-text-danger);
+    }
+    .error-banner.visible { display: flex; }
+
+    /* Sensor type selector */
+    .sensor-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+    .sensor-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 10px 8px; border-radius: 7px; cursor: pointer;
+      border: 1px solid var(--color-border-tertiary);
+      background: var(--color-background-secondary);
+      transition: border-color 0.13s, background 0.13s;
+      user-select: none;
+    }
+    .sensor-btn:hover { border-color: var(--color-border-secondary); background: var(--color-background-primary); }
+    .sensor-btn.active { border-color: #378ADD; background: var(--color-background-info); }
+    .sensor-icon { font-size: 18px; }
+    .sensor-name { font-size: 11px; font-weight: 500; color: var(--color-text-primary); text-align: center; }
+    .sensor-desc { font-size: 10px; color: var(--color-text-secondary); text-align: center; }
+    .sensor-btn.active .sensor-name { color: var(--color-text-info); }
+
+    /* Output dir */
+    .dir-field {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .dir-input {
+      flex: 1; padding: 6px 10px; font-size: 12px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 6px; background: var(--color-background-secondary);
+      color: var(--color-text-primary); font-family: var(--font-mono);
+      outline: none;
+    }
+    .dir-input:focus { border-color: var(--color-accent-blue); }
+
+    .load-footer {
+      padding: 12px 28px;
+      background: var(--color-background-primary);
+      border-top: 0.5px solid var(--color-border-tertiary);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .footer-hint { font-size: 11px; color: var(--color-text-tertiary); }
+
+    /* ════════════════════════════════
+       STEP 2 — PROCESS
+    ════════════════════════════════ */
+    .process-body {
+      flex: 1; overflow-y: auto;
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 16px;
+      background: var(--color-background-secondary);
+      align-content: start;
+    }
+
+    /* Config accordion */
+    .config-section { margin-bottom: 6px; }
+    .config-hdr {
+      display: flex; align-items: center; gap: 6px;
+      padding: 9px 12px; cursor: pointer;
+      background: var(--color-background-secondary);
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      user-select: none;
+    }
+    .config-hdr:hover { background: var(--color-background-tertiary); }
+    .config-hdr-title { font-size: 11px; font-weight: 500; color: var(--color-text-primary); }
+    .config-chevron { margin-left: auto; font-size: 10px; color: var(--color-text-tertiary); transition: transform 0.15s; }
+    .config-hdr.open .config-chevron { transform: rotate(180deg); }
+    .config-rows { padding: 10px 12px; display: flex; flex-direction: column; gap: 9px; }
+    .config-row { display: flex; align-items: center; gap: 10px; }
+    .config-label { font-size: 11px; color: var(--color-text-secondary); width: 130px; flex-shrink: 0; }
+    .config-val { font-size: 11px; color: var(--color-text-primary); font-family: var(--font-mono); }
+    .config-select {
+      flex: 1; padding: 4px 8px; font-size: 11px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 5px; background: var(--color-background-secondary);
+      color: var(--color-text-primary); font-family: var(--font-sans);
+      outline: none; cursor: pointer;
+    }
+    .config-input {
+      width: 72px; padding: 4px 8px; font-size: 11px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 5px; background: var(--color-background-secondary);
+      color: var(--color-text-primary); font-family: var(--font-mono);
+      outline: none; text-align: right;
+    }
+    .config-toggle {
+      display: flex; align-items: center; gap: 5px;
+    }
+    .toggle-track {
+      width: 28px; height: 15px; border-radius: 8px;
+      background: var(--color-border-secondary); cursor: pointer;
+      position: relative; transition: background 0.15s; flex-shrink: 0;
+    }
+    .toggle-track.on { background: #378ADD; }
+    .toggle-thumb {
+      width: 11px; height: 11px; border-radius: 50%;
+      background: #fff; position: absolute;
+      top: 2px; left: 2px; transition: left 0.15s;
+    }
+    .toggle-track.on .toggle-thumb { left: 15px; }
+
+    /* Run panel */
+    .run-panel { display: flex; flex-direction: column; gap: 12px; }
+    .run-card {
+      background: var(--color-background-primary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .run-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+    .run-summary { font-size: 11px; color: var(--color-text-secondary); line-height: 1.5; }
+    .run-summary span { font-family: var(--font-mono); color: var(--color-text-primary); }
+
+    .btn-run {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 16px; border-radius: 7px; cursor: pointer;
+      background: #1a1a18; color: #fff;
+      border: none; font-size: 13px; font-weight: 500;
+      font-family: var(--font-sans);
+      transition: opacity 0.15s;
+      width: 100%;
+    }
+    .btn-run:hover { opacity: 0.85; }
+    .btn-run:disabled { opacity: 0.35; cursor: default; }
+    .btn-run.running { background: var(--color-background-danger); color: var(--color-text-danger); }
+
+    /* Progress timeline */
+    .progress-timeline { display: flex; flex-direction: column; gap: 0; }
+    .progress-step {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 7px 0;
+      position: relative;
+    }
+    .progress-step:not(:last-child)::after {
+      content: '';
+      position: absolute; left: 8px; top: 26px;
+      width: 0.5px; height: calc(100% - 10px);
+      background: var(--color-border-tertiary);
+    }
+    .ps-dot {
+      width: 17px; height: 17px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; z-index: 1;
+    }
+    .ps-dot.pending  { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); }
+    .ps-dot.running  { background: var(--color-background-info); border: 0.5px solid #378ADD; animation: pulse 1.2s ease-in-out infinite; }
+    .ps-dot.done     { background: var(--color-background-success); border: 0.5px solid #639922; }
+    .ps-dot.error    { background: var(--color-background-danger); border: 0.5px solid #E24B4A; }
+
+    .ps-content { flex: 1; }
+    .ps-title { font-size: 11px; font-weight: 500; color: var(--color-text-primary); }
+    .ps-sub   { font-size: 10px; color: var(--color-text-secondary); margin-top: 2px; font-family: var(--font-mono); }
+    .ps-time  { font-size: 10px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+    /* Output summary */
+    .output-card {
+      background: var(--color-background-success);
+      border: 0.5px solid rgba(99,153,34,0.25);
+      border-radius: var(--border-radius-md);
+      padding: 13px 14px;
+      display: none;
+    }
+    .output-card.visible { display: block; }
+    .output-card-title { font-size: 11px; font-weight: 500; color: var(--color-text-success); margin-bottom: 8px; }
+    .output-file {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 8px; border-radius: 5px;
+      background: rgba(255,255,255,0.5);
+      margin-bottom: 4px;
+    }
+    .output-file-name { font-size: 11px; font-family: var(--font-mono); color: var(--color-text-primary); }
+    .output-file-size { font-size: 10px; color: var(--color-text-secondary); margin-left: auto; }
+
+    .process-footer {
+      padding: 12px 28px;
+      background: var(--color-background-primary);
+      border-top: 0.5px solid var(--color-border-tertiary);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════
+       STEP 3 — VISUALIZE
+    ════════════════════════════════ */
+    .viz-body {
+      flex: 1; display: grid;
+      grid-template-columns: 1fr 380px;
+      grid-template-rows: 1fr 220px;
+      overflow: hidden;
+    }
+
+    /* Image viewer */
+    .img-panel {
+      grid-row: 1; grid-column: 1;
+      border-right: 0.5px solid var(--color-border-tertiary);
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      position: relative; overflow: hidden;
+      background: #12151e;
+      cursor: crosshair;
+    }
+    .img-overlay-label {
+      position: absolute; top: 10px; left: 12px;
+      font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500;
+      z-index: 2; pointer-events: none;
+    }
+    .band-selector {
+      position: absolute; top: 30px; left: 12px;
+      display: flex; gap: 4px; z-index: 2;
+    }
+    .band-btn {
+      padding: 3px 8px; border-radius: 4px; font-size: 10px;
+      border: 0.5px solid rgba(255,255,255,0.16);
+      color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.06);
+      cursor: pointer; font-family: var(--font-sans);
+      transition: background 0.13s;
+    }
+    .band-btn:hover  { background: rgba(255,255,255,0.11); }
+    .band-btn.active { background: rgba(55,138,221,0.35); border-color: #378ADD; color: #85B7EB; }
+
+    .img-legend {
+      position: absolute; top: 10px; right: 12px;
+      display: flex; flex-direction: column; gap: 5px; z-index: 2;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(255,255,255,0.55); }
+    .legend-dot  { width: 7px; height: 7px; border-radius: 50%; }
+    .img-coords {
+      position: absolute; bottom: 10px; left: 12px;
+      font-size: 10px; color: rgba(255,255,255,0.4);
+      font-family: var(--font-mono); z-index: 2;
+    }
+    .anomaly-count {
+      position: absolute; bottom: 10px; right: 12px;
+      padding: 4px 10px; border-radius: 6px;
+      background: rgba(226,75,74,0.85); color: #fff;
+      font-size: 11px; font-weight: 500; z-index: 2;
+    }
+
+    /* Crosshair */
+    .crosshair-h, .crosshair-v {
+      position: absolute; background: rgba(255,255,255,0.55);
+      pointer-events: none; z-index: 3;
+    }
+    .crosshair-h { height: 0.5px; left: 0; right: 0; }
+    .crosshair-v { width: 0.5px;  top: 0; bottom: 0; }
+    .crosshair-dot {
+      position: absolute; width: 8px; height: 8px;
+      border-radius: 50%; border: 1.5px solid #fff;
+      background: rgba(55,138,221,0.7);
+      transform: translate(-50%, -50%);
+      pointer-events: none; z-index: 4;
+    }
+
+    /* Pixel nav panel */
+    .pixel-nav {
+      grid-row: 1; grid-column: 2;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      background: var(--color-background-primary);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .panel-hdr {
+      padding: 9px 14px 8px;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .panel-hdr-title { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+    .panel-hdr-sub   { font-size: 11px; color: var(--color-text-secondary); margin-left: auto; font-family: var(--font-mono); }
+
+    /* Coord inputs */
+    .coord-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      flex-shrink: 0;
+    }
+    .coord-label { font-size: 10px; font-weight: 600; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; width: 16px; }
+    .coord-input {
+      width: 56px; padding: 4px 7px; font-size: 11px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 5px; background: var(--color-background-secondary);
+      color: var(--color-text-primary); font-family: var(--font-mono);
+      outline: none; text-align: center;
+    }
+    .coord-input:focus { border-color: var(--color-accent-blue); }
+    .coord-arrows { display: flex; gap: 3px; }
+    .coord-arrow {
+      width: 22px; height: 22px; border-radius: 4px;
+      border: 0.5px solid var(--color-border-secondary);
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: var(--color-text-secondary);
+      transition: background 0.12s; font-family: var(--font-sans);
+    }
+    .coord-arrow:hover { background: var(--color-background-secondary); }
+    .coord-nav { display: flex; gap: 4px; margin-left: auto; }
+    .coord-nav-btn {
+      padding: 4px 10px; border-radius: 5px; font-size: 10px;
+      border: 0.5px solid var(--color-border-secondary);
+      background: transparent; cursor: pointer;
+      color: var(--color-text-secondary); font-family: var(--font-sans);
+      transition: background 0.12s;
+    }
+    .coord-nav-btn:hover { background: var(--color-background-secondary); }
+    .coord-nav-btn.primary { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; font-weight: 500; }
+
+    /* Match list */
+    .match-list { flex: 1; overflow-y: auto; padding: 5px 0; }
+    .match-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 14px; cursor: pointer;
+      border-radius: 6px; margin: 1px 4px;
+      transition: background 0.11s;
+    }
+    .match-row:hover { background: var(--color-background-secondary); }
+    .match-row.top   { background: var(--color-background-success); }
+    .match-rank {
+      width: 17px; height: 17px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; flex-shrink: 0;
+    }
+    .rank-1 { background: #EAF3DE; color: #3B6D11; }
+    .rank-2 { background: #E6F1FB; color: #185FA5; }
+    .rank-3 { background: #FAEEDA; color: #854F0B; }
+    .rank-n { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
+    .match-name { font-size: 12px; color: var(--color-text-primary); font-weight: 500; }
+    .match-sub  { font-size: 10px; color: var(--color-text-secondary); margin-top: 1px; }
+    .score-bar  { width: 60px; height: 3px; background: var(--color-background-secondary); border-radius: 2px; margin-top: 4px; }
+    .score-fill { height: 100%; border-radius: 2px; }
+    .match-score { font-size: 11px; font-weight: 500; text-align: right; min-width: 36px; font-family: var(--font-mono); }
+    .sam-note { padding: 7px 14px; font-size: 10px; color: var(--color-text-tertiary); border-top: 0.5px solid var(--color-border-tertiary); flex-shrink: 0; }
+
+    /* Charts panel */
+    .charts-panel {
+      grid-row: 2; grid-column: 1 / 3;
+      background: var(--color-background-primary);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .chart-tabs {
+      display: flex; gap: 0; flex-shrink: 0;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+    }
+    .chart-tab {
+      padding: 8px 14px; font-size: 11px;
+      color: var(--color-text-secondary);
+      border-bottom: 2px solid transparent;
+      cursor: pointer; transition: color 0.13s; user-select: none;
+      white-space: nowrap;
+    }
+    .chart-tab:hover  { color: var(--color-text-primary); }
+    .chart-tab.active { color: var(--color-text-info); border-bottom-color: #378ADD; font-weight: 500; }
+
+    .charts-area {
+      flex: 1; display: grid;
+      grid-template-columns: 1fr 1px 1fr 1px 1fr;
+      overflow: hidden;
+    }
+    .chart-divider { background: var(--color-border-tertiary); }
+
+    .chart-col {
+      display: flex; flex-direction: column; overflow: hidden;
+      position: relative; padding: 6px 14px 6px 40px;
+    }
+    .chart-col-title {
+      font-size: 10px; font-weight: 600; color: var(--color-text-tertiary);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 3px; padding-left: 0;
+    }
+    .chart-col svg { flex: 1; width: 100%; overflow: visible; }
+    .y-axis-label {
+      position: absolute; left: 3px; top: 50%;
+      font-size: 9px; color: var(--color-text-tertiary);
+      transform: rotate(-90deg) translateX(-50%);
+      transform-origin: left center; white-space: nowrap;
+    }
+    .axis-controls {
+      padding: 4px 14px 6px 40px;
+      display: flex; align-items: center; gap: 10px;
+      border-top: 0.5px solid var(--color-border-tertiary);
+      flex-shrink: 0;
+    }
+    .axis-label { font-size: 10px; color: var(--color-text-tertiary); }
+    .axis-input {
+      width: 52px; padding: 2px 6px; font-size: 10px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: 4px; background: var(--color-background-secondary);
+      color: var(--color-text-primary); font-family: var(--font-mono);
+      outline: none; text-align: center;
+    }
+    .axis-slider {
+      flex: 1; max-width: 140px; accent-color: #378ADD;
+      cursor: pointer;
+    }
+    .axis-sep { font-size: 10px; color: var(--color-text-tertiary); }
+
+    /* Loading overlay for step 3 */
+    .fetch-overlay {
+      display: none;
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.75);
+      align-items: center; justify-content: center;
+      z-index: 10; font-size: 11px; color: var(--color-text-secondary);
+      gap: 8px;
+    }
+    .fetch-overlay.visible { display: flex; }
+    .fetch-spinner {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 1.5px solid var(--color-border-secondary);
+      border-top-color: #378ADD;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Utility ─── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">SpectraDetect</div>
+      <div class="sidebar-sub">Hyperspectral Pipeline v2.1</div>
+    </div>
+
+    <div class="nav-section">Workflow</div>
+    <div class="nav-item active" id="nav-step1" onclick="goStep(1)">
+      <span class="step-indicator step-active" id="si-1">1</span>
+      Load Dataset
+    </div>
+    <div class="nav-item locked" id="nav-step2" onclick="goStep(2)">
+      <span class="step-indicator step-pending" id="si-2">2</span>
+      Run Analysis
+    </div>
+    <div class="nav-item locked" id="nav-step3" onclick="goStep(3)">
+      <span class="step-indicator step-pending" id="si-3">3</span>
+      Spectral Viz
+    </div>
+
+    <div class="nav-section" style="margin-top:6px">Tools</div>
+    <div class="nav-item"><span class="nav-dot dot-teal"></span>USGS Library</div>
+    <div class="nav-item"><span class="nav-dot dot-teal"></span>ROI Manager</div>
+    <div class="nav-item"><span class="nav-dot dot-amber"></span>Export Results</div>
+    <div class="nav-item"><span class="nav-dot dot-gray"></span>Report Builder</div>
+
+    <div class="dataset-panel">
+      <div class="ds-label">Active Dataset</div>
+      <div id="ds-chip-wrap">
+        <div class="ds-empty" id="ds-empty">No file loaded</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <span class="toolbar-title">SpectraDetect</span>
+      <span class="toolbar-sep"></span>
+      <span class="toolbar-step" id="toolbar-step">Step 1 of 3 — Load Dataset</span>
+      <span class="spacer"></span>
+      <span class="status-pill pill-running hidden" id="status-running">
+        <span class="status-dot dot-running"></span>
+        <span id="status-running-text">Processing…</span>
+      </span>
+      <span class="status-pill pill-done hidden" id="status-done">
+        <span class="status-dot dot-done"></span>
+        Analysis complete
+      </span>
+      <span class="toolbar-sep" id="toolbar-sep-right"></span>
+      <button class="btn" id="btn-back" onclick="goStep(currentStep - 1)" style="display:none">← Back</button>
+      <button class="btn btn-primary" id="btn-next" onclick="handleNext()">Continue →</button>
+    </div>
+
+    <!-- ════ STEP 1: LOAD ════ -->
+    <div class="step-panel active" id="step-1">
+      <div class="load-body">
+
+        <!-- Upload card -->
+        <div class="section-card">
+          <div class="card-header">
+            <span class="card-header-title">Source file</span>
+            <span class="card-header-sub">HDF5, GeoTIFF, ENMAP folder</span>
+          </div>
+          <div class="card-body">
+            <div class="drop-zone" id="drop-zone"
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="handleDrop(event)"
+                 onclick="document.getElementById('file-input').click()">
+              <div id="drop-default">
+                <div class="drop-icon">📂</div>
+                <div class="drop-title">Drop file here or click to browse</div>
+                <div class="drop-sub">Supported sensor files</div>
+                <div class="drop-formats">
+                  <span class="format-tag">.he5</span>
+                  <span class="format-tag">.hdf5</span>
+                  <span class="format-tag">.tif / .tiff</span>
+                  <span class="format-tag">ENMAP folder</span>
+                </div>
+              </div>
+              <div class="file-info" id="file-info">
+                <span style="font-size:18px">📄</span>
+                <div>
+                  <div class="file-name" id="file-name-display">—</div>
+                  <div class="file-meta" id="file-meta-display">—</div>
+                </div>
+                <button class="file-clear" onclick="clearFile(event)">✕ Remove</button>
+              </div>
+            </div>
+            <div class="error-banner" id="error-banner">
+              <span>⚠</span>
+              <span id="error-msg">Unsupported file type. Please upload an HDF5 or GeoTIFF file.</span>
+            </div>
+            <input type="file" id="file-input" style="display:none" accept=".he5,.hdf5,.h5,.tif,.tiff" onchange="handleFileSelect(event)"/>
+          </div>
+        </div>
+
+        <!-- Sensor type -->
+        <div class="section-card">
+          <div class="card-header">
+            <span class="card-header-title">Sensor / file type</span>
+            <span class="card-header-sub">Auto-detected on upload</span>
+          </div>
+          <div class="card-body">
+            <div class="sensor-grid">
+              <div class="sensor-btn active" id="sensor-prisma" onclick="selectSensor('prisma')">
+                <span class="sensor-icon">🛰️</span>
+                <span class="sensor-name">PRISMA</span>
+                <span class="sensor-desc">HDF5 · .he5</span>
+              </div>
+              <div class="sensor-btn" id="sensor-enmap" onclick="selectSensor('enmap')">
+                <span class="sensor-icon">🗂️</span>
+                <span class="sensor-name">ENMAP</span>
+                <span class="sensor-desc">Folder-based</span>
+              </div>
+              <div class="sensor-btn" id="sensor-mapper" onclick="selectSensor('mapper')">
+                <span class="sensor-icon">🌐</span>
+                <span class="sensor-name">Mapper</span>
+                <span class="sensor-desc">HyperMapper</span>
+              </div>
+              <div class="sensor-btn" id="sensor-landsat" onclick="selectSensor('landsat')">
+                <span class="sensor-icon">🌡️</span>
+                <span class="sensor-name">Landsat</span>
+                <span class="sensor-desc">Thermal · GeoTIFF</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output directory -->
+        <div class="section-card">
+          <div class="card-header">
+            <span class="card-header-title">Output directory</span>
+            <span class="card-header-sub">GeoTIFF results saved here</span>
+          </div>
+          <div class="card-body">
+            <div class="dir-field">
+              <input class="dir-input" id="output-dir" type="text" value="/Users/vivek/spectral-output/" placeholder="/path/to/output/"/>
+              <button class="btn" onclick="selectOutputDir()">Browse…</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="load-footer">
+        <span class="footer-hint" id="load-hint">Select a source file to continue</span>
+        <span class="spacer"></span>
+      </div>
+    </div>
+
+    <!-- ════ STEP 2: PROCESS ════ -->
+    <div class="step-panel" id="step-2">
+      <div class="process-body">
+
+        <!-- Left: config -->
+        <div>
+          <div class="section-card" style="margin-bottom:14px">
+            <div class="card-header">
+              <span class="card-header-title">Pre-processing</span>
+            </div>
+            <div class="config-rows">
+              <div class="config-row">
+                <span class="config-label">Atmospheric correction</span>
+                <select class="config-select">
+                  <option>QUAC (quick)</option>
+                  <option>FLAASH (full)</option>
+                  <option selected>None (already corrected)</option>
+                </select>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Band masking</span>
+                <div class="config-toggle">
+                  <div class="toggle-track on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+                  <span style="font-size:11px;color:var(--color-text-secondary)">Remove water absorption bands</span>
+                </div>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Spatial subset</span>
+                <input class="config-input" type="text" value="Full scene"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card" style="margin-bottom:14px">
+            <div class="card-header">
+              <span class="card-header-title">Anomaly detection</span>
+            </div>
+            <div class="config-rows">
+              <div class="config-row">
+                <span class="config-label">Algorithm</span>
+                <select class="config-select">
+                  <option selected>RX Detector (Reed-Xiaoli)</option>
+                  <option>CEM (Constrained Energy)</option>
+                  <option>Local RX</option>
+                </select>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Threshold σ</span>
+                <input class="config-input" type="number" value="3.0" step="0.1"/>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Window size</span>
+                <input class="config-input" type="number" value="21" step="2"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="card-header">
+              <span class="card-header-title">Spectral matching</span>
+            </div>
+            <div class="config-rows">
+              <div class="config-row">
+                <span class="config-label">Metric</span>
+                <select class="config-select">
+                  <option selected>SAM (Spectral Angle Mapper)</option>
+                  <option>SID (Spectral Info Divergence)</option>
+                  <option>Euclidean distance</option>
+                </select>
+              </div>
+              <div class="config-row">
+                <span class="config-label">USGS library</span>
+                <select class="config-select">
+                  <option selected>splib07 (40,233 entries)</option>
+                  <option>splib06 (legacy)</option>
+                  <option>Custom…</option>
+                </select>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Top N matches</span>
+                <input class="config-input" type="number" value="10" min="1" max="50"/>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Match threshold</span>
+                <input class="config-input" type="number" value="0.30" step="0.01" max="1"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: run + progress -->
+        <div class="run-panel">
+          <div class="run-card">
+            <div class="run-title">Ready to run</div>
+            <div class="run-summary">
+              <b>File:</b> <span id="proc-filename">PRISMA_20240312.he5</span><br/>
+              <b>Sensor:</b> <span id="proc-sensor">PRISMA</span><br/>
+              <b>Output:</b> <span id="proc-outdir">/Users/vivek/spectral-output/</span>
+            </div>
+            <button class="btn-run" id="btn-run" onclick="startRun()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Analysis
+            </button>
+          </div>
+
+          <div class="section-card" style="flex:1">
+            <div class="card-header">
+              <span class="card-header-title">Progress</span>
+              <span class="card-header-sub" id="progress-label">Idle</span>
+            </div>
+            <div class="card-body" style="padding:10px 12px">
+              <div class="progress-timeline" id="progress-timeline">
+                <div class="progress-step">
+                  <div class="ps-dot pending" id="ps1-dot"></div>
+                  <div class="ps-content">
+                    <div class="ps-title">Pre-processing</div>
+                    <div class="ps-sub" id="ps1-sub">Band masking · water absorption removal</div>
+                    <div class="ps-time" id="ps1-time"></div>
+                  </div>
+                </div>
+                <div class="progress-step">
+                  <div class="ps-dot pending" id="ps2-dot"></div>
+                  <div class="ps-content">
+                    <div class="ps-title">Anomaly detection</div>
+                    <div class="ps-sub" id="ps2-sub">RX Detector · σ = 3.0</div>
+                    <div class="ps-time" id="ps2-time"></div>
+                  </div>
+                </div>
+                <div class="progress-step">
+                  <div class="ps-dot pending" id="ps3-dot"></div>
+                  <div class="ps-content">
+                    <div class="ps-title">Spectral matching</div>
+                    <div class="ps-sub" id="ps3-sub">SAM · splib07 (40,233 entries)</div>
+                    <div class="ps-time" id="ps3-time"></div>
+                  </div>
+                </div>
+                <div class="progress-step">
+                  <div class="ps-dot pending" id="ps4-dot"></div>
+                  <div class="ps-content">
+                    <div class="ps-title">Export outputs</div>
+                    <div class="ps-sub" id="ps4-sub">GeoTIFF · anomaly map + match scores</div>
+                    <div class="ps-time" id="ps4-time"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="output-card" id="output-card">
+            <div class="output-card-title">✓ Output files written</div>
+            <div class="output-file">
+              <span style="font-size:13px">🗺️</span>
+              <span class="output-file-name">anomaly_map.tif</span>
+              <span class="output-file-size">14.2 MB</span>
+            </div>
+            <div class="output-file">
+              <span style="font-size:13px">📊</span>
+              <span class="output-file-name">match_scores.tif</span>
+              <span class="output-file-size">8.6 MB</span>
+            </div>
+            <div class="output-file">
+              <span style="font-size:13px">📄</span>
+              <span class="output-file-name">detection_report.json</span>
+              <span class="output-file-size">42 KB</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="process-footer">
+        <span class="footer-hint" id="proc-hint">Configure parameters above, then click Run Analysis</span>
+        <span class="spacer"></span>
+      </div>
+    </div>
+
+    <!-- ════ STEP 3: VISUALIZE ════ -->
+    <div class="step-panel" id="step-3">
+      <div class="viz-body">
+
+        <!-- Image viewer -->
+        <div class="img-panel" id="img-panel" onclick="handleImageClick(event)">
+          <div class="img-overlay-label">anomaly_map.tif — RX Detector output</div>
+          <div class="band-selector">
+            <div class="band-btn" onclick="switchLayer(this,'RGB')">RGB</div>
+            <div class="band-btn active" onclick="switchLayer(this,'Anomaly')">Anomaly</div>
+            <div class="band-btn" onclick="switchLayer(this,'SAM')">SAM</div>
+            <div class="band-btn" onclick="switchLayer(this,'RX')">RX score</div>
+          </div>
+
+          <!-- SVG map placeholder -->
+          <svg width="100%" height="100%" style="position:absolute;top:0;left:0;" id="map-svg" preserveAspectRatio="xMidYMid slice">
+            <!-- Anomaly map: dark background, white blobs = anomalies -->
+            <rect width="100%" height="100%" fill="#0d0f14"/>
+            <!-- terrain shapes -->
+            <ellipse cx="28%" cy="42%" rx="19%" ry="24%" fill="#1a1e2a" opacity="0.9"/>
+            <ellipse cx="58%" cy="55%" rx="26%" ry="19%" fill="#171b25" opacity="0.85"/>
+            <ellipse cx="77%" cy="24%" rx="15%" ry="17%" fill="#1b2030" opacity="0.9"/>
+            <ellipse cx="18%" cy="72%" rx="21%" ry="13%" fill="#1d2130" opacity="0.8"/>
+            <!-- Anomaly hotspots (white = anomaly pixels) -->
+            <circle cx="43%" cy="37%" r="9" fill="#ffffff" opacity="0.92"/>
+            <circle cx="43%" cy="37%" r="5" fill="#ffffff" opacity="1"/>
+            <circle cx="62%" cy="51%" r="6" fill="#ffffff" opacity="0.88"/>
+            <circle cx="62%" cy="51%" r="3.5" fill="#ffffff" opacity="1"/>
+            <circle cx="30%" cy="62%" r="4" fill="#ffffff" opacity="0.85"/>
+            <circle cx="74%" cy="44%" r="3" fill="#ffffff" opacity="0.80"/>
+            <circle cx="56%" cy="29%" r="7" fill="#ffffff" opacity="0.82"/>
+            <circle cx="56%" cy="29%" r="4" fill="#ffffff" opacity="1"/>
+            <circle cx="20%" cy="48%" r="3" fill="#ffffff" opacity="0.75"/>
+            <circle cx="85%" cy="60%" r="5" fill="#ffffff" opacity="0.78"/>
+            <circle cx="85%" cy="60%" r="3" fill="#ffffff" opacity="0.95"/>
+            <circle cx="38%" cy="70%" r="2.5" fill="#ffffff" opacity="0.72"/>
+            <!-- Scale bar -->
+            <rect x="3%" y="91%" width="8%" height="1.2%" fill="white" opacity="0.22" rx="1"/>
+            <rect x="3%" y="91%" width="4%" height="1.2%" fill="white" opacity="0.55" rx="1"/>
+            <text x="3%" y="96%" font-size="9" fill="rgba(255,255,255,0.38)" font-family="-apple-system,sans-serif">0</text>
+            <text x="8.5%" y="96%" font-size="9" fill="rgba(255,255,255,0.38)" font-family="-apple-system,sans-serif">5km</text>
+          </svg>
+
+          <div class="crosshair-h" id="ch-h" style="top:37%"></div>
+          <div class="crosshair-v" id="ch-v" style="left:43%"></div>
+          <div class="crosshair-dot" id="ch-dot" style="top:37%;left:43%"></div>
+
+          <div class="img-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#fff"></span>Anomaly</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#1a1e2a"></span>Background</div>
+          </div>
+          <div class="img-coords" id="img-coords">412, 287 &nbsp;|&nbsp; 14.2341°N 80.3052°E &nbsp;|&nbsp; GSD 30m</div>
+          <div class="anomaly-count" id="anomaly-count">12 anomalies</div>
+
+          <div class="fetch-overlay" id="img-loading">
+            <div class="fetch-spinner"></div>
+            Fetching spectral data…
+          </div>
+        </div>
+
+        <!-- Pixel nav + match list -->
+        <div class="pixel-nav">
+          <div class="panel-hdr">
+            <span class="panel-hdr-title">Spectral matches</span>
+            <span class="panel-hdr-sub" id="pixel-pos">Pixel (412, 287)</span>
+          </div>
+
+          <!-- Coordinate controls -->
+          <div class="coord-row">
+            <span class="coord-label">X</span>
+            <input class="coord-input" id="coord-x" type="number" value="412" min="0" max="999" onchange="fetchPixel()"/>
+            <div class="coord-arrows">
+              <button class="coord-arrow" onclick="nudge('x',-1)">−</button>
+              <button class="coord-arrow" onclick="nudge('x',+1)">+</button>
+            </div>
+            <div class="coord-nav">
+              <button class="coord-nav-btn" onclick="prevAnomaly()">← Prev</button>
+              <button class="coord-nav-btn primary" onclick="nextAnomaly()">Next →</button>
+            </div>
+          </div>
+          <div class="coord-row" style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <span class="coord-label">Y</span>
+            <input class="coord-input" id="coord-y" type="number" value="287" min="0" max="999" onchange="fetchPixel()"/>
+            <div class="coord-arrows">
+              <button class="coord-arrow" onclick="nudge('y',-1)">−</button>
+              <button class="coord-arrow" onclick="nudge('y',+1)">+</button>
+            </div>
+            <div class="coord-nav" style="margin-left:auto">
+              <button class="coord-nav-btn primary" onclick="fetchPixel()" style="background:var(--color-background-info);color:var(--color-text-info)">Fetch ↵</button>
+            </div>
+          </div>
+
+          <!-- Matches -->
+          <div class="match-list" id="match-list">
+            <!-- populated by JS -->
+          </div>
+          <div class="sam-note">SAM: 0 = identical · 1 = completely dissimilar · Library: splib07</div>
+        </div>
+
+        <!-- Charts panel -->
+        <div class="charts-panel">
+          <div class="chart-tabs">
+            <div class="chart-tab active" onclick="switchChartTab(this,'spectrum')">Dataset spectrum</div>
+            <div class="chart-tab" onclick="switchChartTab(this,'overlay')">Match overlay</div>
+            <div class="chart-tab" onclick="switchChartTab(this,'residual')">Residual</div>
+          </div>
+
+          <div class="charts-area" id="charts-area">
+            <!-- Chart 1: raw spectrum -->
+            <div class="chart-col" id="chart-spectrum">
+              <div class="chart-col-title">Pixel reflectance — target</div>
+              <div class="y-axis-label">Reflectance</div>
+              <svg viewBox="0 0 320 100" preserveAspectRatio="none" id="svg-spectrum">
+                <!-- grid -->
+                <line x1="0" y1="0"   x2="320" y2="0"   stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="0" y1="33"  x2="320" y2="33"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="0" y1="66"  x2="320" y2="66"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="0" y1="98"  x2="320" y2="98"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="80"  y1="0" x2="80"  y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <line x1="160" y1="0" x2="160" y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <line x1="240" y1="0" x2="240" y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <!-- spectrum line -->
+                <path id="path-spectrum"
+                  d="M0,72 C8,69 16,66 28,60 C40,53 55,43 72,36 C89,29 102,25 116,22 C130,19 144,17 158,18 C172,19 182,22 196,20 C210,18 218,14 232,12 C246,10 258,16 268,22 C278,28 286,36 296,44 C306,52 312,58 320,65"
+                  fill="none" stroke="#378ADD" stroke-width="1.8"/>
+                <path id="path-spectrum-fill"
+                  d="M0,72 C8,69 16,66 28,60 C40,53 55,43 72,36 C89,29 102,25 116,22 C130,19 144,17 158,18 C172,19 182,22 196,20 C210,18 218,14 232,12 C246,10 258,16 268,22 C278,28 286,36 296,44 C306,52 312,58 320,65 L320,98 L0,98 Z"
+                  fill="#378ADD" opacity="0.07"/>
+                <!-- x labels -->
+                <text x="0"   y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">400</text>
+                <text x="72"  y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">800</text>
+                <text x="150" y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">1200</text>
+                <text x="228" y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">1600</text>
+                <text x="296" y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">2000nm</text>
+                <!-- y labels -->
+                <text x="-26" y="4"  font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">1.0</text>
+                <text x="-26" y="37" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">0.67</text>
+                <text x="-26" y="70" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">0.33</text>
+              </svg>
+            </div>
+
+            <div class="chart-divider"></div>
+
+            <!-- Chart 2: top match overlay -->
+            <div class="chart-col" id="chart-overlay">
+              <div class="chart-col-title">Best match overlay</div>
+              <div class="y-axis-label">Reflectance</div>
+              <svg viewBox="0 0 320 100" preserveAspectRatio="none" id="svg-overlay">
+                <line x1="0" y1="0"   x2="320" y2="0"   stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="0" y1="33"  x2="320" y2="33"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="0" y1="66"  x2="320" y2="66"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="0" y1="98"  x2="320" y2="98"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="80"  y1="0" x2="80"  y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <line x1="160" y1="0" x2="160" y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <line x1="240" y1="0" x2="240" y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <!-- USGS ref (dashed green) -->
+                <path id="path-ref"
+                  d="M0,70 C8,67 16,63 28,57 C40,51 55,41 72,34 C89,27 102,23 116,20 C130,17 144,15 158,16 C172,17 182,20 196,18 C210,16 218,12 232,10 C246,8 258,14 268,20 C278,26 286,34 296,42 C306,50 312,56 320,63"
+                  fill="none" stroke="#639922" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.8"/>
+                <!-- target spectrum (blue) -->
+                <path id="path-target"
+                  d="M0,72 C8,69 16,66 28,60 C40,53 55,43 72,36 C89,29 102,25 116,22 C130,19 144,17 158,18 C172,19 182,22 196,20 C210,18 218,14 232,12 C246,10 258,16 268,22 C278,28 286,36 296,44 C306,52 312,58 320,65"
+                  fill="none" stroke="#378ADD" stroke-width="1.8"/>
+                <!-- x / y labels -->
+                <text x="0"   y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">400</text>
+                <text x="296" y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">2000nm</text>
+                <text x="-26" y="4"  font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">1.0</text>
+                <text x="-26" y="70" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">0.33</text>
+                <!-- legend -->
+                <line x1="160" y1="8" x2="180" y2="8" stroke="#378ADD" stroke-width="1.8"/>
+                <text x="183" y="11" font-size="7" fill="var(--color-text-secondary)" font-family="-apple-system,sans-serif">Target</text>
+                <line x1="220" y1="8" x2="240" y2="8" stroke="#639922" stroke-width="1.5" stroke-dasharray="5 3"/>
+                <text x="243" y="11" font-size="7" fill="var(--color-text-secondary)" font-family="-apple-system,sans-serif" id="ref-label">Kaolinite</text>
+              </svg>
+            </div>
+
+            <div class="chart-divider"></div>
+
+            <!-- Chart 3: residual -->
+            <div class="chart-col" id="chart-residual">
+              <div class="chart-col-title">Residual (target − match)</div>
+              <div class="y-axis-label">Δ Reflectance</div>
+              <svg viewBox="0 0 320 100" preserveAspectRatio="none">
+                <line x1="0"   y1="50" x2="320" y2="50" stroke="var(--color-border-secondary)" stroke-width="0.7"/>
+                <line x1="0"   y1="0"  x2="320" y2="0"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="0"   y1="98" x2="320" y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+                <line x1="80"  y1="0"  x2="80"  y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <line x1="160" y1="0"  x2="160" y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <line x1="240" y1="0"  x2="240" y2="98" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+                <!-- residual line (near zero = good match) -->
+                <path id="path-residual"
+                  d="M0,52 C8,51 20,49 38,48 C56,47 70,46 90,47 C110,48 126,50 142,49 C158,48 170,47 186,48 C202,49 212,50 228,49 C244,48 258,50 274,51 C288,52 304,52 320,52"
+                  fill="none" stroke="#BA7517" stroke-width="1.5"/>
+                <!-- zero line label -->
+                <text x="-26" y="54" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">0.00</text>
+                <text x="-26" y="4"  font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">+0.1</text>
+                <text x="-26" y="100" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">−0.1</text>
+                <text x="0"   y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">400</text>
+                <text x="296" y="108" font-size="7" fill="var(--color-text-tertiary)" font-family="-apple-system,sans-serif">2000nm</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Axis controls -->
+          <div class="axis-controls">
+            <span class="axis-label">λ range:</span>
+            <input class="axis-input" id="wl-min" type="number" value="400" min="380" max="2500" step="10" onchange="updateAxisRange()"/>
+            <span class="axis-sep">–</span>
+            <input class="axis-input" id="wl-max" type="number" value="2500" min="400" max="2500" step="10" onchange="updateAxisRange()"/>
+            <span class="axis-label" style="margin-left:6px">nm</span>
+            <input class="axis-slider" type="range" min="380" max="1200" value="400" id="slider-min" oninput="syncSlider('min')"/>
+            <input class="axis-slider" type="range" min="800" max="2500" value="2500" id="slider-max" oninput="syncSlider('max')"/>
+            <span class="axis-sep" style="margin-left:6px">Bands:</span>
+            <span class="axis-label" id="band-range-display" style="font-family:var(--font-mono);font-size:10px">1 – 242</span>
+            <span class="spacer"></span>
+            <button class="btn" style="font-size:10px" onclick="resetAxis()">Reset axis</button>
+          </div>
+        </div>
+
+      </div><!-- /viz-body -->
+    </div><!-- /step-3 -->
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ─── State ───────────────────────────────────────────────────────
+let currentStep = 1;
+let loadedFile  = null;
+let selectedSensor = 'prisma';
+let runComplete = false;
+let anomalyPixels = [
+  {x:412, y:287, label:'Kaolinite', score:0.942},
+  {x:622, y:412, label:'Halloysite', score:0.881},
+  {x:287, y:524, label:'Muscovite', score:0.803},
+  {x:748, y:376, label:'Calcite', score:0.771},
+  {x:563, y:241, label:'Montmorillonite', score:0.854},
+  {x:198, y:467, label:'Illite', score:0.735},
+  {x:854, y:512, label:'Kaolinite', score:0.912},
+  {x:389, y:601, label:'Smectite', score:0.694},
+];
+let currentAnomalyIdx = 0;
+
+const MATCHES_BY_PIXEL = {
+  default: [
+    {rank:1, name:'Kaolinite',       sub:'Silicate mineral · splib07', score:0.942, color:'#639922'},
+    {rank:2, name:'Halloysite',      sub:'Clay mineral · splib07',     score:0.812, color:'#378ADD'},
+    {rank:3, name:'Montmorillonite', sub:'Smectite group · splib07',   score:0.741, color:'#BA7517'},
+    {rank:4, name:'Muscovite',       sub:'Mica group · splib07',       score:0.589, color:'#888780'},
+    {rank:5, name:'Calcite',         sub:'Carbonate mineral · splib07',score:0.441, color:'#888780'},
+    {rank:6, name:'Illite',          sub:'Clay mineral · splib07',     score:0.388, color:'#888780'},
+    {rank:7, name:'Chlorite',        sub:'Phyllosilicate · splib07',   score:0.312, color:'#888780'},
+  ],
+  alt: [
+    {rank:1, name:'Muscovite',       sub:'Mica group · splib07',       score:0.903, color:'#639922'},
+    {rank:2, name:'Phlogopite',      sub:'Mica group · splib07',       score:0.862, color:'#378ADD'},
+    {rank:3, name:'Biotite',         sub:'Mica group · splib07',       score:0.798, color:'#BA7517'},
+    {rank:4, name:'Kaolinite',       sub:'Silicate mineral · splib07', score:0.622, color:'#888780'},
+    {rank:5, name:'Illite',          sub:'Clay mineral · splib07',     score:0.501, color:'#888780'},
+  ],
+};
+
+// ─── Step navigation ─────────────────────────────────────────────
+function goStep(n) {
+  if (n < 1 || n > 3) return;
+  if (n === 2 && !loadedFile && n > currentStep) {
+    shakeDropZone(); return;
+  }
+  if (n === 3 && !runComplete) return;
+
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  currentStep = n;
+  document.getElementById('step-' + n).classList.add('active');
+
+  // toolbar
+  const labels = ['', 'Step 1 of 3 — Load Dataset', 'Step 2 of 3 — Run Analysis', 'Step 3 of 3 — Spectral Visualization'];
+  document.getElementById('toolbar-step').textContent = labels[n];
+
+  // nav items
+  ['nav-step1','nav-step2','nav-step3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done','locked');
+    if (i + 1 === n) { el.classList.add('active'); }
+    else if (i + 1 < n || (i + 1 === 2 && loadedFile) || (i + 1 === 3 && runComplete)) {
+      el.classList.add('done');
+    }
+    else if (i + 1 === 2 && !loadedFile) { el.classList.add('locked'); }
+    else if (i + 1 === 3 && !runComplete) { el.classList.add('locked'); }
+  });
+
+  // step indicators
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('si-' + i);
+    el.className = 'step-indicator';
+    if (i < n || (i === 2 && runComplete) || (i === 3 && runComplete && n === 3)) {
+      el.classList.add('step-done'); el.textContent = '✓';
+    } else if (i === n) {
+      el.classList.add('step-active'); el.textContent = i;
+    } else {
+      el.classList.add('step-pending'); el.textContent = i;
+    }
+  }
+
+  // back/next
+  document.getElementById('btn-back').style.display = n > 1 ? '' : 'none';
+  const btnNext = document.getElementById('btn-next');
+  if (n === 3) { btnNext.textContent = '↑ Export'; }
+  else         { btnNext.textContent = 'Continue →'; }
+
+  if (n === 3) { renderMatches('default'); }
+}
+
+function handleNext() {
+  if (currentStep === 1) {
+    if (!loadedFile) { shakeDropZone(); return; }
+    goStep(2);
+  } else if (currentStep === 2) {
+    if (!runComplete) { document.getElementById('btn-run').click(); return; }
+    goStep(3);
+  } else if (currentStep === 3) {
+    alert('Exporting results…');
+  }
+}
+
+// ─── Step 1 helpers ──────────────────────────────────────────────
+function shakeDropZone() {
+  const dz = document.getElementById('drop-zone');
+  dz.style.borderColor = '#E24B4A';
+  setTimeout(() => { dz.style.borderColor = ''; }, 1400);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+  document.getElementById('drop-zone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function processFile(file) {
+  const name = file.name.toLowerCase();
+  const valid = name.endsWith('.he5') || name.endsWith('.hdf5') || name.endsWith('.h5')
+              || name.endsWith('.tif') || name.endsWith('.tiff');
+
+  const dz   = document.getElementById('drop-zone');
+  const err  = document.getElementById('error-banner');
+  const info = document.getElementById('file-info');
+  const def  = document.getElementById('drop-default');
+
+  if (!valid) {
+    dz.classList.remove('has-file'); dz.classList.add('has-error');
+    err.classList.add('visible');
+    document.getElementById('error-msg').textContent =
+      `Unsupported file type "${file.name.split('.').pop()}". Please upload HDF5 (.he5/.hdf5) or GeoTIFF (.tif/.tiff).`;
+    loadedFile = null;
+    updateLoadHint();
+    return;
+  }
+
+  loadedFile = file;
+  dz.classList.remove('has-error'); dz.classList.add('has-file');
+  err.classList.remove('visible');
+  def.style.display = 'none';
+  info.classList.add('visible');
+
+  document.getElementById('file-name-display').textContent = file.name;
+  const sizeKB = (file.size / 1024).toFixed(0);
+  const sizeMB = (file.size / (1024*1024)).toFixed(1);
+  document.getElementById('file-meta-display').textContent =
+    `${sizeMB > 0.1 ? sizeMB + ' MB' : sizeKB + ' KB'} · ${name.endsWith('.he5') || name.endsWith('.hdf5') ? 'HDF5' : 'GeoTIFF'}`;
+
+  // Auto-detect sensor from name
+  const lname = file.name.toLowerCase();
+  if (lname.includes('prisma'))  selectSensor('prisma');
+  else if (lname.includes('enmap')) selectSensor('enmap');
+  else if (lname.includes('landsat')) selectSensor('landsat');
+  else if (lname.includes('mapper')) selectSensor('mapper');
+
+  // Sidebar chip
+  const chipWrap = document.getElementById('ds-chip-wrap');
+  document.getElementById('ds-empty').style.display = 'none';
+  let chip = document.getElementById('loaded-chip');
+  if (!chip) {
+    chip = document.createElement('div');
+    chip.id = 'loaded-chip'; chip.className = 'ds-chip';
+    chip.innerHTML = `<span class="ds-chip-dot" style="background:#378ADD"></span>
+      <span class="ds-chip-name" id="chip-name">—</span>
+      <span class="ds-chip-type" id="chip-type">HSI</span>`;
+    chipWrap.appendChild(chip);
+  }
+  document.getElementById('chip-name').textContent = file.name.replace(/\.[^.]+$/, '').slice(0, 16);
+  document.getElementById('chip-type').textContent = selectedSensor.toUpperCase();
+
+  updateLoadHint();
+  // unlock step 2 nav
+  const nav2 = document.getElementById('nav-step2');
+  nav2.classList.remove('locked');
+
+  // update step 2 summary
+  document.getElementById('proc-filename').textContent = file.name;
+}
+
+function clearFile(e) {
+  e.stopPropagation();
+  loadedFile = null;
+  const dz = document.getElementById('drop-zone');
+  dz.classList.remove('has-file','has-error');
+  document.getElementById('drop-default').style.display = '';
+  document.getElementById('file-info').classList.remove('visible');
+  document.getElementById('error-banner').classList.remove('visible');
+  document.getElementById('ds-empty').style.display = '';
+  const chip = document.getElementById('loaded-chip');
+  if (chip) chip.remove();
+  document.getElementById('file-input').value = '';
+  updateLoadHint();
+  document.getElementById('nav-step2').classList.add('locked');
+}
+
+function updateLoadHint() {
+  const hint = document.getElementById('load-hint');
+  hint.textContent = loadedFile
+    ? `${loadedFile.name} loaded · select sensor type and output directory`
+    : 'Select a source file to continue';
+}
+
+function selectSensor(id) {
+  document.querySelectorAll('.sensor-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sensor-' + id).classList.add('active');
+  selectedSensor = id;
+  if (document.getElementById('chip-type')) {
+    document.getElementById('chip-type').textContent = id.toUpperCase();
+  }
+  document.getElementById('proc-sensor').textContent = {
+    prisma:'PRISMA', enmap:'ENMAP', mapper:'Mapper', landsat:'Landsat'
+  }[id];
+}
+
+function selectOutputDir() {
+  // In a real app this would open a native folder picker
+  document.getElementById('output-dir').focus();
+}
+
+// ─── Step 2 helpers ──────────────────────────────────────────────
+let runTimer = null;
+function startRun() {
+  if (runComplete) { goStep(3); return; }
+  const btn = document.getElementById('btn-run');
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏸ Running…';
+
+  document.getElementById('progress-label').textContent = 'Running…';
+  document.getElementById('status-running').classList.remove('hidden');
+
+  // Step 1
+  markRunStep(1, 'running', 'Removing water absorption bands (121–193, 286–309)…', '');
+  runTimer = setTimeout(() => {
+    markRunStep(1, 'done', 'Complete — 79 bands removed', '2.1s');
+    document.getElementById('status-running-text').textContent = 'Detecting anomalies…';
+    markRunStep(2, 'running', 'RX Detector · scanning 512×512 px…', '');
+    setTimeout(() => {
+      markRunStep(2, 'done', '12 anomalies flagged (σ > 3.0)', '8.4s');
+      document.getElementById('status-running-text').textContent = 'Matching spectra…';
+      markRunStep(3, 'running', 'Querying splib07 (40,233 entries)…', '');
+      setTimeout(() => {
+        markRunStep(3, 'done', '12 pixels × top-10 matches computed', '14.2s');
+        document.getElementById('status-running-text').textContent = 'Writing output…';
+        markRunStep(4, 'running', 'Writing GeoTIFF files…', '');
+        setTimeout(() => {
+          markRunStep(4, 'done', 'anomaly_map.tif + match_scores.tif written', '1.1s');
+          finishRun();
+        }, 900);
+      }, 2800);
+    }, 1800);
+  }, 1200);
+}
+
+function markRunStep(n, state, sub, time) {
+  const dot = document.getElementById('ps' + n + '-dot');
+  dot.className = 'ps-dot ' + state;
+  if (sub)  document.getElementById('ps' + n + '-sub').textContent  = sub;
+  if (time) document.getElementById('ps' + n + '-time').textContent = time;
+}
+
+function finishRun() {
+  runComplete = true;
+  document.getElementById('status-running').classList.add('hidden');
+  document.getElementById('status-done').classList.remove('hidden');
+  document.getElementById('progress-label').textContent = 'Complete';
+  document.getElementById('proc-hint').textContent = 'Analysis complete — click Continue to visualize results';
+  document.getElementById('output-card').classList.add('visible');
+
+  const btn = document.getElementById('btn-run');
+  btn.disabled = false;
+  btn.style.background = '#639922';
+  btn.textContent = '✓ View Results →';
+  btn.onclick = () => goStep(3);
+
+  const nav3 = document.getElementById('nav-step3');
+  nav3.classList.remove('locked');
+  document.getElementById('si-2').className = 'step-indicator step-done';
+  document.getElementById('si-2').textContent = '✓';
+  document.getElementById('btn-next').textContent = 'Continue →';
+}
+
+// ─── Step 3 helpers ──────────────────────────────────────────────
+function renderMatches(dataset) {
+  const matches = MATCHES_BY_PIXEL[dataset] || MATCHES_BY_PIXEL.default;
+  const list = document.getElementById('match-list');
+  list.innerHTML = '';
+  matches.forEach((m, i) => {
+    const pct = Math.round(m.score * 100);
+    const rankClass = ['rank-1','rank-2','rank-3','rank-n'][Math.min(i, 3)];
+    const topClass  = i === 0 ? 'match-row top' : 'match-row';
+    const scoreColor = i === 0 ? 'var(--color-text-success)' : (i === 1 ? 'var(--color-text-info)' : (i === 2 ? 'var(--color-text-warning)' : 'var(--color-text-tertiary)'));
+    list.innerHTML += `
+      <div class="${topClass}" onclick="selectMatch(${i}, '${m.name}')">
+        <div class="match-rank ${rankClass}">${m.rank}</div>
+        <div style="flex:1">
+          <div class="match-name">${m.name}</div>
+          <div class="match-sub">${m.sub}</div>
+          <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${m.color}"></div></div>
+        </div>
+        <div class="match-score" style="color:${scoreColor}">${m.score.toFixed(3)}</div>
+      </div>`;
+  });
+}
+
+function selectMatch(idx, name) {
+  document.getElementById('ref-label').textContent = name;
+  // Vary the ref path slightly to simulate different material
+  const paths = {
+    'Kaolinite':       "M0,70 C8,67 16,63 28,57 C40,51 55,41 72,34 C89,27 102,23 116,20 C130,17 144,15 158,16 C172,17 182,20 196,18 C210,16 218,12 232,10 C246,8 258,14 268,20 C278,26 286,34 296,42 C306,50 312,56 320,63",
+    'Halloysite':      "M0,74 C10,70 22,65 36,58 C50,51 64,42 80,35 C96,28 108,24 122,21 C136,18 150,16 164,17 C178,18 188,21 202,19 C216,17 224,13 238,11 C252,9 264,15 274,22 C284,29 292,38 302,46 C312,54 316,60 320,66",
+    'Montmorillonite': "M0,68 C9,65 18,61 30,55 C42,49 57,40 74,33 C91,26 104,22 118,19 C132,16 146,14 160,15 C174,16 184,19 198,17 C212,15 220,11 234,9  C248,7 260,13 270,19 C280,25 288,33 298,41 C308,49 314,55 320,62",
+  };
+  const refPath = document.getElementById('path-ref');
+  if (paths[name]) refPath.setAttribute('d', paths[name]);
+}
+
+function handleImageClick(e) {
+  const rect = document.getElementById('img-panel').getBoundingClientRect();
+  const pxRatio = 1000 / rect.width;
+  const pyRatio = 700  / rect.height;
+  const x = Math.round((e.clientX - rect.left) * pxRatio);
+  const y = Math.round((e.clientY - rect.top)  * pyRatio);
+
+  document.getElementById('coord-x').value = x;
+  document.getElementById('coord-y').value = y;
+  moveCrosshair(e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
+  fetchPixel();
+}
+
+function moveCrosshair(px, py, W, H) {
+  const xPct = (px / W * 100).toFixed(2) + '%';
+  const yPct = (py / H * 100).toFixed(2) + '%';
+  document.getElementById('ch-h').style.top  = yPct;
+  document.getElementById('ch-v').style.left = xPct;
+  document.getElementById('ch-dot').style.top  = yPct;
+  document.getElementById('ch-dot').style.left = xPct;
+}
+
+function nudge(axis, delta) {
+  const input = document.getElementById('coord-' + axis);
+  input.value = Math.max(0, Math.min(999, +input.value + delta));
+  fetchPixel();
+}
+
+let fetchTimeout = null;
+function fetchPixel() {
+  const x = +document.getElementById('coord-x').value;
+  const y = +document.getElementById('coord-y').value;
+  document.getElementById('pixel-pos').textContent = `Pixel (${x}, ${y})`;
+
+  // Update coords overlay
+  const lat  = (14.2341 + (y - 287) * 0.00027).toFixed(4);
+  const lon  = (80.3052 + (x - 412) * 0.00027).toFixed(4);
+  document.getElementById('img-coords').textContent = `${x}, ${y}  |  ${lat}°N ${lon}°E  |  GSD 30m`;
+
+  // Simulate fetch delay
+  clearTimeout(fetchTimeout);
+  document.getElementById('img-loading').classList.add('visible');
+
+  fetchTimeout = setTimeout(() => {
+    document.getElementById('img-loading').classList.remove('visible');
+    // Alternate between two datasets to simulate different pixels
+    const dataset = (x + y) % 3 === 0 ? 'alt' : 'default';
+    renderMatches(dataset);
+    // Vary the spectrum path slightly
+    animateSpectrumUpdate(x, y);
+  }, 420);
+}
+
+function animateSpectrumUpdate(x, y) {
+  // Generate a slightly different path based on x,y seed
+  const seed = ((x * 7 + y * 13) % 20) - 10;
+  const s = seed * 0.5;
+  const path = `M0,${72+s} C8,${69+s} 16,${66+s} 28,${60+s} C40,${53+s} 55,${43+s*0.8} 72,${36+s*0.6} C89,${29+s*0.4} 102,${25+s*0.2} 116,${22} C130,${19-s*0.2} 144,${17-s*0.4} 158,${18-s*0.3} C172,${19-s*0.2} 182,${22} 196,${20+s*0.1} C210,${18+s*0.3} 218,${14+s*0.5} 232,${12+s*0.7} C246,${10+s*0.9} 258,${16+s} 268,${22+s} C278,${28+s*0.8} 286,${36+s*0.6} 296,${44+s*0.4} C306,${52+s*0.2} 312,${58+s*0.1} 320,${65+s}`;
+  document.getElementById('path-spectrum').setAttribute('d', path);
+  document.getElementById('path-target').setAttribute('d', path);
+}
+
+function nextAnomaly() {
+  currentAnomalyIdx = (currentAnomalyIdx + 1) % anomalyPixels.length;
+  jumpToAnomaly();
+}
+function prevAnomaly() {
+  currentAnomalyIdx = (currentAnomalyIdx - 1 + anomalyPixels.length) % anomalyPixels.length;
+  jumpToAnomaly();
+}
+function jumpToAnomaly() {
+  const p = anomalyPixels[currentAnomalyIdx];
+  document.getElementById('coord-x').value = p.x;
+  document.getElementById('coord-y').value = p.y;
+  // Move crosshair
+  const rect = document.getElementById('img-panel').getBoundingClientRect();
+  const px = (p.x / 1000) * rect.width;
+  const py = (p.y / 700)  * rect.height;
+  moveCrosshair(px, py, rect.width, rect.height);
+  fetchPixel();
+}
+
+function switchLayer(btn, name) {
+  document.querySelectorAll('.band-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function switchChartTab(tab, name) {
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+}
+
+function updateAxisRange() {
+  const min = +document.getElementById('wl-min').value;
+  const max = +document.getElementById('wl-max').value;
+  const b1  = Math.round((min - 400) / (2500 - 400) * 242) + 1;
+  const b2  = Math.round((max - 400) / (2500 - 400) * 242) + 1;
+  document.getElementById('band-range-display').textContent = `${b1} – ${b2}`;
+  document.getElementById('slider-min').value = min;
+  document.getElementById('slider-max').value = max;
+}
+function syncSlider(which) {
+  if (which === 'min') {
+    document.getElementById('wl-min').value = document.getElementById('slider-min').value;
+  } else {
+    document.getElementById('wl-max').value = document.getElementById('slider-max').value;
+  }
+  updateAxisRange();
+}
+function resetAxis() {
+  document.getElementById('wl-min').value = 400;
+  document.getElementById('wl-max').value = 2500;
+  updateAxisRange();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────
+// Simulate a demo file loaded
+(function init() {
+  // Render match list pre-populated for step 3 (won't show until step 3)
+  renderMatches('default');
+  document.getElementById('proc-outdir').textContent = document.getElementById('output-dir').value;
+  document.getElementById('output-dir').addEventListener('input', function() {
+    document.getElementById('proc-outdir').textContent = this.value;
+  });
+})();
+</script>
+</body>
+</html>
