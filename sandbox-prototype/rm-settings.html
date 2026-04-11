@@ -252,12 +252,12 @@
     .log-desc strong { color: var(--text-1); font-weight: 590; }
 
     /* Inline diff pill */
-    .log-diff { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; line-height: 16px; }
-    .d-old { color: var(--danger); text-decoration: line-through; background: var(--danger-bg); padding: 1px 5px; border-radius: 2px; }
-    .d-new { color: var(--success); background: var(--success-bg); padding: 1px 5px; border-radius: 2px; }
+    .log-diff { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; line-height: 16px; color: var(--text-2); }
+    .d-old { text-decoration: line-through; color: var(--text-4); }
+    .d-new { color: var(--text-1); }
     .d-arr { color: var(--text-4); font-size: 11px; }
-    .d-off { color: var(--danger); background: var(--danger-bg); padding: 1px 7px; border-radius: 2px; font-weight: 600; }
-    .d-on { color: var(--success); background: var(--success-bg); padding: 1px 7px; border-radius: 2px; font-weight: 600; }
+    .d-off { text-decoration: line-through; color: var(--text-4); }
+    .d-on { color: var(--text-1); }
 
     /* Tags */
     .log-tags { display: flex; align-items: center; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
@@ -288,14 +288,6 @@
     .filter-select.active { border-color: var(--brand); color: var(--brand); background-color: var(--brand-light); }
     .filter-divider { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; margin: 0 2px; }
 
-    /* ── Sandbox merge expand ── */
-    .merge-source { display: inline; }
-    .merge-toggle { background: none; border: none; padding: 0; font-family: inherit; font-size: 13px; line-height: 18px; color: var(--text-4); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; }
-    .merge-toggle:hover { color: var(--text-2); }
-    .merge-detail { display: none; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; line-height: 16px; color: var(--text-2); }
-    .merge-detail.open { display: flex; }
-    .merge-detail svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; color: var(--text-4); flex-shrink: 0; }
-    .merge-detail strong { color: var(--text-1); font-weight: 590; }
 
     /* ── Empty state ── */
     .drawer-empty { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 60px 32px; text-align: center; }
@@ -634,12 +626,8 @@
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 10, 4:22 PM</span>
         </div>
-        <div class="log-desc">Changed <strong>Allocation time unit</strong> <span class="log-source"><button class="merge-toggle" onclick="toggleMerge('merge-1')">via Sandbox merge</button></span></div>
-        <div class="merge-detail" id="merge-1">
-          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          Merged from sandbox <strong>NiCE_Sandbox</strong> · Apr 10, 2026 at 4:22 PM
-        </div>
-        <div class="log-diff" style="margin-top:6px;">
+        <div class="log-desc">Changed <strong>Allocation time unit</strong> <span class="log-source">via sandbox <strong style="color:var(--text-2);font-weight:590;">NiCE_Sandbox</strong></span></div>
+        <div class="log-diff">
           <span class="d-old">Hours/Day</span><span class="d-arr">→</span><span class="d-new">Hours/Week</span>
         </div>
       </div>
@@ -652,12 +640,8 @@
           <span class="log-actor">Alex M</span>
           <span class="log-time">Apr 10, 4:22 PM</span>
         </div>
-        <div class="log-desc">Changed <strong>Effort planning level</strong> <span class="log-source"><button class="merge-toggle" onclick="toggleMerge('merge-2')">via Sandbox merge</button></span></div>
-        <div class="merge-detail" id="merge-2">
-          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          Merged from sandbox <strong>NiCE_Sandbox</strong> · Apr 10, 2026 at 4:22 PM
-        </div>
-        <div class="log-diff" style="margin-top:6px;">
+        <div class="log-desc">Changed <strong>Effort planning level</strong> <span class="log-source">via sandbox <strong style="color:var(--text-2);font-weight:590;">NiCE_Sandbox</strong></span></div>
+        <div class="log-diff">
           <span class="d-old">At phase level</span><span class="d-arr">→</span><span class="d-new">At task level</span>
         </div>
       </div>
@@ -825,10 +809,6 @@
     document.getElementById('drawer-empty').classList.toggle('visible', visibleCount === 0);
   }
 
-  // ── Sandbox merge expand ──
-  function toggleMerge(id) {
-    document.getElementById(id).classList.toggle('open');
-  }
 
   // ── Export CSV ──
   function exportCSV() {
