@@ -953,12 +953,15 @@
       <option value="reminders">Send reminders</option>
       <option value="approval">Approval settings</option>
       <option value="nonbillable">Non-billable hours</option>
+      <option value="rejected">Re-submission of rejected hours</option>
+      <option value="cap">Cap time tracking to budgeted hours</option>
+      <option value="timeoff">Time off in timesheets</option>
+      <option value="trackagainst">Track time against</option>
+      <option value="activities">Activities</option>
+      <option value="categories">Time entry categories</option>
       <option value="lock">Lock time entries</option>
       <option value="calendar">Calendar integration</option>
       <option value="hours">Hours to be reported</option>
-      <option value="activities">Activities</option>
-      <option value="categories">Time entry categories</option>
-      <option value="trackagainst">Track time against</option>
       <option value="exclusion">Timesheet exclusion</option>
     </select>
     <select class="filter-select" id="filter-user" onchange="applyFilters()">
@@ -1132,6 +1135,50 @@
           <span class="log-time">Mar 28, 9:00 AM</span>
         </div>
         <div class="log-desc">Added <strong>Sneha Reddy</strong> to <strong>Timesheet exclusion</strong> <span class="log-source">via UI</span></div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="mar20">Mar 20, 2026</div>
+
+    <div class="log-entry" data-field="rejected" data-user="RK">
+      <div class="log-av av-p">RK</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Riya K</span>
+          <span class="log-time">Mar 20, 11:30 AM</span>
+        </div>
+        <div class="log-desc">Enabled <strong>Re-submission of rejected hours</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="cap" data-user="RK">
+      <div class="log-av av-p">RK</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Riya K</span>
+          <span class="log-time">Mar 20, 11:25 AM</span>
+        </div>
+        <div class="log-desc">Disabled <strong>Cap time tracking to budgeted hours</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">On</span><span class="d-arr">→</span><span class="d-new">Off</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="timeoff" data-user="SA">
+      <div class="log-av av-g">SA</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Sam A</span>
+          <span class="log-time">Mar 20, 9:10 AM</span>
+        </div>
+        <div class="log-desc">Enabled <strong>Time off in timesheets</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
+        </div>
       </div>
     </div>
 
