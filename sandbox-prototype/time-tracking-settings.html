@@ -964,13 +964,6 @@
       <option value="hours">Hours to be reported</option>
       <option value="exclusion">Timesheet exclusion</option>
     </select>
-    <select class="filter-select" id="filter-user" onchange="applyFilters()">
-      <option value="">All users</option>
-      <option value="VS">Vivek S</option>
-      <option value="AM">Alex M</option>
-      <option value="RK">Riya K</option>
-      <option value="SA">Sam A</option>
-    </select>
     <div class="filter-divider"></div>
     <button class="export-btn" onclick="exportCSV()">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1259,14 +1252,10 @@
   // ── Filters ──
   function applyFilters() {
     const settingVal = document.getElementById('filter-setting').value;
-    const userVal = document.getElementById('filter-user').value;
     document.getElementById('filter-setting').classList.toggle('active', !!settingVal);
-    document.getElementById('filter-user').classList.toggle('active', !!userVal);
     let visibleCount = 0;
     document.querySelectorAll('.log-entry').forEach(e => {
-      const fieldMatch = !settingVal || e.dataset.field === settingVal;
-      const userMatch = !userVal || e.dataset.user === userVal;
-      const show = fieldMatch && userMatch;
+      const show = !settingVal || e.dataset.field === settingVal;
       e.style.display = show ? '' : 'none';
       if (show) visibleCount++;
     });
