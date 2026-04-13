@@ -802,27 +802,28 @@ function renderSDB() {
     </tr>`;
 
     if (s.skill) {
+      const z = `<span style="color:#c6c6c6;">0</span>`;
       // Assigned subtotal
       html += `<tr class="row-demand-child" onclick="toggleSdbRow('${key}','assigned')" style="cursor:pointer;">
         <td></td>
         <td style="text-align:left;padding-left:20px;">
           <button class="collapse-btn">${s.assigned?'▾':'▸'}</button> Assigned
         </td>
-        <td class="sdb-demand-col"></td>
+        <td class="sdb-demand-col">${z}</td>
         <td class="sdb-demand-col" style="font-weight:590;">${fmt(assigned)}</td>
-        <td class="sdb-demand-col"></td>
-        <td></td><td></td><td></td>
+        <td class="sdb-demand-col">${z}</td>
+        <td>${z}</td><td>${z}</td><td></td>
       </tr>`;
       if (s.assigned) {
         html += `<tr class="row-forecast-child">
           <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Hard Allocation</td>
-          <td class="sdb-demand-col"></td><td class="sdb-demand-col">${fmt(d.assignedHard)}</td><td class="sdb-demand-col"></td>
-          <td></td><td></td><td></td>
+          <td class="sdb-demand-col">${z}</td><td class="sdb-demand-col">${fmt(d.assignedHard)}</td><td class="sdb-demand-col">${z}</td>
+          <td>${z}</td><td>${z}</td><td></td>
         </tr>`;
         html += `<tr class="row-forecast-child">
           <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Soft Allocation</td>
-          <td class="sdb-demand-col"></td><td class="sdb-demand-col">${fmt(d.assignedSoft)}</td><td class="sdb-demand-col"></td>
-          <td></td><td></td><td></td>
+          <td class="sdb-demand-col">${z}</td><td class="sdb-demand-col">${fmt(d.assignedSoft)}</td><td class="sdb-demand-col">${z}</td>
+          <td>${z}</td><td>${z}</td><td></td>
         </tr>`;
       }
       // Unassigned subtotal
@@ -831,21 +832,21 @@ function renderSDB() {
         <td style="text-align:left;padding-left:20px;">
           <button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> Unassigned
         </td>
-        <td class="sdb-demand-col"></td>
-        <td class="sdb-demand-col"></td>
+        <td class="sdb-demand-col">${z}</td>
+        <td class="sdb-demand-col">${z}</td>
         <td class="sdb-demand-col sdb-unassigned" style="font-weight:590;">${fmt(unassigned)}</td>
-        <td></td><td></td><td></td>
+        <td>${z}</td><td>${z}</td><td></td>
       </tr>`;
       if (s.unassigned) {
         html += `<tr class="row-forecast-child">
           <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Hard Allocation</td>
-          <td class="sdb-demand-col"></td><td class="sdb-demand-col"></td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedHard)}</td>
-          <td></td><td></td><td></td>
+          <td class="sdb-demand-col">${z}</td><td class="sdb-demand-col">${z}</td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedHard)}</td>
+          <td>${z}</td><td>${z}</td><td></td>
         </tr>`;
         html += `<tr class="row-forecast-child">
           <td></td><td style="text-align:left;padding-left:36px;color:#525252;">Soft Allocation</td>
-          <td class="sdb-demand-col"></td><td class="sdb-demand-col"></td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedSoft)}</td>
-          <td></td><td></td><td></td>
+          <td class="sdb-demand-col">${z}</td><td class="sdb-demand-col">${z}</td><td class="sdb-demand-col sdb-unassigned">${fmt(d.unassignedSoft)}</td>
+          <td>${z}</td><td>${z}</td><td></td>
         </tr>`;
       }
     }
