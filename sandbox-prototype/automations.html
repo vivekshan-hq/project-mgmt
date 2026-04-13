@@ -257,6 +257,51 @@
 
     /* Empty state for no conditions */
     .no-conditions { font-size: 12px; color: var(--text-4); font-style: italic; padding: 2px 0; }
+    /* ═══ AUDIT DRAWER ═══ */
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(22,22,22,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.22s; }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 500px; background: var(--surface); z-index: 201; display: flex; flex-direction: column; box-shadow: -6.4px 0 14.4px rgba(0,0,0,0.13), -1.2px 0 3.6px rgba(0,0,0,0.11); transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1px solid var(--border); }
+    .drawer.open { transform: translateX(0); }
+    .drawer-hd { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .drawer-hd-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .drawer-title { font-size: 16px; font-weight: 600; color: var(--text-1); }
+    .drawer-subtitle { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+    .drawer-close { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: none; cursor: pointer; display: grid; place-items: center; color: var(--text-3); transition: all 0.1s; }
+    .drawer-close:hover { background: var(--bg); color: var(--text-1); }
+    .drawer-close svg { width: 13px; height: 13px; stroke-width: 2; fill: none; stroke: currentColor; }
+    .drawer-filters { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .filter-select { appearance: none; -webkit-appearance: none; padding: 0 28px 0 10px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; color: var(--text-2); background: var(--surface); cursor: pointer; font-family: inherit; outline: none; transition: border-color 0.12s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+    .filter-select:focus { border-color: var(--brand); }
+    .filter-select.active { border-color: var(--brand); color: var(--brand); background-color: var(--brand-light); }
+    .filter-divider { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; margin: 0 2px; }
+    .export-btn { display: inline-flex; align-items: center; gap: 5px; padding: 0 10px; height: 28px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 590; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.1s; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .export-btn:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
+    .export-btn svg { width: 12px; height: 12px; stroke-width: 2; fill: none; stroke: currentColor; }
+    .drawer-scroll { flex: 1; overflow-y: auto; }
+    .log-date-hd { padding: 8px 20px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.32px; color: var(--text-4); background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
+    .log-entry { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); transition: background 0.1s; }
+    .log-entry:hover { background: var(--bg); }
+    .log-av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; margin-top: 1px; }
+    .av-b { background: #0f62fe; } .av-t { background: #007d79; } .av-p { background: #6929c4; } .av-g { background: #525252; }
+    .log-body { flex: 1; min-width: 0; }
+    .log-actor-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; }
+    .log-actor { font-size: 13px; font-weight: 600; color: var(--text-1); }
+    .log-time { font-size: 12px; color: var(--text-4); margin-left: auto; flex-shrink: 0; }
+    .log-desc { font-size: 13px; color: var(--text-2); margin-bottom: 7px; }
+    .log-desc strong { color: var(--text-1); font-weight: 590; }
+    .log-diff { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; color: var(--text-2); }
+    .d-old { text-decoration: line-through; color: var(--text-4); }
+    .d-new { color: var(--text-1); }
+    .d-arr { color: var(--text-4); font-size: 11px; }
+    .log-source { font-size: 13px; color: var(--text-4); }
+    .drawer-empty { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 60px 32px; text-align: center; }
+    .drawer-empty.visible { display: flex; }
+    .drawer-empty-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; }
+    .drawer-empty-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; color: var(--text-4); }
+    .drawer-empty-title { font-size: 14px; font-weight: 600; color: var(--text-2); }
+    .drawer-empty-desc { font-size: 13px; color: var(--text-4); max-width: 260px; }
+    .drawer-footer { padding: 10px 20px; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--bg); }
+    .drawer-footer-text { font-size: 12px; color: var(--text-4); }
   </style>
 </head>
 <body>
@@ -359,10 +404,16 @@
   <div class="view-list" id="view-list">
     <div class="list-header">
       <span class="list-title">Automations</span>
+      <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="openDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+        View audit logs
+      </button>
       <button class="btn btn-primary" onclick="openEditor('new')">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Create automation
       </button>
+      </div>
     </div>
 
     <div class="list-body">
@@ -658,6 +709,157 @@
 
 </div><!-- /main -->
 
+<!-- ══ Drawer overlay ══ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- ══ Audit history drawer ══ -->
+<div class="drawer" id="audit-drawer">
+  <div class="drawer-hd">
+    <div class="drawer-hd-row">
+      <div>
+        <div class="drawer-title">Change history</div>
+        <div class="drawer-subtitle">Automations</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="drawer-filters">
+    <select class="filter-select" id="filter-setting" onchange="applyFilters()">
+      <option value="">All automations</option>
+      <option value="arr">High ARR project alert</option>
+      <option value="task">Overdue task escalation</option>
+      <option value="phase">Phase completion notify</option>
+      <option value="resource">New resource request notify</option>
+    </select>
+    <div class="filter-divider"></div>
+    <button class="export-btn" onclick="exportCSV()">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <div class="drawer-scroll" id="drawer-scroll">
+
+    <div class="log-date-hd" data-group="today">Today · Apr 13, 2026</div>
+
+    <div class="log-entry" data-field="arr" data-user="VS">
+      <div class="log-av av-b">VS</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Vivek S</span>
+          <span class="log-time">1 hour ago</span>
+        </div>
+        <div class="log-desc">Edited condition in <strong>High ARR project alert</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">ARR &gt; 5,000</span><span class="d-arr">→</span><span class="d-new">ARR &gt; 10,000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="task" data-user="VS">
+      <div class="log-av av-b">VS</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Vivek S</span>
+          <span class="log-time">2 hours ago</span>
+        </div>
+        <div class="log-desc">Disabled <strong>Overdue task escalation</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">On</span><span class="d-arr">→</span><span class="d-new">Off</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="apr11">Apr 11, 2026</div>
+
+    <div class="log-entry" data-field="arr" data-user="AM">
+      <div class="log-av av-t">AM</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Alex M</span>
+          <span class="log-time">Apr 11, 3:40 PM</span>
+        </div>
+        <div class="log-desc">Added action block to <strong>High ARR project alert</strong> <span class="log-source">via sandbox (NiCE_Sandbox)</span></div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="phase" data-user="AM">
+      <div class="log-av av-t">AM</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Alex M</span>
+          <span class="log-time">Apr 11, 3:30 PM</span>
+        </div>
+        <div class="log-desc">Created automation <strong>Phase completion notify</strong> <span class="log-source">via sandbox (NiCE_Sandbox)</span></div>
+        <div class="log-diff">
+          <span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">New</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="apr8">Apr 8, 2026</div>
+
+    <div class="log-entry" data-field="resource" data-user="RK">
+      <div class="log-av av-p">RK</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Riya K</span>
+          <span class="log-time">Apr 8, 11:20 AM</span>
+        </div>
+        <div class="log-desc">Changed trigger in <strong>New resource request notify</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Request approved</span><span class="d-arr">→</span><span class="d-new">Request submitted</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry" data-field="task" data-user="RK">
+      <div class="log-av av-p">RK</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Riya K</span>
+          <span class="log-time">Apr 8, 10:50 AM</span>
+        </div>
+        <div class="log-desc">Created automation <strong>Overdue task escalation</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">New</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-date-hd" data-group="apr5">Apr 5, 2026</div>
+
+    <div class="log-entry" data-field="arr" data-user="SA">
+      <div class="log-av av-g">SA</div>
+      <div class="log-body">
+        <div class="log-actor-row">
+          <span class="log-actor">Sam A</span>
+          <span class="log-time">Apr 5, 9:00 AM</span>
+        </div>
+        <div class="log-desc">Enabled <strong>High ARR project alert</strong> <span class="log-source">via UI</span></div>
+        <div class="log-diff">
+          <span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="drawer-empty" id="drawer-empty">
+      <div class="drawer-empty-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+      </div>
+      <div class="drawer-empty-title">No changes found</div>
+      <div class="drawer-empty-desc">Try adjusting your filters, or no changes match the selected automation.</div>
+    </div>
+
+  </div><!-- /drawer-scroll -->
+  <div class="drawer-footer">
+    <span class="drawer-footer-text">Showing last 90 days · Jan 13, 2026 – Apr 13, 2026</span>
+  </div>
+</div><!-- /drawer -->
+
 <script>
   // ── View switching ──
   function openEditor(id) {
@@ -838,6 +1040,51 @@
     btn.innerHTML = isDisabling
       ? `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Enable`
       : `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Disable`;
+  }
+
+  // ── Audit drawer ──
+  function openDrawer() {
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('audit-drawer').classList.add('open');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('audit-drawer').classList.remove('open');
+  }
+
+  function applyFilters() {
+    const val = document.getElementById('filter-setting').value;
+    document.getElementById('filter-setting').classList.toggle('active', !!val);
+    let count = 0;
+    document.querySelectorAll('.log-entry').forEach(e => {
+      const show = !val || e.dataset.field === val;
+      e.style.display = show ? '' : 'none';
+      if (show) count++;
+    });
+    document.querySelectorAll('.log-date-hd').forEach(g => {
+      let next = g.nextElementSibling; let has = false;
+      while (next && !next.classList.contains('log-date-hd') && next.id !== 'drawer-empty') {
+        if (next.style.display !== 'none' && next.classList.contains('log-entry')) has = true;
+        next = next.nextElementSibling;
+      }
+      g.style.display = has ? '' : 'none';
+    });
+    document.getElementById('drawer-empty').classList.toggle('visible', count === 0);
+  }
+
+  function exportCSV() {
+    const rows = [
+      ['timestamp','actor','automation','change_type','old_value','new_value','source'],
+      ['2026-04-13T08:00:00Z','Vivek S','High ARR project alert','Condition edited','ARR > 5000','ARR > 10000','UI'],
+      ['2026-04-13T07:00:00Z','Vivek S','Overdue task escalation','Disabled','On','Off','UI'],
+      ['2026-04-11T13:40:00Z','Alex M','High ARR project alert','Action block added','','','Sandbox Merge'],
+      ['2026-04-11T13:30:00Z','Alex M','Phase completion notify','Created','','New','Sandbox Merge'],
+      ['2026-04-08T09:20:00Z','Riya K','New resource request notify','Trigger changed','Request approved','Request submitted','UI'],
+      ['2026-04-08T08:50:00Z','Riya K','Overdue task escalation','Created','','New','UI'],
+      ['2026-04-05T07:00:00Z','Sam A','High ARR project alert','Enabled','Off','On','UI'],
+    ];
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'automations-audit-log.csv'; a.click();
   }
 </script>
 </body>
