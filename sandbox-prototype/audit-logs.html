@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Logs · Settings · Rocketlane</title>
+  <style>
+    :root {
+      --brand: #0f62fe; --brand-dark: #0043ce; --brand-light: #edf5ff; --brand-muted: #97c1ff;
+      --bg: #fafafa; --surface: #fff; --border: #e0e0e0; --border-subtle: #f4f4f4;
+      --border-strong: #c6c6c6;
+      --text-1: #161616; --text-2: #525252; --text-3: #6f6f6f; --text-4: #a8a8a8;
+      --success: #24a148; --success-bg: #defbe6; --success-border: #a7f0ba;
+      --warning: #ffbf00; --warning-bg: #fffbf0; --warning-border: #f1c21b;
+      --danger: #da1e28; --danger-bg: #fff1f1; --danger-border: #ffd7d9;
+      --radius: 8px; --radius-sm: 4px;
+      --shadow-sm: 0px 0.8px 1.8px rgba(0,0,0,0.13), 0px 0.15px 0.45px rgba(0,0,0,0.11);
+      --shadow-md: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 20px; color: var(--text-1);
+      background: var(--surface); display: flex; height: 100vh; overflow: hidden;
+    }
+
+    /* ═══ ICON RAIL ═══ */
+    .rail { width: 40px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 2px; }
+    .rail-logo { width: 24px; height: 24px; background: #1d1d1f; border-radius: 4px; display: grid; place-items: center; margin-bottom: 10px; flex-shrink: 0; }
+    .rail-logo svg { width: 11px; height: 11px; color: #fff; fill: none; stroke: currentColor; stroke-width: 2; }
+    .rail-icon { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; cursor: pointer; color: var(--text-4); transition: all 0.12s; }
+    .rail-icon:hover { background: var(--bg); color: var(--text-2); }
+    .rail-icon.active { background: #e8e8e8; color: var(--text-1); }
+    .rail-icon svg { width: 16px; height: 16px; stroke-width: 1.75; fill: none; stroke: currentColor; }
+    .rail-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .rail-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--text-2); color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; cursor: pointer; }
+    .rail-badge { position: relative; }
+    .rail-badge-dot { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; border: 1.5px solid var(--surface); }
+
+    /* ═══ SETTINGS SIDEBAR ═══ */
+    .settings-sidebar { width: 280px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+    .ss-title { padding: 20px 20px 12px; font-size: 20px; font-weight: 600; color: var(--text-1); flex-shrink: 0; }
+    .ss-search { padding: 0 12px 10px; flex-shrink: 0; }
+    .ss-search-input { width: 100%; padding: 6px 10px 6px 30px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--text-2); outline: none; background: var(--bg); font-family: inherit; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 9px center; }
+    .ss-section-label { padding: 10px 20px 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.32px; color: var(--text-4); }
+    .ss-divider { height: 1px; background: var(--border); margin: 8px 12px; }
+    .ss-item { display: flex; align-items: center; gap: 10px; padding: 7px 20px; font-size: 14px; color: var(--text-2); cursor: pointer; transition: all 0.1s; position: relative; text-decoration: none; }
+    .ss-item:hover { background: var(--bg); color: var(--text-1); }
+    .ss-item.active { background: var(--brand-light); color: var(--brand); font-weight: 600; }
+    .ss-item.active::after { content: ''; position: absolute; right: 12px; top: 50%; width: 6px; height: 6px; border-top: 1.5px solid var(--brand); border-right: 1.5px solid var(--brand); transform: translateY(-50%) rotate(45deg); }
+    .ss-icon { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; flex-shrink: 0; }
+    .ss-icon svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 2; }
+    .ic-orange { background: linear-gradient(135deg,#ffbe7a,#f98000); }
+    .ic-blue { background: linear-gradient(135deg,#78a9ff,#0f62fe); }
+    .ic-teal { background: linear-gradient(135deg,#3ddbd9,#009d9a); }
+    .ic-green { background: linear-gradient(135deg,#6fdc8c,#24a148); }
+    .ic-purple { background: linear-gradient(135deg,#be95ff,#6929c4); }
+    .ic-yellow { background: linear-gradient(135deg,#ffdf7e,#ffbf00); }
+    .ic-red { background: linear-gradient(135deg,#ff8389,#fa4d56); }
+    .ic-magenta { background: linear-gradient(135deg,#ff7eb6,#d12771); }
+    .ss-chevron { margin-left: auto; color: var(--text-4); flex-shrink: 0; }
+    .ss-chevron svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* ═══ MAIN ═══ */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ═══ HEADER ═══ */
+    .page-header { padding: 20px 28px 0; flex-shrink: 0; }
+    .page-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .page-title-row { display: flex; align-items: center; gap: 8px; }
+    .page-title { font-size: 20px; font-weight: 600; color: var(--text-1); }
+
+    /* ═══ FILTER BAR ═══ */
+    .filter-bar { display: flex; align-items: center; gap: 8px; padding: 0 28px 12px; flex-shrink: 0; flex-wrap: wrap; }
+    .filter-select {
+      appearance: none; -webkit-appearance: none;
+      padding: 0 28px 0 10px; height: 32px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 13px; color: var(--text-2);
+      background: var(--surface); cursor: pointer; font-family: inherit; outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center; transition: border-color 0.12s;
+    }
+    .filter-select:focus { border-color: var(--brand); outline: none; }
+    .filter-select.active { border-color: var(--brand); color: var(--brand); background-color: var(--brand-light); }
+    .filter-divider { width: 1px; height: 20px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
+    .clear-btn { height: 32px; padding: 0 10px; border-radius: var(--radius-sm); border: none; background: none; font-size: 13px; color: var(--brand); cursor: pointer; font-family: inherit; display: none; }
+    .clear-btn.visible { display: block; }
+    .clear-btn:hover { text-decoration: underline; }
+    .result-count { font-size: 13px; color: var(--text-3); margin-left: auto; white-space: nowrap; }
+
+    /* ═══ TABLE ═══ */
+    .table-wrap { flex: 1; overflow-y: auto; padding: 0 28px 32px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { position: sticky; top: 0; z-index: 10; background: var(--surface); }
+    thead tr { border-bottom: 2px solid var(--border); }
+    th {
+      padding: 10px 12px; font-size: 12px; font-weight: 700; color: var(--text-3);
+      letter-spacing: 0.32px; text-align: left; white-space: nowrap; user-select: none;
+    }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { color: var(--text-1); }
+    th .sort-icon { display: inline-flex; align-items: center; gap: 3px; }
+    th .sort-icon svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; color: var(--text-4); vertical-align: middle; }
+    th.sorted .sort-icon svg { color: var(--brand); }
+
+    tbody tr { border-bottom: 1px solid var(--border-subtle); transition: background 0.1s; }
+    tbody tr:hover { background: var(--bg); }
+    td { padding: 12px 12px; font-size: 13px; color: var(--text-2); vertical-align: top; }
+
+    .td-datetime { white-space: nowrap; color: var(--text-2); font-size: 13px; min-width: 140px; }
+    .td-datetime .date { color: var(--text-1); font-weight: 590; }
+    .td-datetime .time { color: var(--text-3); font-size: 12px; margin-top: 1px; }
+
+    .td-user { min-width: 120px; }
+    .user-cell { display: flex; align-items: center; gap: 7px; }
+    .user-av { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .user-name { font-size: 13px; color: var(--text-1); font-weight: 400; white-space: nowrap; }
+
+    .td-source { min-width: 80px; }
+    .source-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+    .source-ui { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+    .source-api { background: #f6f2ff; color: #6929c4; border: 1px solid #d4bbff; }
+    .source-sandbox { background: var(--brand-light); color: var(--brand); border: 1px solid var(--brand-muted); }
+
+    .td-action { max-width: 320px; }
+    .action-text { font-size: 13px; color: var(--text-2); line-height: 18px; }
+    .action-text strong { color: var(--text-1); font-weight: 590; }
+    .diff-pill { display: inline-flex; align-items: center; gap: 5px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 8px; font-size: 12px; color: var(--text-2); margin-top: 6px; }
+    .d-old { text-decoration: line-through; color: var(--text-4); }
+    .d-new { color: var(--text-1); }
+    .d-arr { color: var(--text-4); font-size: 11px; }
+
+    .td-section { min-width: 120px; }
+    .section-badge { display: inline-flex; padding: 2px 9px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 400; background: var(--bg); color: var(--text-2); border: 1px solid var(--border); white-space: nowrap; }
+
+    /* Empty state */
+    .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 80px 32px; text-align: center; }
+    .empty-state.visible { display: flex; }
+    .empty-state-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; }
+    .empty-state-icon svg { width: 22px; height: 22px; fill: none; stroke: var(--text-4); stroke-width: 1.5; }
+    .empty-state-title { font-size: 14px; font-weight: 600; color: var(--text-2); }
+    .empty-state-desc { font-size: 13px; color: var(--text-4); max-width: 280px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; height: 32px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 590; cursor: pointer; border: none; font-family: inherit; transition: all 0.12s; white-space: nowrap; }
+    .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
+    .btn svg { width: 14px; height: 14px; stroke-width: 2; flex-shrink: 0; fill: none; stroke: currentColor; }
+  </style>
+</head>
+<body>
+
+<!-- ══ Icon rail ══ -->
+<nav class="rail">
+  <div class="rail-logo"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+  <div class="rail-icon active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+  <div class="rail-bottom">
+    <div class="rail-badge">
+      <div class="rail-icon" style="margin:0"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+      <div class="rail-badge-dot"></div>
+    </div>
+    <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+    <div class="rail-avatar">VS</div>
+  </div>
+</nav>
+
+<!-- ══ Settings sidebar ══ -->
+<aside class="settings-sidebar">
+  <div class="ss-title">Settings</div>
+  <div class="ss-search"><input class="ss-search-input" type="text" placeholder="Search"></div>
+
+  <div class="ss-item">
+    <div class="ss-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    Members
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+    Project settings
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    Automations
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-purple"><svg viewBox="0 0 24 24"><path d="M4 20h16M4 4h16M9 4v16M15 4v16"/></svg></div>
+    Email intelligence
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Operations and financials</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    Time tracking
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    Resource management
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+    Financial management
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-section-label">Advanced</div>
+  <div class="ss-item active">
+    <div class="ss-icon ic-purple"><svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg></div>
+    Audit logs
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+    Security
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-magenta"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+    API
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><path d="M18 14.45v6.55h-16v-18h7.6"/><path d="M12 18h-7"/><path d="M12 14h-7"/><path d="M5 10h7"/><path d="M15 3.13V9a1 1 0 0 0 1 1h5.74"/><path d="M15 3H7a2 2 0 0 0-2 2"/></svg></div>
+    Webhooks
+  </div>
+</aside>
+
+<!-- ══ Main ══ -->
+<div class="main">
+
+  <div class="page-header">
+    <div class="page-header-top">
+      <div class="page-title-row">
+        <span class="page-title">Audit logs</span>
+      </div>
+      <button class="btn btn-ghost" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <select class="filter-select" id="f-date" onchange="applyFilters()">
+      <option value="">All time</option>
+      <option value="today">Today</option>
+      <option value="7d">Last 7 days</option>
+      <option value="30d">Last 30 days</option>
+      <option value="90d">Last 90 days</option>
+    </select>
+    <select class="filter-select" id="f-source" onchange="applyFilters()">
+      <option value="">All sources</option>
+      <option value="UI">UI</option>
+      <option value="API">API</option>
+      <option value="Sandbox">Sandbox merge</option>
+    </select>
+    <select class="filter-select" id="f-user" onchange="applyFilters()">
+      <option value="">All users</option>
+      <option value="VS">Vivek S</option>
+      <option value="AM">Alex M</option>
+      <option value="RK">Riya K</option>
+      <option value="SA">Sam A</option>
+    </select>
+    <select class="filter-select" id="f-section" onchange="applyFilters()">
+      <option value="">All sections</option>
+      <option value="Time Tracking">Time Tracking</option>
+      <option value="Resource Management">Resource Management</option>
+      <option value="Automations">Automations</option>
+    </select>
+    <div class="filter-divider"></div>
+    <button class="clear-btn" id="clear-btn" onclick="clearFilters()">Clear filters</button>
+    <span class="result-count" id="result-count">Showing 18 entries · last 90 days</span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table id="audit-table">
+      <thead>
+        <tr>
+          <th class="sortable sorted" onclick="sortBy('date')">
+            <span class="sort-icon">Date &amp; time <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </th>
+          <th>User</th>
+          <th>Source</th>
+          <th>Action</th>
+          <th>Section</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+
+        <!-- Apr 13 -->
+        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0">
+          <td class="td-datetime"><div class="date">Apr 13, 2026</div><div class="time">2:00 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#0f62fe;">VS</div><span class="user-name">Vivek S</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Timesheet due day</strong></div>
+            <div class="diff-pill"><span class="d-old">Thursday</span><span class="d-arr">→</span><span class="d-new">Friday</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0">
+          <td class="td-datetime"><div class="date">Apr 13, 2026</div><div class="time">1:00 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#0f62fe;">VS</div><span class="user-name">Vivek S</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Approval settings</strong></div>
+            <div class="diff-pill"><span class="d-old">Timesheet approver</span><span class="d-arr">→</span><span class="d-new">Project owners</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0">
+          <td class="td-datetime"><div class="date">Apr 13, 2026</div><div class="time">12:15 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#0f62fe;">VS</div><span class="user-name">Vivek S</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Enabled <strong>Approver hierarchy</strong> under Timesheet approver</div>
+            <div class="diff-pill"><span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+        <!-- Apr 11 -->
+        <tr data-user="VS" data-source="UI" data-section="Resource Management" data-days="2">
+          <td class="td-datetime"><div class="date">Apr 11, 2026</div><div class="time">2:46 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#0f62fe;">VS</div><span class="user-name">Vivek S</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Allocation time unit</strong></div>
+            <div class="diff-pill"><span class="d-old">Hours/Week</span><span class="d-arr">→</span><span class="d-new">Hours/Day</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Resource Management</span></td>
+        </tr>
+
+        <tr data-user="VS" data-source="UI" data-section="Resource Management" data-days="2">
+          <td class="td-datetime"><div class="date">Apr 11, 2026</div><div class="time">2:29 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#0f62fe;">VS</div><span class="user-name">Vivek S</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Enabled <strong>Soft allocations</strong></div>
+            <div class="diff-pill"><span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Resource Management</span></td>
+        </tr>
+
+        <tr data-user="AM" data-source="Sandbox" data-section="Automations" data-days="2">
+          <td class="td-datetime"><div class="date">Apr 11, 2026</div><div class="time">3:40 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#007d79;">AM</div><span class="user-name">Alex M</span></div></td>
+          <td class="td-source"><span class="source-pill source-sandbox">Sandbox merge</span></td>
+          <td class="td-action">
+            <div class="action-text">Added action block to <strong>High ARR project alert</strong></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Automations</span></td>
+        </tr>
+
+        <tr data-user="AM" data-source="Sandbox" data-section="Automations" data-days="2">
+          <td class="td-datetime"><div class="date">Apr 11, 2026</div><div class="time">3:30 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#007d79;">AM</div><span class="user-name">Alex M</span></div></td>
+          <td class="td-source"><span class="source-pill source-sandbox">Sandbox merge</span></td>
+          <td class="td-action">
+            <div class="action-text">Created automation <strong>Phase completion notify</strong></div>
+            <div class="diff-pill"><span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">New</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Automations</span></td>
+        </tr>
+
+        <!-- Apr 10 -->
+        <tr data-user="AM" data-source="Sandbox" data-section="Resource Management" data-days="3">
+          <td class="td-datetime"><div class="date">Apr 10, 2026</div><div class="time">4:22 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#007d79;">AM</div><span class="user-name">Alex M</span></div></td>
+          <td class="td-source"><span class="source-pill source-sandbox">Sandbox merge</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Allocation time unit</strong></div>
+            <div class="diff-pill"><span class="d-old">Hours/Day</span><span class="d-arr">→</span><span class="d-new">Hours/Week</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Resource Management</span></td>
+        </tr>
+
+        <tr data-user="AM" data-source="Sandbox" data-section="Resource Management" data-days="3">
+          <td class="td-datetime"><div class="date">Apr 10, 2026</div><div class="time">4:22 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#007d79;">AM</div><span class="user-name">Alex M</span></div></td>
+          <td class="td-source"><span class="source-pill source-sandbox">Sandbox merge</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Effort planning level</strong></div>
+            <div class="diff-pill"><span class="d-old">At phase level</span><span class="d-arr">→</span><span class="d-new">At task level</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Resource Management</span></td>
+        </tr>
+
+        <!-- Apr 8 -->
+        <tr data-user="RK" data-source="UI" data-section="Resource Management" data-days="5">
+          <td class="td-datetime"><div class="date">Apr 8, 2026</div><div class="time">11:05 AM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#6929c4;">RK</div><span class="user-name">Riya K</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Disabled <strong>Collaborator access to allocations</strong></div>
+            <div class="diff-pill"><span class="d-old">On</span><span class="d-arr">→</span><span class="d-new">Off</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Resource Management</span></td>
+        </tr>
+
+        <tr data-user="RK" data-source="API" data-section="Resource Management" data-days="5">
+          <td class="td-datetime"><div class="date">Apr 8, 2026</div><div class="time">10:58 AM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#6929c4;">RK</div><span class="user-name">Riya K</span></div></td>
+          <td class="td-source"><span class="source-pill source-api">API</span></td>
+          <td class="td-action">
+            <div class="action-text">Enabled <strong>Collaborator access to allocations</strong></div>
+            <div class="diff-pill"><span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Resource Management</span></td>
+        </tr>
+
+        <tr data-user="RK" data-source="UI" data-section="Automations" data-days="5">
+          <td class="td-datetime"><div class="date">Apr 8, 2026</div><div class="time">11:20 AM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#6929c4;">RK</div><span class="user-name">Riya K</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed trigger in <strong>New resource request notify</strong></div>
+            <div class="diff-pill"><span class="d-old">Request approved</span><span class="d-arr">→</span><span class="d-new">Request submitted</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Automations</span></td>
+        </tr>
+
+        <!-- Apr 5 -->
+        <tr data-user="RK" data-source="UI" data-section="Time Tracking" data-days="8">
+          <td class="td-datetime"><div class="date">Apr 5, 2026</div><div class="time">2:30 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#6929c4;">RK</div><span class="user-name">Riya K</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Enabled <strong>Non-billable hours – Fixed fee</strong></div>
+            <div class="diff-pill"><span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+        <tr data-user="RK" data-source="UI" data-section="Time Tracking" data-days="8">
+          <td class="td-datetime"><div class="date">Apr 5, 2026</div><div class="time">2:15 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#6929c4;">RK</div><span class="user-name">Riya K</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Hours to be reported</strong></div>
+            <div class="diff-pill"><span class="d-old">No requirement</span><span class="d-arr">→</span><span class="d-new">Cannot submit less than 40 hrs/week</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+        <tr data-user="SA" data-source="UI" data-section="Resource Management" data-days="8">
+          <td class="td-datetime"><div class="date">Apr 5, 2026</div><div class="time">3:14 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#525252;">SA</div><span class="user-name">Sam A</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Effort planning level</strong></div>
+            <div class="diff-pill"><span class="d-old">At task level</span><span class="d-arr">→</span><span class="d-new">At phase level</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Resource Management</span></td>
+        </tr>
+
+        <!-- Apr 2 -->
+        <tr data-user="SA" data-source="UI" data-section="Time Tracking" data-days="11">
+          <td class="td-datetime"><div class="date">Apr 2, 2026</div><div class="time">11:00 AM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#525252;">SA</div><span class="user-name">Sam A</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Enabled <strong>Calendar integration</strong></div>
+            <div class="diff-pill"><span class="d-old">Off</span><span class="d-arr">→</span><span class="d-new">On</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+        <!-- Mar 28 -->
+        <tr data-user="AM" data-source="API" data-section="Time Tracking" data-days="16">
+          <td class="td-datetime"><div class="date">Mar 28, 2026</div><div class="time">3:20 PM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#007d79;">AM</div><span class="user-name">Alex M</span></div></td>
+          <td class="td-source"><span class="source-pill source-api">API</span></td>
+          <td class="td-action">
+            <div class="action-text">Changed <strong>Reminder – before due</strong></div>
+            <div class="diff-pill"><span class="d-old">24 hours</span><span class="d-arr">→</span><span class="d-new">6 hours</span></div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="16">
+          <td class="td-datetime"><div class="date">Mar 28, 2026</div><div class="time">9:00 AM</div></td>
+          <td class="td-user"><div class="user-cell"><div class="user-av" style="background:#0f62fe;">VS</div><span class="user-name">Vivek S</span></div></td>
+          <td class="td-source"><span class="source-pill source-ui">UI</span></td>
+          <td class="td-action">
+            <div class="action-text">Added <strong>Sneha Reddy</strong> to Timesheet exclusion</div>
+          </td>
+          <td class="td-section"><span class="section-badge">Time Tracking</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-state-icon"><svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg></div>
+      <div class="empty-state-title">No entries found</div>
+      <div class="empty-state-desc">Try adjusting your filters — no changes match the selected criteria.</div>
+    </div>
+
+  </div><!-- /table-wrap -->
+</div><!-- /main -->
+
+<script>
+  const dayMap = { today: 0, '7d': 7, '30d': 30, '90d': 90 };
+
+  function applyFilters() {
+    const date    = document.getElementById('f-date').value;
+    const source  = document.getElementById('f-source').value;
+    const user    = document.getElementById('f-user').value;
+    const section = document.getElementById('f-section').value;
+
+    // Active styling
+    ['f-date','f-source','f-user','f-section'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.toggle('active', !!el.value);
+    });
+
+    const hasFilter = date || source || user || section;
+    document.getElementById('clear-btn').classList.toggle('visible', !!hasFilter);
+
+    const rows = document.querySelectorAll('#table-body tr');
+    let visible = 0;
+
+    rows.forEach(row => {
+      const rDays    = parseInt(row.dataset.days);
+      const rSource  = row.dataset.source;
+      const rUser    = row.dataset.user;
+      const rSection = row.dataset.section;
+
+      const dateOk   = !date   || rDays <= (dayMap[date] ?? 999);
+      const sourceOk = !source || rSource === source;
+      const userOk   = !user   || rUser === user;
+      const sectOk   = !section|| rSection === section;
+
+      const show = dateOk && sourceOk && userOk && sectOk;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    const countEl = document.getElementById('result-count');
+    countEl.textContent = hasFilter
+      ? `Showing ${visible} of ${rows.length} entries`
+      : `Showing ${rows.length} entries · last 90 days`;
+
+    document.getElementById('empty-state').classList.toggle('visible', visible === 0);
+  }
+
+  function clearFilters() {
+    ['f-date','f-source','f-user','f-section'].forEach(id => {
+      document.getElementById(id).value = '';
+      document.getElementById(id).classList.remove('active');
+    });
+    applyFilters();
+  }
+
+  function exportCSV() {
+    const headers = ['Date & Time','User','Source','Action','Section'];
+    const rows = [...document.querySelectorAll('#table-body tr')]
+      .filter(r => r.style.display !== 'none')
+      .map(r => {
+        const tds = r.querySelectorAll('td');
+        const date   = tds[0].querySelector('.date').textContent + ' ' + tds[0].querySelector('.time').textContent;
+        const user   = tds[1].querySelector('.user-name').textContent;
+        const source = tds[2].textContent.trim();
+        const action = tds[3].querySelector('.action-text').textContent.trim().replace(/\s+/g,' ');
+        const section= tds[4].textContent.trim();
+        return [date, user, source, action, section];
+      });
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'audit-log.csv';
+    a.click();
+  }
+</script>
+</body>
+</html>
