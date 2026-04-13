@@ -152,6 +152,20 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 /* ── Tab panels ── */
 .tab-panel{flex:1;}
 
+/* ── Utilization heatmap ── */
+.util-legend{display:flex;align-items:center;gap:8px;padding:10px 24px;border-bottom:1px solid #f4f4f4;flex-wrap:wrap;}
+.util-leg-item{padding:3px 10px;border-radius:4px;font-size:12px;font-weight:590;}
+.hm-cell{text-align:center;font-size:12px;font-weight:590;padding:7px 4px !important;}
+.hm-avg{text-align:center;font-size:12px;font-weight:700;padding:7px 8px !important;border-left:1px solid #e8e8e8;}
+.hm-low{background:#defbe6;color:#24a148;}
+.hm-ok{background:#fdf4ce;color:#7c5e0f;}
+.hm-high{background:#fff1f1;color:#da1e28;}
+.hm-over{background:#fde8ff;color:#9333ea;}
+.util-role-row>td{background:#fff;font-weight:590;cursor:pointer;}
+.util-role-row>td:first-child{padding-left:12px;}
+.util-skill-row>td{background:#fafafa;}
+.util-skill-row>td:first-child{padding-left:32px;color:#525252;font-size:12px;}
+
 /* ── Skill Demand Breakdown specifics ── */
 .sdb-demand-parent th{background:#edf5ff;color:#0f62fe;text-align:center;font-size:11px;font-weight:590;letter-spacing:0.32px;text-transform:uppercase;padding:5px 12px;border-bottom:1px solid #d0e6ff;}
 .sdb-demand-col{background:#f7faff;}
@@ -229,6 +243,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
     <div class="sub-tab active" onclick="switchSubTab('summary')">Summary</div>
     <div class="sub-tab" onclick="switchSubTab('role')">Role</div>
     <div class="sub-tab" onclick="switchSubTab('role-skill')">Role + Skill</div>
+    <div class="sub-tab" onclick="switchSubTab('utilization')">Utilization</div>
     <div class="sub-tab sub-tab-disabled">Role + Skill + Level</div>
   </div>
 
@@ -327,6 +342,41 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       </div>
     </div>
 
+    <!-- ── Utilization tab ── -->
+    <div class="tab-panel" id="panel-utilization" style="display:none;">
+
+      <!-- Legend -->
+      <div class="util-legend">
+        <span style="font-size:12px;color:#525252;font-weight:590;">Utilization:</span>
+        <span class="util-leg-item hm-low">Under 50% — available capacity</span>
+        <span class="util-leg-item hm-ok">50–85% — healthy</span>
+        <span class="util-leg-item hm-high">85–100% — at risk</span>
+        <span class="util-leg-item hm-over">&gt;100% — overloaded</span>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl" id="util-table">
+          <thead>
+            <tr>
+              <th style="width:220px;min-width:200px;text-align:left;" rowspan="2">Role / Skill</th>
+              <th class="cs-month-hd" colspan="4">Feb '26</th>
+              <th class="cs-month-hd" colspan="4">Mar '26</th>
+              <th class="cs-month-hd" colspan="1"><span class="cs-today-badge">30-03</span></th>
+              <th class="cs-month-hd" colspan="2">Apr '26</th>
+              <th style="background:#f4f4f4;font-size:11px;font-weight:590;color:#525252;letter-spacing:.32px;text-transform:uppercase;padding:6px 12px;text-align:center;" rowspan="2">AVG</th>
+            </tr>
+            <tr>
+              <th class="cs-week-hd">02-06</th><th class="cs-week-hd">09-13</th><th class="cs-week-hd">16-20</th><th class="cs-week-hd">23-27</th>
+              <th class="cs-week-hd">02-06</th><th class="cs-week-hd">09-13</th><th class="cs-week-hd">16-20</th><th class="cs-week-hd">23-27</th>
+              <th class="cs-week-hd cs-today-hd">30-03</th>
+              <th class="cs-week-hd">06-10</th><th class="cs-week-hd">13-17</th>
+            </tr>
+          </thead>
+          <tbody id="util-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -334,7 +384,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 // ══════════════════════════════════════════════════
 // Sub-tab switching
 // ══════════════════════════════════════════════════
-const SUB_TABS = ['summary','role','role-skill'];
+const SUB_TABS = ['summary','role','role-skill','utilization'];
 
 function switchSubTab(id) {
   SUB_TABS.forEach(t => {
@@ -385,6 +435,7 @@ function switchCsUnit(u) {
   renderCS();
   renderRS();
   renderSDB();
+  renderUtil();
 }
 
 function renderCS() {
@@ -858,11 +909,83 @@ function renderSDB() {
 }
 
 // ══════════════════════════════════════════════════
+// Utilization heatmap
+// ══════════════════════════════════════════════════
+
+// Skill utilization per role: pct = totalDemand / avail * 100
+// Using SDB_DATA with small weekly variation (±5%) for realism
+const SKILL_WEEKLY_UTIL = {};
+SDB_DATA.forEach(d => {
+  const key = `${d.role}::${d.skill}`;
+  const req = d.assignedHard + d.assignedSoft + d.unassignedHard + d.unassignedSoft;
+  const base = d.avail > 0 ? Math.round(req / d.avail * 100) : 0;
+  // generate 11 weeks with small variation around base
+  const seed = d.skill.length;
+  SKILL_WEEKLY_UTIL[key] = Array.from({length:11}, (_,i) => {
+    const v = base + Math.round(Math.sin(i * seed) * 8);
+    return Math.max(0, v);
+  });
+});
+
+const utilOpen = {};
+
+function hmClass(p) {
+  return p > 100 ? 'hm-over' : p > 85 ? 'hm-high' : p > 50 ? 'hm-ok' : 'hm-low';
+}
+
+function renderUtil() {
+  let html = '';
+
+  ROLES.forEach(r => {
+    const alloc = rTotalAlloc(r);
+    const cap   = rTotalCap(r);
+    const pcts  = alloc.map((a,i) => Math.round(a / cap[i] * 100));
+    const avg   = Math.round(pcts.reduce((s,v) => s+v, 0) / pcts.length);
+    const isOpen = utilOpen[r.id];
+
+    // Role row
+    html += `<tr class="util-role-row" onclick="toggleUtil('${r.id}')">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg class="exp-icon ${isOpen?'open':''}" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          <div class="role-avatar" style="background:${r.color};flex-shrink:0;">${r.initials}</div>
+          ${r.label}
+        </div>
+      </td>
+      ${pcts.map(p => `<td class="hm-cell ${hmClass(p)}">${p}%</td>`).join('')}
+      <td class="hm-avg ${hmClass(avg)}">${avg}%</td>
+    </tr>`;
+
+    if (!isOpen) return;
+
+    // Skill rows for this role
+    SDB_DATA.filter(d => d.role === r.label).forEach(d => {
+      const key  = `${d.role}::${d.skill}`;
+      const wPct = SKILL_WEEKLY_UTIL[key];
+      const sAvg = Math.round(wPct.reduce((s,v) => s+v, 0) / wPct.length);
+      html += `<tr class="util-skill-row">
+        <td>${d.skill}</td>
+        ${wPct.map(p => `<td class="hm-cell ${hmClass(p)}">${p}%</td>`).join('')}
+        <td class="hm-avg ${hmClass(sAvg)}">${sAvg}%</td>
+      </tr>`;
+    });
+  });
+
+  document.getElementById('util-tbody').innerHTML = html;
+}
+
+function toggleUtil(id) {
+  utilOpen[id] = !utilOpen[id];
+  renderUtil();
+}
+
+// ══════════════════════════════════════════════════
 // Init
 // ══════════════════════════════════════════════════
 renderCS();
 renderRS();
 renderSDB();
+renderUtil();
 </script>
 </body>
 </html>
