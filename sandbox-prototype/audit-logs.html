@@ -147,6 +147,7 @@
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; height: 32px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 590; cursor: pointer; border: none; font-family: inherit; transition: all 0.12s; white-space: nowrap; }
     .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
     .btn-ghost:hover { background: var(--bg); color: var(--text-1); border-color: var(--border-strong); }
+    .btn.icon-only { padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); }
     .btn svg { width: 14px; height: 14px; stroke-width: 2; flex-shrink: 0; fill: none; stroke: currentColor; }
   </style>
 </head>
@@ -235,9 +236,8 @@
       <div class="page-title-row">
         <span class="page-title">Audit logs</span>
       </div>
-      <button class="btn btn-ghost" onclick="exportCSV()">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export CSV
+      <button class="btn btn-ghost icon-only" title="Export CSV" onclick="exportCSV()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 11l5 5 5-5M4 20h16"/></svg>
       </button>
     </div>
   </div>
