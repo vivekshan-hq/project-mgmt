@@ -341,7 +341,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
             <tr>
               <th style="width:180px;min-width:160px;text-align:left;">Role</th>
               <th style="width:200px;min-width:160px;text-align:left;">Skill</th>
-              <th style="width:110px;" id="sdb-req-hd">Total Req</th>
+              <th style="width:110px;" id="sdb-req-hd">Total Allocated</th>
               <th style="width:110px;" id="sdb-assigned-hd">Assigned</th>
               <th style="width:120px;" id="sdb-unassigned-hd">Unassigned</th>
               <th style="width:110px;" id="sdb-avail-hd">Available</th>
@@ -777,10 +777,10 @@ function renderSDB() {
   const fmt = v => isHrs ? Math.round(v * mul).toLocaleString() : v.toFixed(1);
   const unitLabel = isHrs ? 'Hours' : 'FTE';
 
-  document.getElementById('sdb-req-hd').textContent      = `Total Req (${unitLabel})`;
-  document.getElementById('sdb-assigned-hd').textContent  = `Assigned (${unitLabel})`;
-  document.getElementById('sdb-unassigned-hd').textContent= `Unassigned (${unitLabel})`;
-  document.getElementById('sdb-avail-hd').textContent     = `Available (${unitLabel})`;
+  document.getElementById('sdb-req-hd').textContent      = 'Total Allocated';
+  document.getElementById('sdb-assigned-hd').textContent  = 'Assigned';
+  document.getElementById('sdb-unassigned-hd').textContent= 'Unassigned';
+  document.getElementById('sdb-avail-hd').textContent     = 'Available';
 
   const rows = SDB_DATA.filter(d => {
     const gap = d.avail - (d.assignedHard + d.assignedSoft + d.unassignedHard + d.unassignedSoft);
