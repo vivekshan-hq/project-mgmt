@@ -478,12 +478,6 @@
         </div>
       </div>` : '';
 
-    const impactHTML = d.impact ? `
-      <div class="df">
-        <div class="df-label">Impact note</div>
-        <div class="impact-note">${d.impact}</div>
-      </div>` : '';
-
     document.getElementById('detail-drawer-body').innerHTML = `
       <div class="df">
         <div class="df-label">Setting</div>
@@ -508,7 +502,7 @@
         <div class="df-label">Source</div>
         <div class="df-value">${sourceIP[d.source] || d.source}</div>
       </div>
-      ${impactHTML}`;
+      `;
 
     document.getElementById('detail-drawer').classList.add('open');
     document.getElementById('detail-overlay').classList.add('open');
