@@ -94,6 +94,34 @@
     .export-btn:hover { border-color: var(--border-strong); color: var(--text-1); background: var(--bg); }
     .export-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
+    /* ═══ EXPORT MODAL ═══ */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 300; display: none; place-items: center; }
+    .modal-overlay.open { display: grid; }
+    .modal { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); width: 360px; display: flex; flex-direction: column; overflow: hidden; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 16px; font-weight: 600; color: var(--text-1); }
+    .modal-close { background: none; border: none; cursor: pointer; color: var(--text-3); padding: 2px; display: grid; place-items: center; border-radius: var(--radius-sm); }
+    .modal-close:hover { color: var(--text-1); background: var(--bg); }
+    .modal-close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+    .modal-desc { font-size: 13px; color: var(--text-3); margin-bottom: 4px; }
+    .range-option { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--text-2); transition: all 0.1s; }
+    .range-option:hover { border-color: var(--brand); color: var(--text-1); background: var(--brand-light); }
+    .range-option.selected { border-color: var(--brand); background: var(--brand-light); color: var(--brand); font-weight: 500; }
+    .range-option input[type="radio"] { accent-color: var(--brand); flex-shrink: 0; }
+    .custom-range { display: none; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .custom-range.open { display: flex; }
+    .custom-range-row { display: flex; gap: 8px; }
+    .custom-range-field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .custom-range-field label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.4px; }
+    .custom-range-field input[type="date"] { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; color: var(--text-1); font-family: inherit; outline: none; }
+    .custom-range-field input[type="date"]:focus { border-color: var(--brand); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); }
+    .btn-ghost { background: none; border: 1px solid var(--border); padding: 0 14px; height: 32px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; color: var(--text-2); cursor: pointer; }
+    .btn-ghost:hover { border-color: var(--border-strong); color: var(--text-1); }
+    .btn-primary { background: var(--brand); border: none; padding: 0 14px; height: 32px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; color: #fff; cursor: pointer; font-weight: 500; }
+    .btn-primary:hover { background: var(--brand-dark); }
+
     /* ═══ SECTION FILTER (custom grouped dropdown) ═══ */
     .section-filter { position: relative; }
     .section-filter-btn {
@@ -525,6 +553,47 @@
   </div>
 </div>
 
+<!-- Export modal -->
+<div class="modal-overlay" id="export-modal" onclick="closeExportModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Export audit logs</span>
+      <button class="modal-close" onclick="closeExportModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">Select a date range for the export.</p>
+      <label class="range-option selected">
+        <input type="radio" name="export-range" value="30d" checked onchange="onRangeChange(this)"> Last 30 days
+      </label>
+      <label class="range-option">
+        <input type="radio" name="export-range" value="90d" onchange="onRangeChange(this)"> Last 90 days
+      </label>
+      <label class="range-option">
+        <input type="radio" name="export-range" value="180d" onchange="onRangeChange(this)"> Last 180 days
+      </label>
+      <label class="range-option">
+        <input type="radio" name="export-range" value="custom" onchange="onRangeChange(this)"> Custom range
+      </label>
+      <div class="custom-range" id="custom-range">
+        <div class="custom-range-row">
+          <div class="custom-range-field">
+            <label>From</label>
+            <input type="date" id="export-from">
+          </div>
+          <div class="custom-range-field">
+            <label>To</label>
+            <input type="date" id="export-to">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeExportModal()">Cancel</button>
+      <button class="btn-primary" onclick="doExport()">Export</button>
+    </div>
+  </div>
+</div>
+
 <!-- Change detail drawer -->
 <div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
 <div class="detail-drawer" id="detail-drawer">
@@ -708,18 +777,43 @@
   }
 
   function exportCSV() {
-    const headers = ['Date & Time','User','Setting','Action','Source'];
+    // reset modal state
+    document.querySelectorAll('.range-option').forEach(el => el.classList.remove('selected'));
+    document.querySelector('.range-option:first-of-type').classList.add('selected');
+    document.querySelector('input[name="export-range"][value="30d"]').checked = true;
+    document.getElementById('custom-range').classList.remove('open');
+    document.getElementById('export-modal').classList.add('open');
+  }
+
+  function closeExportModal(e) {
+    if (e && e.target !== document.getElementById('export-modal')) return;
+    document.getElementById('export-modal').classList.remove('open');
+  }
+
+  function onRangeChange(input) {
+    document.querySelectorAll('.range-option').forEach(el => el.classList.remove('selected'));
+    input.closest('.range-option').classList.add('selected');
+    document.getElementById('custom-range').classList.toggle('open', input.value === 'custom');
+  }
+
+  function doExport() {
+    const range = document.querySelector('input[name="export-range"]:checked').value;
+    const headers = ['Date & Time', 'What changed', 'Section', 'Action', 'Source', 'Changed by'];
     const rows = [...document.querySelectorAll('#table-body tr')]
-      .filter(r => r.style.display !== 'none')
       .map(r => {
         const d = r.dataset;
-        return [r.querySelector('.du-datetime').textContent.trim(), users[d.user]?.name || d.user, d.setting, d.action, d.source];
+        return [
+          r.querySelector('.td-date').textContent.trim(),
+          d.setting, d.section, d.action, d.source,
+          users[d.user]?.name || d.user
+        ];
       });
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = 'audit-log.csv';
+    a.download = `audit-log-${range}.csv`;
     a.click();
+    document.getElementById('export-modal').classList.remove('open');
   }
 </script>
 </body>
