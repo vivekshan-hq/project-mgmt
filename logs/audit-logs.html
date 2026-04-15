@@ -681,6 +681,7 @@
               ${d.autoObject}
             </div>
           </div>
+          ${changeLabel !== 'Trigger changed' ? `
           <div class="auto-divider"></div>
           <div class="auto-row">
             <div class="auto-label">Trigger</div>
@@ -688,7 +689,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="#f98000" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               ${d.autoTrigger}
             </div>
-          </div>
+          </div>` : ''}
         </div>
       </div>
       ${(d.old || d.new) ? `
