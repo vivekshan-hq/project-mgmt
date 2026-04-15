@@ -261,6 +261,9 @@
       <option value="Time Tracking">Time Tracking</option>
       <option value="Resource Management">Resource Management</option>
       <option value="Automations">Automations</option>
+      <option value="Project Fields">Project Fields</option>
+      <option value="Salesforce Integration">Salesforce Integration</option>
+      <option value="Holiday Calendar">Holiday Calendar</option>
     </select>
     <div class="filter-divider"></div>
     <button class="clear-btn" id="clear-btn" onclick="clearFilters()">Clear filters</button>
@@ -433,6 +436,84 @@
           <td class="td-source">UI</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <!-- ── Project Fields ── -->
+
+        <tr data-user="VS" data-source="UI" data-section="Project Fields" data-days="1" data-setting="ARR Tier" data-action="Created" data-change-label="Field created" data-old="" data-new="Type: Single select · Section: Project overview" onclick="openDetail(this)">
+          <td class="td-date">Apr 12, 2026, 10:30 AM</td>
+          <td class="td-what"><div class="what-name">ARR Tier</div><div class="what-section">Project Fields</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-created">Created</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="VS" data-source="UI" data-section="Project Fields" data-days="4" data-setting="Deal Value" data-action="Updated" data-change-label="Field renamed" data-old="Deal Value" data-new="Contract Value" onclick="openDetail(this)">
+          <td class="td-date">Apr 9, 2026, 3:00 PM</td>
+          <td class="td-what"><div class="what-name">Deal Value</div><div class="what-section">Project Fields</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="RK" data-source="UI" data-section="Project Fields" data-days="9" data-setting="Legacy Info" data-action="Deleted" data-change-label="Section deleted" data-old="" data-new="Legacy Info section and its 4 fields removed" onclick="openDetail(this)">
+          <td class="td-date">Apr 4, 2026, 11:15 AM</td>
+          <td class="td-what"><div class="what-name">Legacy Info</div><div class="what-section">Project Fields</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-deleted">Deleted</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
+        </tr>
+
+        <!-- ── Salesforce Integration ── -->
+
+        <tr data-user="VS" data-source="UI" data-section="Salesforce Integration" data-days="3" data-setting="Salesforce connection" data-action="Created" data-change-label="Integration enabled" data-old="" data-new="Connected to Salesforce org: acme.salesforce.com" onclick="openDetail(this)">
+          <td class="td-date">Apr 10, 2026, 9:45 AM</td>
+          <td class="td-what"><div class="what-name">Salesforce connection</div><div class="what-section">Salesforce Integration</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-created">Created</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="AM" data-source="API" data-section="Salesforce Integration" data-days="5" data-setting="Sync trigger" data-action="Updated" data-change-label="Trigger updated" data-old="Closed Won" data-new="Closed Won, Closed Lost" onclick="openDetail(this)">
+          <td class="td-date">Apr 8, 2026, 2:00 PM</td>
+          <td class="td-what"><div class="what-name">Sync trigger</div><div class="what-section">Salesforce Integration</div></td>
+          <td class="td-source">API</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
+        </tr>
+
+        <tr data-user="VS" data-source="UI" data-section="Salesforce Integration" data-days="7" data-setting="Field mapping" data-action="Updated" data-change-label="Mapping added" data-old="" data-new="Opportunity Amount → Project Budget" onclick="openDetail(this)">
+          <td class="td-date">Apr 6, 2026, 4:30 PM</td>
+          <td class="td-what"><div class="what-name">Field mapping</div><div class="what-section">Salesforce Integration</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <!-- ── Holiday Calendar ── -->
+
+        <tr data-user="VS" data-source="UI" data-section="Holiday Calendar" data-days="2" data-setting="APAC Holidays" data-action="Created" data-change-label="Calendar created" data-old="" data-new="New calendar with 12 holidays added" onclick="openDetail(this)">
+          <td class="td-date">Apr 11, 2026, 1:00 PM</td>
+          <td class="td-what"><div class="what-name">APAC Holidays</div><div class="what-section">Holiday Calendar</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-created">Created</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="RK" data-source="UI" data-section="Holiday Calendar" data-days="10" data-setting="Boxing Day · UK Holidays" data-action="Deleted" data-change-label="Holiday removed" data-old="" data-new="Boxing Day (Dec 26, 2025) removed from UK Holidays" onclick="openDetail(this)">
+          <td class="td-date">Apr 3, 2026, 5:00 PM</td>
+          <td class="td-what"><div class="what-name">Boxing Day</div><div class="what-section">Holiday Calendar</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-deleted">Deleted</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
+        </tr>
+
+        <tr data-user="SA" data-source="UI" data-section="Holiday Calendar" data-days="15" data-setting="Christmas Day · UK Holidays" data-action="Updated" data-change-label="Holiday date updated" data-old="Dec 25, 2024" data-new="Dec 25, 2025" onclick="openDetail(this)">
+          <td class="td-date">Mar 29, 2026, 2:15 PM</td>
+          <td class="td-what"><div class="what-name">Christmas Day</div><div class="what-section">Holiday Calendar</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#525252;">SA</div><span class="by-name">Sam A</span></div></td>
         </tr>
 
       </tbody>
