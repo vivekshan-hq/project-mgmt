@@ -90,9 +90,9 @@
     .clear-btn { height: 32px; padding: 0 10px; border-radius: var(--radius-sm); border: none; background: none; font-size: 13px; color: var(--brand); cursor: pointer; font-family: inherit; display: none; }
     .clear-btn.visible { display: block; }
     .clear-btn:hover { text-decoration: underline; }
-    .export-btn { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--text-3); padding: 4px; display: grid; place-items: center; border-radius: var(--radius-sm); }
-    .export-btn:hover { color: var(--text-1); background: var(--bg); }
-    .export-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .export-btn { margin-left: auto; background: none; border: 1px solid var(--border); cursor: pointer; color: var(--text-2); padding: 0 12px; height: 32px; display: flex; align-items: center; gap: 6px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; font-weight: 500; }
+    .export-btn:hover { border-color: var(--border-strong); color: var(--text-1); background: var(--bg); }
+    .export-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
     /* ═══ SECTION FILTER (custom grouped dropdown) ═══ */
     .section-filter { position: relative; }
@@ -330,8 +330,9 @@
     </div>
     <div class="filter-divider"></div>
     <button class="clear-btn" id="clear-btn" onclick="clearFilters()">Clear filters</button>
-    <button class="export-btn" title="Export CSV" onclick="exportCSV()">
+    <button class="export-btn" onclick="exportCSV()">
       <svg viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5M4 20h16"/></svg>
+      Export
     </button>
   </div>
 
