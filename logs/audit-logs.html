@@ -505,7 +505,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="AM" data-source="API" data-section="Salesforce Integration" data-days="5" data-setting="Closed Won – Create Project" data-action="Updated" data-change-label="Field mapping added" data-old="" data-new="Opportunity Revenue → ARR" onclick="openDetail(this)">
+        <tr data-user="AM" data-source="API" data-section="Salesforce Integration" data-days="5" data-setting="Closed Won – Create Project" data-action="Updated" data-auto-object="Opportunity" data-change-label="Field mapping added" data-old="" data-new="Opportunity Revenue → ARR" onclick="openDetail(this)">
           <td class="td-date">Apr 8, 2026, 2:00 PM</td>
           <td class="td-what"><div class="what-name">Closed Won – Create Project</div><div class="what-section">Salesforce Integration</div></td>
           <td class="td-source">API</td>
@@ -513,7 +513,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
-        <tr data-user="VS" data-source="App" data-section="Salesforce Integration" data-days="7" data-setting="New Account – Kickoff Project" data-action="Updated" data-change-label="Field mapping added" data-old="" data-new="Opportunity Close Date → Project End date" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Salesforce Integration" data-days="7" data-setting="New Account – Kickoff Project" data-action="Updated" data-auto-object="Opportunity" data-change-label="Field mapping added" data-old="" data-new="Opportunity Close Date → Project End date" onclick="openDetail(this)">
           <td class="td-date">Apr 6, 2026, 4:30 PM</td>
           <td class="td-what"><div class="what-name">New Account – Kickoff Project</div><div class="what-section">Salesforce Integration</div></td>
           <td class="td-source">App</td>
@@ -672,7 +672,7 @@
     const u = users[d.user] || { name: d.user, email: '', color: '#525252' };
     const datetime = row.querySelector('.td-date').textContent.trim();
 
-    const isAuto = d.section === 'Automations' && d.autoObject;
+    const isAuto = !!d.autoObject;
     const changeLabel = d.changeLabel || 'Change';
 
     const changeHTML = isAuto ? `
