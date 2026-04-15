@@ -275,9 +275,10 @@
     </select>
     <select class="filter-select" id="f-source" onchange="applyFilters()">
       <option value="">All sources</option>
-      <option value="UI">UI</option>
+      <option value="App">App</option>
       <option value="API">API</option>
       <option value="Sandbox">Sandbox merge</option>
+      <option value="Workforce Agent">Workforce Agent</option>
     </select>
     <select class="filter-select" id="f-user" onchange="applyFilters()">
       <option value="">All users</option>
@@ -349,18 +350,18 @@
 
         <!-- ── Time Tracking ── -->
 
-        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0" data-setting="Timesheet due day" data-action="Updated" data-old="Thursday" data-new="Friday" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Time Tracking" data-days="0" data-setting="Timesheet due day" data-action="Updated" data-old="Thursday" data-new="Friday" onclick="openDetail(this)">
           <td class="td-date">Apr 13, 2026, 2:00 PM</td>
           <td class="td-what"><div class="what-name">Timesheet due day</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="UI" data-section="Time Tracking" data-days="8" data-setting="Hours to be reported" data-action="Updated" data-old="No requirement" data-new="Cannot submit less than 40 hrs/week" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Time Tracking" data-days="8" data-setting="Hours to be reported" data-action="Updated" data-old="No requirement" data-new="Cannot submit less than 40 hrs/week" onclick="openDetail(this)">
           <td class="td-date">Apr 5, 2026, 2:15 PM</td>
           <td class="td-what"><div class="what-name">Hours to be reported</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
@@ -375,10 +376,10 @@
 
         <!-- ── Resource Management ── -->
 
-        <tr data-user="VS" data-source="UI" data-section="Resource Management" data-days="2" data-setting="Soft allocations" data-action="Updated" data-old="Off" data-new="On" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Resource Management" data-days="2" data-setting="Soft allocations" data-action="Updated" data-old="Off" data-new="On" onclick="openDetail(this)">
           <td class="td-date">Apr 11, 2026, 2:29 PM</td>
           <td class="td-what"><div class="what-name">Soft allocations</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
@@ -391,10 +392,10 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="UI" data-section="Resource Management" data-days="5" data-setting="Collaborator access to allocations" data-action="Updated" data-old="On" data-new="Off" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Resource Management" data-days="5" data-setting="Collaborator access to allocations" data-action="Updated" data-old="On" data-new="Off" onclick="openDetail(this)">
           <td class="td-date">Apr 8, 2026, 11:05 AM</td>
           <td class="td-what"><div class="what-name">Collaborator access to allocations</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
@@ -423,49 +424,49 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="UI" data-section="Automations" data-days="5" data-setting="New resource request notify" data-action="Updated"
+        <tr data-user="RK" data-source="App" data-section="Automations" data-days="5" data-setting="New resource request notify" data-action="Updated"
             data-auto-object="Resource requests" data-auto-trigger="When Request submitted"
             data-change-label="Trigger changed" data-old="When Request approved" data-new="When Request submitted"
             onclick="openDetail(this)">
           <td class="td-date">Apr 8, 2026, 11:20 AM</td>
           <td class="td-what"><div class="what-name">New resource request notify</div><div class="what-section">Automations</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
         <!-- ── Project Fields ── -->
 
-        <tr data-user="VS" data-source="UI" data-section="Project Fields" data-days="1" data-setting="ARR Tier" data-action="Created" data-change-label="Field created" data-old="" data-new="Type: Single select · Section: Project overview" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Project Fields" data-days="1" data-setting="ARR Tier" data-action="Created" data-change-label="Field created" data-old="" data-new="Type: Single select · Section: Project overview" onclick="openDetail(this)">
           <td class="td-date">Apr 12, 2026, 10:30 AM</td>
           <td class="td-what"><div class="what-name">ARR Tier</div><div class="what-section">Project Fields</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-created">Created</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="VS" data-source="UI" data-section="Project Fields" data-days="4" data-setting="Deal Value" data-action="Updated" data-change-label="Field renamed" data-old="Deal Value" data-new="Contract Value" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Project Fields" data-days="4" data-setting="Deal Value" data-action="Updated" data-change-label="Field renamed" data-old="Deal Value" data-new="Contract Value" onclick="openDetail(this)">
           <td class="td-date">Apr 9, 2026, 3:00 PM</td>
           <td class="td-what"><div class="what-name">Deal Value</div><div class="what-section">Project Fields</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="UI" data-section="Project Fields" data-days="9" data-setting="Legacy Info" data-action="Deleted" data-change-label="Section deleted" data-old="" data-new="Legacy Info section and its 4 fields removed" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Project Fields" data-days="9" data-setting="Legacy Info" data-action="Deleted" data-change-label="Section deleted" data-old="" data-new="Legacy Info section and its 4 fields removed" onclick="openDetail(this)">
           <td class="td-date">Apr 4, 2026, 11:15 AM</td>
           <td class="td-what"><div class="what-name">Legacy Info</div><div class="what-section">Project Fields</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-deleted">Deleted</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
         <!-- ── Salesforce Integration ── -->
 
-        <tr data-user="VS" data-source="UI" data-section="Salesforce Integration" data-days="3" data-setting="Opportunity Amount ↔ Project Budget" data-action="Updated" data-change-label="Sync direction" data-old="One-way (Salesforce → Rocketlane)" data-new="Two-way sync" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Salesforce Integration" data-days="3" data-setting="Opportunity Amount ↔ Project Budget" data-action="Updated" data-change-label="Sync direction" data-old="One-way (Salesforce → Rocketlane)" data-new="Two-way sync" onclick="openDetail(this)">
           <td class="td-date">Apr 10, 2026, 9:45 AM</td>
           <td class="td-what"><div class="what-name">Field sync</div><div class="what-section">Salesforce Integration</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
@@ -478,36 +479,36 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
-        <tr data-user="VS" data-source="UI" data-section="Salesforce Integration" data-days="7" data-setting="New Account – Kickoff Project" data-action="Updated" data-change-label="Field mapping added" data-old="" data-new="Opportunity Close Date → Project End date" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Salesforce Integration" data-days="7" data-setting="New Account – Kickoff Project" data-action="Updated" data-change-label="Field mapping added" data-old="" data-new="Opportunity Close Date → Project End date" onclick="openDetail(this)">
           <td class="td-date">Apr 6, 2026, 4:30 PM</td>
           <td class="td-what"><div class="what-name">New Account – Kickoff Project</div><div class="what-section">Salesforce Integration</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
         <!-- ── Holiday Calendar ── -->
 
-        <tr data-user="VS" data-source="UI" data-section="Holiday Calendar" data-days="2" data-setting="APAC Holidays" data-action="Created" data-change-label="Calendar created" data-old="" data-new="New calendar with 12 holidays added" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Holiday Calendar" data-days="2" data-setting="APAC Holidays" data-action="Created" data-change-label="Calendar created" data-old="" data-new="New calendar with 12 holidays added" onclick="openDetail(this)">
           <td class="td-date">Apr 11, 2026, 1:00 PM</td>
           <td class="td-what"><div class="what-name">APAC Holidays</div><div class="what-section">Holiday Calendar</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-created">Created</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="UI" data-section="Holiday Calendar" data-days="10" data-setting="Boxing Day · UK Holidays" data-action="Deleted" data-change-label="Holiday removed" data-old="" data-new="Boxing Day (Dec 26, 2025) removed from UK Holidays" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Holiday Calendar" data-days="10" data-setting="Boxing Day · UK Holidays" data-action="Deleted" data-change-label="Holiday removed" data-old="" data-new="Boxing Day (Dec 26, 2025) removed from UK Holidays" onclick="openDetail(this)">
           <td class="td-date">Apr 3, 2026, 5:00 PM</td>
           <td class="td-what"><div class="what-name">Boxing Day</div><div class="what-section">Holiday Calendar</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-deleted">Deleted</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
-        <tr data-user="SA" data-source="UI" data-section="Holiday Calendar" data-days="15" data-setting="Christmas Day · UK Holidays" data-action="Updated" data-change-label="Holiday date updated" data-old="Dec 25, 2024" data-new="Dec 25, 2025" onclick="openDetail(this)">
+        <tr data-user="SA" data-source="App" data-section="Holiday Calendar" data-days="15" data-setting="Christmas Day · UK Holidays" data-action="Updated" data-change-label="Holiday date updated" data-old="Dec 25, 2024" data-new="Dec 25, 2025" onclick="openDetail(this)">
           <td class="td-date">Mar 29, 2026, 2:15 PM</td>
           <td class="td-what"><div class="what-name">Christmas Day</div><div class="what-section">Holiday Calendar</div></td>
-          <td class="td-source">UI</td>
+          <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#525252;">SA</div><span class="by-name">Sam A</span></div></td>
         </tr>
@@ -583,7 +584,7 @@
     SA: { name: 'Sam A', email: 'sam.a@acme.com', color: '#525252' },
   };
 
-  const sourceIP = { UI: 'UI · 103.21.x.x', API: 'API · 52.14.x.x', Sandbox: 'Sandbox merge' };
+  const sourceIP = { App: 'App · 103.21.x.x', API: 'API · 52.14.x.x', Sandbox: 'Sandbox merge', 'Workforce Agent': 'Workforce Agent' };
 
   let activeRow = null;
 
