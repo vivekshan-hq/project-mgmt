@@ -210,6 +210,9 @@
     .detail-drawer-close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
     .detail-drawer-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
 
+    /* Module tag */
+    .module-tag { display: inline-flex; align-items: center; padding: 2px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; font-size: 11px; color: var(--text-3); white-space: nowrap; }
+
     /* Drawer fields */
     .df { display: flex; flex-direction: column; gap: 6px; }
     .df-label { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: var(--text-3); text-transform: uppercase; }
@@ -696,8 +699,10 @@
     document.getElementById('detail-drawer-body').innerHTML = `
       <div class="df">
         <div class="df-label">${isAuto ? 'Automation name' : 'Setting'}</div>
-        <div class="df-value">${d.setting}</div>
-        <div class="what-section" style="margin-top:2px;">${d.section}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="df-value">${d.setting}</div>
+          <span class="module-tag">${d.section}</span>
+        </div>
       </div>
       ${changeHTML}
       <div class="drawer-meta">
