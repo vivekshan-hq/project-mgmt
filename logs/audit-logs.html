@@ -291,7 +291,7 @@
         <span id="section-filter-label">All settings</span>
         <svg class="sfb-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      <div class="sfd-panel" id="sfd-panel">
+      <div class="sfd-panel" id="sfd-panel" onclick="event.stopPropagation()">
         <div class="sfd-all selected" id="sfd-all-opt" onclick="selectSection('', 'All settings')">All settings</div>
         <div class="sfd-divider"></div>
         <div class="sfd-group">
