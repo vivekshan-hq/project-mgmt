@@ -639,7 +639,7 @@
 
     document.getElementById('detail-drawer-body').innerHTML = `
       <div class="df">
-        <div class="df-label">Setting</div>
+        <div class="df-label">${isAuto ? 'Automation name' : 'Setting'}</div>
         <div class="df-value">${d.setting}</div>
       </div>
       ${changeHTML}
