@@ -676,27 +676,6 @@
     const changeLabel = d.changeLabel || 'Change';
 
     const changeHTML = isAuto ? `
-      <div class="df">
-        <div class="df-label">Automation</div>
-        <div class="auto-card">
-          <div class="auto-row">
-            <div class="auto-label">Runs on</div>
-            <div class="auto-value">
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-              ${d.autoObject}
-            </div>
-          </div>
-          ${changeLabel !== 'Trigger changed' ? `
-          <div class="auto-divider"></div>
-          <div class="auto-row">
-            <div class="auto-label">Trigger</div>
-            <div class="auto-value">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#f98000" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              ${d.autoTrigger}
-            </div>
-          </div>` : ''}
-        </div>
-      </div>
       ${(d.old || d.new) ? `
       <div class="df">
         <div class="df-label">${changeLabel}</div>
