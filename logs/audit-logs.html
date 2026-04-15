@@ -285,7 +285,9 @@
       </thead>
       <tbody id="table-body">
 
-        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0" data-setting="Timesheet due day" data-action="Updated" data-old="Thursday" data-new="Friday" data-impact="Affects when weekly timesheets are due for all team members." onclick="openDetail(this)">
+        <!-- ── Time Tracking ── -->
+
+        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0" data-setting="Timesheet due day" data-action="Updated" data-old="Thursday" data-new="Friday" onclick="openDetail(this)">
           <td class="td-date">Apr 13, 2026, 2:00 PM</td>
           <td class="td-what"><div class="what-name">Timesheet due day</div><div class="what-section">Time Tracking</div></td>
           <td class="td-source">UI</td>
@@ -293,37 +295,49 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0" data-setting="Approval settings" data-action="Updated" data-old="Timesheet approver" data-new="Project owners" data-impact="All pending timesheets will now route to project owners for approval." onclick="openDetail(this)">
-          <td class="td-date">Apr 13, 2026, 1:00 PM</td>
-          <td class="td-what"><div class="what-name">Approval settings</div><div class="what-section">Time Tracking</div></td>
+        <tr data-user="RK" data-source="UI" data-section="Time Tracking" data-days="8" data-setting="Hours to be reported" data-action="Updated" data-old="No requirement" data-new="Cannot submit less than 40 hrs/week" onclick="openDetail(this)">
+          <td class="td-date">Apr 5, 2026, 2:15 PM</td>
+          <td class="td-what"><div class="what-name">Hours to be reported</div><div class="what-section">Time Tracking</div></td>
           <td class="td-source">UI</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
-        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="0" data-setting="Approver hierarchy" data-action="Updated" data-old="Off" data-new="On" data-impact="Approvals will now follow the configured hierarchy order." onclick="openDetail(this)">
-          <td class="td-date">Apr 13, 2026, 12:15 PM</td>
-          <td class="td-what"><div class="what-name">Approver hierarchy</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">UI</td>
+        <tr data-user="AM" data-source="API" data-section="Time Tracking" data-days="16" data-setting="Reminder – before due" data-action="Updated" data-old="24 hours" data-new="6 hours" onclick="openDetail(this)">
+          <td class="td-date">Mar 28, 2026, 3:20 PM</td>
+          <td class="td-what"><div class="what-name">Reminder – before due</div><div class="what-section">Time Tracking</div></td>
+          <td class="td-source">API</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
-        <tr data-user="VS" data-source="UI" data-section="Resource Management" data-days="2" data-setting="Allocation time unit" data-action="Updated" data-old="Hours/Week" data-new="Hours/Day" data-impact="Affects how all allocations are displayed. Numeric values auto-converted." onclick="openDetail(this)">
-          <td class="td-date">Apr 11, 2026, 2:46 PM</td>
-          <td class="td-what"><div class="what-name">Allocation time unit</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">UI</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
-        </tr>
+        <!-- ── Resource Management ── -->
 
-        <tr data-user="VS" data-source="UI" data-section="Resource Management" data-days="2" data-setting="Soft allocations" data-action="Updated" data-old="Off" data-new="On" data-impact="Team members can now be soft-allocated to projects." onclick="openDetail(this)">
+        <tr data-user="VS" data-source="UI" data-section="Resource Management" data-days="2" data-setting="Soft allocations" data-action="Updated" data-old="Off" data-new="On" onclick="openDetail(this)">
           <td class="td-date">Apr 11, 2026, 2:29 PM</td>
           <td class="td-what"><div class="what-name">Soft allocations</div><div class="what-section">Resource Management</div></td>
           <td class="td-source">UI</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
+
+        <tr data-user="AM" data-source="Sandbox" data-section="Resource Management" data-days="3" data-setting="Effort planning level" data-action="Updated" data-old="At phase level" data-new="At task level" onclick="openDetail(this)">
+          <td class="td-date">Apr 10, 2026, 4:22 PM</td>
+          <td class="td-what"><div class="what-name">Effort planning level</div><div class="what-section">Resource Management</div></td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
+        </tr>
+
+        <tr data-user="RK" data-source="UI" data-section="Resource Management" data-days="5" data-setting="Collaborator access to allocations" data-action="Updated" data-old="On" data-new="Off" onclick="openDetail(this)">
+          <td class="td-date">Apr 8, 2026, 11:05 AM</td>
+          <td class="td-what"><div class="what-name">Collaborator access to allocations</div><div class="what-section">Resource Management</div></td>
+          <td class="td-source">UI</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
+        </tr>
+
+        <!-- ── Automations ── -->
 
         <tr data-user="AM" data-source="Sandbox" data-section="Automations" data-days="2" data-setting="High ARR project alert" data-action="Updated"
             data-auto-object="All projects" data-auto-trigger="When Project created"
@@ -347,38 +361,6 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
-        <tr data-user="AM" data-source="Sandbox" data-section="Resource Management" data-days="3" data-setting="Allocation time unit" data-action="Updated" data-old="Hours/Day" data-new="Hours/Week" data-impact="Affects how all allocations are displayed. Numeric values auto-converted." onclick="openDetail(this)">
-          <td class="td-date">Apr 10, 2026, 4:22 PM</td>
-          <td class="td-what"><div class="what-name">Allocation time unit</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">Sandbox merge</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
-        </tr>
-
-        <tr data-user="AM" data-source="Sandbox" data-section="Resource Management" data-days="3" data-setting="Effort planning level" data-action="Updated" data-old="At phase level" data-new="At task level" data-impact="Resource planning views will reflect task-level granularity." onclick="openDetail(this)">
-          <td class="td-date">Apr 10, 2026, 4:22 PM</td>
-          <td class="td-what"><div class="what-name">Effort planning level</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">Sandbox merge</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
-        </tr>
-
-        <tr data-user="RK" data-source="UI" data-section="Resource Management" data-days="5" data-setting="Collaborator access to allocations" data-action="Updated" data-old="On" data-new="Off" data-impact="Collaborators can no longer view or edit allocation data." onclick="openDetail(this)">
-          <td class="td-date">Apr 8, 2026, 11:05 AM</td>
-          <td class="td-what"><div class="what-name">Collaborator access to allocations</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">UI</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
-        </tr>
-
-        <tr data-user="RK" data-source="API" data-section="Resource Management" data-days="5" data-setting="Collaborator access to allocations" data-action="Updated" data-old="Off" data-new="On" data-impact="Collaborators can now view and edit allocation data." onclick="openDetail(this)">
-          <td class="td-date">Apr 8, 2026, 10:58 AM</td>
-          <td class="td-what"><div class="what-name">Collaborator access to allocations</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">API</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
-        </tr>
-
         <tr data-user="RK" data-source="UI" data-section="Automations" data-days="5" data-setting="New resource request notify" data-action="Updated"
             data-auto-object="Resource requests" data-auto-trigger="When Request submitted"
             data-change-label="Trigger changed" data-old="When Request approved" data-new="When Request submitted"
@@ -388,54 +370,6 @@
           <td class="td-source">UI</td>
           <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
-        </tr>
-
-        <tr data-user="RK" data-source="UI" data-section="Time Tracking" data-days="8" data-setting="Non-billable hours – Fixed fee" data-action="Updated" data-old="Off" data-new="On" data-impact="" onclick="openDetail(this)">
-          <td class="td-date">Apr 5, 2026, 2:30 PM</td>
-          <td class="td-what"><div class="what-name">Non-billable hours – Fixed fee</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">UI</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
-        </tr>
-
-        <tr data-user="RK" data-source="UI" data-section="Time Tracking" data-days="8" data-setting="Hours to be reported" data-action="Updated" data-old="No requirement" data-new="Cannot submit less than 40 hrs/week" data-impact="Members will be blocked from submitting timesheets under 40 hrs/week." onclick="openDetail(this)">
-          <td class="td-date">Apr 5, 2026, 2:15 PM</td>
-          <td class="td-what"><div class="what-name">Hours to be reported</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">UI</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
-        </tr>
-
-        <tr data-user="SA" data-source="UI" data-section="Resource Management" data-days="8" data-setting="Effort planning level" data-action="Updated" data-old="At task level" data-new="At phase level" data-impact="" onclick="openDetail(this)">
-          <td class="td-date">Apr 5, 2026, 3:14 PM</td>
-          <td class="td-what"><div class="what-name">Effort planning level</div><div class="what-section">Resource Management</div></td>
-          <td class="td-source">UI</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#525252;">SA</div><span class="by-name">Sam A</span></div></td>
-        </tr>
-
-        <tr data-user="SA" data-source="UI" data-section="Time Tracking" data-days="11" data-setting="Calendar integration" data-action="Updated" data-old="Off" data-new="On" data-impact="" onclick="openDetail(this)">
-          <td class="td-date">Apr 2, 2026, 11:00 AM</td>
-          <td class="td-what"><div class="what-name">Calendar integration</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">UI</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#525252;">SA</div><span class="by-name">Sam A</span></div></td>
-        </tr>
-
-        <tr data-user="AM" data-source="API" data-section="Time Tracking" data-days="16" data-setting="Reminder – before due" data-action="Updated" data-old="24 hours" data-new="6 hours" data-impact="" onclick="openDetail(this)">
-          <td class="td-date">Mar 28, 2026, 3:20 PM</td>
-          <td class="td-what"><div class="what-name">Reminder – before due</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">API</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
-        </tr>
-
-        <tr data-user="VS" data-source="UI" data-section="Time Tracking" data-days="16" data-setting="Timesheet exclusion" data-action="Updated" data-old="" data-new="Sneha Reddy added" data-impact="" onclick="openDetail(this)">
-          <td class="td-date">Mar 28, 2026, 9:00 AM</td>
-          <td class="td-what"><div class="what-name">Timesheet exclusion</div><div class="what-section">Time Tracking</div></td>
-          <td class="td-source">UI</td>
-          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
-          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
         <!-- ── Project Fields ── -->
