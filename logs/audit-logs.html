@@ -222,10 +222,15 @@
     .change-new { font-size: 14px; color: #198038; font-weight: 500; }
 
     /* Changed by */
-    .cb-user { display: flex; align-items: center; gap: 10px; }
-    .cb-av { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
-    .cb-info-name { font-size: 14px; font-weight: 600; color: var(--text-1); }
-    .cb-info-email { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+    .cb-user { display: flex; align-items: center; gap: 8px; }
+    .cb-av { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 8px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .cb-info-name { font-size: 13px; font-weight: 500; color: var(--text-2); }
+
+    /* Meta row (changed by + when + source) */
+    .drawer-meta { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle); }
+    .dm-row { display: flex; align-items: center; gap: 6px; }
+    .dm-label { font-size: 11px; color: var(--text-4); min-width: 72px; }
+    .dm-value { font-size: 12px; color: var(--text-3); }
 
     /* Automation card in drawer */
     .auto-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
@@ -715,23 +720,22 @@
         <div class="df-value">${d.setting}</div>
       </div>
       ${changeHTML}
-      <div class="df">
-        <div class="df-label">Changed by</div>
-        <div class="cb-user">
-          <div class="cb-av" style="background:${u.color};">${d.user}</div>
-          <div>
-            <div class="cb-info-name">${u.name}</div>
-            ${u.email ? `<div class="cb-info-email">${u.email}</div>` : ''}
+      <div class="drawer-meta">
+        <div class="dm-row">
+          <span class="dm-label">Changed by</span>
+          <div class="cb-user">
+            <div class="cb-av" style="background:${u.color};">${d.user}</div>
+            <span class="cb-info-name">${u.name}</span>
           </div>
         </div>
-      </div>
-      <div class="df">
-        <div class="df-label">When</div>
-        <div class="df-value">${datetime}</div>
-      </div>
-      <div class="df">
-        <div class="df-label">Source</div>
-        <div class="df-value">${sourceIP[d.source] || d.source}</div>
+        <div class="dm-row">
+          <span class="dm-label">When</span>
+          <span class="dm-value">${datetime}</span>
+        </div>
+        <div class="dm-row">
+          <span class="dm-label">Source</span>
+          <span class="dm-value">${sourceIP[d.source] || d.source}</span>
+        </div>
       </div>
       `;
 
