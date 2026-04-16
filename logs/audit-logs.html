@@ -213,6 +213,18 @@
     /* Module tag */
     .module-tag { display: inline-flex; align-items: center; padding: 2px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; font-size: 11px; color: var(--text-3); white-space: nowrap; }
 
+    /* Toggle diff list */
+    .toggle-list { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+    .toggle-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .toggle-pip { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 11px; font-weight: 700; }
+    .toggle-pip.t-on  { background: #defbe6; color: #198038; }
+    .toggle-pip.t-off { background: #fff1f1; color: #da1e28; }
+    .toggle-pip.t-same { background: var(--border); color: var(--text-4); }
+    .toggle-name.t-on  { color: #198038; font-weight: 500; }
+    .toggle-name.t-off { color: #da1e28; text-decoration: line-through; }
+    .toggle-name.t-same { color: var(--text-3); }
+    .toggle-hint { font-size: 11px; color: var(--text-4); margin-left: auto; }
+
     /* Template breadcrumb */
     .tpl-breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
     .tpl-bc-sep { color: var(--text-4); font-size: 13px; }
@@ -408,7 +420,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="VS" data-source="App" data-section="Time Tracking" data-days="2" data-setting="Track time against" data-action="Updated" data-change-label="Selection changed" data-old="Tasks · Milestones · Activities" data-new="Tasks · Phases" onclick="openDetail(this)">
+        <tr data-user="VS" data-source="App" data-section="Time Tracking" data-days="2" data-setting="Track time against" data-action="Updated" data-change-label="Selection changed" data-toggles="Tasks:same,Milestones:off,Activities:off,Phases:on" onclick="openDetail(this)">
           <td class="td-date">Apr 11, 2026, 11:30 AM</td>
           <td class="td-what"><div class="what-name">Track time against</div><div class="what-section">Time Tracking</div></td>
           <td class="td-source">App</td>
@@ -780,6 +792,25 @@
         `</div>`;
     }
 
+    // Toggle-diff rendering (e.g. multi-select options enabled/disabled)
+    let toggleHTML = '';
+    if (d.toggles) {
+      const items = d.toggles.split(',').map(t => {
+        const [name, state] = t.split(':');
+        const pip = state === 'on' ? '+' : state === 'off' ? '−' : '·';
+        const hint = state === 'on' ? 'Enabled' : state === 'off' ? 'Disabled' : '';
+        return `<div class="toggle-item">
+          <div class="toggle-pip t-${state}">${pip}</div>
+          <span class="toggle-name t-${state}">${name}</span>
+          ${hint ? `<span class="toggle-hint">${hint}</span>` : ''}
+        </div>`;
+      }).join('');
+      toggleHTML = `<div class="df">
+        <div class="df-label">${changeLabel}</div>
+        <div class="toggle-list">${items}</div>
+      </div>`;
+    }
+
     const changeHTML = isAuto ? `
       ${(d.old || d.new) ? `
       <div class="df">
@@ -806,7 +837,7 @@
           <span class="module-tag">${d.section}</span>
         </div>
       </div>
-      ${changeHTML}
+      ${d.toggles ? toggleHTML : changeHTML}
       <div class="drawer-meta">
         <div class="dm-row">
           <span class="dm-label">Changed by</span>
