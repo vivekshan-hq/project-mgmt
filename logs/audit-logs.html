@@ -218,6 +218,7 @@
     .tpl-bc-sep { color: var(--text-4); font-size: 13px; }
     .tpl-bc-item { font-size: 14px; color: var(--text-3); font-weight: 400; }
     .tpl-bc-item.tpl-bc-leaf { color: var(--text-1); font-weight: 600; }
+    .tpl-bc-type { font-size: 11px; color: var(--text-4); font-weight: 400; }
 
     /* Drawer fields */
     .df { display: flex; flex-direction: column; gap: 6px; }
@@ -748,13 +749,12 @@
     let tplBreadcrumbHTML = '';
     if (isTemplate) {
       const parts = [];
-      if (d.tplName) parts.push(d.tplName);
-      if (d.tplPhase) parts.push(d.tplPhase);
-      // Add task name only if it's different from the template name (i.e. task-level change)
-      if (d.tplPhase && d.setting && d.setting !== d.tplName) parts.push(d.setting);
+      if (d.tplName) parts.push({ label: d.tplName, suffix: '' });
+      if (d.tplPhase) parts.push({ label: d.tplPhase, suffix: 'Phase' });
+      if (d.tplPhase && d.setting && d.setting !== d.tplName) parts.push({ label: d.setting, suffix: 'Task' });
       tplBreadcrumbHTML = `<div class="tpl-breadcrumb">` +
         parts.map((p, i) =>
-          `${i > 0 ? '<span class="tpl-bc-sep">›</span>' : ''}<span class="tpl-bc-item${i === parts.length - 1 ? ' tpl-bc-leaf' : ''}">${p}</span>`
+          `${i > 0 ? '<span class="tpl-bc-sep">›</span>' : ''}<span class="tpl-bc-item${i === parts.length - 1 ? ' tpl-bc-leaf' : ''}">${p.label}${p.suffix ? ` <span class="tpl-bc-type">(${p.suffix})</span>` : ''}</span>`
         ).join('') +
         `</div>`;
     }
