@@ -357,6 +357,12 @@
           </div>
         </div>
         <div class="sfd-group">
+          <div class="sfd-group-header" onclick="toggleSfdGroup(this)"><span>Templates</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <div class="sfd-group-items">
+            <div class="sfd-item" onclick="selectSection('Project Templates', 'Project Templates')">Project Templates</div>
+          </div>
+        </div>
+        <div class="sfd-group">
           <div class="sfd-group-header" onclick="toggleSfdGroup(this)"><span>Advanced</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
           <div class="sfd-group-items">
             <div class="sfd-item" onclick="selectSection('Automations', 'Automations')">Automations</div>
@@ -524,6 +530,55 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
+        <!-- ── Project Templates ── -->
+
+        <tr data-user="VS" data-source="Sandbox" data-section="Project Templates" data-days="1" data-template="true"
+            data-setting="Security review" data-action="Created"
+            data-change-label="Task added" data-old=""
+            data-new="Security review · Discovery phase · Start Day 5, 2 days"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 12, 2026, 4:00 PM</td>
+          <td class="td-what"><div class="what-name">Security review</div><div class="what-section">Project Templates</div></td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-created">Created</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="AM" data-source="Sandbox" data-section="Project Templates" data-days="3" data-template="true"
+            data-setting="Kickoff Call" data-action="Updated"
+            data-change-label="Task start offset" data-old="Day 1" data-new="Day 3"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 10, 2026, 2:00 PM</td>
+          <td class="td-what"><div class="what-name">Kickoff Call</div><div class="what-section">Project Templates</div></td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
+        </tr>
+
+        <tr data-user="RK" data-source="App" data-section="Project Templates" data-days="5" data-template="true"
+            data-setting="Legal Review" data-action="Updated"
+            data-change-label="Dynamic condition added" data-old=""
+            data-new="Deal Value &gt; $50,000"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 8, 2026, 10:30 AM</td>
+          <td class="td-what"><div class="what-name">Legal Review</div><div class="what-section">Project Templates</div></td>
+          <td class="td-source">App</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
+        </tr>
+
+        <tr data-user="VS" data-source="Sandbox" data-section="Project Templates" data-days="6" data-template="true"
+            data-setting="Enterprise Onboarding" data-action="Updated"
+            data-change-label="Effort planning level"
+            data-old="At phase level" data-new="At task level"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 7, 2026, 3:15 PM</td>
+          <td class="td-what"><div class="what-name">Enterprise Onboarding</div><div class="what-section">Project Templates</div></td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
         <!-- ── Holiday Calendar ── -->
 
         <tr data-user="VS" data-source="App" data-section="Holiday Calendar" data-days="2" data-setting="APAC Holidays" data-action="Created" data-change-label="Calendar created" data-old="" data-new="New calendar with 12 holidays added" onclick="openDetail(this)">
@@ -676,6 +731,7 @@
     const datetime = row.querySelector('.td-date').textContent.trim();
 
     const isAuto = !!d.autoObject;
+    const isTemplate = d.template === 'true';
     const changeLabel = d.changeLabel || 'Change';
 
     const changeHTML = isAuto ? `
@@ -698,7 +754,7 @@
 
     document.getElementById('detail-drawer-body').innerHTML = `
       <div class="df">
-        <div class="df-label">${isAuto ? 'Automation name' : 'Setting'}</div>
+        <div class="df-label">${isAuto ? 'Automation name' : isTemplate ? 'Template' : 'Setting'}</div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <div class="df-value">${d.setting}</div>
           <span class="module-tag">${d.section}</span>
