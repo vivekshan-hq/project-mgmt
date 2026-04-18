@@ -226,8 +226,37 @@
     .toggle-state.was-off { color: var(--text-4); text-decoration: line-through; }
     .toggle-arr { color: var(--text-4); font-size: 13px; }
 
-    /* No-diff note */
-    .no-diff-note { font-size: 13px; color: var(--text-3); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; font-style: italic; }
+    /* Rich text CTA */
+    .rich-text-note { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+    .rich-text-note-text { font-size: 13px; color: var(--text-2); }
+    .rich-text-cta { font-size: 13px; color: var(--brand); font-weight: 500; background: none; border: none; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0; }
+    .rich-text-cta:hover { text-decoration: underline; }
+
+    /* Side-by-side diff modal */
+    .diff-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 400; display: none; place-items: center; }
+    .diff-modal-overlay.open { display: grid; }
+    .diff-modal { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); width: min(860px, 95vw); max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
+    .diff-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .diff-modal-title { font-size: 16px; font-weight: 600; color: var(--text-1); }
+    .diff-modal-meta { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .diff-modal-close { background: none; border: 1px solid var(--border); cursor: pointer; color: var(--text-2); width: 32px; height: 32px; border-radius: var(--radius-sm); display: grid; place-items: center; }
+    .diff-modal-close:hover { background: var(--bg); }
+    .diff-modal-close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .diff-modal-body { display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden; }
+    .diff-pane { display: flex; flex-direction: column; overflow: hidden; }
+    .diff-pane + .diff-pane { border-left: 1px solid var(--border); }
+    .diff-pane-header { padding: 10px 20px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-4); flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+    .diff-pane-header.pane-before { background: #fff8f8; color: #a63d2f; }
+    .diff-pane-header.pane-after  { background: #f3fbf5; color: #1a6b35; }
+    .diff-pane-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .pane-before .diff-pane-dot { background: #da1e28; }
+    .pane-after  .diff-pane-dot { background: #198038; }
+    .diff-pane-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; line-height: 20px; color: var(--text-1); }
+    .diff-pane-body h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+    .diff-pane-body p { color: var(--text-2); margin-bottom: 10px; }
+    .diff-pane-body ul { padding-left: 18px; color: var(--text-2); display: flex; flex-direction: column; gap: 4px; }
+    .diff-removed { background: #fff1f1; border-left: 3px solid #da1e28; padding: 8px 12px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 8px; }
+    .diff-added   { background: #defbe6; border-left: 3px solid #198038; padding: 8px 12px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 8px; }
 
     /* Template breadcrumb */
     .tpl-breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
@@ -646,7 +675,7 @@
         <tr data-user="AM" data-source="App" data-section="Document Templates" data-days="5" data-template="true"
             data-tpl-name="Onboarding Welcome Doc"
             data-setting="Onboarding Welcome Doc" data-action="Updated"
-            data-change-label="Content updated" data-no-diff="true"
+            data-change-label="Content updated" data-rich-text="true"
             onclick="openDetail(this)">
           <td class="td-date">Apr 13, 2026, 3:45 PM</td>
           <td class="td-what"><div class="what-name">Onboarding Welcome Doc</div><div class="what-section">Document Templates</div></td>
@@ -698,7 +727,7 @@
         <tr data-user="SA" data-source="App" data-section="Project Update Templates" data-days="10" data-template="true"
             data-tpl-name="Weekly Status Update"
             data-setting="Weekly Status Update" data-action="Updated"
-            data-change-label="Content updated" data-no-diff="true"
+            data-change-label="Content updated" data-rich-text="true"
             onclick="openDetail(this)">
           <td class="td-date">Apr 8, 2026, 4:15 PM</td>
           <td class="td-what"><div class="what-name">Weekly Status Update</div><div class="what-section">Project Update Templates</div></td>
@@ -807,6 +836,50 @@
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeExportModal()">Cancel</button>
       <button class="btn-primary" onclick="doExport()">Export</button>
+    </div>
+  </div>
+</div>
+
+<!-- Side-by-side diff modal -->
+<div class="diff-modal-overlay" id="diff-modal" onclick="closeDiffModal(event)">
+  <div class="diff-modal">
+    <div class="diff-modal-header">
+      <div>
+        <div class="diff-modal-title" id="diff-modal-title">Content changes</div>
+        <div class="diff-modal-meta" id="diff-modal-meta"></div>
+      </div>
+      <button class="diff-modal-close" onclick="closeDiffModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="diff-modal-body">
+      <div class="diff-pane">
+        <div class="diff-pane-header pane-before"><div class="diff-pane-dot"></div>Before</div>
+        <div class="diff-pane-body">
+          <h3>Welcome to Rocketlane Onboarding</h3>
+          <p>This document outlines the onboarding process for new enterprise customers.</p>
+          <div class="diff-removed">Please reach out to your CSM for any questions during the process.</div>
+          <p>Key milestones in your onboarding journey:</p>
+          <ul>
+            <li>Kickoff call with your implementation team</li>
+            <li>Environment setup and configuration</li>
+            <li>Team training sessions</li>
+          </ul>
+        </div>
+      </div>
+      <div class="diff-pane">
+        <div class="diff-pane-header pane-after"><div class="diff-pane-dot"></div>After</div>
+        <div class="diff-pane-body">
+          <h3>Welcome to Rocketlane Onboarding</h3>
+          <p>This document outlines the onboarding process for new enterprise customers.</p>
+          <div class="diff-added">Your dedicated CSM and implementation lead will be your primary contacts throughout this journey. Reach out to them at any time.</div>
+          <p>Key milestones in your onboarding journey:</p>
+          <ul>
+            <li>Kickoff call with your implementation team</li>
+            <li>Environment setup and configuration</li>
+            <li>Team training sessions</li>
+            <li>Go-live sign-off and handover</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -944,10 +1017,13 @@
           ${d.new ? `<div class="change-new">${d.new}</div>` : ''}
         </div>
       </div>` :
-    (d.noDiff === 'true') ? `
+    (d.richText === 'true') ? `
       <div class="df">
         <div class="df-label">${changeLabel}</div>
-        <div class="no-diff-note">Rich text content was edited. Diff not available here — view version history on the template.</div>
+        <div class="rich-text-note">
+          <span class="rich-text-note-text">Rich text content was edited.</span>
+          <button class="rich-text-cta" onclick="openDiffModal('${d.setting}', '${d.section}', '${datetime}')">View Changes →</button>
+        </div>
       </div>` : '';
 
     document.getElementById('detail-drawer-body').innerHTML = `
@@ -1038,6 +1114,17 @@
     document.querySelectorAll('.range-option').forEach(el => el.classList.remove('selected'));
     input.closest('.range-option').classList.add('selected');
     document.getElementById('custom-range').classList.toggle('open', input.value === 'custom');
+  }
+
+  function openDiffModal(setting, section, datetime) {
+    document.getElementById('diff-modal-title').textContent = setting + ' — content changes';
+    document.getElementById('diff-modal-meta').textContent = section + ' · ' + datetime;
+    document.getElementById('diff-modal').classList.add('open');
+  }
+
+  function closeDiffModal(e) {
+    if (e && e.target !== document.getElementById('diff-modal')) return;
+    document.getElementById('diff-modal').classList.remove('open');
   }
 
   function doExport() {
