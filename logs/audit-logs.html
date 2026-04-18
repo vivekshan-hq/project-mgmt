@@ -1005,7 +1005,8 @@
       <div class="df">
         <div class="df-label">${changeLabel}</div>
         <div class="change-box-auto">
-          ${d.old ? `<div class="change-old">${d.old}</div><div class="change-arr">↓</div>` : ''}
+          ${d.old ? `<div class="change-old">${d.old}</div>` : ''}
+          ${(d.old && d.new) ? `<div class="change-arr">↓</div>` : ''}
           ${d.new ? `<div class="change-new">${d.new}</div>` : ''}
         </div>
       </div>` : ''}` :
@@ -1013,7 +1014,8 @@
       <div class="df">
         <div class="df-label">${changeLabel}</div>
         <div class="change-box">
-          ${d.old ? `<div class="change-old">${d.old}</div><div class="change-arr">↓</div>` : ''}
+          ${d.old ? `<div class="change-old">${d.old}</div>` : ''}
+          ${(d.old && d.new) ? `<div class="change-arr">↓</div>` : ''}
           ${d.new ? `<div class="change-new">${d.new}</div>` : ''}
         </div>
       </div>` :
