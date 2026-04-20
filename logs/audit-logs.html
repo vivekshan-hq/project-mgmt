@@ -828,16 +828,25 @@
     <div class="modal-body">
       <p class="modal-desc">Select a date range for the export.</p>
       <label class="range-option selected">
-        <input type="radio" name="export-range" value="30d" checked onchange="onRangeChange(this)"> Last 30 days
+        <input type="radio" name="export-range" value="this_month" checked onchange="onRangeChange(this)"> This month
       </label>
       <label class="range-option">
-        <input type="radio" name="export-range" value="90d" onchange="onRangeChange(this)"> Last 90 days
+        <input type="radio" name="export-range" value="last_month" onchange="onRangeChange(this)"> Last month
       </label>
       <label class="range-option">
-        <input type="radio" name="export-range" value="180d" onchange="onRangeChange(this)"> Last 180 days
+        <input type="radio" name="export-range" value="this_quarter" onchange="onRangeChange(this)"> This quarter
       </label>
       <label class="range-option">
-        <input type="radio" name="export-range" value="custom" onchange="onRangeChange(this)"> Custom range
+        <input type="radio" name="export-range" value="last_quarter" onchange="onRangeChange(this)"> Last quarter
+      </label>
+      <label class="range-option">
+        <input type="radio" name="export-range" value="ytd" onchange="onRangeChange(this)"> Year to date
+      </label>
+      <label class="range-option">
+        <input type="radio" name="export-range" value="overall" onchange="onRangeChange(this)"> Overall
+      </label>
+      <label class="range-option">
+        <input type="radio" name="export-range" value="custom" onchange="onRangeChange(this)"> Custom
       </label>
       <div class="custom-range" id="custom-range">
         <div class="custom-range-row">
@@ -1199,7 +1208,7 @@
     // reset modal state
     document.querySelectorAll('.range-option').forEach(el => el.classList.remove('selected'));
     document.querySelector('.range-option:first-of-type').classList.add('selected');
-    document.querySelector('input[name="export-range"][value="30d"]').checked = true;
+    document.querySelector('input[name="export-range"][value="this_month"]').checked = true;
     document.getElementById('custom-range').classList.remove('open');
     document.getElementById('export-modal').classList.add('open');
   }
