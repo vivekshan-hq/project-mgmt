@@ -512,7 +512,13 @@ function renderRoleChart() {
           labels: { boxWidth:10, boxHeight:10, font:{size:12}, padding:16 },
         },
         tooltip: { callbacks: {
-          label: c => ` ${c.dataset.label}: ${csUnit==='fte' ? c.raw.toFixed(1)+' FTE' : Number(c.raw).toLocaleString()+' hrs'}`
+          label: c => ` ${c.dataset.label}: ${csUnit==='fte' ? c.raw.toFixed(1)+' FTE' : Number(c.raw).toLocaleString()+' hrs'}`,
+          footer: items => {
+            const get = lbl => items.find(i => i.dataset.label === lbl)?.raw || 0;
+            const gap = get('Available Capacity') - get('Assigned') - get('Unassigned');
+            const fmt = v => csUnit==='fte' ? (v>=0?'+':'')+v.toFixed(1)+' FTE' : (v>=0?'+':'')+Math.round(v).toLocaleString()+' hrs';
+            return 'Net Gap: ' + fmt(gap);
+          },
         }},
       },
       scales: {
