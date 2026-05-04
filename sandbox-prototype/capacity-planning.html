@@ -153,6 +153,18 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .tab-panel{flex:1;}
 
 
+/* ── Settings dropdown ── */
+.settings-wrap{position:relative;}
+.settings-btn-active{background:#f4f4f4;}
+.settings-dropdown{position:absolute;right:0;top:36px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:210px;z-index:200;padding:6px 0;display:none;}
+.settings-dropdown.open{display:block;}
+.settings-item{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:#161616;cursor:pointer;user-select:none;}
+.settings-item:hover{background:#f4f4f4;}
+.settings-cb{width:14px;height:14px;border:1.5px solid #8d8d8d;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.settings-cb.checked{background:#161616;border-color:#161616;}
+.settings-cb.checked::after{content:'';display:block;width:8px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);}
+.settings-divider{height:1px;background:#f4f4f4;margin:4px 0;}
+
 /* ── Skill Demand Breakdown specifics ── */
 .sdb-demand-parent th{background:#edf5ff;color:#0f62fe;text-align:center;font-size:11px;font-weight:590;letter-spacing:0.32px;text-transform:uppercase;padding:5px 12px;border-bottom:1px solid #d0e6ff;}
 .sdb-demand-col{background:#f7faff;}
@@ -222,7 +234,23 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         <button class="arrow-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
       <button class="arrow-btn" title="Help"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
-      <button class="arrow-btn" title="Settings"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></button>
+      <div class="settings-wrap">
+        <button class="arrow-btn" id="settings-btn" title="Settings" onclick="toggleSettingsMenu(event)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        </button>
+        <div class="settings-dropdown" id="settings-dropdown">
+          <div class="settings-item" onclick="toggleSetting('hideGraph')">
+            <div class="settings-cb" id="cb-hideGraph"></div> Hide graph
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-item" onclick="toggleSetting('ignoreSoft')">
+            <div class="settings-cb" id="cb-ignoreSoft"></div> Ignore soft allocations
+          </div>
+          <div class="settings-item" onclick="toggleSetting('showProjects')">
+            <div class="settings-cb" id="cb-showProjects"></div> Show Projects
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -357,11 +385,11 @@ function renderRS() {
   let html = '';
   ROLES.forEach(r => {
     const s       = getRsState(r.id);
-    const alloc   = rTotalAlloc(r);
+    const assigned   = settings.ignoreSoft ? r.allocAssignedHard.slice() : rAssignedAlloc(r);
+    const unassigned = settings.ignoreSoft ? r.allocUnassignedHard.slice() : rUnassignedAlloc(r);
+    const alloc   = assigned.map((v,i) => v + unassigned[i]);
     const cap     = rTotalCap(r);
     const gap     = cap.map((c,i) => c - alloc[i]);
-    const assigned   = rAssignedAlloc(r);
-    const unassigned = rUnassignedAlloc(r);
     const pcts    = alloc.map((a,i) => Math.round(a / cap[i] * 100));
 
     // Role header row — shows utilization %
@@ -452,8 +480,8 @@ function getChartData() {
       const tc = r.capTeamMembers[i] + r.capPartners[i];
       tcW[i] += tc;
       acW[i] += tc - r.capTimeOff[i] - r.capHolidays[i];
-      asW[i] += r.allocAssignedHard[i] + r.allocAssignedSoft[i];
-      unW[i] += r.allocUnassignedHard[i] + r.allocUnassignedSoft[i];
+      asW[i] += settings.ignoreSoft ? r.allocAssignedHard[i] : r.allocAssignedHard[i] + r.allocAssignedSoft[i];
+      unW[i] += settings.ignoreSoft ? r.allocUnassignedHard[i] : r.allocUnassignedHard[i] + r.allocUnassignedSoft[i];
     }
   });
 
@@ -549,6 +577,32 @@ function toggleChartPeriod() {
 function switchUnit(u) {
   switchCsUnit(u === 'hours' ? 'hrs' : 'fte');
 }
+
+// ══════════════════════════════════════════════════
+// Settings
+// ══════════════════════════════════════════════════
+const settings = { hideGraph: false, ignoreSoft: false, showProjects: false };
+
+function toggleSettingsMenu(e) {
+  e.stopPropagation();
+  document.getElementById('settings-dropdown').classList.toggle('open');
+}
+
+function toggleSetting(key) {
+  settings[key] = !settings[key];
+  document.getElementById('cb-' + key).classList.toggle('checked', settings[key]);
+  if (key === 'hideGraph') {
+    document.querySelector('.chart-area').style.display = settings.hideGraph ? 'none' : '';
+  }
+  if (key === 'ignoreSoft') {
+    renderRS();
+    renderRoleChart();
+  }
+}
+
+document.addEventListener('click', () => {
+  document.getElementById('settings-dropdown').classList.remove('open');
+});
 
 // ══════════════════════════════════════════════════
 // Init
