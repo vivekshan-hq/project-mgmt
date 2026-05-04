@@ -115,6 +115,9 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .sub-row>td{color:#525252;}
 .sub-row>td:first-child{padding-left:48px;color:#525252;}
 .role-avatar{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+.proj-avatar{width:20px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0;}
+.proj-row>td{color:#525252;font-size:13px;}
+.proj-row>td:first-child{padding-left:72px;}
 .pct{display:inline-block;padding:1px 8px;border-radius:120px;font-size:11px;font-weight:590;}
 .pct-green{background:#defbe6;color:#24a148;}
 .pct-yellow{background:#fdf4ce;color:#92400e;}
@@ -365,6 +368,63 @@ const ROLES = [
   },
 ];
 
+// Project mock data per role
+const PROJECT_DATA = {
+  ae: {
+    assigned: [
+      { name:'Bubba Gump – HRMS Setup',  color:'#6929c4', initials:'BG', hours:[ 80, 80, 40, 80, 80, 80, 40, 20, 20, 24, 20] },
+      { name:'Oscorp Onboarding',         color:'#0f62fe', initials:'OO', hours:[ 40, 60, 36, 40, 60, 60, 24,  0,  0,  0,  0] },
+      { name:'1 Month Onboarding',        color:'#007d79', initials:'1M', hours:[ 30, 40, 15, 24, 56, 40, 16, 16, 16, 19, 16] },
+    ],
+    unassigned: [
+      { name:'New Logo Account',  color:'#da1e28', initials:'NL', hours:[16, 20, 10, 16, 20, 18,  9,  4,  4,  5,  4] },
+      { name:'Pipeline Deal Q2',  color:'#8d8d8d', initials:'PD', hours:[12, 12,  7, 12, 17, 16,  8,  4,  4,  4,  4] },
+    ],
+  },
+  ap: {
+    assigned: [
+      { name:'Aimpoint Platform Setup', color:'#da1e28', initials:'AP', hours:[24, 64, 48, 32, 80, 56, 32, 24, 16, 16, 24] },
+      { name:'AP Config Review',        color:'#6929c4', initials:'AC', hours:[14, 39, 28, 25, 45, 28, 15, 14, 11,  7, 11] },
+    ],
+    unassigned: [
+      { name:'New AP Client', color:'#8d8d8d', initials:'NA', hours:[7, 17, 13, 10, 20, 14, 8, 6, 5, 5, 6] },
+    ],
+  },
+  ai: {
+    assigned: [
+      { name:'SecureNet Deployment',     color:'#6929c4', initials:'SN', hours:[120,100,160, 80,200,320, 40, 32, 16, 24, 32] },
+      { name:'AlgoSec Phase 2',          color:'#007d79', initials:'A2', hours:[ 96, 96,152, 72,192,280, 40, 24, 14, 20, 28] },
+      { name:'Network Security Audit',   color:'#da1e28', initials:'NS', hours:[ 56, 49, 76, 47, 92,159, 25, 20,  8, 13, 16] },
+    ],
+    unassigned: [
+      { name:'New Security Client', color:'#8d8d8d', initials:'SC', hours:[32, 30, 46, 24, 56, 88, 12, 9,  5,  7,  9] },
+      { name:'AlgoSec Expansion',   color:'#0f62fe', initials:'AX', hours:[16, 14, 22, 11, 27, 44,  6, 4,  2,  3,  4] },
+    ],
+  },
+  pm: {
+    assigned: [
+      { name:'Product Roadmap Q2',    color:'#007d79', initials:'PR', hours:[160,120,200,160,120,160,100, 96, 80, 88, 96] },
+      { name:'Feature Sprint Alpha',  color:'#0f62fe', initials:'FS', hours:[200,160,240,180,120,140,100, 96, 72, 88, 96] },
+      { name:'Stakeholder Q2 Review', color:'#6929c4', initials:'SQ', hours:[116, 87,137,103, 90, 78, 65, 61, 56, 51, 54] },
+    ],
+    unassigned: [
+      { name:'New PM Initiative', color:'#8d8d8d', initials:'NP', hours:[48, 36, 56, 44, 32, 40, 28, 28, 20, 24, 24] },
+      { name:'Q3 Planning',       color:'#da1e28', initials:'Q3', hours:[36, 29, 45, 34, 27, 27, 19, 17, 17, 16, 19] },
+    ],
+  },
+  sa: {
+    assigned: [
+      { name:'Cloud Migration',    color:'#9f1853', initials:'CM', hours:[240,320,200,248,400,800,180,120, 80, 80, 96] },
+      { name:'Integration Design', color:'#0f62fe', initials:'ID', hours:[280,400,240,280,480,960,200,136, 96, 88,112] },
+      { name:'Architecture Review',color:'#007d79', initials:'AR', hours:[238,304,203,266,357,696,197,122, 89, 78, 86] },
+    ],
+    unassigned: [
+      { name:'New SA Engagement', color:'#8d8d8d', initials:'NE', hours:[ 80,120, 76, 88,144,280, 68, 44, 32, 28, 32] },
+      { name:'Cloud Expansion',   color:'#da1e28', initials:'CE', hours:[ 54, 60, 37, 52, 75,154, 33, 23, 15, 15, 19] },
+    ],
+  },
+};
+
 // Derived totals helpers
 function rTotalAlloc(r)      { return r.allocAssignedHard.map((_,i) => r.allocAssignedHard[i]+r.allocAssignedSoft[i]+r.allocUnassignedHard[i]+r.allocUnassignedSoft[i]); }
 function rAssignedAlloc(r)   { return r.allocAssignedHard.map((_,i) => r.allocAssignedHard[i]+r.allocAssignedSoft[i]); }
@@ -373,7 +433,7 @@ function rTotalCap(r)        { return r.capTeamMembers.map((_,i) => r.capTeamMem
 
 const rsOpen = {};
 function getRsState(id) {
-  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, cap:true };
+  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, assigned:true, unassigned:true, cap:true };
   return rsOpen[id];
 }
 
@@ -414,14 +474,46 @@ function renderRS() {
     </tr>`;
 
     if (s.alloc) {
-      html += `<tr class="row-demand-child cs-i2">
-        <td style="padding-left:44px;">Assigned</td>
+      const projs = PROJECT_DATA[r.id] || { assigned: [], unassigned: [] };
+      const showP = settings.showProjects;
+
+      // Assigned row
+      html += `<tr class="row-demand-child cs-i2" ${showP?`onclick="toggleRole('${r.id}','assigned')" style="cursor:pointer;"`:''}>
+        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.assigned?'▾':'▸'}</button> &nbsp;`:''}Assigned</td>
         ${assigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
-      html += `<tr class="row-forecast cs-i2">
-        <td style="padding-left:44px;">Unassigned</td>
+      if (showP && s.assigned) {
+        projs.assigned.forEach(p => {
+          html += `<tr class="proj-row">
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="proj-avatar" style="background:${p.color};">${p.initials}</div>
+                ${p.name}
+              </div>
+            </td>
+            ${p.hours.map(v=>`<td>${fmt(v)}</td>`).join('')}
+          </tr>`;
+        });
+      }
+
+      // Unassigned row
+      html += `<tr class="row-forecast cs-i2" ${showP?`onclick="toggleRole('${r.id}','unassigned')" style="cursor:pointer;"`:''}>
+        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> &nbsp;`:''}Unassigned</td>
         ${unassigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
+      if (showP && s.unassigned) {
+        projs.unassigned.forEach(p => {
+          html += `<tr class="proj-row">
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="proj-avatar" style="background:${p.color};">${p.initials}</div>
+                ${p.name}
+              </div>
+            </td>
+            ${p.hours.map(v=>`<td>${fmt(v)}</td>`).join('')}
+          </tr>`;
+        });
+      }
     }
 
     // ── Capacity ──
@@ -597,6 +689,9 @@ function toggleSetting(key) {
   if (key === 'ignoreSoft') {
     renderRS();
     renderRoleChart();
+  }
+  if (key === 'showProjects') {
+    renderRS();
   }
 }
 
