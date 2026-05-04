@@ -158,6 +158,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .sdb-demand-col{background:#f7faff;}
 .sdb-unassigned{color:#8d8d8d;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -212,8 +213,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         <button class="tgl active" id="tgl-hours" onclick="switchUnit('hours')">HOURS</button>
         <button class="tgl" id="tgl-fte" onclick="switchUnit('fte')">FTE</button>
       </div>
-      <div class="period-sel">
-        Week
+      <div class="period-sel" onclick="toggleChartPeriod()" style="cursor:pointer;user-select:none;">
+        <span id="period-label">Week</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="nav-arrows">
@@ -231,6 +232,11 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
     <!-- ── Role tab ── -->
     <div class="tab-panel" id="panel-role">
+      <div class="chart-area">
+        <div style="position:relative;height:220px;">
+          <canvas id="role-chart"></canvas>
+        </div>
+      </div>
       <div class="tbl-wrap">
         <table class="tbl">
           <thead>
@@ -265,6 +271,7 @@ function switchCsUnit(u) {
   document.getElementById('tgl-hours').classList.toggle('active', u === 'hrs');
   document.getElementById('tgl-fte').classList.toggle('active', u === 'fte');
   renderRS();
+  renderRoleChart();
 }
 
 // ══════════════════════════════════════════════════
@@ -420,6 +427,110 @@ function toggleRole(id, section) {
 }
 
 // ══════════════════════════════════════════════════
+// Chart
+// ══════════════════════════════════════════════════
+let chartPeriod = 'week';
+let roleChart = null;
+
+const WEEK_LABELS = ['02-06','09-13','16-20','23-27','02-06','09-13','16-20','23-27','30-03','06-10','13-17'];
+const WEEK_MONTH_PREFIX = ['Feb','Feb','Feb','Feb','Mar','Mar','Mar','Mar','Mar','Apr','Apr'];
+const MONTH_GROUPS = [
+  { label:"Feb '26", indices:[0,1,2,3] },
+  { label:"Mar '26", indices:[4,5,6,7,8] },
+  { label:"Apr '26", indices:[9,10] },
+];
+
+function getChartData() {
+  const n = WEEK_LABELS.length;
+  const tcW = new Array(n).fill(0);
+  const acW = new Array(n).fill(0);
+  const asW = new Array(n).fill(0);
+  const unW = new Array(n).fill(0);
+
+  ROLES.forEach(r => {
+    for (let i = 0; i < n; i++) {
+      const tc = r.capTeamMembers[i] + r.capPartners[i];
+      tcW[i] += tc;
+      acW[i] += tc - r.capTimeOff[i] - r.capHolidays[i];
+      asW[i] += r.allocAssignedHard[i] + r.allocAssignedSoft[i];
+      unW[i] += r.allocUnassignedHard[i] + r.allocUnassignedSoft[i];
+    }
+  });
+
+  if (chartPeriod === 'week') {
+    const cv = v => csUnit === 'fte' ? parseFloat((v/40).toFixed(1)) : v;
+    return {
+      labels:    WEEK_LABELS.map((w,i) => WEEK_MONTH_PREFIX[i] + ' ' + w),
+      totalCap:  tcW.map(cv),
+      availCap:  acW.map(cv),
+      assigned:  asW.map(cv),
+      unassigned: unW.map(cv),
+    };
+  }
+
+  const agg = arr => MONTH_GROUPS.map(g => {
+    const sum = g.indices.reduce((s,i) => s + arr[i], 0);
+    return csUnit === 'fte' ? parseFloat((sum / g.indices.length / 40).toFixed(1)) : sum;
+  });
+  return {
+    labels:    MONTH_GROUPS.map(g => g.label),
+    totalCap:  agg(tcW),
+    availCap:  agg(acW),
+    assigned:  agg(asW),
+    unassigned: agg(unW),
+  };
+}
+
+function renderRoleChart() {
+  const { labels, totalCap, availCap, assigned, unassigned } = getChartData();
+  const yLabel = csUnit === 'fte' ? 'FTE' : 'Hours';
+
+  const ctx = document.getElementById('role-chart').getContext('2d');
+  if (roleChart) { roleChart.destroy(); roleChart = null; }
+
+  roleChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Assigned',           data:assigned,   backgroundColor:'#0f62fe', stack:'alloc', order:2 },
+        { label:'Unassigned',         data:unassigned, backgroundColor:'#08bdba', stack:'alloc', order:2 },
+        { label:'Available Capacity', data:availCap,   type:'line', borderColor:'#161616', borderWidth:2,
+          pointRadius:3, pointBackgroundColor:'#161616', fill:false, tension:0.3, order:1 },
+        { label:'Total Capacity',     data:totalCap,   type:'line', borderColor:'#8d8d8d', borderWidth:2,
+          borderDash:[6,3], pointRadius:2, pointBackgroundColor:'#8d8d8d', fill:false, tension:0.3, order:1 },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: {
+          position:'top', align:'end',
+          labels: { boxWidth:10, boxHeight:10, font:{size:12}, padding:16 },
+        },
+        tooltip: { callbacks: {
+          label: c => ` ${c.dataset.label}: ${csUnit==='fte' ? c.raw.toFixed(1)+' FTE' : Number(c.raw).toLocaleString()+' hrs'}`
+        }},
+      },
+      scales: {
+        x: { stacked:true, grid:{display:false}, ticks:{font:{size:11},color:'#8d8d8d'} },
+        y: { stacked:false, beginAtZero:true, grid:{color:'#f4f4f4'},
+             ticks:{font:{size:11},color:'#8d8d8d'},
+             title:{display:true, text:yLabel, font:{size:11}, color:'#8d8d8d'} },
+      },
+    },
+  });
+}
+
+function toggleChartPeriod() {
+  chartPeriod = chartPeriod === 'week' ? 'month' : 'week';
+  document.getElementById('period-label').textContent = chartPeriod === 'week' ? 'Week' : 'Month';
+  renderRoleChart();
+}
+
+// ══════════════════════════════════════════════════
 // Toolbar unit toggle (HOURS / FTE)
 // ══════════════════════════════════════════════════
 function switchUnit(u) {
@@ -430,6 +541,7 @@ function switchUnit(u) {
 // Init
 // ══════════════════════════════════════════════════
 renderRS();
+renderRoleChart();
 
 </script>
 </body>
