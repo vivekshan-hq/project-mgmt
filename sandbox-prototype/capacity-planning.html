@@ -336,9 +336,9 @@ function rAssignedAlloc(r)   { return r.allocAssignedHard.map((_,i) => r.allocAs
 function rUnassignedAlloc(r) { return r.allocUnassignedHard.map((_,i) => r.allocUnassignedHard[i]+r.allocUnassignedSoft[i]); }
 function rTotalCap(r)        { return r.capTeamMembers.map((_,i) => r.capTeamMembers[i]+r.capPartners[i]-r.capTimeOff[i]-r.capHolidays[i]); }
 
-const rsOpen = {}; // rsOpen[id] = { role, alloc, assigned, unassigned, cap }
+const rsOpen = {};
 function getRsState(id) {
-  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, assigned:true, unassigned:true, cap:true };
+  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, cap:true };
   return rsOpen[id];
 }
 
@@ -379,24 +379,14 @@ function renderRS() {
     </tr>`;
 
     if (s.alloc) {
-      // Assigned
-      html += `<tr class="row-demand-child cs-i2" onclick="toggleRole('${r.id}','assigned')">
-        <td><button class="collapse-btn">${s.assigned?'▾':'▸'}</button> &nbsp;Assigned</td>
+      html += `<tr class="row-demand-child cs-i2">
+        <td style="padding-left:44px;">Assigned</td>
         ${assigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
-      if (s.assigned) {
-        html += `<tr class="row-forecast-child cs-i3"><td>Hard Allocation</td>${r.allocAssignedHard.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
-        html += `<tr class="row-forecast-child cs-i3"><td>Soft Allocation</td>${r.allocAssignedSoft.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
-      }
-      // Unassigned
-      html += `<tr class="row-forecast cs-i2" onclick="toggleRole('${r.id}','unassigned')">
-        <td><button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> &nbsp;Unassigned</td>
+      html += `<tr class="row-forecast cs-i2">
+        <td style="padding-left:44px;">Unassigned</td>
         ${unassigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
-      if (s.unassigned) {
-        html += `<tr class="row-forecast-child cs-i3"><td>Hard Allocation</td>${r.allocUnassignedHard.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
-        html += `<tr class="row-forecast-child cs-i3"><td>Soft Allocation</td>${r.allocUnassignedSoft.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
-      }
     }
 
     // ── Capacity ──
