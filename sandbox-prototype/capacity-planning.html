@@ -493,9 +493,9 @@ function renderRoleChart() {
     data: {
       labels,
       datasets: [
-        { label:'Assigned',   data:assigned,   backgroundColor:'#0f62fe', stack:'alloc', order:2,
-          borderWidth:{top:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false },
         { label:'Unassigned', data:unassigned, backgroundColor:'#f59e0b', stack:'alloc', order:2 },
+        { label:'Assigned',   data:assigned,   backgroundColor:'#0f62fe', stack:'alloc', order:2,
+          borderWidth:{bottom:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false },
         { label:'Available Capacity', data:availCap,   type:'line', borderColor:'#161616', borderWidth:2,
           pointRadius:3, pointBackgroundColor:'#161616', fill:false, tension:0.3, order:1 },
         { label:'Total Capacity',     data:totalCap,   type:'line', borderColor:'#8d8d8d', borderWidth:2,
