@@ -304,6 +304,8 @@
     .tpl-diff-row { display: grid; grid-template-columns: 1.1fr 1fr; padding: 11px 14px; border-bottom: 1px solid var(--border-subtle); align-items: start; gap: 16px; }
     .tpl-diff-row:last-child { border-bottom: none; }
     .tpl-diff-item-name { font-size: 13px; font-weight: 500; color: var(--text-1); }
+    .tpl-name-added  { color: #15803d; }
+    .tpl-name-deleted { color: #dc2626; }
     .tpl-diff-item-context { font-size: 11px; color: var(--text-4); margin-top: 2px; }
     .tpl-diff-changes-cell { display: flex; flex-direction: column; gap: 4px; padding-top: 1px; }
     .tpl-inline-diff { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
@@ -1081,7 +1083,7 @@
         }
         return `<div class="tpl-diff-row">
           <div>
-            <div class="tpl-diff-item-name">${item.name}</div>
+            <div class="tpl-diff-item-name${item.action === 'added' ? ' tpl-name-added' : item.action === 'deleted' ? ' tpl-name-deleted' : ''}">${item.name}</div>
             ${item.context ? `<div class="tpl-diff-item-context">${item.context}</div>` : ''}
           </div>
           <div class="tpl-diff-changes-cell">${changesHTML}</div>
