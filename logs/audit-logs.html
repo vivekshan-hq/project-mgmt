@@ -207,7 +207,7 @@
     /* ═══ CHANGE DETAIL DRAWER ═══ */
     .detail-overlay { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
     .detail-overlay.open { pointer-events: auto; }
-    .detail-drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 400px; background: var(--surface); box-shadow: -4px 0 24px rgba(0,0,0,0.1); z-index: 101; transform: translateX(100%); transition: transform 0.22s ease; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
+    .detail-drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 500px; background: var(--surface); box-shadow: -4px 0 24px rgba(0,0,0,0.1); z-index: 101; transform: translateX(100%); transition: transform 0.22s ease; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
     .detail-drawer.open { transform: translateX(0); }
     .detail-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .detail-drawer-title { font-size: 17px; font-weight: 600; color: var(--text-1); }
@@ -290,39 +290,28 @@
     .tpl-bc-item.tpl-bc-leaf { color: var(--text-1); font-weight: 600; }
     .tpl-bc-type { font-size: 11px; color: var(--text-4); font-weight: 400; }
 
-    /* Table-row summary for multi-change template events */
-    .tpl-summary { display: flex; align-items: center; gap: 5px; margin-top: 3px; flex-wrap: wrap; }
-    .tpl-summary-pill { font-size: 11px; font-weight: 500; white-space: nowrap; }
-    .tpl-summary-pill.added   { color: #15803d; }
-    .tpl-summary-pill.modified { color: #b45309; }
-    .tpl-summary-pill.deleted  { color: #dc2626; }
-    .tpl-summary-sep { font-size: 11px; color: var(--text-4); }
-
-    /* Structured diff in drawer (Project Template save events) */
+    /* Structured diff table in drawer (Project Template save events) */
     .tpl-diff-section { display: flex; flex-direction: column; gap: 8px; }
     .tpl-diff-section-header { display: flex; align-items: center; gap: 7px; }
-    .tpl-diff-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.55px; text-transform: uppercase; color: var(--text-3); }
+    .tpl-diff-section-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
     .tpl-diff-count-pill { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; border: 1px solid; white-space: nowrap; }
     .tpl-diff-count-pill.added    { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
     .tpl-diff-count-pill.modified { background: #fffbeb; color: #b45309; border-color: #fde68a; }
     .tpl-diff-count-pill.deleted  { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-    .tpl-diff-items { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-    .tpl-diff-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); }
-    .tpl-diff-item:last-child { border-bottom: none; }
-    .tpl-diff-icon { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; line-height: 1; }
-    .tpl-diff-icon.added    { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-    .tpl-diff-icon.modified { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-    .tpl-diff-icon.deleted  { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-    .tpl-diff-item-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .tpl-diff-table { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+    .tpl-diff-table-head { display: grid; grid-template-columns: 1.1fr 1fr; padding: 7px 14px; border-bottom: 1px solid var(--border); background: var(--bg); gap: 16px; }
+    .tpl-diff-col-header { font-size: 11px; font-weight: 600; color: var(--text-3); }
+    .tpl-diff-row { display: grid; grid-template-columns: 1.1fr 1fr; padding: 11px 14px; border-bottom: 1px solid var(--border-subtle); align-items: start; gap: 16px; }
+    .tpl-diff-row:last-child { border-bottom: none; }
     .tpl-diff-item-name { font-size: 13px; font-weight: 500; color: var(--text-1); }
-    .tpl-diff-item-context { font-size: 11px; color: var(--text-4); }
-    .tpl-diff-item-detail { font-size: 12px; color: var(--text-2); margin-top: 1px; }
-    .tpl-inline-diff { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
-    .tpl-inline-field { font-size: 11px; color: var(--text-4); margin-right: 2px; }
-    .tpl-inline-old { font-size: 12px; color: #dc2626; text-decoration: line-through; }
+    .tpl-diff-item-context { font-size: 11px; color: var(--text-4); margin-top: 2px; }
+    .tpl-diff-changes-cell { display: flex; flex-direction: column; gap: 4px; padding-top: 1px; }
+    .tpl-inline-diff { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+    .tpl-inline-field { font-size: 12px; color: var(--text-3); flex-shrink: 0; }
+    .tpl-inline-old { font-size: 13px; color: var(--text-3); text-decoration: line-through; }
     .tpl-inline-arr { font-size: 12px; color: var(--text-4); }
-    .tpl-inline-new { font-size: 12px; color: #15803d; font-weight: 500; }
-    .tpl-inline-new-only { font-size: 12px; color: #15803d; font-weight: 500; }
+    .tpl-inline-new { font-size: 13px; color: var(--text-1); font-weight: 600; }
+    .tpl-inline-new-only { font-size: 13px; color: #15803d; font-weight: 500; }
 
     /* Drawer fields */
     .df { display: flex; flex-direction: column; gap: 6px; }
@@ -1029,14 +1018,14 @@
     'eo-apr12': {
       sections: [
         {
-          title: 'Tasks',
+          title: 'Tasks', colHeader: 'Task',
           items: [
             { action: 'added',    name: 'Security review', context: 'Discovery (Phase)', detail: 'Start on 5d · Duration 2d' },
             { action: 'modified', name: 'Kickoff Call',    context: 'Kickoff (Phase)',   changes: [{ field: 'Start offset', from: 'Day 1', to: 'Day 3' }] }
           ]
         },
         {
-          title: 'Settings',
+          title: 'Settings', colHeader: 'Setting',
           items: [
             { action: 'modified', name: 'Effort planning level', changes: [{ from: 'At phase level', to: 'At task level' }] }
           ]
@@ -1046,7 +1035,7 @@
     'so-apr08': {
       sections: [
         {
-          title: 'Tasks',
+          title: 'Tasks', colHeader: 'Task',
           items: [
             { action: 'modified', name: 'Legal Review', context: 'Legal & Compliance (Phase)', changes: [{ field: 'Dynamic condition', to: 'Deal Value > $50,000' }] }
           ]
@@ -1063,33 +1052,39 @@
       const modifiedCount = section.items.filter(i => i.action === 'modified').length;
       const deletedCount  = section.items.filter(i => i.action === 'deleted').length;
       const pills = [
-        addedCount    ? `<span class="tpl-diff-count-pill added">+${addedCount} added</span>`       : '',
+        addedCount    ? `<span class="tpl-diff-count-pill added">+${addedCount} added</span>`         : '',
         modifiedCount ? `<span class="tpl-diff-count-pill modified">~${modifiedCount} modified</span>` : '',
-        deletedCount  ? `<span class="tpl-diff-count-pill deleted">−${deletedCount} deleted</span>`  : ''
+        deletedCount  ? `<span class="tpl-diff-count-pill deleted">−${deletedCount} deleted</span>`    : ''
       ].join('');
 
-      const itemsHTML = section.items.map(item => {
-        const iconChar = item.action === 'added' ? '+' : item.action === 'deleted' ? '−' : '~';
-        let detailHTML = '';
+      const rowsHTML = section.items.map(item => {
+        let changesHTML = '';
         if (item.detail) {
-          detailHTML = `<div class="tpl-diff-item-detail">${item.detail}</div>`;
+          changesHTML = `<span class="tpl-inline-new-only">${item.detail}</span>`;
         } else if (item.changes) {
-          detailHTML = item.changes.map(c => {
+          changesHTML = item.changes.map(c => {
             if (c.from && c.to) {
-              return `<div class="tpl-inline-diff">${c.field ? `<span class="tpl-inline-field">${c.field}:</span>` : ''}<span class="tpl-inline-old">${c.from}</span><span class="tpl-inline-arr">→</span><span class="tpl-inline-new">${c.to}</span></div>`;
+              return `<div class="tpl-inline-diff">
+                ${c.field ? `<span class="tpl-inline-field">${c.field}:</span>` : ''}
+                <span class="tpl-inline-old">${c.from}</span>
+                <span class="tpl-inline-arr">→</span>
+                <span class="tpl-inline-new">${c.to}</span>
+              </div>`;
             } else if (c.to) {
-              return `<div class="tpl-inline-diff">${c.field ? `<span class="tpl-inline-field">${c.field}:</span>` : ''}<span class="tpl-inline-new-only">${c.to}</span></div>`;
+              return `<div class="tpl-inline-diff">
+                ${c.field ? `<span class="tpl-inline-field">${c.field}:</span>` : ''}
+                <span class="tpl-inline-new-only">${c.to}</span>
+              </div>`;
             }
             return '';
           }).join('');
         }
-        return `<div class="tpl-diff-item">
-          <div class="tpl-diff-icon ${item.action}">${iconChar}</div>
-          <div class="tpl-diff-item-body">
+        return `<div class="tpl-diff-row">
+          <div>
             <div class="tpl-diff-item-name">${item.name}</div>
             ${item.context ? `<div class="tpl-diff-item-context">${item.context}</div>` : ''}
-            ${detailHTML}
           </div>
+          <div class="tpl-diff-changes-cell">${changesHTML}</div>
         </div>`;
       }).join('');
 
@@ -1098,7 +1093,13 @@
           <span class="tpl-diff-section-title">${section.title}</span>
           ${pills}
         </div>
-        <div class="tpl-diff-items">${itemsHTML}</div>
+        <div class="tpl-diff-table">
+          <div class="tpl-diff-table-head">
+            <span class="tpl-diff-col-header">${section.colHeader || section.title}</span>
+            <span class="tpl-diff-col-header">Changes</span>
+          </div>
+          ${rowsHTML}
+        </div>
       </div>`;
     }).join('');
   }
