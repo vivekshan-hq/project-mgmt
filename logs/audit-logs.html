@@ -1020,7 +1020,7 @@
         {
           title: 'Tasks', colHeader: 'Task',
           items: [
-            { action: 'added',    name: 'Security review', context: 'Discovery (Phase)', detail: 'Start on 5d · Duration 2d' },
+            { action: 'added',    name: 'Security review', context: 'Discovery (Phase)', changes: [{ field: 'Start', to: 'Day 5' }, { field: 'Duration', to: '2 days' }] },
             { action: 'modified', name: 'Kickoff Call',    context: 'Kickoff (Phase)',   changes: [{ field: 'Start offset', from: 'Day 1', to: 'Day 3' }] }
           ]
         },
