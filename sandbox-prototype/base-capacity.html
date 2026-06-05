@@ -306,15 +306,17 @@ tr:hover .row-actions{opacity:1;}
 /* ── Effective date popup ── */
 .eff-overlay{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .15s;}
 .eff-overlay.open{opacity:1;pointer-events:all;}
-.eff-dialog{width:420px;background:var(--surface);border-radius:var(--radius);box-shadow:0px 24px 48px rgba(0,0,0,.22),0px 4px 12px rgba(0,0,0,.14);border:1px solid var(--border);display:flex;flex-direction:column;}
-.eff-hd{padding:20px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;}
-.eff-title{font-size:16px;font-weight:600;color:var(--text-1);}
-.eff-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
-.eff-hint{font-size:13px;color:var(--text-2);line-height:18px;}
-.eff-label{font-size:13px;font-weight:590;color:var(--text-1);margin-bottom:6px;}
-.eff-warn{display:none;align-items:flex-start;gap:8px;background:var(--warning-bg);border:1px solid var(--warning-border);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;line-height:17px;color:#6f4c00;}
-.eff-warn.show{display:flex;}
-.eff-warn svg{width:14px;height:14px;fill:none;stroke:var(--warning);stroke-width:2;flex-shrink:0;margin-top:1px;}
+.eff-dialog{width:540px;background:var(--surface);border-radius:var(--radius);box-shadow:0px 24px 48px rgba(0,0,0,.22),0px 4px 12px rgba(0,0,0,.14);border:1px solid var(--border);display:flex;flex-direction:column;}
+.eff-hd{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;}
+.eff-title{font-size:18px;font-weight:600;color:var(--text-1);}
+.eff-body{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.eff-radio-row{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:2px 0;}
+.eff-radio-row input[type=radio]{width:18px;height:18px;accent-color:var(--brand);flex-shrink:0;margin-top:1px;cursor:pointer;}
+.eff-radio-label{font-size:15px;font-weight:590;color:var(--text-1);line-height:22px;}
+.eff-radio-desc{font-size:13px;color:var(--text-2);line-height:19px;margin-top:2px;}
+.eff-date-wrap{margin-top:4px;display:none;}
+.eff-date-wrap.show{display:block;}
+.eff-date-label{font-size:13px;font-weight:590;color:var(--text-1);margin-bottom:6px;}
 .eff-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg);border-radius:0 0 var(--radius) var(--radius);}
 </style>
 </head>
@@ -470,7 +472,7 @@ tr:hover .row-actions{opacity:1;}
           <td><span class="perm-badge">Account Admin</span></td>
           <td>
             <div class="cap-cell" onclick="openDrawer('Paul','Engineer','av-teal','P')" title="View base capacity history">
-              <span class="cap-val">8 hrs / day</span>
+              <span class="cap-val">40 hrs / week</span>
               <span class="cap-since">From 04 Jun 2026</span>
             </div>
           </td>
@@ -496,7 +498,7 @@ tr:hover .row-actions{opacity:1;}
           <td><span class="perm-badge">Account Admin</span></td>
           <td>
             <div class="cap-cell" onclick="openDrawer('Rachel','Customer success','av-orange','R')" title="View base capacity history">
-              <span class="cap-val">8 hrs / day</span>
+              <span class="cap-val">40 hrs / week</span>
               <span class="cap-since">From 03 Jun 2026</span>
             </div>
           </td>
@@ -522,7 +524,7 @@ tr:hover .row-actions{opacity:1;}
           <td><span class="perm-badge">Account Admin</span></td>
           <td>
             <div class="cap-cell" onclick="openDrawer('Vivek Shanmugasundaram','Project Manager','av-blue','VS')" title="View base capacity history">
-              <span class="cap-val">8 hrs / day</span>
+              <span class="cap-val">40 hrs / week</span>
               <span class="cap-since">From 05 Jun 2026</span>
             </div>
           </td>
@@ -568,18 +570,15 @@ tr:hover .row-actions{opacity:1;}
         <div class="mp-field-label"><span class="mp-req">*</span> Base capacity</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div class="mp-input-wrap" style="max-width:160px;">
-            <input class="mp-number" type="number" id="mp-hours" value="8" min="1" max="24" step="0.5" placeholder="8">
+            <input class="mp-number" type="number" id="mp-hours" value="40" min="1" max="168" step="0.5" placeholder="40">
           </div>
-          <select class="mp-unit-select" id="mp-unit">
-            <option value="day">hrs / day</option>
-            <option value="week">hrs / week</option>
-          </select>
+          <span style="font-size:14px;color:var(--text-2);white-space:nowrap;">hrs / week</span>
         </div>
         <div class="mp-hint">The default available hours for this team member.</div>
       </div>
       <div class="mp-cb-row" onclick="toggleMpCb()">
         <div class="mp-cb" id="mp-cb"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <span class="mp-cb-label">Same as account default: <strong>8 hrs / day</strong></span>
+        <span class="mp-cb-label">Same as account default: <strong>40 hrs / week</strong></span>
       </div>
     </div>
 
@@ -615,7 +614,7 @@ tr:hover .row-actions{opacity:1;}
           <div class="mp-log-body">
             <div class="mp-log-actor-row"><span class="mp-log-actor">Vivek Shanmugasundaram</span><span class="mp-log-time">2 hrs ago</span></div>
             <div class="mp-log-desc">Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 04 Jun)</span></div>
-            <div class="mp-log-diff"><span class="mp-d-old">6 hrs / day</span><span class="mp-d-arr">→</span><span class="mp-d-new">8 hrs / day</span></div>
+            <div class="mp-log-diff"><span class="mp-d-old">30 hrs / week</span><span class="mp-d-arr">→</span><span class="mp-d-new">40 hrs / week</span></div>
           </div>
         </div>
         <div class="mp-log-date" style="position:relative;">01 May 2026</div>
@@ -624,7 +623,7 @@ tr:hover .row-actions{opacity:1;}
           <div class="mp-log-body">
             <div class="mp-log-actor-row"><span class="mp-log-actor">Vivek Shanmugasundaram</span><span class="mp-log-time">01 May</span></div>
             <div class="mp-log-desc">Set <strong>Base capacity</strong></div>
-            <div class="mp-log-diff"><span class="mp-d-old">—</span><span class="mp-d-arr">→</span><span class="mp-d-new">6 hrs / day</span></div>
+            <div class="mp-log-diff"><span class="mp-d-old">—</span><span class="mp-d-arr">→</span><span class="mp-d-new">30 hrs / week</span></div>
           </div>
         </div>
       </div>
@@ -649,25 +648,34 @@ tr:hover .row-actions{opacity:1;}
 <div class="eff-overlay" id="eff-overlay">
   <div class="eff-dialog">
     <div class="eff-hd">
-      <div class="eff-title">Effective date</div>
+      <div class="eff-title">Update base capacity?</div>
       <button class="mp-close" onclick="closeEffDialog()">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="eff-body">
-      <div class="eff-hint">From when should this base capacity change take effect? You can backdate this to update historical utilisation calculations.</div>
-      <div>
-        <div class="eff-label">Effective from</div>
-        <input class="inp-text" type="date" id="eff-date" style="max-width:196px;" oninput="checkEffBackdate()">
-      </div>
-      <div class="eff-warn" id="eff-warn">
-        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span id="eff-warn-text">Backdating this change will update utilisation calculations for the affected period.</span>
-      </div>
+      <label class="eff-radio-row">
+        <input type="radio" name="eff-mode" value="forward" checked onchange="onEffModeChange()">
+        <div>
+          <div class="eff-radio-label">Going forward</div>
+          <div class="eff-radio-desc">The new base capacity will apply to all time reported by the team member going forward.</div>
+        </div>
+      </label>
+      <label class="eff-radio-row">
+        <input type="radio" name="eff-mode" value="backdate" onchange="onEffModeChange()">
+        <div style="width:100%">
+          <div class="eff-radio-label">Backdate base capacity</div>
+          <div class="eff-radio-desc">The new base capacity will apply to all time reported by the team member from the selected date and going forward.</div>
+          <div class="eff-date-wrap" id="eff-date-wrap">
+            <div class="eff-date-label" style="margin-top:12px;">Backdate from</div>
+            <input class="inp-text" type="date" id="eff-date" style="max-width:196px;">
+          </div>
+        </div>
+      </label>
     </div>
     <div class="eff-footer">
       <button class="btn btn-ghost" onclick="closeEffDialog()">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmSave()">Save changes</button>
+      <button class="btn btn-primary" onclick="confirmSave()">Update</button>
     </div>
   </div>
 </div>
@@ -741,7 +749,7 @@ tr:hover .row-actions{opacity:1;}
         <div class="log-body">
           <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
           <div class="log-desc">Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 04 Jun)</span></div>
-          <div class="log-diff"><span class="d-old">6 hrs / day</span><span class="d-arr">→</span><span class="d-new">8 hrs / day</span></div>
+          <div class="log-diff"><span class="d-old">30 hrs / week</span><span class="d-arr">→</span><span class="d-new">40 hrs / week</span></div>
         </div>
       </div>
       <div class="log-date-hd" style="position:relative;top:0;">01 May 2026</div>
@@ -750,7 +758,7 @@ tr:hover .row-actions{opacity:1;}
         <div class="log-body">
           <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">01 May</span></div>
           <div class="log-desc">Set <strong>Base capacity</strong></div>
-          <div class="log-diff"><span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">6 hrs / day</span></div>
+          <div class="log-diff"><span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">30 hrs / week</span></div>
         </div>
       </div>
     </div>
@@ -809,16 +817,16 @@ tr:hover .row-actions{opacity:1;}
 // ── Data ──────────────────────────────────────────────────────────────────────
 const historyData = {
   Paul: [
-    { hrs:6, unit:'day', updatedOn:'01 May', backdatedTo:null },
-    { hrs:8, unit:'day', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
+    { hrs:30, unit:'week', updatedOn:'01 May', backdatedTo:null },
+    { hrs:40, unit:'week', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
   ],
   Rachel: [
-    { hrs:7, unit:'day', updatedOn:'01 May', backdatedTo:null },
-    { hrs:8, unit:'day', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
+    { hrs:35, unit:'week', updatedOn:'01 May', backdatedTo:null },
+    { hrs:40, unit:'week', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
   ],
   'Vivek Shanmugasundaram': [
-    { hrs:6, unit:'day', updatedOn:'01 May', backdatedTo:null },
-    { hrs:8, unit:'day', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
+    { hrs:30, unit:'week', updatedOn:'01 May', backdatedTo:null },
+    { hrs:40, unit:'week', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
   ],
 };
 
@@ -864,7 +872,7 @@ function renderHistory(name) {
   document.getElementById('hist-tbody').innerHTML = rows.map(r => `
     <tr>
       <td>
-        <div class="h-update">Updated to ${r.hrs} hrs / ${r.unit}</div>
+        <div class="h-update">Updated to ${r.hrs} hrs / week</div>
         ${r.backdatedTo ? `<div class="h-backdate">Backdated to ${r.backdatedTo}</div>` : ''}
       </td>
       <td><span class="h-date">${r.updatedOn}</span></td>
@@ -943,8 +951,7 @@ function openMpanel(name, role, avClass, initials) {
   mpMember = { name, role, avClass, initials };
   document.getElementById('mp-name').textContent = name;
   const rows = historyData[name] || [];
-  document.getElementById('mp-hours').value = rows.length ? rows[rows.length-1].hrs : 8;
-  document.getElementById('mp-unit').value  = rows.length ? rows[rows.length-1].unit : 'day';
+  document.getElementById('mp-hours').value = rows.length ? rows[rows.length-1].hrs : 40;
   switchMpTab('hist');
   renderMpHistory(name);
   document.getElementById('mp-overlay').classList.add('open');
@@ -967,8 +974,7 @@ function toggleMpCb() {
   const cb = document.getElementById('mp-cb');
   cb.classList.toggle('checked');
   if (cb.classList.contains('checked')) {
-    document.getElementById('mp-hours').value = 8;
-    document.getElementById('mp-unit').value  = 'day';
+    document.getElementById('mp-hours').value = 40;
   }
 }
 
@@ -989,7 +995,7 @@ function renderMpHistory(name) {
     }
     return `
       <tr>
-        <td style="font-size:14px;color:var(--text-1);">${r.hrs} hrs / ${r.unit}</td>
+        <td style="font-size:14px;color:var(--text-1);">${r.hrs} hrs / week</td>
         <td><span class="mp-eff">${effRange}</span></td>
         <td>
           <div class="mp-user">
@@ -1003,8 +1009,9 @@ function renderMpHistory(name) {
 
 // ── Effective date popup ──────────────────────────────────────────────────────
 function openEffDialog() {
-  document.getElementById('eff-date').value = new Date().toISOString().slice(0,10);
-  document.getElementById('eff-warn').classList.remove('show');
+  document.querySelectorAll('input[name="eff-mode"]').forEach(r => { r.checked = r.value === 'forward'; });
+  document.getElementById('eff-date-wrap').classList.remove('show');
+  document.getElementById('eff-date').value = '';
   document.getElementById('eff-overlay').classList.add('open');
 }
 
@@ -1012,38 +1019,30 @@ function closeEffDialog() {
   document.getElementById('eff-overlay').classList.remove('open');
 }
 
-function checkEffBackdate() {
-  const v     = document.getElementById('eff-date').value;
-  const today = new Date().toISOString().slice(0,10);
-  const warn  = document.getElementById('eff-warn');
-  if (v && v < today) {
-    const d   = new Date(v + 'T12:00:00');
-    const fmt = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-    document.getElementById('eff-warn-text').textContent =
-      `This change will be backdated to ${fmt}. Historical utilisation calculations will be updated.`;
-    warn.classList.add('show');
-  } else {
-    warn.classList.remove('show');
+function onEffModeChange() {
+  const isBackdate = document.querySelector('input[name="eff-mode"]:checked')?.value === 'backdate';
+  document.getElementById('eff-date-wrap').classList.toggle('show', isBackdate);
+  if (isBackdate && !document.getElementById('eff-date').value) {
+    document.getElementById('eff-date').value = new Date().toISOString().slice(0,10);
   }
 }
 
 function confirmSave() {
-  const hrs     = parseFloat(document.getElementById('mp-hours').value);
-  const unit    = document.getElementById('mp-unit').value;
-  const dateVal = document.getElementById('eff-date').value;
+  const hrs      = parseFloat(document.getElementById('mp-hours').value);
   if (!hrs || isNaN(hrs)) return;
-  const today      = new Date().toISOString().slice(0,10);
-  const isBackdate = dateVal && dateVal < today;
-  const updatedOn  = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-  let backdatedTo  = null;
-  if (isBackdate) {
-    const d    = new Date(dateVal + 'T12:00:00');
-    backdatedTo = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  const mode     = document.querySelector('input[name="eff-mode"]:checked')?.value || 'forward';
+  const dateVal  = mode === 'backdate' ? document.getElementById('eff-date').value : '';
+  const today    = new Date().toISOString().slice(0,10);
+  const isBack   = mode === 'backdate' && dateVal && dateVal < today;
+  const updatedOn = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  let backdatedTo = null;
+  if (isBack) {
+    backdatedTo = new Date(dateVal + 'T12:00:00').toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
   }
   const name = mpMember?.name;
   if (name) {
     if (!historyData[name]) historyData[name] = [];
-    historyData[name].push({ hrs, unit, updatedOn, backdatedTo });
+    historyData[name].push({ hrs, unit:'week', updatedOn, backdatedTo });
     renderMpHistory(name);
     if (activeMember === name && document.getElementById('drawer').classList.contains('open')) {
       renderHistory(name);
