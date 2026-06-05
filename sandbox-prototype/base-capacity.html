@@ -457,18 +457,22 @@ tr:hover .row-actions{opacity:1;}
 
 <!-- Dropdown -->
 <div class="dropdown" id="dropdown">
-  <div class="dd-item" id="dd-history">
-    <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
-    View capacity history
+  <div class="dd-item" id="dd-details">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    View Details
   </div>
-  <div class="dd-item" id="dd-update">
+  <div class="dd-item" id="dd-cost-rate">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    Manage Cost Rate
+  </div>
+  <div class="dd-item" id="dd-base-cap">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    Update base capacity
+    Manage Base Capacity
   </div>
   <div class="dd-sep"></div>
   <div class="dd-item danger" id="dd-deactivate">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-    Deactivate member
+    Deactivate
   </div>
 </div>
 
@@ -730,10 +734,13 @@ function toggleMenu(e, name, role, avClass, initials) {
   menu.style.top  = (rect.bottom + 4) + 'px';
   menu.style.left = (rect.right - 196) + 'px';
 
-  document.getElementById('dd-history').onclick = () => {
+  document.getElementById('dd-details').onclick = () => {
     openDrawer(name, role, avClass, initials); closeMenu();
   };
-  document.getElementById('dd-update').onclick = () => {
+  document.getElementById('dd-cost-rate').onclick = () => {
+    openDrawer(name, role, avClass, initials); closeMenu();
+  };
+  document.getElementById('dd-base-cap').onclick = () => {
     activeMember = name; activeMeta = { name, role, avClass, initials };
     openModal(name, role); closeMenu();
   };
