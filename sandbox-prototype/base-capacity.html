@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Base Capacity · Resource Management · Rocketlane</title>
+<style>
+:root {
+  --brand:#0f62fe;--brand-dark:#0043ce;--brand-light:#edf5ff;--brand-muted:#97c1ff;
+  --bg:#fafafa;--surface:#fff;--border:#e0e0e0;--border-subtle:#f4f4f4;--border-strong:#c6c6c6;
+  --text-1:#161616;--text-2:#525252;--text-3:#6f6f6f;--text-4:#a8a8a8;
+  --success:#24a148;--success-bg:#defbe6;--success-border:#a7f0ba;
+  --warning:#ffbf00;--warning-bg:#fffbf0;--warning-border:#f1c21b;
+  --danger:#da1e28;--danger-bg:#fff1f1;--danger-border:#ffd7d9;
+  --radius:8px;--radius-sm:4px;
+  --shadow-sm:0px 0.8px 1.8px rgba(0,0,0,.13),0px 0.15px 0.45px rgba(0,0,0,.11);
+  --shadow:0px 1.6px 3.6px rgba(0,0,0,.13),0px 0.3px 0.9px rgba(0,0,0,.11);
+  --shadow-lg:0px 6.4px 14.4px rgba(0,0,0,.13),0px 1.2px 3.6px rgba(0,0,0,.11);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:14px;line-height:20px;color:var(--text-1);background:var(--surface);display:flex;height:100vh;overflow:hidden;}
+
+/* ── Rail ── */
+.rail{width:40px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;}
+.rail-logo{width:24px;height:24px;background:#1d1d1f;border-radius:4px;display:grid;place-items:center;margin-bottom:10px;flex-shrink:0;}
+.rail-logo svg{width:11px;height:11px;color:#fff;fill:none;stroke:currentColor;stroke-width:2;}
+.rail-icon{width:32px;height:32px;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--text-4);transition:all .12s;}
+.rail-icon:hover{background:var(--bg);color:var(--text-2);}
+.rail-icon.active{background:#e8e8e8;color:var(--text-1);}
+.rail-icon svg{width:16px;height:16px;stroke-width:1.75;fill:none;stroke:currentColor;}
+.rail-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.rail-avatar{width:26px;height:26px;border-radius:50%;background:#0f62fe;color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;cursor:pointer;}
+
+/* ── Sidebar ── */
+.sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
+.ss-title{padding:20px 20px 10px;font-size:20px;font-weight:600;color:var(--text-1);}
+.ss-search{padding:0 12px 10px;}
+.ss-search-input{width:100%;padding:6px 10px 6px 30px;border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--text-2);outline:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 9px center;font-family:inherit;}
+.ss-search-input:focus{border-color:var(--brand);}
+.ss-group{padding:8px 20px 4px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-4);text-transform:uppercase;}
+.ss-divider{height:1px;background:var(--border);margin:6px 12px;}
+.ss-item{display:flex;align-items:center;gap:10px;padding:7px 20px;font-size:14px;color:var(--text-2);cursor:pointer;transition:all .1s;}
+.ss-item:hover{background:var(--bg);color:var(--text-1);}
+.ss-item.active{background:var(--brand-light);color:var(--brand);font-weight:600;}
+.ss-icon{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;flex-shrink:0;}
+.ss-icon svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2;}
+.ic-orange{background:linear-gradient(135deg,#ffbe7a,#f98000);}
+.ic-blue{background:linear-gradient(135deg,#78a9ff,#0f62fe);}
+.ic-teal{background:linear-gradient(135deg,#3ddbd9,#009d9a);}
+.ic-green{background:linear-gradient(135deg,#6fdc8c,#24a148);}
+.ic-purple{background:linear-gradient(135deg,#be95ff,#6929c4);}
+.ic-yellow{background:linear-gradient(135deg,#ffdf7e,#ffbf00);}
+.ic-red{background:linear-gradient(135deg,#ff8389,#fa4d56);}
+.ic-magenta{background:linear-gradient(135deg,#ff7eb6,#d12771);}
+.ss-sub{padding:5px 20px 5px 52px;font-size:13px;color:var(--text-3);cursor:pointer;transition:all .1s;}
+.ss-sub:hover{color:var(--text-1);background:var(--bg);}
+.ss-sub.active{color:var(--brand);font-weight:590;background:var(--brand-light);}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+.content-header{padding:20px 28px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-shrink:0;}
+.content-title{font-size:20px;font-weight:600;line-height:28px;color:var(--text-1);}
+.content-desc{font-size:13px;color:var(--text-3);margin-top:3px;max-width:580px;line-height:18px;}
+.content-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;padding-top:2px;}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:0 12px;height:32px;border-radius:var(--radius-sm);font-size:14px;font-weight:590;letter-spacing:.16px;cursor:pointer;border:none;font-family:inherit;transition:all .12s;white-space:nowrap;}
+.btn-primary{background:#1d1d1f;color:#fff;}
+.btn-primary:hover{background:#2d2d2f;}
+.btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg);color:var(--text-1);}
+.btn svg{width:14px;height:14px;stroke-width:2;fill:none;stroke:currentColor;flex-shrink:0;}
+.btn-sm{height:26px;padding:0 10px;font-size:13px;}
+
+/* Tab bar */
+.tab-bar{display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--border-subtle);flex-shrink:0;margin-top:10px;gap:0;}
+.tab{padding:9px 14px;font-size:14px;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;position:relative;bottom:-1px;white-space:nowrap;transition:all .1s;}
+.tab:hover{color:var(--text-1);}
+.tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:590;}
+.tab-sep{width:1px;height:16px;background:var(--border);margin:0 4px;align-self:center;}
+.filter-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;font-size:13px;color:var(--text-2);cursor:pointer;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;height:28px;margin-left:2px;position:relative;bottom:-1px;}
+.filter-btn:hover{background:var(--bg);}
+.filter-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;}
+
+/* Toolbar */
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 28px;border-bottom:1px solid var(--border-subtle);flex-shrink:0;}
+.sort-label{font-size:13px;color:var(--text-3);}
+.sort-label span{color:var(--text-4);}
+.toolbar-right{display:flex;align-items:center;gap:6px;}
+.icon-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--text-3);}
+.icon-btn:hover{background:var(--bg);color:var(--text-2);}
+.icon-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;}
+.export-btn{display:flex;align-items:center;gap:5px;padding:0 10px;height:30px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:13px;color:var(--text-2);cursor:pointer;font-family:inherit;}
+.export-btn:hover{background:var(--bg);}
+.export-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;}
+
+/* Table */
+.table-wrap{flex:1;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:8px 14px;text-align:left;font-size:11px;font-weight:590;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase;background:var(--surface);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:1;}
+thead th:first-child{padding-left:28px;}
+thead th:last-child{padding-right:28px;text-align:right;}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border-subtle);vertical-align:middle;}
+tbody td:first-child{padding-left:28px;}
+tbody td:last-child{padding-right:28px;}
+tbody tr:hover td{background:var(--bg);}
+tbody tr:last-child td{border-bottom:none;}
+
+.member-cell{display:flex;align-items:center;gap:10px;}
+.avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;letter-spacing:0;}
+.av-blue{background:#0f62fe;}
+.av-teal{background:#007d79;}
+.av-purple{background:#6929c4;}
+.av-orange{background:#b45309;}
+.member-name{font-size:14px;font-weight:590;color:var(--text-1);}
+
+.role-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:590;letter-spacing:.04em;border:1px solid;}
+.role-engineer{background:#fff8e1;color:#6f4c00;border-color:#f1c21b;}
+.role-cs{background:#d9fbfb;color:#005d5d;border-color:#3ddbd9;}
+.role-pm{background:#f6f2ff;color:#491d8b;border-color:#be95ff;}
+
+.cap-cell{display:flex;align-items:center;gap:8px;}
+.cap-val{font-size:14px;color:var(--text-1);}
+.edit-icon-btn{width:20px;height:20px;border-radius:3px;display:none;place-items:center;cursor:pointer;color:var(--text-4);border:none;background:transparent;}
+.edit-icon-btn:hover{color:var(--text-2);background:var(--border-subtle);}
+.edit-icon-btn svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;}
+tr:hover .edit-icon-btn{display:grid;}
+.cap-input{width:56px;border:1px solid var(--brand);border-radius:var(--radius-sm);padding:3px 6px;font-size:13px;color:var(--text-1);outline:none;font-family:inherit;background:var(--brand-light);}
+
+.rate-cell{display:flex;align-items:center;gap:8px;}
+.rate-val{font-size:14px;color:var(--text-1);}
+.rate-edit-btn{display:none;padding:2px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text-2);cursor:pointer;background:var(--surface);font-family:inherit;}
+.rate-edit-btn:hover{background:var(--bg);border-color:var(--border-strong);}
+tr:hover .rate-edit-btn{display:inline-flex;}
+
+.eff-date{font-size:13px;color:var(--text-2);}
+
+.row-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;opacity:0;transition:opacity .1s;}
+tr:hover .row-actions{opacity:1;}
+.act-btn{width:28px;height:28px;border-radius:var(--radius-sm);display:grid;place-items:center;cursor:pointer;color:var(--text-3);border:1px solid var(--border);background:var(--surface);}
+.act-btn:hover{background:var(--bg);color:var(--text-1);}
+.act-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;}
+
+/* ── Drawer ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(22,22,22,.3);z-index:200;opacity:0;pointer-events:none;transition:opacity .22s;}
+.drawer-overlay.open{opacity:1;pointer-events:all;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:520px;background:var(--surface);z-index:201;display:flex;flex-direction:column;box-shadow:-6.4px 0 14.4px rgba(0,0,0,.13),-1.2px 0 3.6px rgba(0,0,0,.11);transform:translateX(100%);transition:transform .28s cubic-bezier(.16,1,.3,1);border-left:1px solid var(--border);}
+.drawer.open{transform:translateX(0);}
+
+.drawer-hd{padding:16px 20px 0;border-bottom:1px solid var(--border);flex-shrink:0;}
+.drawer-hd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.drawer-member{display:flex;align-items:center;gap:10px;}
+.drawer-member-name{font-size:15px;font-weight:600;color:var(--text-1);}
+.drawer-member-role{font-size:12px;color:var(--text-3);margin-top:1px;}
+.drawer-close{width:28px;height:28px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;display:grid;place-items:center;color:var(--text-3);}
+.drawer-close:hover{background:var(--bg);color:var(--text-1);}
+.drawer-close svg{width:13px;height:13px;stroke-width:2;fill:none;stroke:currentColor;}
+
+/* Drawer tabs — matching Image 1 style */
+.dtabs{display:flex;gap:0;margin-bottom:-1px;}
+.dtab{padding:8px 18px;font-size:14px;font-weight:590;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text-2);border-bottom:none;letter-spacing:.16px;font-family:inherit;transition:all .1s;}
+.dtab:first-child{border-radius:var(--radius-sm) 0 0 0;}
+.dtab:last-child{border-radius:0 var(--radius-sm) 0 0;border-left:none;}
+.dtab.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f;}
+.dtab:not(.active):hover{background:var(--bg);}
+
+.drawer-body{flex:1;overflow-y:auto;}
+
+/* History table */
+.htbl{width:100%;border-collapse:collapse;}
+.htbl thead th{padding:10px 20px;text-align:left;font-size:11px;font-weight:590;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:1;}
+.htbl tbody td{padding:14px 20px;border-bottom:1px solid var(--border-subtle);vertical-align:top;}
+.htbl tbody tr:last-child td{border-bottom:none;}
+.htbl tbody tr:hover td{background:var(--bg);}
+.rate-update{font-size:14px;font-weight:590;color:var(--text-1);line-height:20px;}
+.rate-backdate{font-size:12px;color:var(--danger);margin-top:3px;}
+.h-date{font-size:13px;color:var(--text-2);white-space:nowrap;}
+.h-user{display:flex;align-items:center;gap:8px;}
+.h-user-name{font-size:13px;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+
+/* Audit log */
+.log-date-hd{padding:8px 20px 6px;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--text-4);background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;text-transform:uppercase;}
+.log-entry{display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border-subtle);}
+.log-entry:hover{background:var(--bg);}
+.log-body{flex:1;min-width:0;}
+.log-actor-row{display:flex;align-items:baseline;gap:6px;margin-bottom:3px;}
+.log-actor{font-size:13px;font-weight:600;color:var(--text-1);}
+.log-time{font-size:12px;color:var(--text-4);margin-left:auto;flex-shrink:0;}
+.log-desc{font-size:13px;color:var(--text-2);margin-bottom:7px;line-height:18px;}
+.log-desc strong{color:var(--text-1);font-weight:590;}
+.log-diff{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px;font-size:12px;color:var(--text-2);}
+.d-old{text-decoration:line-through;color:var(--text-4);}
+.d-new{color:var(--text-1);}
+.d-arr{color:var(--text-4);font-size:11px;}
+
+.drawer-footer{padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;}
+.drawer-footer-note{font-size:12px;color:var(--text-4);}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(22,22,22,.45);z-index:300;opacity:0;pointer-events:none;transition:opacity .18s;display:flex;align-items:center;justify-content:center;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{width:440px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:scale(.96) translateY(8px);transition:transform .18s;}
+.modal-overlay.open .modal{transform:scale(1) translateY(0);}
+.modal-hd{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-title{font-size:16px;font-weight:600;color:var(--text-1);}
+.modal-subtitle{font-size:13px;color:var(--text-3);margin-top:2px;}
+.modal-close{width:28px;height:28px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;display:grid;place-items:center;color:var(--text-3);flex-shrink:0;}
+.modal-close:hover{background:var(--bg);color:var(--text-1);}
+.modal-close svg{width:13px;height:13px;stroke-width:2;fill:none;stroke:currentColor;}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.form-row{display:flex;flex-direction:column;gap:5px;}
+.form-label{font-size:13px;font-weight:590;color:var(--text-1);}
+.form-hint{font-size:12px;color:var(--text-3);}
+.input-group{display:flex;align-items:center;gap:8px;}
+.inp-select{height:36px;padding:0 28px 0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text-1);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center;font-family:inherit;outline:none;appearance:none;cursor:pointer;}
+.inp-select:focus{border-color:var(--brand);}
+.inp-text{height:36px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text-1);background:var(--surface);font-family:inherit;outline:none;flex:1;}
+.inp-text:focus{border-color:var(--brand);}
+.inp-suffix{font-size:13px;color:var(--text-3);white-space:nowrap;}
+.backdate-warn{display:none;align-items:flex-start;gap:8px;background:var(--warning-bg);border:1px solid var(--warning-border);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;line-height:17px;color:#6f4c00;}
+.backdate-warn.show{display:flex;}
+.backdate-warn svg{width:14px;height:14px;fill:none;stroke:var(--warning);stroke-width:2;flex-shrink:0;margin-top:1px;}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg);border-radius:0 0 var(--radius) var(--radius);}
+</style>
+</head>
+<body>
+
+<!-- Rail -->
+<nav class="rail">
+  <div class="rail-logo">
+    <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+  </div>
+  <div class="rail-icon" title="Notifications">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </div>
+  <div class="rail-icon" title="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </div>
+  <div class="rail-icon" title="Projects">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+  </div>
+  <div class="rail-icon active" title="Resources">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </div>
+  <div class="rail-icon" title="Analytics">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  </div>
+  <div class="rail-icon" title="Tasks">
+    <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+  </div>
+  <div class="rail-icon" title="Grid">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  </div>
+  <div class="rail-bottom">
+    <div class="rail-icon" title="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+    <div class="rail-avatar">VS</div>
+  </div>
+</nav>
+
+<!-- Settings sidebar -->
+<aside class="sidebar">
+  <div class="ss-title">Settings</div>
+  <div class="ss-search"><input class="ss-search-input" placeholder="Search"></div>
+
+  <div class="ss-group">Personal</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Profile
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Notifications
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-group">Account</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Preferences
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-purple"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Team members
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-yellow"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>Plans &amp; Billing
+  </div>
+
+  <div class="ss-divider"></div>
+  <div class="ss-group">Operations &amp; Financials</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>Time tracking
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-green"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Resource management
+  </div>
+  <div class="ss-sub">General settings</div>
+  <div class="ss-sub active">Base capacity</div>
+  <div class="ss-sub">Work schedule</div>
+  <div class="ss-sub">Resource requests</div>
+  <div class="ss-item">
+    <div class="ss-icon ic-teal"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>Financial management
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-red"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>Rate cards
+  </div>
+  <div class="ss-item">
+    <div class="ss-icon ic-magenta"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>Invoicing
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="content-header">
+    <div>
+      <div class="content-title">Base Capacity</div>
+      <div class="content-desc">Set the default available hours and cost rate for each team member. Cost rate changes can be backdated — this will recalculate historical project financials for the affected period.</div>
+    </div>
+    <div class="content-actions">
+      <button class="btn btn-ghost" onclick="alert('Exporting…')">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Invite members
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab(this)">Active <span style="color:var(--text-4);font-weight:400;">(3)</span></div>
+    <div class="tab" onclick="switchTab(this)">Invited</div>
+    <div class="tab" onclick="switchTab(this)">Deactivated</div>
+    <div class="tab-sep"></div>
+    <button class="filter-btn">
+      <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filter
+    </button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="sort-label">Team member (3) <span>↑</span></div>
+    <div class="toolbar-right">
+      <button class="icon-btn" title="Search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <button class="export-btn">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="min-width:200px">Team member</th>
+          <th style="min-width:190px">Email</th>
+          <th style="min-width:150px">Role</th>
+          <th style="min-width:150px">Base capacity</th>
+          <th style="min-width:160px">Cost rate</th>
+          <th style="min-width:140px">Effective from</th>
+          <th style="min-width:90px"></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Paul -->
+        <tr>
+          <td><div class="member-cell"><div class="avatar av-teal">P</div><span class="member-name">Paul</span></div></td>
+          <td style="font-size:13px;color:var(--text-2);">sampleuser2@rocketlane.com</td>
+          <td><span class="role-badge role-engineer">Engineer</span></td>
+          <td>
+            <div class="cap-cell" id="cap-paul">
+              <span class="cap-val" id="cap-paul-val">8 hrs / day</span>
+              <button class="edit-icon-btn" onclick="editCap('paul')" title="Edit">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+          </td>
+          <td>
+            <div class="rate-cell">
+              <span class="rate-val">USD 100 / hr</span>
+              <button class="rate-edit-btn" onclick="openModal('Paul','Engineer','av-teal','P',100,'USD')">Edit rate</button>
+            </div>
+          </td>
+          <td><span class="eff-date">01 Jun 2026</span></td>
+          <td>
+            <div class="row-actions">
+              <button class="act-btn" title="Cost rate history" onclick="openDrawer('Paul','Engineer','av-teal','P')">
+                <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+              </button>
+              <button class="act-btn" title="More">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Rachel -->
+        <tr>
+          <td><div class="member-cell"><div class="avatar av-orange">R</div><span class="member-name">Rachel</span></div></td>
+          <td style="font-size:13px;color:var(--text-2);">sampleuser1@rocketlane.com</td>
+          <td><span class="role-badge role-cs">Customer success</span></td>
+          <td>
+            <div class="cap-cell" id="cap-rachel">
+              <span class="cap-val" id="cap-rachel-val">8 hrs / day</span>
+              <button class="edit-icon-btn" onclick="editCap('rachel')" title="Edit">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+          </td>
+          <td>
+            <div class="rate-cell">
+              <span class="rate-val">USD 130 / hr</span>
+              <button class="rate-edit-btn" onclick="openModal('Rachel','Customer success','av-orange','R',130,'USD')">Edit rate</button>
+            </div>
+          </td>
+          <td><span class="eff-date">01 May 2026</span></td>
+          <td>
+            <div class="row-actions">
+              <button class="act-btn" title="Cost rate history" onclick="openDrawer('Rachel','Customer success','av-orange','R')">
+                <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+              </button>
+              <button class="act-btn" title="More">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Vivek -->
+        <tr>
+          <td><div class="member-cell"><div class="avatar av-blue">VS</div><span class="member-name">Vivek Shanmugasundaram</span></div></td>
+          <td style="font-size:13px;color:var(--text-2);">vivek@rocketlane.com</td>
+          <td><span class="role-badge role-pm">Project Manager</span></td>
+          <td>
+            <div class="cap-cell" id="cap-vivek">
+              <span class="cap-val" id="cap-vivek-val">8 hrs / day</span>
+              <button class="edit-icon-btn" onclick="editCap('vivek')" title="Edit">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+          </td>
+          <td>
+            <div class="rate-cell">
+              <span class="rate-val">USD 200 / hr</span>
+              <button class="rate-edit-btn" onclick="openModal('Vivek Shanmugasundaram','Project Manager','av-blue','VS',200,'USD')">Edit rate</button>
+            </div>
+          </td>
+          <td><span class="eff-date">05 Jun 2026</span></td>
+          <td>
+            <div class="row-actions">
+              <button class="act-btn" title="Cost rate history" onclick="openDrawer('Vivek Shanmugasundaram','Project Manager','av-blue','VS')">
+                <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+              </button>
+              <button class="act-btn" title="More">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Drawer overlay -->
+<div class="drawer-overlay" id="d-overlay" onclick="closeDrawer()"></div>
+
+<!-- Cost rate history drawer -->
+<div class="drawer" id="drawer">
+  <div class="drawer-hd">
+    <div class="drawer-hd-top">
+      <div class="drawer-member">
+        <div class="avatar" id="d-avatar">VS</div>
+        <div>
+          <div class="drawer-member-name" id="d-name">Vivek Shanmugasundaram</div>
+          <div class="drawer-member-role" id="d-role">Project Manager</div>
+        </div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="dtabs">
+      <button class="dtab active" id="dtab-hist" onclick="switchDrawerTab('hist')">Cost rate history</button>
+      <button class="dtab" id="dtab-audit" onclick="switchDrawerTab('audit')">Audit log</button>
+    </div>
+  </div>
+
+  <div class="drawer-body">
+    <!-- Cost rate history tab -->
+    <div id="tab-hist">
+      <table class="htbl">
+        <thead>
+          <tr>
+            <th>Cost rate updates</th>
+            <th>Updated on</th>
+            <th>Updated by</th>
+          </tr>
+        </thead>
+        <tbody id="hist-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Audit log tab -->
+    <div id="tab-audit" style="display:none;">
+      <div class="log-date-hd">Today · 05 Jun 2026</div>
+      <div class="log-entry">
+        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
+        <div class="log-body">
+          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
+          <div class="log-desc">Updated <strong>Cost rate</strong></div>
+          <div class="log-diff"><span class="d-old">USD 150 / hr</span><span class="d-arr">→</span><span class="d-new">USD 200 / hr</span></div>
+        </div>
+      </div>
+      <div class="log-entry">
+        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
+        <div class="log-body">
+          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
+          <div class="log-desc">Updated <strong>Cost rate</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 03 Jun)</span></div>
+          <div class="log-diff"><span class="d-old">USD 125 / hr</span><span class="d-arr">→</span><span class="d-new">USD 150 / hr</span></div>
+        </div>
+      </div>
+      <div class="log-entry">
+        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
+        <div class="log-body">
+          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
+          <div class="log-desc">Updated <strong>Cost rate</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 04 Jun)</span></div>
+          <div class="log-diff"><span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">USD 125 / hr</span></div>
+        </div>
+      </div>
+      <div class="log-date-hd" style="top:unset;">Yesterday · 04 Jun 2026</div>
+      <div class="log-entry">
+        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
+        <div class="log-body">
+          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">04 Jun</span></div>
+          <div class="log-desc">Updated <strong>Base capacity</strong></div>
+          <div class="log-diff"><span class="d-old">6 hrs / day</span><span class="d-arr">→</span><span class="d-new">8 hrs / day</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <span class="drawer-footer-note" id="d-footer-note">Showing all rate changes</span>
+    <button class="btn btn-primary btn-sm" id="d-update-btn" onclick="openModalFromDrawer()">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Update cost rate
+    </button>
+  </div>
+</div>
+
+<!-- Modal overlay -->
+<div class="modal-overlay" id="m-overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title">Update cost rate</div>
+        <div class="modal-subtitle" id="m-subtitle">Paul · Engineer</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Cost rate</label>
+        <div class="input-group">
+          <select class="inp-select" id="m-currency" style="width:88px;">
+            <option>USD</option><option>EUR</option><option>GBP</option><option>INR</option><option>AUD</option>
+          </select>
+          <input class="inp-text" type="number" id="m-amount" placeholder="0.00" min="0" step="0.01">
+          <span class="inp-suffix">/ hour</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Effective date</label>
+        <div class="form-hint">The new rate applies starting from this date. Pick a past date to backdate.</div>
+        <input class="inp-text" type="date" id="m-date" style="max-width:196px;" oninput="checkBackdate()">
+      </div>
+      <div class="backdate-warn" id="m-warn">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span id="m-warn-text">Backdating this change will recalculate project costs for the affected period.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRate()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const historyData = {
+  Paul: [
+    { amount:100, currency:'USD', updatedOn:'01 Jun', backdatedTo:null },
+    { amount:125, currency:'USD', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
+  ],
+  Rachel: [
+    { amount:130, currency:'USD', updatedOn:'01 May', backdatedTo:null },
+    { amount:150, currency:'USD', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
+  ],
+  'Vivek Shanmugasundaram': [
+    { amount:125, currency:'USD', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
+    { amount:150, currency:'USD', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
+    { amount:200, currency:'USD', updatedOn:'05 Jun', backdatedTo:null },
+  ],
+};
+
+let activeMember = null;
+let activeModal  = { name:'', role:'', avClass:'', initials:'', amount:0, currency:'USD' };
+
+// ── Tabs (main) ───────────────────────────────────────────────────────────────
+function switchTab(el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Drawer ────────────────────────────────────────────────────────────────────
+function openDrawer(name, role, avClass, initials) {
+  activeMember = name;
+  document.getElementById('d-name').textContent    = name;
+  document.getElementById('d-role').textContent    = role;
+  const av = document.getElementById('d-avatar');
+  av.className  = 'avatar ' + avClass;
+  av.textContent = initials;
+  switchDrawerTab('hist');
+  renderHistory(name);
+  document.getElementById('d-overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('d-overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+function switchDrawerTab(tab) {
+  const isHist = tab === 'hist';
+  document.getElementById('dtab-hist').classList.toggle('active',  isHist);
+  document.getElementById('dtab-audit').classList.toggle('active', !isHist);
+  document.getElementById('tab-hist').style.display  = isHist  ? '' : 'none';
+  document.getElementById('tab-audit').style.display = !isHist ? '' : 'none';
+}
+
+function renderHistory(name) {
+  const rows = (historyData[name] || []).slice().reverse();
+  document.getElementById('hist-tbody').innerHTML = rows.map(r => `
+    <tr>
+      <td>
+        <div class="rate-update">Updated to ${r.currency} ${r.amount.toFixed(0)}</div>
+        ${r.backdatedTo ? `<div class="rate-backdate">Backdated to ${r.backdatedTo}</div>` : ''}
+      </td>
+      <td><span class="h-date">${r.updatedOn}</span></td>
+      <td>
+        <div class="h-user">
+          <div class="avatar av-blue" style="width:22px;height:22px;font-size:8px;flex-shrink:0;">VS</div>
+          <span class="h-user-name">Vivek Shanmugasundaram</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(name, role, avClass, initials, amount, currency) {
+  activeModal = { name, role, avClass, initials, amount, currency };
+  document.getElementById('m-subtitle').textContent = name + ' · ' + role;
+  document.getElementById('m-currency').value       = currency;
+  document.getElementById('m-amount').value         = amount;
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('m-date').value           = today;
+  document.getElementById('m-warn').classList.remove('show');
+  document.getElementById('m-overlay').classList.add('open');
+}
+
+function openModalFromDrawer() {
+  if (!activeMember) return;
+  const rows   = historyData[activeMember] || [];
+  const latest = rows[rows.length - 1] || { amount:0, currency:'USD' };
+  const role   = document.getElementById('d-role').textContent;
+  openModal(activeMember, role,
+    document.getElementById('d-avatar').className.replace('avatar ',''),
+    document.getElementById('d-avatar').textContent,
+    latest.amount, latest.currency);
+}
+
+function closeModal() {
+  document.getElementById('m-overlay').classList.remove('open');
+}
+
+function checkBackdate() {
+  const v     = document.getElementById('m-date').value;
+  const today = new Date().toISOString().slice(0,10);
+  const warn  = document.getElementById('m-warn');
+  if (v && v < today) {
+    const d   = new Date(v + 'T12:00:00');
+    const fmt = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    document.getElementById('m-warn-text').textContent =
+      `This change will be backdated to ${fmt}. Project cost calculations for this period will be recalculated.`;
+    warn.classList.add('show');
+  } else {
+    warn.classList.remove('show');
+  }
+}
+
+function saveRate() {
+  const currency = document.getElementById('m-currency').value;
+  const amount   = parseFloat(document.getElementById('m-amount').value);
+  const dateVal  = document.getElementById('m-date').value;
+  if (!amount || isNaN(amount) || amount <= 0) {
+    document.getElementById('m-amount').focus();
+    return;
+  }
+  const today      = new Date().toISOString().slice(0,10);
+  const isBackdate = dateVal && dateVal < today;
+  let backdatedTo  = null;
+  if (isBackdate) {
+    const d    = new Date(dateVal + 'T12:00:00');
+    backdatedTo = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  }
+  const updatedOn  = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  const name       = activeModal.name;
+  if (!historyData[name]) historyData[name] = [];
+  historyData[name].push({ amount, currency, updatedOn, backdatedTo });
+  if (activeMember === name && document.getElementById('drawer').classList.contains('open')) {
+    renderHistory(name);
+  }
+  closeModal();
+}
+
+// ── Inline capacity edit ──────────────────────────────────────────────────────
+function editCap(id) {
+  const valEl = document.getElementById('cap-' + id + '-val');
+  const wrap  = document.getElementById('cap-' + id);
+  const cur   = parseInt(valEl.textContent);
+  valEl.style.display = 'none';
+  const inp   = document.createElement('input');
+  inp.type    = 'number'; inp.className = 'cap-input';
+  inp.value   = cur; inp.min = 1; inp.max = 24;
+  wrap.insertBefore(inp, wrap.querySelector('.edit-icon-btn'));
+  inp.focus(); inp.select();
+  const done = () => {
+    const v = Math.min(24, Math.max(1, parseInt(inp.value) || cur));
+    valEl.textContent   = v + ' hrs / day';
+    valEl.style.display = '';
+    inp.remove();
+  };
+  inp.addEventListener('blur', done);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  done();
+    if (e.key === 'Escape') { inp.value = cur; done(); }
+  });
+}
+
+// Set today's date on load
+document.getElementById('m-date').value = new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
