@@ -8,7 +8,7 @@
   --brand:#0f62fe;--brand-dark:#0043ce;--brand-light:#edf5ff;--brand-muted:#97c1ff;
   --bg:#fafafa;--surface:#fff;--border:#e0e0e0;--border-subtle:#f4f4f4;--border-strong:#c6c6c6;
   --text-1:#161616;--text-2:#525252;--text-3:#6f6f6f;--text-4:#a8a8a8;
-  --success:#24a148;--success-bg:#defbe6;--success-border:#a7f0ba;
+  --success:#24a148;--success-bg:#defbe6;
   --warning:#ffbf00;--warning-bg:#fffbf0;--warning-border:#f1c21b;
   --danger:#da1e28;--danger-bg:#fff1f1;--danger-border:#ffd7d9;
   --radius:8px;--radius-sm:4px;
@@ -40,7 +40,6 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Helvetica Neue'
 .ss-divider{height:1px;background:var(--border);margin:6px 12px;}
 .ss-item{display:flex;align-items:center;gap:10px;padding:7px 20px;font-size:14px;color:var(--text-2);cursor:pointer;transition:all .1s;}
 .ss-item:hover{background:var(--bg);color:var(--text-1);}
-.ss-item.active{background:var(--brand-light);color:var(--brand);font-weight:600;}
 .ss-icon{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;flex-shrink:0;}
 .ss-icon svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2;}
 .ic-orange{background:linear-gradient(135deg,#ffbe7a,#f98000);}
@@ -57,7 +56,6 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Helvetica Neue'
 
 /* ── Main ── */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-
 .content-header{padding:20px 28px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-shrink:0;}
 .content-title{font-size:20px;font-weight:600;line-height:28px;color:var(--text-1);}
 .content-desc{font-size:13px;color:var(--text-3);margin-top:3px;max-width:580px;line-height:18px;}
@@ -72,7 +70,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Helvetica Neue'
 .btn-sm{height:26px;padding:0 10px;font-size:13px;}
 
 /* Tab bar */
-.tab-bar{display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--border-subtle);flex-shrink:0;margin-top:10px;gap:0;}
+.tab-bar{display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--border-subtle);flex-shrink:0;margin-top:10px;}
 .tab{padding:9px 14px;font-size:14px;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;position:relative;bottom:-1px;white-space:nowrap;transition:all .1s;}
 .tab:hover{color:var(--text-1);}
 .tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:590;}
@@ -118,21 +116,19 @@ tbody tr:last-child td{border-bottom:none;}
 .role-cs{background:#d9fbfb;color:#005d5d;border-color:#3ddbd9;}
 .role-pm{background:#f6f2ff;color:#491d8b;border-color:#be95ff;}
 
-.cap-cell{display:flex;align-items:center;gap:8px;}
-.cap-val{font-size:14px;color:var(--text-1);}
-.edit-icon-btn{width:20px;height:20px;border-radius:3px;display:none;place-items:center;cursor:pointer;color:var(--text-4);border:none;background:transparent;}
-.edit-icon-btn:hover{color:var(--text-2);background:var(--border-subtle);}
-.edit-icon-btn svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;}
-tr:hover .edit-icon-btn{display:grid;}
-.cap-input{width:56px;border:1px solid var(--brand);border-radius:var(--radius-sm);padding:3px 6px;font-size:13px;color:var(--text-1);outline:none;font-family:inherit;background:var(--brand-light);}
+/* Capacity cell — clickable, mirrors cost rate cell interaction */
+.cap-cell{display:flex;flex-direction:column;gap:2px;cursor:pointer;width:fit-content;}
+.cap-val{font-size:14px;color:var(--text-1);font-weight:590;}
+.cap-since{font-size:12px;color:var(--text-4);}
+.cap-cell:hover .cap-val{color:var(--brand);}
 
-.rate-cell{display:flex;align-items:center;gap:8px;}
-.rate-val{font-size:14px;color:var(--text-1);}
-.rate-edit-btn{display:none;padding:2px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text-2);cursor:pointer;background:var(--surface);font-family:inherit;}
-.rate-edit-btn:hover{background:var(--bg);border-color:var(--border-strong);}
-tr:hover .rate-edit-btn{display:inline-flex;}
+/* Permission badge */
+.perm-badge{font-size:13px;color:var(--text-2);}
 
-.eff-date{font-size:13px;color:var(--text-2);}
+/* Timesheet approver */
+.approver-cell{display:flex;align-items:center;gap:6px;}
+.approver-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--border);font-size:12px;color:var(--text-2);}
+.approver-chip .avatar{width:16px;height:16px;font-size:7px;background:#da1e28;}
 
 .row-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;opacity:0;transition:opacity .1s;}
 tr:hover .row-actions{opacity:1;}
@@ -155,8 +151,8 @@ tr:hover .row-actions{opacity:1;}
 .drawer-close:hover{background:var(--bg);color:var(--text-1);}
 .drawer-close svg{width:13px;height:13px;stroke-width:2;fill:none;stroke:currentColor;}
 
-/* Drawer tabs — matching Image 1 style */
-.dtabs{display:flex;gap:0;margin-bottom:-1px;}
+/* Drawer tabs — same visual as cost rate history panel in the shared image */
+.dtabs{display:flex;margin-bottom:-1px;}
 .dtab{padding:8px 18px;font-size:14px;font-weight:590;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text-2);border-bottom:none;letter-spacing:.16px;font-family:inherit;transition:all .1s;}
 .dtab:first-child{border-radius:var(--radius-sm) 0 0 0;}
 .dtab:last-child{border-radius:0 var(--radius-sm) 0 0;border-left:none;}
@@ -165,14 +161,14 @@ tr:hover .row-actions{opacity:1;}
 
 .drawer-body{flex:1;overflow-y:auto;}
 
-/* History table */
+/* History table in drawer */
 .htbl{width:100%;border-collapse:collapse;}
 .htbl thead th{padding:10px 20px;text-align:left;font-size:11px;font-weight:590;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:1;}
 .htbl tbody td{padding:14px 20px;border-bottom:1px solid var(--border-subtle);vertical-align:top;}
 .htbl tbody tr:last-child td{border-bottom:none;}
 .htbl tbody tr:hover td{background:var(--bg);}
-.rate-update{font-size:14px;font-weight:590;color:var(--text-1);line-height:20px;}
-.rate-backdate{font-size:12px;color:var(--danger);margin-top:3px;}
+.h-update{font-size:14px;font-weight:590;color:var(--text-1);line-height:20px;}
+.h-backdate{font-size:12px;color:var(--danger);margin-top:3px;}
 .h-date{font-size:13px;color:var(--text-2);white-space:nowrap;}
 .h-user{display:flex;align-items:center;gap:8px;}
 .h-user-name{font-size:13px;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
@@ -221,8 +217,8 @@ tr:hover .row-actions{opacity:1;}
 .backdate-warn svg{width:14px;height:14px;fill:none;stroke:var(--warning);stroke-width:2;flex-shrink:0;margin-top:1px;}
 .modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg);border-radius:0 0 var(--radius) var(--radius);}
 
-/* ── Dropdown menu ── */
-.dropdown{position:fixed;z-index:400;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:188px;padding:4px;display:none;}
+/* ── Dropdown ── */
+.dropdown{position:fixed;z-index:400;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:196px;padding:4px;display:none;}
 .dropdown.open{display:block;}
 .dd-item{display:flex;align-items:center;gap:9px;padding:7px 10px;font-size:13px;color:var(--text-1);border-radius:5px;cursor:pointer;transition:background .1s;}
 .dd-item:hover{background:var(--bg);}
@@ -321,12 +317,11 @@ tr:hover .row-actions{opacity:1;}
   <div class="content-header">
     <div>
       <div class="content-title">Base Capacity</div>
-      <div class="content-desc">Set the default available hours and cost rate for each team member. Cost rate changes can be backdated — this will recalculate historical project financials for the affected period.</div>
+      <div class="content-desc">Set the default available hours for each team member. Changes can be backdated to update historical utilisation calculations.</div>
     </div>
     <div class="content-actions">
-      <button class="btn btn-ghost" onclick="alert('Exporting…')">
+      <button class="icon-btn" title="Export" style="width:30px;height:32px;">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export
       </button>
       <button class="btn btn-primary">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -361,18 +356,18 @@ tr:hover .row-actions{opacity:1;}
     </div>
   </div>
 
-  <!-- Table -->
+  <!-- Table — columns match the Team Members settings layout from the shared image -->
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
           <th style="min-width:200px">Team member</th>
           <th style="min-width:190px">Email</th>
-          <th style="min-width:150px">Role</th>
-          <th style="min-width:150px">Base capacity</th>
-          <th style="min-width:160px">Cost rate</th>
-          <th style="min-width:140px">Effective from</th>
-          <th style="min-width:90px"></th>
+          <th style="min-width:160px">Role</th>
+          <th style="min-width:160px">Permission</th>
+          <th style="min-width:180px">Base capacity</th>
+          <th style="min-width:160px">Timesheet approver</th>
+          <th style="min-width:80px"></th>
         </tr>
       </thead>
       <tbody>
@@ -382,27 +377,21 @@ tr:hover .row-actions{opacity:1;}
           <td><div class="member-cell"><div class="avatar av-teal">P</div><span class="member-name">Paul</span></div></td>
           <td style="font-size:13px;color:var(--text-2);">sampleuser2@rocketlane.com</td>
           <td><span class="role-badge role-engineer">Engineer</span></td>
+          <td><span class="perm-badge">Account Admin</span></td>
           <td>
-            <div class="cap-cell" id="cap-paul">
-              <span class="cap-val" id="cap-paul-val">8 hrs / day</span>
-              <button class="edit-icon-btn" onclick="editCap('paul')" title="Edit">
-                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
+            <div class="cap-cell" onclick="openDrawer('Paul','Engineer','av-teal','P')" title="View base capacity history">
+              <span class="cap-val">8 hrs / day</span>
+              <span class="cap-since">From 04 Jun 2026</span>
             </div>
           </td>
           <td>
-            <div class="rate-cell">
-              <span class="rate-val">USD 100 / hr</span>
-              <button class="rate-edit-btn" onclick="openModal('Paul','Engineer','av-teal','P',100,'USD')">Edit rate</button>
+            <div class="approver-cell">
+              <div class="approver-chip"><div class="avatar" style="width:16px;height:16px;font-size:7px;background:#da1e28;">A</div>Admins</div>
             </div>
           </td>
-          <td><span class="eff-date">01 Jun 2026</span></td>
           <td>
             <div class="row-actions">
-              <button class="act-btn" title="Cost rate history" onclick="openDrawer('Paul','Engineer','av-teal','P')">
-                <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
-              </button>
-              <button class="act-btn" title="More" onclick="toggleMenu(event,'Paul','Engineer','av-teal','P',100,'USD')">
+              <button class="act-btn" title="More" onclick="toggleMenu(event,'Paul','Engineer','av-teal','P')">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
               </button>
             </div>
@@ -414,27 +403,21 @@ tr:hover .row-actions{opacity:1;}
           <td><div class="member-cell"><div class="avatar av-orange">R</div><span class="member-name">Rachel</span></div></td>
           <td style="font-size:13px;color:var(--text-2);">sampleuser1@rocketlane.com</td>
           <td><span class="role-badge role-cs">Customer success</span></td>
+          <td><span class="perm-badge">Account Admin</span></td>
           <td>
-            <div class="cap-cell" id="cap-rachel">
-              <span class="cap-val" id="cap-rachel-val">8 hrs / day</span>
-              <button class="edit-icon-btn" onclick="editCap('rachel')" title="Edit">
-                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
+            <div class="cap-cell" onclick="openDrawer('Rachel','Customer success','av-orange','R')" title="View base capacity history">
+              <span class="cap-val">8 hrs / day</span>
+              <span class="cap-since">From 03 Jun 2026</span>
             </div>
           </td>
           <td>
-            <div class="rate-cell">
-              <span class="rate-val">USD 130 / hr</span>
-              <button class="rate-edit-btn" onclick="openModal('Rachel','Customer success','av-orange','R',130,'USD')">Edit rate</button>
+            <div class="approver-cell">
+              <div class="approver-chip"><div class="avatar" style="width:16px;height:16px;font-size:7px;background:#da1e28;">A</div>Admins</div>
             </div>
           </td>
-          <td><span class="eff-date">01 May 2026</span></td>
           <td>
             <div class="row-actions">
-              <button class="act-btn" title="Cost rate history" onclick="openDrawer('Rachel','Customer success','av-orange','R')">
-                <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
-              </button>
-              <button class="act-btn" title="More" onclick="toggleMenu(event,'Rachel','Customer success','av-orange','R',130,'USD')">
+              <button class="act-btn" title="More" onclick="toggleMenu(event,'Rachel','Customer success','av-orange','R')">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
               </button>
             </div>
@@ -446,27 +429,21 @@ tr:hover .row-actions{opacity:1;}
           <td><div class="member-cell"><div class="avatar av-blue">VS</div><span class="member-name">Vivek Shanmugasundaram</span></div></td>
           <td style="font-size:13px;color:var(--text-2);">vivek@rocketlane.com</td>
           <td><span class="role-badge role-pm">Project Manager</span></td>
+          <td><span class="perm-badge">Account Admin</span></td>
           <td>
-            <div class="cap-cell" id="cap-vivek">
-              <span class="cap-val" id="cap-vivek-val">8 hrs / day</span>
-              <button class="edit-icon-btn" onclick="editCap('vivek')" title="Edit">
-                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
+            <div class="cap-cell" onclick="openDrawer('Vivek Shanmugasundaram','Project Manager','av-blue','VS')" title="View base capacity history">
+              <span class="cap-val">8 hrs / day</span>
+              <span class="cap-since">From 05 Jun 2026</span>
             </div>
           </td>
           <td>
-            <div class="rate-cell">
-              <span class="rate-val">USD 200 / hr</span>
-              <button class="rate-edit-btn" onclick="openModal('Vivek Shanmugasundaram','Project Manager','av-blue','VS',200,'USD')">Edit rate</button>
+            <div class="approver-cell">
+              <div class="approver-chip"><div class="avatar" style="width:16px;height:16px;font-size:7px;background:#da1e28;">A</div>Admins</div>
             </div>
           </td>
-          <td><span class="eff-date">05 Jun 2026</span></td>
           <td>
             <div class="row-actions">
-              <button class="act-btn" title="Cost rate history" onclick="openDrawer('Vivek Shanmugasundaram','Project Manager','av-blue','VS')">
-                <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
-              </button>
-              <button class="act-btn" title="More" onclick="toggleMenu(event,'Vivek Shanmugasundaram','Project Manager','av-blue','VS',200,'USD')">
+              <button class="act-btn" title="More" onclick="toggleMenu(event,'Vivek Shanmugasundaram','Project Manager','av-blue','VS')">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
               </button>
             </div>
@@ -478,19 +455,15 @@ tr:hover .row-actions{opacity:1;}
   </div>
 </div>
 
-<!-- Dropdown menu -->
+<!-- Dropdown -->
 <div class="dropdown" id="dropdown">
   <div class="dd-item" id="dd-history">
     <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
-    View cost rate history
+    View capacity history
   </div>
-  <div class="dd-item" id="dd-edit-rate">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-    Update cost rate
-  </div>
-  <div class="dd-item" id="dd-edit-cap">
+  <div class="dd-item" id="dd-update">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    Edit base capacity
+    Update base capacity
   </div>
   <div class="dd-sep"></div>
   <div class="dd-item danger" id="dd-deactivate">
@@ -502,7 +475,7 @@ tr:hover .row-actions{opacity:1;}
 <!-- Drawer overlay -->
 <div class="drawer-overlay" id="d-overlay" onclick="closeDrawer()"></div>
 
-<!-- Cost rate history drawer -->
+<!-- Base capacity history drawer -->
 <div class="drawer" id="drawer">
   <div class="drawer-hd">
     <div class="drawer-hd-top">
@@ -517,19 +490,20 @@ tr:hover .row-actions{opacity:1;}
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
+    <!-- Tabs: same visual style as cost rate history panel -->
     <div class="dtabs">
-      <button class="dtab active" id="dtab-hist" onclick="switchDrawerTab('hist')">Cost rate history</button>
+      <button class="dtab active" id="dtab-hist" onclick="switchDrawerTab('hist')">Base capacity history</button>
       <button class="dtab" id="dtab-audit" onclick="switchDrawerTab('audit')">Audit log</button>
     </div>
   </div>
 
   <div class="drawer-body">
-    <!-- Cost rate history tab -->
+    <!-- Base capacity history tab -->
     <div id="tab-hist">
       <table class="htbl">
         <thead>
           <tr>
-            <th>Cost rate updates</th>
+            <th>Base capacity updates</th>
             <th>Updated on</th>
             <th>Updated by</th>
           </tr>
@@ -545,53 +519,37 @@ tr:hover .row-actions{opacity:1;}
         <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
         <div class="log-body">
           <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
-          <div class="log-desc">Updated <strong>Cost rate</strong></div>
-          <div class="log-diff"><span class="d-old">USD 150 / hr</span><span class="d-arr">→</span><span class="d-new">USD 200 / hr</span></div>
-        </div>
-      </div>
-      <div class="log-entry">
-        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
-        <div class="log-body">
-          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
-          <div class="log-desc">Updated <strong>Cost rate</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 03 Jun)</span></div>
-          <div class="log-diff"><span class="d-old">USD 125 / hr</span><span class="d-arr">→</span><span class="d-new">USD 150 / hr</span></div>
-        </div>
-      </div>
-      <div class="log-entry">
-        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
-        <div class="log-body">
-          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
-          <div class="log-desc">Updated <strong>Cost rate</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 04 Jun)</span></div>
-          <div class="log-diff"><span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">USD 125 / hr</span></div>
-        </div>
-      </div>
-      <div class="log-date-hd" style="top:unset;">Yesterday · 04 Jun 2026</div>
-      <div class="log-entry">
-        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
-        <div class="log-body">
-          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">04 Jun</span></div>
-          <div class="log-desc">Updated <strong>Base capacity</strong></div>
+          <div class="log-desc">Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 04 Jun)</span></div>
           <div class="log-diff"><span class="d-old">6 hrs / day</span><span class="d-arr">→</span><span class="d-new">8 hrs / day</span></div>
+        </div>
+      </div>
+      <div class="log-date-hd" style="position:relative;top:0;">01 May 2026</div>
+      <div class="log-entry">
+        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
+        <div class="log-body">
+          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">01 May</span></div>
+          <div class="log-desc">Set <strong>Base capacity</strong></div>
+          <div class="log-diff"><span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">6 hrs / day</span></div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="drawer-footer">
-    <span class="drawer-footer-note" id="d-footer-note">Showing all rate changes</span>
-    <button class="btn btn-primary btn-sm" id="d-update-btn" onclick="openModalFromDrawer()">
+    <span class="drawer-footer-note">Showing all capacity changes</span>
+    <button class="btn btn-primary btn-sm" onclick="openModal()">
       <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Update cost rate
+      Update base capacity
     </button>
   </div>
 </div>
 
-<!-- Modal overlay -->
+<!-- Update base capacity modal -->
 <div class="modal-overlay" id="m-overlay" onclick="closeModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-hd">
       <div>
-        <div class="modal-title">Update cost rate</div>
+        <div class="modal-title">Update base capacity</div>
         <div class="modal-subtitle" id="m-subtitle">Paul · Engineer</div>
       </div>
       <button class="modal-close" onclick="closeModal()">
@@ -600,97 +558,53 @@ tr:hover .row-actions{opacity:1;}
     </div>
     <div class="modal-body">
       <div class="form-row">
-        <label class="form-label">Cost rate</label>
+        <label class="form-label">Base capacity</label>
         <div class="input-group">
-          <select class="inp-select" id="m-currency" style="width:88px;">
-            <option>USD</option><option>EUR</option><option>GBP</option><option>INR</option><option>AUD</option>
+          <input class="inp-text" type="number" id="m-hours" placeholder="8" min="1" max="24" step="0.5" style="max-width:100px;">
+          <select class="inp-select" id="m-unit">
+            <option value="day">hrs / day</option>
+            <option value="week">hrs / week</option>
           </select>
-          <input class="inp-text" type="number" id="m-amount" placeholder="0.00" min="0" step="0.01">
-          <span class="inp-suffix">/ hour</span>
         </div>
       </div>
       <div class="form-row">
         <label class="form-label">Effective date</label>
-        <div class="form-hint">The new rate applies starting from this date. Pick a past date to backdate.</div>
+        <div class="form-hint">The new capacity applies from this date. Pick a past date to backdate.</div>
         <input class="inp-text" type="date" id="m-date" style="max-width:196px;" oninput="checkBackdate()">
       </div>
       <div class="backdate-warn" id="m-warn">
         <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span id="m-warn-text">Backdating this change will recalculate project costs for the affected period.</span>
+        <span id="m-warn-text">Backdating this change will update utilisation calculations for the affected period.</span>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveRate()">Save changes</button>
+      <button class="btn btn-primary" onclick="saveCapacity()">Save changes</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── Dropdown ─────────────────────────────────────────────────────────────────
-let ddCtx = {};
-
-function toggleMenu(e, name, role, avClass, initials, amount, currency) {
-  e.stopPropagation();
-  const menu = document.getElementById('dropdown');
-  const already = menu.classList.contains('open') && ddCtx.name === name;
-  closeMenu();
-  if (already) return;
-
-  ddCtx = { name, role, avClass, initials, amount, currency };
-
-  // Position below the button
-  const rect = e.currentTarget.getBoundingClientRect();
-  menu.style.top  = (rect.bottom + 4) + 'px';
-  menu.style.left = (rect.right - 188) + 'px'; // right-align to button
-
-  // Wire up items
-  document.getElementById('dd-history').onclick = () => {
-    openDrawer(name, role, avClass, initials); closeMenu();
-  };
-  document.getElementById('dd-edit-rate').onclick = () => {
-    openModal(name, role, avClass, initials, amount, currency); closeMenu();
-  };
-  document.getElementById('dd-edit-cap').onclick = () => {
-    const capId = name === 'Paul' ? 'paul' : name === 'Rachel' ? 'rachel' : 'vivek';
-    editCap(capId); closeMenu();
-  };
-  document.getElementById('dd-deactivate').onclick = () => {
-    if (confirm(`Deactivate ${name}? They will lose access to Rocketlane.`)) alert('Member deactivated (prototype only).');
-    closeMenu();
-  };
-
-  menu.classList.add('open');
-}
-
-function closeMenu() {
-  document.getElementById('dropdown').classList.remove('open');
-}
-
-document.addEventListener('click', closeMenu);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
-
 // ── Data ──────────────────────────────────────────────────────────────────────
 const historyData = {
   Paul: [
-    { amount:100, currency:'USD', updatedOn:'01 Jun', backdatedTo:null },
-    { amount:125, currency:'USD', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
+    { hrs:6, unit:'day', updatedOn:'01 May', backdatedTo:null },
+    { hrs:8, unit:'day', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
   ],
   Rachel: [
-    { amount:130, currency:'USD', updatedOn:'01 May', backdatedTo:null },
-    { amount:150, currency:'USD', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
+    { hrs:7, unit:'day', updatedOn:'01 May', backdatedTo:null },
+    { hrs:8, unit:'day', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
   ],
   'Vivek Shanmugasundaram': [
-    { amount:125, currency:'USD', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
-    { amount:150, currency:'USD', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
-    { amount:200, currency:'USD', updatedOn:'05 Jun', backdatedTo:null },
+    { hrs:6, unit:'day', updatedOn:'01 May', backdatedTo:null },
+    { hrs:8, unit:'day', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
   ],
 };
 
 let activeMember = null;
-let activeModal  = { name:'', role:'', avClass:'', initials:'', amount:0, currency:'USD' };
+let activeMeta   = {};
 
-// ── Tabs (main) ───────────────────────────────────────────────────────────────
+// ── Main tabs ─────────────────────────────────────────────────────────────────
 function switchTab(el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
@@ -699,10 +613,11 @@ function switchTab(el) {
 // ── Drawer ────────────────────────────────────────────────────────────────────
 function openDrawer(name, role, avClass, initials) {
   activeMember = name;
-  document.getElementById('d-name').textContent    = name;
-  document.getElementById('d-role').textContent    = role;
+  activeMeta   = { name, role, avClass, initials };
+  document.getElementById('d-name').textContent = name;
+  document.getElementById('d-role').textContent = role;
   const av = document.getElementById('d-avatar');
-  av.className  = 'avatar ' + avClass;
+  av.className   = 'avatar ' + avClass;
   av.textContent = initials;
   switchDrawerTab('hist');
   renderHistory(name);
@@ -728,8 +643,8 @@ function renderHistory(name) {
   document.getElementById('hist-tbody').innerHTML = rows.map(r => `
     <tr>
       <td>
-        <div class="rate-update">Updated to ${r.currency} ${r.amount.toFixed(0)}</div>
-        ${r.backdatedTo ? `<div class="rate-backdate">Backdated to ${r.backdatedTo}</div>` : ''}
+        <div class="h-update">Updated to ${r.hrs} hrs / ${r.unit}</div>
+        ${r.backdatedTo ? `<div class="h-backdate">Backdated to ${r.backdatedTo}</div>` : ''}
       </td>
       <td><span class="h-date">${r.updatedOn}</span></td>
       <td>
@@ -743,26 +658,17 @@ function renderHistory(name) {
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-function openModal(name, role, avClass, initials, amount, currency) {
-  activeModal = { name, role, avClass, initials, amount, currency };
-  document.getElementById('m-subtitle').textContent = name + ' · ' + role;
-  document.getElementById('m-currency').value       = currency;
-  document.getElementById('m-amount').value         = amount;
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('m-date').value           = today;
+function openModal(name, role) {
+  const n = name || activeMember;
+  const r = role || (activeMeta.role || '');
+  if (!n) return;
+  document.getElementById('m-subtitle').textContent = n + (r ? ' · ' + r : '');
+  const latest = (historyData[n] || []).slice(-1)[0];
+  document.getElementById('m-hours').value = latest ? latest.hrs : 8;
+  document.getElementById('m-unit').value  = latest ? latest.unit : 'day';
+  document.getElementById('m-date').value  = new Date().toISOString().slice(0,10);
   document.getElementById('m-warn').classList.remove('show');
   document.getElementById('m-overlay').classList.add('open');
-}
-
-function openModalFromDrawer() {
-  if (!activeMember) return;
-  const rows   = historyData[activeMember] || [];
-  const latest = rows[rows.length - 1] || { amount:0, currency:'USD' };
-  const role   = document.getElementById('d-role').textContent;
-  openModal(activeMember, role,
-    document.getElementById('d-avatar').className.replace('avatar ',''),
-    document.getElementById('d-avatar').textContent,
-    latest.amount, latest.currency);
 }
 
 function closeModal() {
@@ -777,21 +683,19 @@ function checkBackdate() {
     const d   = new Date(v + 'T12:00:00');
     const fmt = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
     document.getElementById('m-warn-text').textContent =
-      `This change will be backdated to ${fmt}. Project cost calculations for this period will be recalculated.`;
+      `This change will be backdated to ${fmt}. Utilisation calculations for this period will be updated.`;
     warn.classList.add('show');
   } else {
     warn.classList.remove('show');
   }
 }
 
-function saveRate() {
-  const currency = document.getElementById('m-currency').value;
-  const amount   = parseFloat(document.getElementById('m-amount').value);
-  const dateVal  = document.getElementById('m-date').value;
-  if (!amount || isNaN(amount) || amount <= 0) {
-    document.getElementById('m-amount').focus();
-    return;
-  }
+function saveCapacity() {
+  const hrs    = parseFloat(document.getElementById('m-hours').value);
+  const unit   = document.getElementById('m-unit').value;
+  const dateVal = document.getElementById('m-date').value;
+  if (!hrs || isNaN(hrs) || hrs <= 0) { document.getElementById('m-hours').focus(); return; }
+
   const today      = new Date().toISOString().slice(0,10);
   const isBackdate = dateVal && dateVal < today;
   let backdatedTo  = null;
@@ -799,41 +703,56 @@ function saveRate() {
     const d    = new Date(dateVal + 'T12:00:00');
     backdatedTo = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
   }
-  const updatedOn  = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-  const name       = activeModal.name;
-  if (!historyData[name]) historyData[name] = [];
-  historyData[name].push({ amount, currency, updatedOn, backdatedTo });
-  if (activeMember === name && document.getElementById('drawer').classList.contains('open')) {
-    renderHistory(name);
+  const updatedOn = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  const name = activeMember || document.getElementById('m-subtitle').textContent.split(' · ')[0];
+  if (name) {
+    if (!historyData[name]) historyData[name] = [];
+    historyData[name].push({ hrs, unit, updatedOn, backdatedTo });
+    if (activeMember === name && document.getElementById('drawer').classList.contains('open')) {
+      renderHistory(name);
+    }
   }
   closeModal();
 }
 
-// ── Inline capacity edit ──────────────────────────────────────────────────────
-function editCap(id) {
-  const valEl = document.getElementById('cap-' + id + '-val');
-  const wrap  = document.getElementById('cap-' + id);
-  const cur   = parseInt(valEl.textContent);
-  valEl.style.display = 'none';
-  const inp   = document.createElement('input');
-  inp.type    = 'number'; inp.className = 'cap-input';
-  inp.value   = cur; inp.min = 1; inp.max = 24;
-  wrap.insertBefore(inp, wrap.querySelector('.edit-icon-btn'));
-  inp.focus(); inp.select();
-  const done = () => {
-    const v = Math.min(24, Math.max(1, parseInt(inp.value) || cur));
-    valEl.textContent   = v + ' hrs / day';
-    valEl.style.display = '';
-    inp.remove();
+// ── Dropdown ──────────────────────────────────────────────────────────────────
+let ddCtx = {};
+
+function toggleMenu(e, name, role, avClass, initials) {
+  e.stopPropagation();
+  const menu    = document.getElementById('dropdown');
+  const already = menu.classList.contains('open') && ddCtx.name === name;
+  closeMenu();
+  if (already) return;
+
+  ddCtx = { name, role, avClass, initials };
+  const rect = e.currentTarget.getBoundingClientRect();
+  menu.style.top  = (rect.bottom + 4) + 'px';
+  menu.style.left = (rect.right - 196) + 'px';
+
+  document.getElementById('dd-history').onclick = () => {
+    openDrawer(name, role, avClass, initials); closeMenu();
   };
-  inp.addEventListener('blur', done);
-  inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter')  done();
-    if (e.key === 'Escape') { inp.value = cur; done(); }
-  });
+  document.getElementById('dd-update').onclick = () => {
+    activeMember = name; activeMeta = { name, role, avClass, initials };
+    openModal(name, role); closeMenu();
+  };
+  document.getElementById('dd-deactivate').onclick = () => {
+    if (confirm(`Deactivate ${name}? They will lose access to Rocketlane.`)) alert('Member deactivated (prototype only).');
+    closeMenu();
+  };
+
+  menu.classList.add('open');
 }
 
-// Set today's date on load
+function closeMenu() {
+  document.getElementById('dropdown').classList.remove('open');
+}
+
+document.addEventListener('click', closeMenu);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); } });
+
+// Init
 document.getElementById('m-date').value = new Date().toISOString().slice(0,10);
 </script>
 </body>
