@@ -220,6 +220,16 @@ tr:hover .row-actions{opacity:1;}
 .backdate-warn.show{display:flex;}
 .backdate-warn svg{width:14px;height:14px;fill:none;stroke:var(--warning);stroke-width:2;flex-shrink:0;margin-top:1px;}
 .modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg);border-radius:0 0 var(--radius) var(--radius);}
+
+/* ── Dropdown menu ── */
+.dropdown{position:fixed;z-index:400;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:188px;padding:4px;display:none;}
+.dropdown.open{display:block;}
+.dd-item{display:flex;align-items:center;gap:9px;padding:7px 10px;font-size:13px;color:var(--text-1);border-radius:5px;cursor:pointer;transition:background .1s;}
+.dd-item:hover{background:var(--bg);}
+.dd-item svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;color:var(--text-3);flex-shrink:0;}
+.dd-item.danger{color:var(--danger);}
+.dd-item.danger svg{color:var(--danger);}
+.dd-sep{height:1px;background:var(--border);margin:4px 0;}
 </style>
 </head>
 <body>
@@ -392,7 +402,7 @@ tr:hover .row-actions{opacity:1;}
               <button class="act-btn" title="Cost rate history" onclick="openDrawer('Paul','Engineer','av-teal','P')">
                 <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
               </button>
-              <button class="act-btn" title="More">
+              <button class="act-btn" title="More" onclick="toggleMenu(event,'Paul','Engineer','av-teal','P',100,'USD')">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
               </button>
             </div>
@@ -424,7 +434,7 @@ tr:hover .row-actions{opacity:1;}
               <button class="act-btn" title="Cost rate history" onclick="openDrawer('Rachel','Customer success','av-orange','R')">
                 <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
               </button>
-              <button class="act-btn" title="More">
+              <button class="act-btn" title="More" onclick="toggleMenu(event,'Rachel','Customer success','av-orange','R',130,'USD')">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
               </button>
             </div>
@@ -456,7 +466,7 @@ tr:hover .row-actions{opacity:1;}
               <button class="act-btn" title="Cost rate history" onclick="openDrawer('Vivek Shanmugasundaram','Project Manager','av-blue','VS')">
                 <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
               </button>
-              <button class="act-btn" title="More">
+              <button class="act-btn" title="More" onclick="toggleMenu(event,'Vivek Shanmugasundaram','Project Manager','av-blue','VS',200,'USD')">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
               </button>
             </div>
@@ -465,6 +475,27 @@ tr:hover .row-actions{opacity:1;}
 
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Dropdown menu -->
+<div class="dropdown" id="dropdown">
+  <div class="dd-item" id="dd-history">
+    <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+    View cost rate history
+  </div>
+  <div class="dd-item" id="dd-edit-rate">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    Update cost rate
+  </div>
+  <div class="dd-item" id="dd-edit-cap">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Edit base capacity
+  </div>
+  <div class="dd-sep"></div>
+  <div class="dd-item danger" id="dd-deactivate">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+    Deactivate member
   </div>
 </div>
 
@@ -596,6 +627,49 @@ tr:hover .row-actions{opacity:1;}
 </div>
 
 <script>
+// ── Dropdown ─────────────────────────────────────────────────────────────────
+let ddCtx = {};
+
+function toggleMenu(e, name, role, avClass, initials, amount, currency) {
+  e.stopPropagation();
+  const menu = document.getElementById('dropdown');
+  const already = menu.classList.contains('open') && ddCtx.name === name;
+  closeMenu();
+  if (already) return;
+
+  ddCtx = { name, role, avClass, initials, amount, currency };
+
+  // Position below the button
+  const rect = e.currentTarget.getBoundingClientRect();
+  menu.style.top  = (rect.bottom + 4) + 'px';
+  menu.style.left = (rect.right - 188) + 'px'; // right-align to button
+
+  // Wire up items
+  document.getElementById('dd-history').onclick = () => {
+    openDrawer(name, role, avClass, initials); closeMenu();
+  };
+  document.getElementById('dd-edit-rate').onclick = () => {
+    openModal(name, role, avClass, initials, amount, currency); closeMenu();
+  };
+  document.getElementById('dd-edit-cap').onclick = () => {
+    const capId = name === 'Paul' ? 'paul' : name === 'Rachel' ? 'rachel' : 'vivek';
+    editCap(capId); closeMenu();
+  };
+  document.getElementById('dd-deactivate').onclick = () => {
+    if (confirm(`Deactivate ${name}? They will lose access to Rocketlane.`)) alert('Member deactivated (prototype only).');
+    closeMenu();
+  };
+
+  menu.classList.add('open');
+}
+
+function closeMenu() {
+  document.getElementById('dropdown').classList.remove('open');
+}
+
+document.addEventListener('click', closeMenu);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 const historyData = {
   Paul: [
