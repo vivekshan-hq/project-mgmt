@@ -574,7 +574,7 @@ tr:hover .row-actions{opacity:1;}
           </div>
           <span style="font-size:14px;color:var(--text-2);white-space:nowrap;">hrs / week</span>
         </div>
-        <div class="mp-hint">The default available hours for this team member.</div>
+        <div class="mp-hint" id="mp-hint">The current base capacity of Paul</div>
       </div>
     </div>
 
@@ -946,6 +946,7 @@ let mpMember = null;
 function openMpanel(name, role, avClass, initials) {
   mpMember = { name, role, avClass, initials };
   document.getElementById('mp-name').textContent = name;
+  document.getElementById('mp-hint').textContent = `The current base capacity of ${name}`;
   const rows = historyData[name] || [];
   document.getElementById('mp-hours').value = rows.length ? rows[rows.length-1].hrs : 40;
   switchMpTab('hist');
