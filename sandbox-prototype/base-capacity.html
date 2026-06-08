@@ -576,10 +576,6 @@ tr:hover .row-actions{opacity:1;}
         </div>
         <div class="mp-hint">The default available hours for this team member.</div>
       </div>
-      <div class="mp-cb-row" onclick="toggleMpCb()">
-        <div class="mp-cb" id="mp-cb"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <span class="mp-cb-label">Same as account default: <strong>40 hrs / week</strong></span>
-      </div>
     </div>
 
     <!-- Tabs -->
@@ -978,6 +974,12 @@ function toggleMpCb() {
   }
 }
 
+function prevDay(ddMon) {
+  const d = new Date(ddMon + ' 2026');
+  d.setDate(d.getDate() - 1);
+  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+}
+
 function renderMpHistory(name) {
   const rows = (historyData[name] || []).slice().reverse();
   document.getElementById('mp-hist-tbody').innerHTML = rows.map((r, i) => {
@@ -990,7 +992,7 @@ function renderMpHistory(name) {
     } else {
       const next  = allRows[i - 1];
       const from  = r.backdatedTo || r.updatedOn;
-      const to    = next ? (next.backdatedTo || next.updatedOn) : r.updatedOn;
+      const to    = next ? prevDay(next.backdatedTo || next.updatedOn) : r.updatedOn;
       effRange    = `${from} – ${to}`;
     }
     return `
