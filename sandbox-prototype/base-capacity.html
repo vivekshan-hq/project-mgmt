@@ -303,6 +303,16 @@ tr:hover .row-actions{opacity:1;}
 .mp-save-btn:hover{background:var(--bg);color:var(--text-1);}
 .mp-save-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;}
 
+/* ── Minutes select ── */
+.mp-min-sel{height:40px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 24px 0 10px;font-size:14px;color:var(--text-1);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 6px center;font-family:inherit;outline:none;appearance:none;cursor:pointer;min-width:72px;}
+.mp-min-sel:focus{border-color:var(--brand);}
+.mp-val-error{font-size:12px;color:var(--danger);margin-top:5px;display:none;}
+
+/* ── Deactivated / gap rows in history table ── */
+.mp-deact-row td{background:var(--bg) !important;}
+.mp-gap-row td{background:var(--bg) !important;}
+.deact-row td{background:var(--bg) !important;}
+
 /* ── Effective date popup ── */
 .eff-overlay{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .15s;}
 .eff-overlay.open{opacity:1;pointer-events:all;}
@@ -471,9 +481,9 @@ tr:hover .row-actions{opacity:1;}
           <td><span class="role-badge role-engineer">Engineer</span></td>
           <td><span class="perm-badge">Account Admin</span></td>
           <td>
-            <div class="cap-cell" onclick="openDrawer('Paul','Engineer','av-teal','P')" title="View base capacity history">
-              <span class="cap-val">40 hrs / week</span>
-              <span class="cap-since">From 04 Jun 2026</span>
+            <div class="cap-cell" data-member="Paul" onclick="openDrawer('Paul','Engineer','av-teal','P')" title="View base capacity history">
+              <span class="cap-val">40h</span>
+              <span class="cap-since">From 01 Jan 2026</span>
             </div>
           </td>
           <td>
@@ -497,9 +507,9 @@ tr:hover .row-actions{opacity:1;}
           <td><span class="role-badge role-cs">Customer success</span></td>
           <td><span class="perm-badge">Account Admin</span></td>
           <td>
-            <div class="cap-cell" onclick="openDrawer('Rachel','Customer success','av-orange','R')" title="View base capacity history">
-              <span class="cap-val">40 hrs / week</span>
-              <span class="cap-since">From 03 Jun 2026</span>
+            <div class="cap-cell" data-member="Rachel" onclick="openDrawer('Rachel','Customer success','av-orange','R')" title="View base capacity history">
+              <span class="cap-val">40h</span>
+              <span class="cap-since">From 01 Jun 2026</span>
             </div>
           </td>
           <td>
@@ -523,9 +533,9 @@ tr:hover .row-actions{opacity:1;}
           <td><span class="role-badge role-pm">Project Manager</span></td>
           <td><span class="perm-badge">Account Admin</span></td>
           <td>
-            <div class="cap-cell" onclick="openDrawer('Vivek Shanmugasundaram','Project Manager','av-blue','VS')" title="View base capacity history">
-              <span class="cap-val">40 hrs / week</span>
-              <span class="cap-since">From 05 Jun 2026</span>
+            <div class="cap-cell" data-member="Vivek Shanmugasundaram" onclick="openDrawer('Vivek Shanmugasundaram','Project Manager','av-blue','VS')" title="View base capacity history">
+              <span class="cap-val">40h</span>
+              <span class="cap-since">From 01 Mar 2026</span>
             </div>
           </td>
           <td>
@@ -569,12 +579,27 @@ tr:hover .row-actions{opacity:1;}
       <div class="mp-field">
         <div class="mp-field-label"><span class="mp-req">*</span> Base capacity</div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <div class="mp-input-wrap" style="max-width:160px;">
-            <input class="mp-number" type="number" id="mp-hours" value="40" min="1" max="168" step="0.5" placeholder="40">
+          <div class="mp-input-wrap" style="max-width:130px;">
+            <input class="mp-number" type="number" id="mp-hrs" value="40" min="0" max="167" step="1" placeholder="40">
+            <span style="padding:0 10px;font-size:14px;color:var(--text-2);border-left:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0;background:var(--bg);">h</span>
           </div>
-          <span style="font-size:14px;color:var(--text-2);white-space:nowrap;">hrs / week</span>
+          <select class="mp-min-sel" id="mp-mins">
+            <option value="0">00 min</option>
+            <option value="5">05 min</option>
+            <option value="10">10 min</option>
+            <option value="15">15 min</option>
+            <option value="20">20 min</option>
+            <option value="25">25 min</option>
+            <option value="30">30 min</option>
+            <option value="35">35 min</option>
+            <option value="40">40 min</option>
+            <option value="45">45 min</option>
+            <option value="50">50 min</option>
+            <option value="55">55 min</option>
+          </select>
         </div>
         <div class="mp-hint" id="mp-hint">The current base capacity of Paul</div>
+        <div class="mp-val-error" id="mp-val-error">Please enter a valid base capacity.</div>
       </div>
     </div>
 
@@ -654,17 +679,28 @@ tr:hover .row-actions{opacity:1;}
         <input type="radio" name="eff-mode" value="forward" checked onchange="onEffModeChange()">
         <div>
           <div class="eff-radio-label">Going forward</div>
-          <div class="eff-radio-desc">The new base capacity will apply to all time reported by the team member going forward.</div>
+          <div class="eff-radio-desc">The new base capacity will apply to all capacity calculations for this team member going forward from today. The current window closes as of yesterday and the new window starts from today.</div>
         </div>
       </label>
       <label class="eff-radio-row">
         <input type="radio" name="eff-mode" value="backdate" onchange="onEffModeChange()">
         <div style="width:100%">
           <div class="eff-radio-label">Backdate base capacity</div>
-          <div class="eff-radio-desc">The new base capacity will apply to all time reported by the team member from the selected date and going forward.</div>
-          <div class="eff-date-wrap" id="eff-date-wrap">
+          <div class="eff-radio-desc">The new base capacity will apply from a selected past date going forward, replacing all existing windows from that date through to Present.</div>
+          <div class="eff-date-wrap" id="eff-backdate-wrap">
             <div class="eff-date-label" style="margin-top:12px;">Backdate from</div>
-            <input class="inp-text" type="date" id="eff-date" style="max-width:196px;">
+            <input class="inp-text" type="date" id="eff-backdate" style="max-width:196px;">
+          </div>
+        </div>
+      </label>
+      <label class="eff-radio-row">
+        <input type="radio" name="eff-mode" value="future" onchange="onEffModeChange()">
+        <div style="width:100%">
+          <div class="eff-radio-label">Set a future date</div>
+          <div class="eff-radio-desc">The new base capacity will apply from a selected future date. The current window closes the day before the selected date.</div>
+          <div class="eff-date-wrap" id="eff-future-wrap">
+            <div class="eff-date-label" style="margin-top:12px;">Effective from</div>
+            <input class="inp-text" type="date" id="eff-future" style="max-width:196px;">
           </div>
         </div>
       </label>
@@ -762,72 +798,111 @@ tr:hover .row-actions{opacity:1;}
 
   <div class="drawer-footer">
     <span class="drawer-footer-note">Showing all capacity changes</span>
-    <button class="btn btn-primary btn-sm" onclick="openModal()">
+    <button class="btn btn-primary btn-sm" onclick="openMpanel(activeMember, activeMeta.role, activeMeta.avClass, activeMeta.initials); closeDrawer();">
       <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Update base capacity
+      Manage base capacity
     </button>
   </div>
 </div>
 
-<!-- Update base capacity modal -->
-<div class="modal-overlay" id="m-overlay" onclick="closeModal()">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hd">
-      <div>
-        <div class="modal-title">Update base capacity</div>
-        <div class="modal-subtitle" id="m-subtitle">Paul · Engineer</div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <label class="form-label">Base capacity</label>
-        <div class="input-group">
-          <input class="inp-text" type="number" id="m-hours" placeholder="8" min="1" max="24" step="0.5" style="max-width:100px;">
-          <select class="inp-select" id="m-unit">
-            <option value="day">hrs / day</option>
-            <option value="week">hrs / week</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <label class="form-label">Effective date</label>
-        <div class="form-hint">The new capacity applies from this date. Pick a past date to backdate.</div>
-        <input class="inp-text" type="date" id="m-date" style="max-width:196px;" oninput="checkBackdate()">
-      </div>
-      <div class="backdate-warn" id="m-warn">
-        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span id="m-warn-text">Backdating this change will update utilisation calculations for the affected period.</span>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveCapacity()">Save changes</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// ── Data ──────────────────────────────────────────────────────────────────────
-const historyData = {
-  Paul: [
-    { hrs:30, unit:'week', updatedOn:'01 May', backdatedTo:null },
-    { hrs:40, unit:'week', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function prevDayISO(iso){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);}
+function nextDayISO(iso){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+function isoToDisplay(iso){if(!iso)return'';const[,mo,d]=iso.split('-').map(Number);return`${String(d).padStart(2,'0')} ${MONTHS[mo-1]}`;}
+function isoToDisplayYear(iso){if(!iso)return'';const[y,mo,d]=iso.split('-').map(Number);return`${String(d).padStart(2,'0')} ${MONTHS[mo-1]} ${y}`;}
+function formatCap(totalMins){const h=Math.floor(totalMins/60),m=totalMins%60;return m===0?`${h}h`:`${h}h ${String(m).padStart(2,'0')}m`;}
+function getTotalMins(){const h=parseInt(document.getElementById('mp-hrs').value)||0,m=parseInt(document.getElementById('mp-mins').value)||0;return h*60+m;}
+function getCurrentWindow(name){const wins=windowsData[name]||[];return wins.find(w=>w.to===null)||(wins.length?wins[wins.length-1]:null);}
+function refreshCapCell(name){
+  const win=getCurrentWindow(name);
+  document.querySelectorAll(`[data-member="${name}"]`).forEach(cell=>{
+    if(!win)return;
+    const v=cell.querySelector('.cap-val'),s=cell.querySelector('.cap-since');
+    if(v)v.textContent=formatCap(win.totalMins);
+    if(s)s.textContent=`From ${isoToDisplayYear(win.from)}`;
+  });
+}
+
+// ── Data (windows sorted oldest→newest) ──────────────────────────────────────
+const windowsData = {
+  'Paul': [
+    {totalMins:2400,from:'2026-01-01',to:null,        type:'active',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'}
   ],
-  Rachel: [
-    { hrs:35, unit:'week', updatedOn:'01 May', backdatedTo:null },
-    { hrs:40, unit:'week', updatedOn:'05 Jun', backdatedTo:'03 Jun' },
+  'Rachel': [
+    {totalMins:2400,from:'2026-01-01',to:'2026-04-30',type:'active',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'},
+    {totalMins:0,   from:'2026-05-01',to:'2026-05-31',type:'deactivated',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 May 2026'},
+    {totalMins:2400,from:'2026-06-01',to:null,        type:'active',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jun 2026'}
   ],
   'Vivek Shanmugasundaram': [
-    { hrs:30, unit:'week', updatedOn:'01 May', backdatedTo:null },
-    { hrs:40, unit:'week', updatedOn:'05 Jun', backdatedTo:'04 Jun' },
-  ],
+    {totalMins:1920,from:'2026-01-01',to:'2026-02-28',type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'},
+    {totalMins:2400,from:'2026-03-01',to:null,        type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Mar 2026'}
+  ]
 };
 
-let activeMember = null;
-let activeMeta   = {};
+let activeMember=null,activeMeta={},mpMember=null;
+
+// ── Window engine ─────────────────────────────────────────────────────────────
+function applyCapacityUpdate(name,totalMins,mode,dateISO){
+  const today=todayISO(),updatedOn=isoToDisplayYear(today);
+  let wins=(windowsData[name]||[]).map(w=>({...w}));
+  if(mode==='forward'){
+    const last=wins[wins.length-1];
+    if(last&&last.from===today&&last.type!=='deactivated'){last.totalMins=totalMins;last.updatedOn=updatedOn;}
+    else{if(last&&last.to===null)last.to=prevDayISO(today);wins.push({totalMins,from:today,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});}
+  }
+  else if(mode==='backdate'){
+    const deactIdx=wins.findIndex(w=>w.type==='deactivated'&&w.from>=dateISO);
+    const stopDate=deactIdx>=0?wins[deactIdx].from:null;
+    const kept=[];
+    for(const w of wins){
+      if(w.type==='deactivated'){kept.push(w);continue;}
+      const wEnd=w.to||'9999-12-31';
+      if(wEnd<dateISO){kept.push(w);continue;}
+      if(w.from>=dateISO){if(stopDate&&w.from>=stopDate)kept.push(w);continue;}
+      kept.push({...w,to:prevDayISO(dateISO)});
+    }
+    const newTo=stopDate?prevDayISO(stopDate):null;
+    kept.push({totalMins,from:dateISO,to:newTo,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+    wins=kept.sort((a,b)=>a.from.localeCompare(b.from));
+  }
+  else if(mode==='future'){
+    let openIdx=-1;
+    for(let i=wins.length-1;i>=0;i--){if(wins[i].to===null){openIdx=i;break;}}
+    if(openIdx>=0)wins[openIdx].to=prevDayISO(dateISO);
+    wins.push({totalMins,from:dateISO,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+    wins.sort((a,b)=>a.from.localeCompare(b.from));
+  }
+  windowsData[name]=wins;
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────────
+function renderDrawerHistory(name){
+  const wins=(windowsData[name]||[]).slice().reverse();
+  document.getElementById('hist-tbody').innerHTML=wins.map(w=>{
+    const isDeact=w.type==='deactivated';
+    const capStr=isDeact?`0h <em style="color:var(--text-3)">(Deactivated)</em>`:`Updated to <strong>${formatCap(w.totalMins)}</strong>`;
+    const effFrom=isoToDisplay(w.from),effTo=w.to?isoToDisplay(w.to):'Present';
+    return`<tr class="${isDeact?'deact-row':''}"><td><div class="h-update">${capStr}</div><div style="font-size:12px;color:var(--text-4);margin-top:2px;">${effFrom} – ${effTo}</div></td><td><span class="h-date">${w.updatedOn}</span></td><td><div class="h-user"><div class="avatar av-blue" style="width:22px;height:22px;font-size:8px;flex-shrink:0;">VS</div><span class="h-user-name">${w.updatedBy}</span></div></td></tr>`;
+  }).join('');
+}
+
+function renderMpHistory(name){
+  const wins=(windowsData[name]||[]).slice().reverse();
+  document.getElementById('mp-hist-tbody').innerHTML=wins.map(w=>{
+    const isDeact=w.type==='deactivated';
+    const capCell=isDeact
+      ?`<span style="font-size:14px;">0h</span> <em style="font-size:13px;color:var(--text-3);">(Deactivated)</em>`
+      :`<span style="font-size:14px;font-weight:590;">${formatCap(w.totalMins)}</span>`;
+    const from=isoToDisplay(w.from),to=w.to?isoToDisplay(w.to):'Present';
+    const updBy=isDeact
+      ?`<span style="color:var(--text-4);">—</span>`
+      :`<div class="mp-user"><div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div><span class="mp-user-name">${w.updatedBy}</span></div>`;
+    return`<tr class="${isDeact?'mp-deact-row':w.type==='gap'?'mp-gap-row':''}"><td>${capCell}</td><td><span class="mp-eff">${from} – ${to}</span></td><td>${updBy}</td></tr>`;
+  }).join('');
+}
 
 // ── Main tabs ─────────────────────────────────────────────────────────────────
 function switchTab(el) {
@@ -836,266 +911,118 @@ function switchTab(el) {
 }
 
 // ── Drawer ────────────────────────────────────────────────────────────────────
-function openDrawer(name, role, avClass, initials) {
-  activeMember = name;
-  activeMeta   = { name, role, avClass, initials };
-  document.getElementById('d-name').textContent = name;
-  document.getElementById('d-role').textContent = role;
-  const av = document.getElementById('d-avatar');
-  av.className   = 'avatar ' + avClass;
-  av.textContent = initials;
-  switchDrawerTab('hist');
-  renderHistory(name);
+function openDrawer(name,role,avClass,initials){
+  activeMember=name;activeMeta={name,role,avClass,initials};
+  document.getElementById('d-name').textContent=name;
+  document.getElementById('d-role').textContent=role;
+  const av=document.getElementById('d-avatar');av.className='avatar '+avClass;av.textContent=initials;
+  switchDrawerTab('hist');renderDrawerHistory(name);
   document.getElementById('d-overlay').classList.add('open');
   document.getElementById('drawer').classList.add('open');
 }
-
-function closeDrawer() {
+function closeDrawer(){
   document.getElementById('d-overlay').classList.remove('open');
   document.getElementById('drawer').classList.remove('open');
 }
-
-function switchDrawerTab(tab) {
-  const isHist = tab === 'hist';
-  document.getElementById('dtab-hist').classList.toggle('active',  isHist);
-  document.getElementById('dtab-audit').classList.toggle('active', !isHist);
-  document.getElementById('tab-hist').style.display  = isHist  ? '' : 'none';
-  document.getElementById('tab-audit').style.display = !isHist ? '' : 'none';
-}
-
-function renderHistory(name) {
-  const rows = (historyData[name] || []).slice().reverse();
-  document.getElementById('hist-tbody').innerHTML = rows.map(r => `
-    <tr>
-      <td>
-        <div class="h-update">Updated to ${r.hrs} hrs / week</div>
-        ${r.backdatedTo ? `<div class="h-backdate">Backdated to ${r.backdatedTo}</div>` : ''}
-      </td>
-      <td><span class="h-date">${r.updatedOn}</span></td>
-      <td>
-        <div class="h-user">
-          <div class="avatar av-blue" style="width:22px;height:22px;font-size:8px;flex-shrink:0;">VS</div>
-          <span class="h-user-name">Vivek Shanmugasundaram</span>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
-function openModal(name, role) {
-  const n = name || activeMember;
-  const r = role || (activeMeta.role || '');
-  if (!n) return;
-  document.getElementById('m-subtitle').textContent = n + (r ? ' · ' + r : '');
-  const latest = (historyData[n] || []).slice(-1)[0];
-  document.getElementById('m-hours').value = latest ? latest.hrs : 8;
-  document.getElementById('m-unit').value  = latest ? latest.unit : 'day';
-  document.getElementById('m-date').value  = new Date().toISOString().slice(0,10);
-  document.getElementById('m-warn').classList.remove('show');
-  document.getElementById('m-overlay').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('m-overlay').classList.remove('open');
-}
-
-function checkBackdate() {
-  const v     = document.getElementById('m-date').value;
-  const today = new Date().toISOString().slice(0,10);
-  const warn  = document.getElementById('m-warn');
-  if (v && v < today) {
-    const d   = new Date(v + 'T12:00:00');
-    const fmt = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-    document.getElementById('m-warn-text').textContent =
-      `This change will be backdated to ${fmt}. Utilisation calculations for this period will be updated.`;
-    warn.classList.add('show');
-  } else {
-    warn.classList.remove('show');
-  }
-}
-
-function saveCapacity() {
-  const hrs    = parseFloat(document.getElementById('m-hours').value);
-  const unit   = document.getElementById('m-unit').value;
-  const dateVal = document.getElementById('m-date').value;
-  if (!hrs || isNaN(hrs) || hrs <= 0) { document.getElementById('m-hours').focus(); return; }
-
-  const today      = new Date().toISOString().slice(0,10);
-  const isBackdate = dateVal && dateVal < today;
-  let backdatedTo  = null;
-  if (isBackdate) {
-    const d    = new Date(dateVal + 'T12:00:00');
-    backdatedTo = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-  }
-  const updatedOn = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-  const name = activeMember || document.getElementById('m-subtitle').textContent.split(' · ')[0];
-  if (name) {
-    if (!historyData[name]) historyData[name] = [];
-    historyData[name].push({ hrs, unit, updatedOn, backdatedTo });
-    if (activeMember === name && document.getElementById('drawer').classList.contains('open')) {
-      renderHistory(name);
-    }
-  }
-  closeModal();
+function switchDrawerTab(tab){
+  const h=tab==='hist';
+  document.getElementById('dtab-hist').classList.toggle('active',h);
+  document.getElementById('dtab-audit').classList.toggle('active',!h);
+  document.getElementById('tab-hist').style.display=h?'':'none';
+  document.getElementById('tab-audit').style.display=h?'none':'';
 }
 
 // ── Manage Base Capacity panel ────────────────────────────────────────────────
-let mpMember = null;
-
-function openMpanel(name, role, avClass, initials) {
-  mpMember = { name, role, avClass, initials };
-  document.getElementById('mp-name').textContent = name;
-  document.getElementById('mp-hint').textContent = `The current base capacity of ${name}`;
-  const rows = historyData[name] || [];
-  document.getElementById('mp-hours').value = rows.length ? rows[rows.length-1].hrs : 40;
-  switchMpTab('hist');
-  renderMpHistory(name);
+function openMpanel(name,role,avClass,initials){
+  mpMember={name,role,avClass,initials};
+  document.getElementById('mp-name').textContent=name;
+  document.getElementById('mp-hint').textContent=`The current base capacity of ${name}`;
+  const win=getCurrentWindow(name),cur=win?win.totalMins:2400;
+  document.getElementById('mp-hrs').value=Math.floor(cur/60);
+  document.getElementById('mp-mins').value=cur%60;
+  document.getElementById('mp-val-error').style.display='none';
+  switchMpTab('hist');renderMpHistory(name);
+  if(win)document.getElementById('mp-footer-note').textContent=`Updated by ${win.updatedBy}, ${win.updatedOn}`;
   document.getElementById('mp-overlay').classList.add('open');
 }
-
-function closeMpanel(e) {
-  if (e && e.target !== document.getElementById('mp-overlay')) return;
+function closeMpanel(e){
+  if(e&&e.target!==document.getElementById('mp-overlay'))return;
   document.getElementById('mp-overlay').classList.remove('open');
 }
-
-function switchMpTab(tab) {
-  const isHist = tab === 'hist';
-  document.getElementById('mptab-hist').classList.toggle('active', isHist);
-  document.getElementById('mptab-audit').classList.toggle('active', !isHist);
-  document.getElementById('mp-tab-hist').style.display  = isHist  ? '' : 'none';
-  document.getElementById('mp-tab-audit').style.display = !isHist ? '' : 'none';
-}
-
-function toggleMpCb() {
-  const cb = document.getElementById('mp-cb');
-  cb.classList.toggle('checked');
-  if (cb.classList.contains('checked')) {
-    document.getElementById('mp-hours').value = 40;
-  }
-}
-
-function prevDay(ddMon) {
-  const d = new Date(ddMon + ' 2026');
-  d.setDate(d.getDate() - 1);
-  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-}
-
-function renderMpHistory(name) {
-  const rows = (historyData[name] || []).slice().reverse();
-  document.getElementById('mp-hist-tbody').innerHTML = rows.map((r, i) => {
-    const isLatest = i === 0;
-    const allRows  = (historyData[name] || []).slice().reverse();
-    let effRange;
-    if (isLatest) {
-      const from  = r.backdatedTo || r.updatedOn;
-      effRange    = `${from} – Present`;
-    } else {
-      const next  = allRows[i - 1];
-      const from  = r.backdatedTo || r.updatedOn;
-      const to    = next ? prevDay(next.backdatedTo || next.updatedOn) : r.updatedOn;
-      effRange    = `${from} – ${to}`;
-    }
-    return `
-      <tr>
-        <td style="font-size:14px;color:var(--text-1);">${r.hrs} hrs / week</td>
-        <td><span class="mp-eff">${effRange}</span></td>
-        <td>
-          <div class="mp-user">
-            <div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div>
-            <span class="mp-user-name">Vivek Shanmugasundaram</span>
-          </div>
-        </td>
-      </tr>`;
-  }).join('');
+function switchMpTab(tab){
+  const h=tab==='hist';
+  document.getElementById('mptab-hist').classList.toggle('active',h);
+  document.getElementById('mptab-audit').classList.toggle('active',!h);
+  document.getElementById('mp-tab-hist').style.display=h?'':'none';
+  document.getElementById('mp-tab-audit').style.display=h?'none':'';
 }
 
 // ── Effective date popup ──────────────────────────────────────────────────────
-function openEffDialog() {
-  document.querySelectorAll('input[name="eff-mode"]').forEach(r => { r.checked = r.value === 'forward'; });
-  document.getElementById('eff-date-wrap').classList.remove('show');
-  document.getElementById('eff-date').value = '';
+function openEffDialog(){
+  const tm=getTotalMins();
+  if(tm<=0){document.getElementById('mp-val-error').style.display='block';return;}
+  document.getElementById('mp-val-error').style.display='none';
+  document.querySelectorAll('input[name="eff-mode"]').forEach(r=>{r.checked=r.value==='forward';});
+  document.getElementById('eff-backdate-wrap').classList.remove('show');
+  document.getElementById('eff-future-wrap').classList.remove('show');
+  document.getElementById('eff-backdate').value='';
+  document.getElementById('eff-future').value='';
+  document.getElementById('eff-future').min=nextDayISO(todayISO());
   document.getElementById('eff-overlay').classList.add('open');
 }
-
-function closeEffDialog() {
-  document.getElementById('eff-overlay').classList.remove('open');
+function closeEffDialog(){document.getElementById('eff-overlay').classList.remove('open');}
+function onEffModeChange(){
+  const mode=document.querySelector('input[name="eff-mode"]:checked')?.value;
+  document.getElementById('eff-backdate-wrap').classList.toggle('show',mode==='backdate');
+  document.getElementById('eff-future-wrap').classList.toggle('show',mode==='future');
+  if(mode==='backdate'&&!document.getElementById('eff-backdate').value)
+    document.getElementById('eff-backdate').value=prevDayISO(todayISO());
+  if(mode==='future'&&!document.getElementById('eff-future').value)
+    document.getElementById('eff-future').value=nextDayISO(todayISO());
 }
 
-function onEffModeChange() {
-  const isBackdate = document.querySelector('input[name="eff-mode"]:checked')?.value === 'backdate';
-  document.getElementById('eff-date-wrap').classList.toggle('show', isBackdate);
-  if (isBackdate && !document.getElementById('eff-date').value) {
-    document.getElementById('eff-date').value = new Date().toISOString().slice(0,10);
-  }
-}
-
-function confirmSave() {
-  const hrs      = parseFloat(document.getElementById('mp-hours').value);
-  if (!hrs || isNaN(hrs)) return;
-  const mode     = document.querySelector('input[name="eff-mode"]:checked')?.value || 'forward';
-  const dateVal  = mode === 'backdate' ? document.getElementById('eff-date').value : '';
-  const today    = new Date().toISOString().slice(0,10);
-  const isBack   = mode === 'backdate' && dateVal && dateVal < today;
-  const updatedOn = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-  let backdatedTo = null;
-  if (isBack) {
-    backdatedTo = new Date(dateVal + 'T12:00:00').toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-  }
-  const name = mpMember?.name;
-  if (name) {
-    if (!historyData[name]) historyData[name] = [];
-    historyData[name].push({ hrs, unit:'week', updatedOn, backdatedTo });
-    renderMpHistory(name);
-    if (activeMember === name && document.getElementById('drawer').classList.contains('open')) {
-      renderHistory(name);
-    }
+function confirmSave(){
+  const totalMins=getTotalMins();
+  if(totalMins<=0)return;
+  const mode=document.querySelector('input[name="eff-mode"]:checked')?.value||'forward';
+  const today=todayISO();
+  let dateISO='';
+  if(mode==='backdate'){dateISO=document.getElementById('eff-backdate').value;if(!dateISO||dateISO>=today){document.getElementById('eff-backdate').focus();return;}}
+  else if(mode==='future'){dateISO=document.getElementById('eff-future').value;if(!dateISO||dateISO<=today){document.getElementById('eff-future').focus();return;}}
+  const name=mpMember?.name;
+  if(name){
+    applyCapacityUpdate(name,totalMins,mode,dateISO);
+    renderMpHistory(name);refreshCapCell(name);
+    if(activeMember===name&&document.getElementById('drawer').classList.contains('open'))renderDrawerHistory(name);
+    const w=getCurrentWindow(name);
+    if(w)document.getElementById('mp-footer-note').textContent=`Updated by ${w.updatedBy}, just now`;
   }
   closeEffDialog();
   document.getElementById('mp-overlay').classList.remove('open');
 }
 
 // ── Dropdown ──────────────────────────────────────────────────────────────────
-let ddCtx = {};
-
-function toggleMenu(e, name, role, avClass, initials) {
+let ddCtx={};
+function toggleMenu(e,name,role,avClass,initials){
   e.stopPropagation();
-  const menu    = document.getElementById('dropdown');
-  const already = menu.classList.contains('open') && ddCtx.name === name;
-  closeMenu();
-  if (already) return;
-
-  ddCtx = { name, role, avClass, initials };
-  const rect = e.currentTarget.getBoundingClientRect();
-  menu.style.top  = (rect.bottom + 4) + 'px';
-  menu.style.left = (rect.right - 196) + 'px';
-
-  document.getElementById('dd-details').onclick = () => {
-    openDrawer(name, role, avClass, initials); closeMenu();
-  };
-  document.getElementById('dd-cost-rate').onclick = () => {
-    openDrawer(name, role, avClass, initials); closeMenu();
-  };
-  document.getElementById('dd-base-cap').onclick = () => {
-    openMpanel(name, role, avClass, initials); closeMenu();
-  };
-  document.getElementById('dd-deactivate').onclick = () => {
-    if (confirm(`Deactivate ${name}? They will lose access to Rocketlane.`)) alert('Member deactivated (prototype only).');
-    closeMenu();
-  };
-
+  const menu=document.getElementById('dropdown');
+  const already=menu.classList.contains('open')&&ddCtx.name===name;
+  closeMenu();if(already)return;
+  ddCtx={name,role,avClass,initials};
+  const rect=e.currentTarget.getBoundingClientRect();
+  menu.style.top=(rect.bottom+4)+'px';menu.style.left=(rect.right-196)+'px';
+  document.getElementById('dd-details').onclick=()=>{openDrawer(name,role,avClass,initials);closeMenu();};
+  document.getElementById('dd-cost-rate').onclick=()=>{openDrawer(name,role,avClass,initials);closeMenu();};
+  document.getElementById('dd-base-cap').onclick=()=>{openMpanel(name,role,avClass,initials);closeMenu();};
+  document.getElementById('dd-deactivate').onclick=()=>{if(confirm(`Deactivate ${name}?`))alert('Deactivated (prototype only).');closeMenu();};
   menu.classList.add('open');
 }
-
-function closeMenu() {
-  document.getElementById('dropdown').classList.remove('open');
-}
-
-document.addEventListener('click', closeMenu);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); } });
+function closeMenu(){document.getElementById('dropdown').classList.remove('open');}
+document.addEventListener('click',closeMenu);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDrawer();}});
 
 // Init
-document.getElementById('m-date').value = new Date().toISOString().slice(0,10);
+['Paul','Rachel','Vivek Shanmugasundaram'].forEach(refreshCapCell);
 </script>
 </body>
 </html>
