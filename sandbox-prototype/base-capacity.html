@@ -303,9 +303,9 @@ tr:hover .row-actions{opacity:1;}
 .mp-save-btn:hover{background:var(--bg);color:var(--text-1);}
 .mp-save-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;}
 
-/* ── Minutes select ── */
-.mp-min-sel{height:40px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 24px 0 10px;font-size:14px;color:var(--text-1);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 6px center;font-family:inherit;outline:none;appearance:none;cursor:pointer;min-width:72px;}
-.mp-min-sel:focus{border-color:var(--brand);}
+.mp-cap-input{height:40px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;font-size:14px;color:var(--text-1);font-family:inherit;outline:none;background:var(--surface);width:160px;box-sizing:border-box;}
+.mp-cap-input:focus{border-color:var(--brand);}
+.mp-cap-input.error{border-color:var(--danger);}
 .mp-val-error{font-size:12px;color:var(--danger);margin-top:5px;display:none;}
 
 /* ── Deactivated / gap rows in history table ── */
@@ -577,29 +577,10 @@ tr:hover .row-actions{opacity:1;}
     <!-- Form -->
     <div class="mp-form">
       <div class="mp-field">
-        <div class="mp-field-label"><span class="mp-req">*</span> Base capacity</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="mp-input-wrap" style="max-width:130px;">
-            <input class="mp-number" type="number" id="mp-hrs" value="40" min="0" max="167" step="1" placeholder="40">
-            <span style="padding:0 10px;font-size:14px;color:var(--text-2);border-left:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0;background:var(--bg);">h</span>
-          </div>
-          <select class="mp-min-sel" id="mp-mins">
-            <option value="0">00 min</option>
-            <option value="5">05 min</option>
-            <option value="10">10 min</option>
-            <option value="15">15 min</option>
-            <option value="20">20 min</option>
-            <option value="25">25 min</option>
-            <option value="30">30 min</option>
-            <option value="35">35 min</option>
-            <option value="40">40 min</option>
-            <option value="45">45 min</option>
-            <option value="50">50 min</option>
-            <option value="55">55 min</option>
-          </select>
-        </div>
-        <div class="mp-hint" id="mp-hint">The current base capacity of Paul</div>
-        <div class="mp-val-error" id="mp-val-error">Please enter a valid base capacity.</div>
+        <div class="mp-field-label"><span class="mp-req">*</span> Number of hours per week a team member is available to work</div>
+        <input class="mp-cap-input" type="text" id="mp-cap-input" value="40h 00m" placeholder="e.g. 40h 00m" autocomplete="off" onblur="formatCapInput()">
+        <div class="mp-hint" id="mp-hint">Should be a multiple of 5 minutes</div>
+        <div class="mp-val-error" id="mp-val-error">Please enter a valid base capacity (e.g. 40h, 8h 30m).</div>
       </div>
     </div>
 
@@ -814,7 +795,25 @@ function nextDayISO(iso){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()
 function isoToDisplay(iso){if(!iso)return'';const[,mo,d]=iso.split('-').map(Number);return`${String(d).padStart(2,'0')} ${MONTHS[mo-1]}`;}
 function isoToDisplayYear(iso){if(!iso)return'';const[y,mo,d]=iso.split('-').map(Number);return`${String(d).padStart(2,'0')} ${MONTHS[mo-1]} ${y}`;}
 function formatCap(totalMins){const h=Math.floor(totalMins/60),m=totalMins%60;return m===0?`${h}h`:`${h}h ${String(m).padStart(2,'0')}m`;}
-function getTotalMins(){const h=parseInt(document.getElementById('mp-hrs').value)||0,m=parseInt(document.getElementById('mp-mins').value)||0;return h*60+m;}
+function parseCapInput(str){
+  str=(str||'').trim();
+  // "40h 30m", "40h30m", "40h", "30m", "40"
+  const full=str.match(/^(\d+)h\s*(\d+)m?$/i);
+  if(full)return parseInt(full[1])*60+parseInt(full[2]);
+  const honly=str.match(/^(\d+)h$/i);
+  if(honly)return parseInt(honly[1])*60;
+  const monly=str.match(/^(\d+)m$/i);
+  if(monly)return parseInt(monly[1]);
+  const num=str.match(/^(\d+)$/);
+  if(num)return parseInt(num[1])*60;
+  return NaN;
+}
+function formatCapInput(){
+  const el=document.getElementById('mp-cap-input');
+  const mins=parseCapInput(el.value);
+  if(!isNaN(mins)&&mins>0){const h=Math.floor(mins/60),m=mins%60;el.value=`${h}h ${String(m).padStart(2,'0')}m`;}
+}
+function getTotalMins(){return parseCapInput(document.getElementById('mp-cap-input').value);}
 function getCurrentWindow(name){const wins=windowsData[name]||[];return wins.find(w=>w.to===null)||(wins.length?wins[wins.length-1]:null);}
 function refreshCapCell(name){
   const win=getCurrentWindow(name);
@@ -938,8 +937,9 @@ function openMpanel(name,role,avClass,initials){
   document.getElementById('mp-name').textContent=name;
   document.getElementById('mp-hint').textContent=`The current base capacity of ${name}`;
   const win=getCurrentWindow(name),cur=win?win.totalMins:2400;
-  document.getElementById('mp-hrs').value=Math.floor(cur/60);
-  document.getElementById('mp-mins').value=cur%60;
+  const h=Math.floor(cur/60),m=cur%60;
+  document.getElementById('mp-cap-input').value=`${h}h ${String(m).padStart(2,'0')}m`;
+  document.getElementById('mp-cap-input').classList.remove('error');
   document.getElementById('mp-val-error').style.display='none';
   switchMpTab('hist');renderMpHistory(name);
   if(win)document.getElementById('mp-footer-note').textContent=`Updated by ${win.updatedBy}, ${win.updatedOn}`;
@@ -959,9 +959,12 @@ function switchMpTab(tab){
 
 // ── Effective date popup ──────────────────────────────────────────────────────
 function openEffDialog(){
+  formatCapInput();
   const tm=getTotalMins();
-  if(tm<=0){document.getElementById('mp-val-error').style.display='block';return;}
-  document.getElementById('mp-val-error').style.display='none';
+  const inp=document.getElementById('mp-cap-input');
+  const errEl=document.getElementById('mp-val-error');
+  if(isNaN(tm)||tm<=0){inp.classList.add('error');errEl.style.display='block';return;}
+  inp.classList.remove('error');errEl.style.display='none';
   document.querySelectorAll('input[name="eff-mode"]').forEach(r=>{r.checked=r.value==='forward';});
   document.getElementById('eff-backdate-wrap').classList.remove('show');
   document.getElementById('eff-future-wrap').classList.remove('show');
