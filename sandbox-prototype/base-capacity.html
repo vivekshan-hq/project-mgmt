@@ -66,6 +66,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Helvetica Neue'
 .btn-primary:hover{background:#2d2d2f;}
 .btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border);}
 .btn-ghost:hover{background:var(--bg);color:var(--text-1);}
+.btn-danger{background:#da1e28;color:#fff;}
+.btn-danger:hover{background:#ba1b23;}
 .btn svg{width:14px;height:14px;stroke-width:2;fill:none;stroke:currentColor;flex-shrink:0;}
 .btn-sm{height:26px;padding:0 10px;font-size:13px;}
 
@@ -693,6 +695,27 @@ tr:hover .row-actions{opacity:1;}
   </div>
 </div>
 
+<!-- Deactivation dialog -->
+<div class="eff-overlay" id="deact-overlay">
+  <div class="eff-dialog" style="max-width:420px;">
+    <div class="eff-hd">
+      <div class="eff-title">Deactivate <span id="deact-name-title">member</span>?</div>
+      <button class="mp-close" onclick="closeDeactDialog()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="eff-body">
+      <p style="font-size:14px;color:var(--text-2);margin:0 0 20px 0;">Base capacity will be set to <strong>0h</strong> from the deactivation date. This will appear as a deactivated window in the member's capacity history.</p>
+      <div class="eff-date-label">Deactivation date</div>
+      <input class="inp-text" type="date" id="deact-date" style="max-width:196px;">
+    </div>
+    <div class="eff-footer">
+      <button class="btn btn-ghost" onclick="closeDeactDialog()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeactivate()">Deactivate</button>
+    </div>
+  </div>
+</div>
+
 <!-- Dropdown -->
 <div class="dropdown" id="dropdown">
   <div class="dd-item" id="dd-details">
@@ -820,9 +843,45 @@ function refreshCapCell(name){
   document.querySelectorAll(`[data-member="${name}"]`).forEach(cell=>{
     if(!win)return;
     const v=cell.querySelector('.cap-val'),s=cell.querySelector('.cap-since');
-    if(v)v.textContent=formatCap(win.totalMins);
-    if(s)s.textContent=`From ${isoToDisplayYear(win.from)}`;
+    if(win.type==='deactivated'){
+      if(v){v.textContent='Deactivated';v.style.cssText='font-size:13px;color:var(--text-3);font-style:italic;font-weight:400;';}
+      if(s)s.textContent=`From ${isoToDisplayYear(win.from)}`;
+    }else{
+      if(v){v.textContent=formatCap(win.totalMins);v.style.cssText='';}
+      if(s)s.textContent=`From ${isoToDisplayYear(win.from)}`;
+    }
   });
+}
+
+let deactMember=null;
+function openDeactDialog(name){
+  deactMember=name;
+  document.getElementById('deact-name-title').textContent=name;
+  document.getElementById('deact-date').value=todayISO();
+  document.getElementById('deact-overlay').classList.add('open');
+}
+function closeDeactDialog(){document.getElementById('deact-overlay').classList.remove('open');}
+function deactivateMember(name,dateISO){
+  const updatedOn=isoToDisplayYear(dateISO);
+  let wins=(windowsData[name]||[]).map(w=>({...w}));
+  const openIdx=wins.findIndex(w=>w.to===null);
+  if(openIdx>=0){
+    if(wins[openIdx].from===dateISO){
+      wins.splice(openIdx,1);
+    }else{
+      wins[openIdx].to=prevDayISO(dateISO);
+    }
+  }
+  wins=wins.filter(w=>w.from<dateISO);
+  wins.push({totalMins:0,from:dateISO,to:null,type:'deactivated',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+  windowsData[name]=wins;
+}
+function confirmDeactivate(){
+  const dateISO=document.getElementById('deact-date').value;
+  if(!dateISO)return;
+  deactivateMember(deactMember,dateISO);
+  refreshCapCell(deactMember);
+  closeDeactDialog();
 }
 
 // ── Data (windows sorted oldest→newest) ──────────────────────────────────────
@@ -1017,12 +1076,12 @@ function toggleMenu(e,name,role,avClass,initials){
   document.getElementById('dd-details').onclick=()=>{openDrawer(name,role,avClass,initials);closeMenu();};
   document.getElementById('dd-cost-rate').onclick=()=>{openDrawer(name,role,avClass,initials);closeMenu();};
   document.getElementById('dd-base-cap').onclick=()=>{openMpanel(name,role,avClass,initials);closeMenu();};
-  document.getElementById('dd-deactivate').onclick=()=>{if(confirm(`Deactivate ${name}?`))alert('Deactivated (prototype only).');closeMenu();};
+  document.getElementById('dd-deactivate').onclick=()=>{openDeactDialog(name);closeMenu();};
   menu.classList.add('open');
 }
 function closeMenu(){document.getElementById('dropdown').classList.remove('open');}
 document.addEventListener('click',closeMenu);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDrawer();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDrawer();closeDeactDialog();closeEffDialog();}});
 
 // Init
 ['Paul','Rachel','Vivek Shanmugasundaram'].forEach(refreshCapCell);
