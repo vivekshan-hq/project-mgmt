@@ -272,13 +272,11 @@ tr:hover .row-actions{opacity:1;}
 /* History table inside panel */
 .mp-body{flex:1;overflow-y:auto;}
 .mp-tbl{width:100%;border-collapse:collapse;}
-.mp-tbl thead th{padding:11px 20px;text-align:left;font-size:13px;font-weight:400;color:var(--text-3);border-bottom:1px solid var(--border);}
-.mp-tbl thead th+th{border-left:1px solid var(--border);}
-.mp-tbl tbody td{padding:16px 20px;border-bottom:1px solid var(--border-subtle);font-size:14px;color:var(--text-1);}
-.mp-tbl tbody td+td{border-left:1px solid var(--border-subtle);}
+.mp-tbl thead th{padding:12px 24px;text-align:left;font-size:13px;font-weight:400;color:var(--text-3);border-bottom:1px solid var(--border);}
+.mp-tbl tbody td{padding:18px 24px;border-bottom:1px solid var(--border-subtle);font-size:15px;color:var(--text-1);}
 .mp-tbl tbody tr:last-child td{border-bottom:none;}
 .mp-tbl tbody tr:hover td{background:var(--bg);}
-.mp-eff{color:var(--text-2);font-size:14px;}
+.mp-eff{color:var(--text-2);font-size:15px;}
 .mp-user{display:flex;align-items:center;gap:8px;}
 .mp-user-name{font-size:13px;color:var(--brand);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
@@ -956,8 +954,8 @@ function renderMpHistory(name){
   document.getElementById('mp-hist-tbody').innerHTML=wins.map(w=>{
     const isDeact=w.type==='deactivated';
     const capCell=isDeact
-      ?`<span style="font-size:14px;">0h</span> <em style="font-size:13px;color:var(--text-3);">(Deactivated)</em>`
-      :`<span style="font-size:14px;font-weight:590;">${formatCap(w.totalMins)}</span>`;
+      ?`<span>0h</span> <em style="font-size:13px;color:var(--text-3);">(Deactivated)</em>`
+      :`<span>${formatCap(w.totalMins)}</span>`;
     const from=isoToDisplay(w.from),to=w.to?isoToDisplay(w.to):'Present';
     const updBy=`<div class="mp-user"><div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div><span class="mp-user-name">${w.updatedBy}</span></div>`;
     return`<tr class="${isDeact?'mp-deact-row':w.type==='gap'?'mp-gap-row':''}"><td>${capCell}</td><td><span class="mp-eff">${from} – ${to}</span></td><td>${updBy}</td></tr>`;
