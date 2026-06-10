@@ -955,9 +955,7 @@ function renderMpHistory(name){
       ?`<span style="font-size:14px;">0h</span> <em style="font-size:13px;color:var(--text-3);">(Deactivated)</em>`
       :`<span style="font-size:14px;font-weight:590;">${formatCap(w.totalMins)}</span>`;
     const from=isoToDisplay(w.from),to=w.to?isoToDisplay(w.to):'Present';
-    const updBy=isDeact
-      ?`<span style="color:var(--text-4);">—</span>`
-      :`<div class="mp-user"><div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div><span class="mp-user-name">${w.updatedBy}</span></div>`;
+    const updBy=`<div class="mp-user"><div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div><span class="mp-user-name">${w.updatedBy}</span></div>`;
     return`<tr class="${isDeact?'mp-deact-row':w.type==='gap'?'mp-gap-row':''}"><td>${capCell}</td><td><span class="mp-eff">${from} – ${to}</span></td><td>${updBy}</td></tr>`;
   }).join('');
 }
