@@ -111,10 +111,14 @@ tbody tr:last-child td{border-bottom:none;}
 .av-teal{background:#007d79;}
 .av-purple{background:#6929c4;}
 .av-orange{background:#b45309;}
+.av-green{background:#24a148;}
+.av-red{background:#da1e28;}
 .member-name{font-size:14px;font-weight:590;color:var(--text-1);}
 
 .role-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:590;letter-spacing:.04em;border:1px solid;}
 .role-engineer{background:#fff8e1;color:#6f4c00;border-color:#f1c21b;}
+.role-impl{background:#fff1f1;color:#750e13;border-color:#ff8389;}
+.role-csm{background:#d9fbfb;color:#005d5d;border-color:#3ddbd9;}
 .role-cs{background:#d9fbfb;color:#005d5d;border-color:#3ddbd9;}
 .role-pm{background:#f6f2ff;color:#491d8b;border-color:#be95ff;}
 
@@ -328,6 +332,33 @@ tr:hover .row-actions{opacity:1;}
 .eff-date-wrap.show{display:block;}
 .eff-date-label{font-size:13px;font-weight:590;color:var(--text-1);margin-bottom:6px;}
 .eff-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg);border-radius:0 0 var(--radius) var(--radius);}
+
+/* ── Invite modal ── */
+.invite-dialog{width:480px;max-height:90vh;background:var(--surface);border-radius:var(--radius);box-shadow:0px 24px 48px rgba(0,0,0,.22),0px 4px 12px rgba(0,0,0,.14);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.inv-hd{padding:20px 20px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.inv-title{font-size:18px;font-weight:600;color:var(--text-1);}
+.inv-body{padding:20px;display:flex;flex-direction:column;gap:18px;overflow-y:auto;}
+.inv-field{display:flex;flex-direction:column;gap:6px;}
+.inv-label{font-size:13px;font-weight:590;color:var(--text-1);}
+.inv-input{height:40px;padding:0 40px 0 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text-1);background:var(--surface);font-family:inherit;outline:none;width:100%;box-sizing:border-box;}
+.inv-input:focus{border-color:var(--brand);}
+.inv-input::placeholder{color:var(--text-placeholder);}
+.inv-input-wrap{position:relative;}
+.inv-input-wrap .inv-chev{position:absolute;right:0;top:0;bottom:0;width:40px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--border);pointer-events:none;color:var(--text-3);}
+.inv-sel{height:40px;padding:0 40px 0 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text-1);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;font-family:inherit;outline:none;appearance:none;cursor:pointer;width:100%;box-sizing:border-box;}
+.inv-sel:focus{border-color:var(--brand);}
+.inv-sel.placeholder{color:var(--text-placeholder);}
+.inv-cap-row{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.inv-cap-row input[type=radio]{width:18px;height:18px;accent-color:var(--brand);flex-shrink:0;cursor:pointer;}
+.inv-cap-row span{font-size:14px;color:var(--text-1);}
+.inv-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg);flex-shrink:0;}
+.inv-err{font-size:12px;color:var(--danger);display:none;margin-top:2px;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:28px;right:28px;min-width:288px;background:#1d1d1f;color:#fff;border-radius:8px;font-size:14px;display:flex;align-items:center;gap:10px;z-index:9999;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;pointer-events:none;overflow:hidden;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast-bar{width:3px;background:#24a148;align-self:stretch;flex-shrink:0;}
+.toast-body{padding:14px 16px 14px 0;flex:1;}
 </style>
 </head>
 <body>
@@ -425,7 +456,7 @@ tr:hover .row-actions{opacity:1;}
       <button class="icon-btn" title="Export" style="width:30px;height:32px;">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </button>
-      <button class="btn btn-primary">
+      <button class="btn btn-primary" onclick="openInviteModal()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Invite members
       </button>
@@ -717,6 +748,91 @@ tr:hover .row-actions{opacity:1;}
     </div>
   </div>
 </div>
+
+<!-- Invite modal -->
+<div class="eff-overlay" id="invite-overlay">
+  <div class="invite-dialog" onclick="event.stopPropagation()">
+    <div class="inv-hd">
+      <div class="inv-title">Invite team members</div>
+      <button class="mp-close" onclick="closeInviteModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="inv-body">
+      <div class="inv-field">
+        <label class="inv-label"><span class="mp-req">*</span> Email address</label>
+        <div class="inv-input-wrap">
+          <input class="inv-input" type="email" id="inv-email" placeholder="eg. user@example.com" autocomplete="off">
+          <div class="inv-chev"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        </div>
+        <div class="inv-err" id="inv-email-err">Please enter a valid email address.</div>
+      </div>
+      <div class="inv-field">
+        <label class="inv-label"><span class="mp-req">*</span> Role (eg. Engineer, CSM, etc)</label>
+        <select class="inv-sel" id="inv-role" onchange="this.classList.toggle('placeholder',!this.value)">
+          <option value="">Choose or type to create a role</option>
+          <option value="Product Manager">Product Manager</option>
+          <option value="Implementation Manager">Implementation Manager</option>
+          <option value="CSM">CSM</option>
+        </select>
+        <div class="inv-err" id="inv-role-err">Please select a role.</div>
+      </div>
+      <div class="inv-field">
+        <label class="inv-label"><span class="mp-req">*</span> Permission</label>
+        <select class="inv-sel placeholder" id="inv-perm" onchange="this.classList.toggle('placeholder',!this.value)">
+          <option value="">Select...</option>
+          <option value="Admin">Admin</option>
+          <option value="Super User">Super User</option>
+          <option value="Collaborator">Collaborator</option>
+        </select>
+        <div class="inv-err" id="inv-perm-err">Please select a permission level.</div>
+      </div>
+      <div class="inv-field">
+        <label class="inv-label">Timesheet approver</label>
+        <select class="inv-sel" id="inv-approver">
+          <option value="Admins">Admins</option>
+          <option value="Vivek Shanmugasundaram">Vivek Shanmugasundaram</option>
+          <option value="Sarah Chen">Sarah Chen</option>
+          <option value="Marcus Johnson">Marcus Johnson</option>
+        </select>
+      </div>
+      <div class="inv-field">
+        <label class="inv-label">Language</label>
+        <select class="inv-sel" id="inv-lang" style="max-width:220px;">
+          <option value="English">English</option>
+          <option value="French">French</option>
+          <option value="German">German</option>
+        </select>
+      </div>
+      <div class="inv-field">
+        <label class="inv-label">Weekly capacity</label>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:2px;">
+          <label class="inv-cap-row">
+            <input type="radio" name="inv-cap" value="default" checked onchange="onInvCapChange()">
+            <span>Same as default team capacity: <strong>40h 00m</strong></span>
+          </label>
+          <label class="inv-cap-row">
+            <input type="radio" name="inv-cap" value="manual" onchange="onInvCapChange()">
+            <span>Set manually</span>
+          </label>
+          <div id="inv-cap-wrap" style="display:none;margin-left:28px;">
+            <input class="mp-cap-input" type="text" id="inv-cap-input" value="40h 00m" placeholder="e.g. 40h 00m" autocomplete="off" onblur="formatInvCapInput()">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="inv-footer">
+      <button class="btn btn-ghost" onclick="closeInviteModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitInvite()">
+        Invite
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><div class="toast-bar"></div><div class="toast-body" id="toast-body"></div></div>
 
 <!-- Dropdown -->
 <div class="dropdown" id="dropdown">
@@ -1081,7 +1197,99 @@ function toggleMenu(e,name,role,avClass,initials){
 }
 function closeMenu(){document.getElementById('dropdown').classList.remove('open');}
 document.addEventListener('click',closeMenu);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDrawer();closeDeactDialog();closeEffDialog();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDrawer();closeDeactDialog();closeEffDialog();closeInviteModal();}});
+
+// ── Invite modal ──────────────────────────────────────────────────────────────
+const AVATAR_COLORS=['av-teal','av-purple','av-green','av-orange','av-red'];
+const ROLE_BADGE_MAP={'Product Manager':'role-pm','Implementation Manager':'role-impl','CSM':'role-csm','Engineer':'role-engineer','Customer success':'role-cs'};
+
+function openInviteModal(){
+  document.getElementById('inv-email').value='';
+  document.getElementById('inv-role').value='';
+  document.getElementById('inv-perm').value='';
+  document.getElementById('inv-perm').classList.add('placeholder');
+  document.getElementById('inv-approver').value='Admins';
+  document.getElementById('inv-lang').value='English';
+  document.querySelectorAll('input[name="inv-cap"]').forEach(r=>r.checked=r.value==='default');
+  document.getElementById('inv-cap-wrap').style.display='none';
+  document.getElementById('inv-cap-input').value='40h 00m';
+  ['inv-email-err','inv-role-err','inv-perm-err'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('invite-overlay').classList.add('open');
+}
+function closeInviteModal(){document.getElementById('invite-overlay').classList.remove('open');}
+
+function onInvCapChange(){
+  const manual=document.querySelector('input[name="inv-cap"]:checked').value==='manual';
+  document.getElementById('inv-cap-wrap').style.display=manual?'block':'none';
+}
+function formatInvCapInput(){
+  const el=document.getElementById('inv-cap-input');
+  const mins=parseCapInput(el.value);
+  if(!isNaN(mins)&&mins>=0){const h=Math.floor(mins/60),m=mins%60;el.value=`${h}h ${String(m).padStart(2,'0')}m`;}
+}
+
+function nameFromEmail(email){
+  const local=email.split('@')[0];
+  return local.split(/[._\-+]/).filter(Boolean).map(p=>p.charAt(0).toUpperCase()+p.slice(1).toLowerCase()).join(' ');
+}
+
+function submitInvite(){
+  const email=document.getElementById('inv-email').value.trim();
+  const role=document.getElementById('inv-role').value;
+  const perm=document.getElementById('inv-perm').value;
+  let valid=true;
+  document.getElementById('inv-email-err').style.display=(!email||!email.includes('@'))?'block':'none';
+  document.getElementById('inv-role-err').style.display=!role?'block':'none';
+  document.getElementById('inv-perm-err').style.display=!perm?'block':'none';
+  if(!email||!email.includes('@')||!role||!perm)return;
+
+  const approver=document.getElementById('inv-approver').value;
+  const capMode=document.querySelector('input[name="inv-cap"]:checked').value;
+  formatInvCapInput();
+  let totalMins=2400;
+  if(capMode==='manual'){const m=parseCapInput(document.getElementById('inv-cap-input').value);totalMins=(!isNaN(m)&&m>=0)?m:2400;}
+
+  const name=nameFromEmail(email);
+  const initials=name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  const avClass=AVATAR_COLORS[Object.keys(windowsData).length%AVATAR_COLORS.length];
+  const today=todayISO(),updatedOn=isoToDisplayYear(today);
+  windowsData[name]=[{totalMins,from:today,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn}];
+
+  const approverCell=approver==='Admins'
+    ?`<div class="approver-chip"><div class="avatar av-red" style="width:16px;height:16px;font-size:7px;">A</div>Admins</div>`
+    :`<div class="approver-chip"><div class="avatar av-blue" style="width:16px;height:16px;font-size:7px;">${approver.split(' ').map(p=>p[0]).join('').slice(0,2)}</div>${approver}</div>`;
+
+  const capDisplay=totalMins===0
+    ?'<span style="font-size:13px;color:var(--text-3);font-style:italic;font-weight:400;">Deactivated</span><span class="cap-since">From '+isoToDisplayYear(today)+'</span>'
+    :`<span class="cap-val">${formatCap(totalMins)}</span><span class="cap-since">From ${isoToDisplayYear(today)}</span>`;
+
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><div class="member-cell"><div class="avatar ${avClass}">${initials}</div><span class="member-name">${name}</span></div></td>
+    <td style="font-size:13px;color:var(--text-2);">${email}</td>
+    <td><span class="role-badge ${ROLE_BADGE_MAP[role]||'role-engineer'}">${role}</span></td>
+    <td><span class="perm-badge">${perm}</span></td>
+    <td><div class="cap-cell" data-member="${name}" onclick="openDrawer('${name}','${role}','${avClass}','${initials}')" title="View base capacity history">${capDisplay}</div></td>
+    <td><div class="approver-cell">${approverCell}</div></td>
+    <td><div class="row-actions"><button class="act-btn" title="More" onclick="toggleMenu(event,'${name}','${role}','${avClass}','${initials}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></div></td>`;
+  document.querySelector('table tbody').appendChild(tr);
+
+  const count=document.querySelectorAll('table tbody tr').length;
+  document.querySelector('.tab.active').innerHTML=`Active <span style="color:var(--text-4);font-weight:400;">(${count})</span>`;
+  document.querySelector('.sort-label').innerHTML=`Team member (${count}) <span>↑</span>`;
+
+  closeInviteModal();
+  showToast(`${name} has been invited successfully.`);
+}
+
+let toastTimer=null;
+function showToast(msg){
+  document.getElementById('toast-body').textContent=msg;
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
 
 // Init
 ['Paul','Rachel','Vivek Shanmugasundaram'].forEach(refreshCapCell);
