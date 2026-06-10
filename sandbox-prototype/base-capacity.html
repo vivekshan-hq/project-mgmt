@@ -577,9 +577,9 @@ tr:hover .row-actions{opacity:1;}
     <!-- Form -->
     <div class="mp-form">
       <div class="mp-field">
-        <div class="mp-field-label"><span class="mp-req">*</span> Number of hours per week a team member is available to work</div>
+        <div class="mp-field-label"><span class="mp-req">*</span> Number of hours per week <span id="mp-field-name">Paul</span> is available to work</div>
         <input class="mp-cap-input" type="text" id="mp-cap-input" value="40h 00m" placeholder="e.g. 40h 00m" autocomplete="off" onblur="formatCapInput()">
-        <div class="mp-hint" id="mp-hint">Should be a multiple of 5 minutes</div>
+        <div class="mp-hint">Should be a multiple of 5 minutes</div>
         <div class="mp-val-error" id="mp-val-error">Please enter a valid base capacity (e.g. 40h, 8h 30m).</div>
       </div>
     </div>
@@ -935,7 +935,7 @@ function switchDrawerTab(tab){
 function openMpanel(name,role,avClass,initials){
   mpMember={name,role,avClass,initials};
   document.getElementById('mp-name').textContent=name;
-  document.getElementById('mp-hint').textContent=`The current base capacity of ${name}`;
+  document.getElementById('mp-field-name').textContent=name;
   const win=getCurrentWindow(name),cur=win?win.totalMins:2400;
   const h=Math.floor(cur/60),m=cur%60;
   document.getElementById('mp-cap-input').value=`${h}h ${String(m).padStart(2,'0')}m`;
