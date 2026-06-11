@@ -962,16 +962,13 @@ function openDeactDialog(name){
 function closeDeactDialog(){document.getElementById('deact-overlay').classList.remove('open');}
 function deactivateMember(name,dateISO){
   const updatedOn=isoToDisplayYear(dateISO);
-  let wins=(windowsData[name]||[]).map(w=>({...w}));
-  const openIdx=wins.findIndex(w=>w.to===null);
-  if(openIdx>=0){
-    if(wins[openIdx].from===dateISO){
-      wins.splice(openIdx,1);
-    }else{
-      wins[openIdx].to=prevDayISO(dateISO);
-    }
+  // Drop any windows that start on or after the deactivation date (future windows)
+  let wins=(windowsData[name]||[]).map(w=>({...w})).filter(w=>w.from<dateISO);
+  // Close the last remaining window if it extends into or past the deactivation date
+  if(wins.length){
+    const last=wins[wins.length-1];
+    if(last.to===null||last.to>=dateISO)last.to=prevDayISO(dateISO);
   }
-  wins=wins.filter(w=>w.from<dateISO);
   wins.push({totalMins:0,from:dateISO,to:null,type:'deactivated',updatedBy:'Vivek Shanmugasundaram',updatedOn});
   windowsData[name]=wins;
 }
