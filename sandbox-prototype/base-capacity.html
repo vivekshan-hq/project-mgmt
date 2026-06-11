@@ -1062,8 +1062,14 @@ function applyCapacityUpdate(name,totalMins,mode,dateISO){
   let wins=(windowsData[name]||[]).map(w=>({...w}));
   if(mode==='forward'){
     const last=wins[wins.length-1];
+    // Same-day active window: amend in place
     if(last&&last.from===today&&last.type!=='deactivated'){last.totalMins=totalMins;last.updatedOn=updatedOn;}
-    else{if(last&&last.to===null)last.to=prevDayISO(today);wins.push({totalMins,from:today,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});}
+    else{
+      // Drop any windows starting today or later (handles same-day deactivated window)
+      wins=wins.filter(w=>w.from<today);
+      if(wins.length){const l=wins[wins.length-1];if(l.to===null||l.to>=today)l.to=prevDayISO(today);}
+      wins.push({totalMins,from:today,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+    }
   }
   else if(mode==='backdate'){
     const deactIdx=wins.findIndex(w=>w.type==='deactivated'&&w.from>=dateISO);
@@ -1081,11 +1087,10 @@ function applyCapacityUpdate(name,totalMins,mode,dateISO){
     wins=kept.sort((a,b)=>a.from.localeCompare(b.from));
   }
   else if(mode==='future'){
-    let openIdx=-1;
-    for(let i=wins.length-1;i>=0;i--){if(wins[i].to===null){openIdx=i;break;}}
-    if(openIdx>=0)wins[openIdx].to=prevDayISO(dateISO);
+    // Drop all windows starting on or after dateISO (avoids invalid date ranges)
+    wins=wins.filter(w=>w.from<dateISO);
+    if(wins.length){const l=wins[wins.length-1];if(l.to===null||l.to>=dateISO)l.to=prevDayISO(dateISO);}
     wins.push({totalMins,from:dateISO,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});
-    wins.sort((a,b)=>a.from.localeCompare(b.from));
   }
   windowsData[name]=wins;
 }
