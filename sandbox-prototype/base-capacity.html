@@ -644,26 +644,7 @@ tr:hover .row-actions{opacity:1;}
       </div>
 
       <!-- Audit log tab -->
-      <div id="mp-tab-audit" style="display:none;">
-        <div class="mp-log-date">Today · 05 Jun 2026</div>
-        <div class="mp-log-entry">
-          <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
-          <div class="mp-log-body">
-            <div class="mp-log-actor-row"><span class="mp-log-actor">Vivek Shanmugasundaram</span><span class="mp-log-time">2 hrs ago</span></div>
-            <div class="mp-log-desc">Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 04 Jun)</span></div>
-            <div class="mp-log-diff"><span class="mp-d-old">30 hrs / week</span><span class="mp-d-arr">→</span><span class="mp-d-new">40 hrs / week</span></div>
-          </div>
-        </div>
-        <div class="mp-log-date" style="position:relative;">01 May 2026</div>
-        <div class="mp-log-entry">
-          <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
-          <div class="mp-log-body">
-            <div class="mp-log-actor-row"><span class="mp-log-actor">Vivek Shanmugasundaram</span><span class="mp-log-time">01 May</span></div>
-            <div class="mp-log-desc">Set <strong>Base capacity</strong></div>
-            <div class="mp-log-diff"><span class="mp-d-old">—</span><span class="mp-d-arr">→</span><span class="mp-d-new">30 hrs / week</span></div>
-          </div>
-        </div>
-      </div>
+      <div id="mp-tab-audit" style="display:none;"></div>
 
     </div>
 
@@ -997,7 +978,10 @@ function deactivateMember(name,dateISO){
 function confirmDeactivate(){
   const dateISO=document.getElementById('deact-date').value;
   if(!dateISO)return;
+  const prevWin=getCurrentWindow(deactMember);
+  const fromMins=prevWin?prevWin.totalMins:0;
   deactivateMember(deactMember,dateISO);
+  pushAuditEntry(deactMember,{mode:'deactivated',effectiveISO:dateISO,fromMins,toMins:0});
   refreshCapCell(deactMember);
   closeDeactDialog();
 }
@@ -1018,7 +1002,62 @@ const windowsData = {
   ]
 };
 
+const auditData = {
+  'Paul': [
+    {who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:'2026-01-01',mode:'set',effectiveISO:'2026-01-01',fromMins:null,toMins:2400}
+  ],
+  'Rachel': [
+    {who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:'2026-01-01',mode:'set',effectiveISO:'2026-01-01',fromMins:null,toMins:2400},
+    {who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:'2026-05-01',mode:'deactivated',effectiveISO:'2026-05-01',fromMins:2400,toMins:0},
+    {who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:'2026-06-01',mode:'set',effectiveISO:'2026-06-01',fromMins:0,toMins:2400}
+  ],
+  'Vivek Shanmugasundaram': [
+    {who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:'2026-01-01',mode:'set',effectiveISO:'2026-01-01',fromMins:null,toMins:1920},
+    {who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:'2026-03-01',mode:'forward',effectiveISO:'2026-03-01',fromMins:1920,toMins:2400}
+  ]
+};
+
 let activeMember=null,activeMeta={},mpMember=null;
+
+// ── Audit log ────────────────────────────────────────────────────────────────
+function pushAuditEntry(name,{mode,effectiveISO,fromMins,toMins}){
+  if(!auditData[name])auditData[name]=[];
+  auditData[name].push({who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:todayISO(),mode,effectiveISO,fromMins,toMins});
+}
+
+function renderMpAudit(name){
+  const entries=(auditData[name]||[]).slice().reverse();
+  const container=document.getElementById('mp-tab-audit');
+  if(!entries.length){container.innerHTML='<div style="padding:24px 20px;font-size:14px;color:var(--text-3);">No changes recorded yet.</div>';return;}
+  const today=todayISO();
+  const groups={};
+  entries.forEach(e=>{if(!groups[e.whenISO])groups[e.whenISO]=[];groups[e.whenISO].push(e);});
+  let html='';
+  Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(dateISO=>{
+    const isToday=dateISO===today;
+    const label=isToday?`Today · ${isoToDisplayYear(dateISO)}`:isoToDisplayYear(dateISO);
+    html+=`<div class="mp-log-date">${label}</div>`;
+    groups[dateISO].forEach(e=>{
+      const timeLabel=isToday?'just now':isoToDisplay(e.whenISO);
+      let desc='';
+      if(e.mode==='set')desc='Set <strong>Base capacity</strong>';
+      else if(e.mode==='forward')desc='Updated <strong>Base capacity</strong>';
+      else if(e.mode==='backdate')desc=`Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to ${isoToDisplay(e.effectiveISO)})</span>`;
+      else if(e.mode==='future')desc=`Updated <strong>Base capacity</strong> <span style="color:var(--brand);font-weight:590;">(effective from ${isoToDisplay(e.effectiveISO)})</span>`;
+      else if(e.mode==='deactivated')desc='Deactivated team member';
+      const oldStr=e.fromMins===null?'—':`${formatCap(e.fromMins)} / week`;
+      const newStr=e.mode==='deactivated'?'0h (Deactivated)':`${formatCap(e.toMins)} / week`;
+      html+=`<div class="mp-log-entry">
+        <div class="avatar ${e.whoAvClass}" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">${e.whoInitials}</div>
+        <div class="mp-log-body">
+          <div class="mp-log-actor-row"><span class="mp-log-actor">${e.who}</span><span class="mp-log-time">${timeLabel}</span></div>
+          <div class="mp-log-desc">${desc}</div>
+          <div class="mp-log-diff"><span class="mp-d-old">${oldStr}</span><span class="mp-d-arr">→</span><span class="mp-d-new">${newStr}</span></div>
+        </div></div>`;
+    });
+  });
+  container.innerHTML=html;
+}
 
 // ── Window engine ─────────────────────────────────────────────────────────────
 function applyCapacityUpdate(name,totalMins,mode,dateISO){
@@ -1116,7 +1155,7 @@ function openMpanel(name,role,avClass,initials){
   document.getElementById('mp-cap-input').value=`${h}h ${String(m).padStart(2,'0')}m`;
   document.getElementById('mp-cap-input').classList.remove('error');
   document.getElementById('mp-val-error').style.display='none';
-  switchMpTab('hist');renderMpHistory(name);
+  switchMpTab('hist');renderMpHistory(name);renderMpAudit(name);
   if(win)document.getElementById('mp-footer-note').textContent=`Updated by ${win.updatedBy}, ${win.updatedOn}`;
   document.getElementById('mp-overlay').classList.add('open');
 }
@@ -1169,8 +1208,12 @@ function confirmSave(){
   else if(mode==='future'){dateISO=document.getElementById('eff-future').value;if(!dateISO||dateISO<=today){document.getElementById('eff-future').focus();return;}}
   const name=mpMember?.name;
   if(name){
+    const prevWin=getCurrentWindow(name);
+    const fromMins=prevWin?prevWin.totalMins:null;
+    const effectiveISO=mode==='backdate'?dateISO:mode==='future'?dateISO:today;
     applyCapacityUpdate(name,totalMins,mode,dateISO);
-    renderMpHistory(name);refreshCapCell(name);
+    pushAuditEntry(name,{mode:fromMins===null?'set':mode,effectiveISO,fromMins,toMins:totalMins});
+    renderMpHistory(name);renderMpAudit(name);refreshCapCell(name);
     if(activeMember===name&&document.getElementById('drawer').classList.contains('open'))renderDrawerHistory(name);
     const w=getCurrentWindow(name);
     if(w)document.getElementById('mp-footer-note').textContent=`Updated by ${w.updatedBy}, just now`;
@@ -1254,6 +1297,7 @@ function submitInvite(){
   const avClass=AVATAR_COLORS[Object.keys(windowsData).length%AVATAR_COLORS.length];
   const today=todayISO(),updatedOn=isoToDisplayYear(today);
   windowsData[name]=[{totalMins,from:today,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn}];
+  auditData[name]=[{who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:today,mode:'set',effectiveISO:today,fromMins:null,toMins:totalMins}];
 
   const approverCell=approver==='Admins'
     ?`<div class="approver-chip"><div class="avatar av-red" style="width:16px;height:16px;font-size:7px;">A</div>Admins</div>`
