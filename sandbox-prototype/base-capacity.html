@@ -1101,7 +1101,7 @@ function renderDrawerHistory(name){
   document.getElementById('hist-tbody').innerHTML=wins.map(w=>{
     const isDeact=w.type==='deactivated';
     const capStr=isDeact?`0h <em style="color:var(--text-3)">(Deactivated)</em>`:`Updated to <strong>${formatCap(w.totalMins)}</strong>`;
-    const effFrom=isoToDisplay(w.from),effTo=w.to?isoToDisplay(w.to):'Present';
+    const effFrom=isoToDisplay(w.from),effTo=w.to?isoToDisplay(w.to):'—';
     return`<tr class="${isDeact?'deact-row':''}"><td><div class="h-update">${capStr}</div><div style="font-size:12px;color:var(--text-4);margin-top:2px;">${effFrom} – ${effTo}</div></td><td><span class="h-date">${w.updatedOn}</span></td><td><div class="h-user"><div class="avatar av-blue" style="width:22px;height:22px;font-size:8px;flex-shrink:0;">VS</div><span class="h-user-name">${w.updatedBy}</span></div></td></tr>`;
   }).join('');
 }
@@ -1113,7 +1113,7 @@ function renderMpHistory(name){
     const capCell=isDeact
       ?`<span>0h</span> <em style="font-size:13px;color:var(--text-3);">(Deactivated)</em>`
       :`<span>${formatCap(w.totalMins)}</span>`;
-    const from=isoToDisplay(w.from),to=w.to?isoToDisplay(w.to):'Present';
+    const from=isoToDisplay(w.from),to=w.to?isoToDisplay(w.to):'—';
     const updBy=`<div class="mp-user"><div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div><span class="mp-user-name">${w.updatedBy}</span></div>`;
     return`<tr class="${isDeact?'mp-deact-row':w.type==='gap'?'mp-gap-row':''}"><td>${capCell}</td><td><span class="mp-eff">${from} – ${to}</span></td><td>${updBy}</td></tr>`;
   }).join('');
