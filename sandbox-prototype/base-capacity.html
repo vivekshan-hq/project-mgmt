@@ -1041,7 +1041,7 @@ function renderMpAudit(name){
       else if(e.mode==='forward')desc='Updated <strong>Base capacity</strong>';
       else if(e.mode==='backdate')desc=`Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to ${isoToDisplay(e.effectiveISO)})</span>`;
       else if(e.mode==='future')desc=`Updated <strong>Base capacity</strong> <span style="color:var(--brand);font-weight:590;">(effective from ${isoToDisplay(e.effectiveISO)})</span>`;
-      else if(e.mode==='deactivated')desc='Deactivated team member';
+      else if(e.mode==='deactivated')desc=`Deactivated team member <span style="color:var(--text-3);font-weight:590;">(effective ${isoToDisplay(e.effectiveISO)})</span>`;
       const oldStr=e.fromMins===null?'—':`${formatCap(e.fromMins)} / week`;
       const newStr=e.mode==='deactivated'?'0h (Deactivated)':`${formatCap(e.toMins)} / week`;
       html+=`<div class="mp-log-entry">
