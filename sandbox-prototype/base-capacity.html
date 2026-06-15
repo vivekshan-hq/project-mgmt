@@ -690,17 +690,6 @@ tr:hover .row-actions{opacity:1;}
           </div>
         </div>
       </label>
-      <label class="eff-radio-row">
-        <input type="radio" name="eff-mode" value="future" onchange="onEffModeChange()">
-        <div style="width:100%">
-          <div class="eff-radio-label">Set a future date</div>
-          <div class="eff-radio-desc">The new base capacity will apply from a selected future date. The current window closes the day before the selected date.</div>
-          <div class="eff-date-wrap" id="eff-future-wrap">
-            <div class="eff-date-label" style="margin-top:12px;">Effective from</div>
-            <input class="inp-text" type="date" id="eff-future" style="max-width:196px;">
-          </div>
-        </div>
-      </label>
     </div>
     <div class="eff-footer">
       <button class="btn btn-ghost" onclick="closeEffDialog()">Cancel</button>
@@ -1183,21 +1172,15 @@ function openEffDialog(){
   inp.classList.remove('error');errEl.style.display='none';
   document.querySelectorAll('input[name="eff-mode"]').forEach(r=>{r.checked=r.value==='forward';});
   document.getElementById('eff-backdate-wrap').classList.remove('show');
-  document.getElementById('eff-future-wrap').classList.remove('show');
   document.getElementById('eff-backdate').value='';
-  document.getElementById('eff-future').value='';
-  document.getElementById('eff-future').min=nextDayISO(todayISO());
   document.getElementById('eff-overlay').classList.add('open');
 }
 function closeEffDialog(){document.getElementById('eff-overlay').classList.remove('open');}
 function onEffModeChange(){
   const mode=document.querySelector('input[name="eff-mode"]:checked')?.value;
   document.getElementById('eff-backdate-wrap').classList.toggle('show',mode==='backdate');
-  document.getElementById('eff-future-wrap').classList.toggle('show',mode==='future');
   if(mode==='backdate'&&!document.getElementById('eff-backdate').value)
     document.getElementById('eff-backdate').value=prevDayISO(todayISO());
-  if(mode==='future'&&!document.getElementById('eff-future').value)
-    document.getElementById('eff-future').value=nextDayISO(todayISO());
 }
 
 function confirmSave(){
@@ -1207,12 +1190,11 @@ function confirmSave(){
   const today=todayISO();
   let dateISO='';
   if(mode==='backdate'){dateISO=document.getElementById('eff-backdate').value;if(!dateISO||dateISO>=today){document.getElementById('eff-backdate').focus();return;}}
-  else if(mode==='future'){dateISO=document.getElementById('eff-future').value;if(!dateISO||dateISO<=today){document.getElementById('eff-future').focus();return;}}
   const name=mpMember?.name;
   if(name){
     const prevWin=getCurrentWindow(name);
     const fromMins=prevWin?prevWin.totalMins:null;
-    const effectiveISO=mode==='backdate'?dateISO:mode==='future'?dateISO:today;
+    const effectiveISO=mode==='backdate'?dateISO:today;
     applyCapacityUpdate(name,totalMins,mode,dateISO);
     pushAuditEntry(name,{mode:fromMins===null?'set':mode,effectiveISO,fromMins,toMins:totalMins});
     renderMpHistory(name);renderMpAudit(name);refreshCapCell(name);
