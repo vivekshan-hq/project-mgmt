@@ -708,9 +708,7 @@ tr:hover .row-actions{opacity:1;}
       </button>
     </div>
     <div class="eff-body">
-      <p style="font-size:14px;color:var(--text-2);margin:0 0 20px 0;">Base capacity will be set to <strong>0h</strong> from the deactivation date. This will appear as a deactivated window in the member's capacity history.</p>
-      <div class="eff-date-label">Deactivation date</div>
-      <input class="inp-text" type="date" id="deact-date" style="max-width:196px;">
+      <p style="font-size:14px;color:var(--text-2);margin:0;">Base capacity will be set to <strong>0h</strong> effective today. This will appear as a deactivated window in the member's capacity history.</p>
     </div>
     <div class="eff-footer">
       <button class="btn btn-ghost" onclick="closeDeactDialog()">Cancel</button>
@@ -945,7 +943,6 @@ let deactMember=null;
 function openDeactDialog(name){
   deactMember=name;
   document.getElementById('deact-name-title').textContent=name;
-  document.getElementById('deact-date').value=todayISO();
   document.getElementById('deact-overlay').classList.add('open');
 }
 function closeDeactDialog(){document.getElementById('deact-overlay').classList.remove('open');}
@@ -962,8 +959,7 @@ function deactivateMember(name,dateISO){
   windowsData[name]=wins;
 }
 function confirmDeactivate(){
-  const dateISO=document.getElementById('deact-date').value;
-  if(!dateISO)return;
+  const dateISO=todayISO();
   const prevWin=getCurrentWindow(deactMember);
   const fromMins=prevWin?prevWin.totalMins:0;
   deactivateMember(deactMember,dateISO);
