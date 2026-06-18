@@ -291,6 +291,7 @@
     .tpl-bc-type { font-size: 11px; color: var(--text-4); font-weight: 400; }
 
     /* Structured diff table in drawer (Project Template save events) */
+    .detail-drawer.tpl-wide { width: 680px; }
     .tpl-diff-section { display: flex; flex-direction: column; gap: 8px; }
     .tpl-diff-section-header { display: flex; align-items: center; gap: 7px; }
     .tpl-diff-section-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
@@ -299,21 +300,27 @@
     .tpl-diff-count-pill.modified { background: #fffbeb; color: #b45309; border-color: #fde68a; }
     .tpl-diff-count-pill.deleted  { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
     .tpl-diff-table { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-    .tpl-diff-table-head { display: grid; grid-template-columns: 1.1fr 1fr; padding: 7px 14px; border-bottom: 1px solid var(--border); background: var(--bg); gap: 16px; }
-    .tpl-diff-col-header { font-size: 11px; font-weight: 600; color: var(--text-3); }
-    .tpl-diff-row { display: grid; grid-template-columns: 1.1fr 1fr; padding: 11px 14px; border-bottom: 1px solid var(--border-subtle); align-items: start; gap: 16px; }
+    .tpl-diff-table.cols-4 .tpl-diff-table-head,
+    .tpl-diff-table.cols-4 .tpl-diff-row { grid-template-columns: 68px 1fr 110px 90px; }
+    .tpl-diff-table.cols-5 .tpl-diff-table-head,
+    .tpl-diff-table.cols-5 .tpl-diff-row { grid-template-columns: 68px 1fr 100px 105px 90px; }
+    .tpl-diff-table-head { display: grid; border-bottom: 1px solid var(--border); background: var(--bg); }
+    .tpl-diff-col-header { font-size: 11px; font-weight: 600; color: var(--text-3); padding: 7px 10px; }
+    .tpl-diff-row { display: grid; border-bottom: 1px solid var(--border-subtle); align-items: start; }
     .tpl-diff-row:last-child { border-bottom: none; }
+    .tpl-diff-cell { padding: 10px 10px; }
+    .tpl-diff-status { font-size: 12px; font-weight: 600; padding: 10px 10px; }
+    .tpl-diff-status.tpl-status-added    { color: #15803d; }
+    .tpl-diff-status.tpl-status-modified { color: #b45309; }
+    .tpl-diff-status.tpl-status-deleted  { color: #dc2626; }
     .tpl-diff-item-name { font-size: 13px; font-weight: 500; color: var(--text-1); }
-    .tpl-name-added  { color: #15803d; }
-    .tpl-name-deleted { color: #dc2626; }
     .tpl-diff-item-context { font-size: 11px; color: var(--text-4); margin-top: 2px; }
-    .tpl-diff-changes-cell { display: flex; flex-direction: column; gap: 4px; padding-top: 1px; }
-    .tpl-inline-diff { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
-    .tpl-inline-field { font-size: 12px; color: var(--text-3); flex-shrink: 0; }
-    .tpl-inline-old { font-size: 13px; color: var(--text-3); text-decoration: line-through; }
-    .tpl-inline-arr { font-size: 12px; color: var(--text-4); }
-    .tpl-inline-new { font-size: 13px; color: var(--text-1); font-weight: 600; }
-    .tpl-inline-new-only { font-size: 13px; color: #15803d; font-weight: 500; }
+    .tpl-diff-what { font-size: 13px; color: var(--text-2); padding: 10px 10px; }
+    .tpl-diff-prod { padding: 10px 10px; }
+    .tpl-diff-prod-val { font-size: 13px; color: var(--text-3); text-decoration: line-through; }
+    .tpl-diff-prod-empty { font-size: 13px; color: var(--text-4); }
+    .tpl-diff-sandbox { font-size: 13px; font-weight: 500; color: var(--text-1); padding: 10px 10px; }
+    .tpl-diff-sandbox-empty { font-size: 13px; color: var(--text-4); font-weight: 400; padding: 10px 10px; }
 
     /* Drawer fields */
     .df { display: flex; flex-direction: column; gap: 6px; }
@@ -1020,17 +1027,21 @@
     'eo-apr12': {
       sections: [
         {
-          title: 'Tasks', colHeader: 'Task',
+          title: 'Phases', colHeader: 'Phase',
           items: [
-            { action: 'added',    name: 'Security review', context: 'Discovery (Phase)', changes: [{ field: 'Start', to: 'Day 5' }, { field: 'Duration', to: '2 days' }] },
-            { action: 'modified', name: 'Kickoff Call',    context: 'Kickoff (Phase)',   changes: [{ field: 'Start offset', from: 'Day 1', to: 'Day 3' }] },
-            { action: 'modified', name: 'Technical Setup', context: 'Implementation (Phase)', changes: [{ field: 'Assigned to', from: 'Project Manager', to: 'Solutions Engineer, Implementation Consultant' }] }
+            { action: 'added', name: 'Post-Launch Review' },
+            { action: 'added', name: 'Hypercare Support' }
           ]
         },
         {
-          title: 'Settings', colHeader: 'Setting',
+          title: 'Tasks', colHeader: 'Task',
           items: [
-            { action: 'modified', name: 'Effort planning level', changes: [{ from: 'At phase level', to: 'At task level' }] }
+            { action: 'modified', name: 'Send Welcome Email', context: 'Phase: Kickoff',            whatChanged: 'Duration',    prod: 'Day 1',   sandbox: 'Day 3' },
+            { action: 'modified', name: 'Intro Call',         context: 'Phase: Kickoff',            whatChanged: 'Assigned to', prod: 'Day 1',   sandbox: 'Day 3' },
+            { action: 'modified', name: 'Technical Setup',    context: 'Phase: Discovery',          whatChanged: 'Duration',    prod: 'Day 1',   sandbox: 'Day 3' },
+            { action: 'deleted',  name: 'Stakeholder Review', context: 'Phase: Go Live' },
+            { action: 'added',    name: 'Executive Review',   context: 'Phase: Go Live' },
+            { action: 'modified', name: 'Final Handoff',      context: 'Phase: Post Launch Review', whatChanged: 'Phase name',  prod: 'Kickoff', sandbox: 'Post Launch Review' }
           ]
         }
       ]
@@ -1040,17 +1051,23 @@
         {
           title: 'Tasks', colHeader: 'Task',
           items: [
-            { action: 'modified', name: 'Legal Review', context: 'Legal & Compliance (Phase)', changes: [{ field: 'Dynamic condition', to: 'Deal Value > $50,000' }] }
+            { action: 'modified', name: 'Legal Review', context: 'Phase: Legal & Compliance', whatChanged: 'Dynamic condition', prod: null, sandbox: 'Deal Value > $50,000' }
           ]
         }
       ]
     }
   };
 
-  function buildTplDiffHTML(tplId) {
+  function buildTplDiffHTML(tplId, source) {
     const tc = tplChanges[tplId];
     if (!tc) return '';
+    const isSandbox     = source === 'Sandbox';
+    const prodHeader    = isSandbox ? 'Production' : 'Before';
+    const sandboxHeader = isSandbox ? 'Sandbox'    : 'After';
+
     return tc.sections.map(section => {
+      const hasWhat       = section.items.some(i => i.action === 'modified' && i.whatChanged);
+      const cols          = hasWhat ? 5 : 4;
       const addedCount    = section.items.filter(i => i.action === 'added').length;
       const modifiedCount = section.items.filter(i => i.action === 'modified').length;
       const deletedCount  = section.items.filter(i => i.action === 'deleted').length;
@@ -1061,33 +1078,26 @@
       ].join('');
 
       const rowsHTML = section.items.map(item => {
-        let changesHTML = '';
-        if (item.detail) {
-          changesHTML = `<span class="tpl-inline-new-only">${item.detail}</span>`;
-        } else if (item.changes) {
-          changesHTML = item.changes.map(c => {
-            if (c.from && c.to) {
-              return `<div class="tpl-inline-diff">
-                ${c.field ? `<span class="tpl-inline-field">${c.field}:</span>` : ''}
-                <span class="tpl-inline-old">${c.from}</span>
-                <span class="tpl-inline-arr">→</span>
-                <span class="tpl-inline-new">${c.to}</span>
-              </div>`;
-            } else if (c.to) {
-              return `<div class="tpl-inline-diff">
-                ${c.field ? `<span class="tpl-inline-field">${c.field}:</span>` : ''}
-                <span class="tpl-inline-new-only">${c.to}</span>
-              </div>`;
-            }
-            return '';
-          }).join('');
+        const statusLabel = item.action.charAt(0).toUpperCase() + item.action.slice(1);
+        const nameCell = `<div class="tpl-diff-cell">
+          <div class="tpl-diff-item-name">${item.name}</div>
+          ${item.context ? `<div class="tpl-diff-item-context">${item.context}</div>` : ''}
+        </div>`;
+
+        let whatCell = '', prodCell = '', sandboxCell = '';
+        if (item.action === 'modified') {
+          whatCell    = hasWhat ? `<div class="tpl-diff-what">${item.whatChanged || ''}</div>` : '';
+          prodCell    = `<div class="tpl-diff-prod">${item.prod ? `<span class="tpl-diff-prod-val">${item.prod}</span>` : `<span class="tpl-diff-prod-empty">—</span>`}</div>`;
+          sandboxCell = `<div class="tpl-diff-sandbox">${item.sandbox || ''}</div>`;
+        } else {
+          whatCell    = hasWhat ? `<div class="tpl-diff-what" style="color:var(--text-4)">--</div>` : '';
+          prodCell    = `<div class="tpl-diff-prod"><span class="tpl-diff-prod-empty">—</span></div>`;
+          sandboxCell = `<div class="tpl-diff-sandbox-empty">--</div>`;
         }
+
         return `<div class="tpl-diff-row">
-          <div>
-            <div class="tpl-diff-item-name${item.action === 'added' ? ' tpl-name-added' : item.action === 'deleted' ? ' tpl-name-deleted' : ''}">${item.name}</div>
-            ${item.context ? `<div class="tpl-diff-item-context">${item.context}</div>` : ''}
-          </div>
-          <div class="tpl-diff-changes-cell">${changesHTML}</div>
+          <div class="tpl-diff-status tpl-status-${item.action}">${statusLabel}</div>
+          ${nameCell}${whatCell}${prodCell}${sandboxCell}
         </div>`;
       }).join('');
 
@@ -1096,10 +1106,13 @@
           <span class="tpl-diff-section-title">${section.title}</span>
           ${pills}
         </div>
-        <div class="tpl-diff-table">
+        <div class="tpl-diff-table cols-${cols}">
           <div class="tpl-diff-table-head">
+            <span class="tpl-diff-col-header">Status</span>
             <span class="tpl-diff-col-header">${section.colHeader || section.title}</span>
-            <span class="tpl-diff-col-header">Changes</span>
+            ${hasWhat ? `<span class="tpl-diff-col-header">What changed</span>` : ''}
+            <span class="tpl-diff-col-header">${prodHeader}</span>
+            <span class="tpl-diff-col-header">${sandboxHeader}</span>
           </div>
           ${rowsHTML}
         </div>
@@ -1256,6 +1269,7 @@
       </div>`;
 
     if (d.tplId) {
+      document.getElementById('detail-drawer').classList.add('tpl-wide');
       document.getElementById('detail-drawer-body').innerHTML = `
         <div class="df">
           <div class="df-label">Template</div>
@@ -1264,9 +1278,10 @@
             <span class="module-tag">${d.section}</span>
           </div>
         </div>
-        ${buildTplDiffHTML(d.tplId)}
+        ${buildTplDiffHTML(d.tplId, d.source)}
         ${metaHTML}`;
     } else {
+      document.getElementById('detail-drawer').classList.remove('tpl-wide');
       document.getElementById('detail-drawer-body').innerHTML = `
         <div class="df">
           <div class="df-label">${isTemplate ? 'Template' : 'Setting'}</div>
@@ -1284,7 +1299,9 @@
   }
 
   function closeDetail() {
-    document.getElementById('detail-drawer').classList.remove('open');
+    const drawer = document.getElementById('detail-drawer');
+    drawer.classList.remove('open');
+    drawer.classList.remove('tpl-wide');
     document.getElementById('detail-overlay').classList.remove('open');
     if (activeRow) { activeRow.classList.remove('active-row'); activeRow = null; }
   }
