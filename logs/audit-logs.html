@@ -1061,9 +1061,8 @@
   function buildTplDiffHTML(tplId, source) {
     const tc = tplChanges[tplId];
     if (!tc) return '';
-    const isSandbox     = source === 'Sandbox';
-    const prodHeader    = isSandbox ? 'Production' : 'Before';
-    const sandboxHeader = isSandbox ? 'Sandbox'    : 'After';
+    const prodHeader    = 'Old value';
+    const sandboxHeader = 'New value';
 
     return tc.sections.map(section => {
       const hasWhat       = section.items.some(i => i.action === 'modified' && i.whatChanged);
