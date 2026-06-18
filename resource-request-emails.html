@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resource Request Email Templates</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f0f0;
+      color: #1a1a1a;
+      padding: 28px 24px 60px;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 20px;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid #d8d8d8;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 9px 15px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #666;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color 0.12s;
+    }
+    .tab-btn:hover { color: #222; }
+    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Email pair ── */
+    .email-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      max-width: 1240px;
+    }
+
+    .email-col-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+    }
+
+    /* ── Email card shell ── */
+    .email-card {
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      overflow: hidden;
+      max-width: 580px;
+    }
+
+    /* ── Email brand header ── */
+    .email-header {
+      background: #111111;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .email-logo {
+      width: 30px;
+      height: 30px;
+      background: #ffffff;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .email-logo svg { display: block; }
+    .email-brand-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Email body ── */
+    .email-body {
+      padding: 28px 32px 24px;
+    }
+    .email-heading {
+      font-size: 15.5px;
+      color: #1a1a1a;
+      line-height: 1.45;
+      margin-bottom: 22px;
+      font-weight: 400;
+    }
+    .email-heading strong { font-weight: 700; }
+
+    .section-label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    .section-divider {
+      border: none;
+      border-top: 1px solid #e8e8e8;
+      margin-bottom: 14px;
+    }
+
+    /* ── Fields table ── */
+    .fields-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .fields-table tr { vertical-align: top; }
+    .fields-table td { padding: 5px 0; font-size: 13px; line-height: 1.5; }
+    .field-label {
+      width: 46%;
+      color: #666;
+      padding-right: 12px;
+    }
+    .field-value { color: #1a1a1a; }
+
+    /* ── Allocation blocks (Additional Hours) ── */
+    .alloc-blocks { display: flex; flex-direction: column; gap: 1px; }
+    .alloc-row { font-size: 13px; color: #1a1a1a; }
+
+    /* ── Skill conditions ── */
+    .skill-conds { display: flex; flex-direction: column; gap: 3px; }
+    .skill-cond { font-size: 13px; color: #1a1a1a; }
+
+    /* ── Status colours ── */
+    .status-todo    { color: #1a1a1a; }
+    .status-approved { color: #16a34a; font-weight: 600; }
+    .status-blocked  { color: #dc2626; font-weight: 600; }
+
+    /* ── Email footer ── */
+    .email-footer {
+      border-top: 1px solid #ebebeb;
+      background: #fafafa;
+      padding: 14px 32px;
+      text-align: center;
+    }
+    .email-footer p {
+      font-size: 11.5px;
+      color: #aaa;
+      line-height: 1.7;
+    }
+    .email-footer a {
+      color: #555;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Resource Request Email Templates</h1>
+
+<!-- ── Tab navigation ── -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="ntm">New Team Member</button>
+  <button class="tab-btn" data-tab="ap">Assign Placeholder</button>
+  <button class="tab-btn" data-tab="rep">Replacement</button>
+  <button class="tab-btn" data-tab="sa">Shift Allocations</button>
+  <button class="tab-btn" data-tab="da">Delete Allocation</button>
+  <button class="tab-btn" data-tab="ah">Additional Hours</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     Shared logo SVG snippet (inlined via JS)
+     ════════════════════════════════════════ -->
+
+<!-- ── 1. New Team Member ── -->
+<div id="ntm" class="tab-panel active">
+  <div class="email-pair">
+
+    <div>
+      <div class="email-col-label">Approver Assignment</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Alpha Onboarding</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading"><strong>abbhinav</strong> assigned you a resource request</p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Alpha Onboarding</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">New Team Member</td></tr>
+            <tr><td class="field-label">Role / Team Member</td><td class="field-value">Engineer</td></tr>
+            <tr><td class="field-label">Skills</td><td class="field-value"><div class="skill-conds"><div class="skill-cond">Technical skill is one of React, Node.js, Java</div><div class="skill-cond">Proficiency is at least Intermediate</div></div></td></tr>
+            <tr><td class="field-label">Project dates</td><td class="field-value">Jul 15 – Aug 30</td></tr>
+            <tr><td class="field-label">Hours</td><td class="field-value">40h 00m</td></tr>
+            <tr><td class="field-label">Allocation type</td><td class="field-value">Hard</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-todo">To Do</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="email-col-label">Request Approved</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Alpha Onboarding</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading">Your resource request has been <strong>approved</strong></p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Alpha Onboarding</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">New Team Member</td></tr>
+            <tr><td class="field-label">Role / Team Member</td><td class="field-value">Engineer</td></tr>
+            <tr><td class="field-label">Skills</td><td class="field-value"><div class="skill-conds"><div class="skill-cond">Technical skill is one of React, Node.js, Java</div><div class="skill-cond">Proficiency is at least Intermediate</div></div></td></tr>
+            <tr><td class="field-label">Project dates</td><td class="field-value">Jul 15 – Aug 30</td></tr>
+            <tr><td class="field-label">Hours</td><td class="field-value">40h 00m</td></tr>
+            <tr><td class="field-label">Allocation type</td><td class="field-value">Hard</td></tr>
+            <tr><td class="field-label">Assigned approvers</td><td class="field-value">Sarah Chen, David Kim</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-approved">Approved</td></tr>
+            <tr><td class="field-label">Approved resource</td><td class="field-value">Jordan Matthews</td></tr>
+            <tr><td class="field-label">Approved by</td><td class="field-value">Sarah Chen</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 2. Assign Placeholder ── -->
+<div id="ap" class="tab-panel">
+  <div class="email-pair">
+
+    <div>
+      <div class="email-col-label">Approver Assignment</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Beta Launch</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading"><strong>abbhinav</strong> assigned you a resource request</p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Beta Launch</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Assign Placeholder</td></tr>
+            <tr><td class="field-label">Placeholder</td><td class="field-value">Senior Designer</td></tr>
+            <tr><td class="field-label">Skills</td><td class="field-value"><div class="skill-conds"><div class="skill-cond">Technical skill is one of Figma, Sketch, UX Research</div><div class="skill-cond">Proficiency is at least Advanced</div></div></td></tr>
+            <tr><td class="field-label">Project dates</td><td class="field-value">Aug 1 – Sep 15</td></tr>
+            <tr><td class="field-label">Hours</td><td class="field-value">32h 00m</td></tr>
+            <tr><td class="field-label">Allocation type</td><td class="field-value">Soft</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-todo">To Do</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="email-col-label">Request Approved</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Beta Launch</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading">Your resource request has been <strong>approved</strong></p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Beta Launch</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Assign Placeholder</td></tr>
+            <tr><td class="field-label">Placeholder</td><td class="field-value">Senior Designer</td></tr>
+            <tr><td class="field-label">Skills</td><td class="field-value"><div class="skill-conds"><div class="skill-cond">Technical skill is one of Figma, Sketch, UX Research</div><div class="skill-cond">Proficiency is at least Advanced</div></div></td></tr>
+            <tr><td class="field-label">Project dates</td><td class="field-value">Aug 1 – Sep 15</td></tr>
+            <tr><td class="field-label">Hours</td><td class="field-value">32h 00m</td></tr>
+            <tr><td class="field-label">Allocation type</td><td class="field-value">Soft</td></tr>
+            <tr><td class="field-label">Assigned approvers</td><td class="field-value">Marcus Reid</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-approved">Approved</td></tr>
+            <tr><td class="field-label">Approved resource</td><td class="field-value">Jamie Scott</td></tr>
+            <tr><td class="field-label">Approved by</td><td class="field-value">Marcus Reid</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 3. Replacement ── -->
+<div id="rep" class="tab-panel">
+  <div class="email-pair">
+
+    <div>
+      <div class="email-col-label">Approver Assignment</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Gamma Migration</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading"><strong>abbhinav</strong> assigned you a resource request</p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Gamma Migration</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Replacement</td></tr>
+            <tr><td class="field-label">Team member to replace</td><td class="field-value">James Keller</td></tr>
+            <tr><td class="field-label">Replace with</td><td class="field-value">Priya Nair</td></tr>
+            <tr><td class="field-label">Replace</td><td class="field-value">Jun 10 – Jun 20</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-todo">To Do</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="email-col-label">Request Approved</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Gamma Migration</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading">Your resource request has been <strong>approved</strong></p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Gamma Migration</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Replacement</td></tr>
+            <tr><td class="field-label">Team member to replace</td><td class="field-value">James Keller</td></tr>
+            <tr><td class="field-label">Replace with</td><td class="field-value">Priya Nair</td></tr>
+            <tr><td class="field-label">Replace</td><td class="field-value">Jun 10 – Jun 20</td></tr>
+            <tr><td class="field-label">Assigned approvers</td><td class="field-value">Lisa Tran, Raj Patel</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-approved">Approved</td></tr>
+            <tr><td class="field-label">Approved resource</td><td class="field-value">Priya Nair</td></tr>
+            <tr><td class="field-label">Approved by</td><td class="field-value">Lisa Tran</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 4. Shift Allocations ── -->
+<div id="sa" class="tab-panel">
+  <div class="email-pair">
+
+    <div>
+      <div class="email-col-label">Approver Assignment</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Delta Rollout</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading"><strong>abbhinav</strong> assigned you a resource request</p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Delta Rollout</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Shift Allocations</td></tr>
+            <tr><td class="field-label">For</td><td class="field-value">Alex Morgan, Raj Patel</td></tr>
+            <tr><td class="field-label">Starting from</td><td class="field-value">Jul 15, 2026</td></tr>
+            <tr><td class="field-label">Shift to</td><td class="field-value">Aug 5, 2026</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-todo">To Do</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="email-col-label">Request Approved</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Delta Rollout</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading">Your resource request has been <strong>approved</strong></p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Delta Rollout</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Shift Allocations</td></tr>
+            <tr><td class="field-label">For</td><td class="field-value">Alex Morgan, Raj Patel</td></tr>
+            <tr><td class="field-label">Starting from</td><td class="field-value">Jul 15, 2026</td></tr>
+            <tr><td class="field-label">Shift to</td><td class="field-value">Aug 5, 2026</td></tr>
+            <tr><td class="field-label">Assigned approvers</td><td class="field-value">Chris Wu</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-approved">Approved</td></tr>
+            <tr><td class="field-label">Approved resource</td><td class="field-value">Alex Morgan, Raj Patel</td></tr>
+            <tr><td class="field-label">Approved by</td><td class="field-value">Chris Wu</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 5. Delete Allocation ── -->
+<div id="da" class="tab-panel">
+  <div class="email-pair">
+
+    <div>
+      <div class="email-col-label">Approver Assignment</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Epsilon Deployment</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading"><strong>abbhinav</strong> assigned you a resource request</p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Epsilon Deployment</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Delete Allocation</td></tr>
+            <tr><td class="field-label">Team member or placeholder</td><td class="field-value">Marcus Reid</td></tr>
+            <tr><td class="field-label">Delete</td><td class="field-value">Jun 10 – Jun 20</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-todo">To Do</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="email-col-label">Request Approved</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Epsilon Deployment</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading">Your resource request has been <strong>approved</strong></p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Epsilon Deployment</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Delete Allocation</td></tr>
+            <tr><td class="field-label">Team member or placeholder</td><td class="field-value">Marcus Reid</td></tr>
+            <tr><td class="field-label">Delete</td><td class="field-value">Jun 10 – Jun 20</td></tr>
+            <tr><td class="field-label">Assigned approvers</td><td class="field-value">Nadia Okonkwo, Sarah Chen</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-approved">Approved</td></tr>
+            <tr><td class="field-label">Approved resource</td><td class="field-value">Marcus Reid</td></tr>
+            <tr><td class="field-label">Approved by</td><td class="field-value">Nadia Okonkwo</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 6. Additional Hours ── -->
+<div id="ah" class="tab-panel">
+  <div class="email-pair">
+
+    <div>
+      <div class="email-col-label">Approver Assignment</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Zeta Integration</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading"><strong>abbhinav</strong> assigned you a resource request</p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Zeta Integration</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Additional Hours</td></tr>
+            <tr><td class="field-label">Role or Team Member</td><td class="field-value">Priya Nair</td></tr>
+            <tr><td class="field-label">Allocation method</td><td class="field-value">By date range</td></tr>
+            <tr><td class="field-label">Allocation type</td><td class="field-value">Hard</td></tr>
+            <tr>
+              <td class="field-label">Hours requested</td>
+              <td class="field-value">
+                <div class="alloc-blocks">
+                  <div class="alloc-row">Jun 1 – Jul 12: 8h 00m</div>
+                  <div class="alloc-row">Aug 1 – Aug 15: 4h 00m</div>
+                  <div class="alloc-row">Sep 5 – Sep 20: 6h 30m</div>
+                </div>
+              </td>
+            </tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-todo">To Do</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="email-col-label">Request Approved</div>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="email-logo"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5L10 10L4 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5L16 10L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="email-brand-name">Zeta Integration</div>
+        </div>
+        <div class="email-body">
+          <p class="email-heading">Your resource request has been <strong>approved</strong></p>
+          <p class="section-label">Request details</p>
+          <hr class="section-divider">
+          <table class="fields-table">
+            <tr><td class="field-label">Project</td><td class="field-value">Zeta Integration</td></tr>
+            <tr><td class="field-label">Request type</td><td class="field-value">Additional Hours</td></tr>
+            <tr><td class="field-label">Role or Team Member</td><td class="field-value">Priya Nair</td></tr>
+            <tr><td class="field-label">Allocation method</td><td class="field-value">By date range</td></tr>
+            <tr><td class="field-label">Allocation type</td><td class="field-value">Hard</td></tr>
+            <tr>
+              <td class="field-label">Hours requested</td>
+              <td class="field-value">
+                <div class="alloc-blocks">
+                  <div class="alloc-row">Jun 1 – Jul 12: 8h 00m</div>
+                  <div class="alloc-row">Aug 1 – Aug 15: 4h 00m</div>
+                  <div class="alloc-row">Sep 5 – Sep 20: 6h 30m</div>
+                </div>
+              </td>
+            </tr>
+            <tr><td class="field-label">Assigned approvers</td><td class="field-value">Tom Ellis</td></tr>
+            <tr><td class="field-label">Status</td><td class="field-value status-approved">Approved</td></tr>
+            <tr><td class="field-label">Approved resource</td><td class="field-value">Priya Nair</td></tr>
+            <tr><td class="field-label">Approved by</td><td class="field-value">Tom Ellis</td></tr>
+          </table>
+        </div>
+        <div class="email-footer">
+          <p>You are signed up for this email as <a href="#">vivek@rocketlane.com</a>.<br>Manage email preferences.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
