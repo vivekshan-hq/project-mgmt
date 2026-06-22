@@ -825,7 +825,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="2" data-template="true" data-tpl-name="Onboarding Intake Form" data-setting="Onboarding Intake Form" data-action="Updated" data-change-label="Label changed" data-old="Goal" data-new="Project Goal" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="2" data-template="true" data-tpl-name="Onboarding Intake Form" data-setting="Onboarding Intake Form" data-action="Updated" data-change-label="Label changed" data-tpl-field="Goal" data-old="Goal" data-new="Project Goal" onclick="openDetail(this)">
           <td class="td-date">Apr 13, 2026, 11:45 AM</td>
           <td class="td-what"><div class="what-name">Onboarding Intake Form</div><div class="what-section">Form Templates</div></td>
           <td class="td-source">App</td>
@@ -833,7 +833,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="2" data-template="true" data-tpl-name="Onboarding Intake Form" data-setting="Onboarding Intake Form" data-action="Updated" data-change-label="Required" data-old="Off" data-new="On" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="2" data-template="true" data-tpl-name="Onboarding Intake Form" data-setting="Onboarding Intake Form" data-action="Updated" data-change-label="Required" data-tpl-field="Budget Range" data-old="Off" data-new="On" onclick="openDetail(this)">
           <td class="td-date">Apr 13, 2026, 11:42 AM</td>
           <td class="td-what"><div class="what-name">Onboarding Intake Form</div><div class="what-section">Form Templates</div></td>
           <td class="td-source">App</td>
@@ -857,7 +857,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="4" data-template="true" data-tpl-name="Customer Feedback Form" data-setting="Customer Feedback Form" data-action="Updated" data-change-label="Star count" data-old="5 stars" data-new="10 stars" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="4" data-template="true" data-tpl-name="Customer Feedback Form" data-setting="Customer Feedback Form" data-action="Updated" data-change-label="Star count" data-tpl-field="Satisfaction" data-old="5 stars" data-new="10 stars" onclick="openDetail(this)">
           <td class="td-date">Apr 11, 2026, 10:30 AM</td>
           <td class="td-what"><div class="what-name">Customer Feedback Form</div><div class="what-section">Form Templates</div></td>
           <td class="td-source">App</td>
@@ -865,7 +865,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
-        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="4" data-template="true" data-tpl-name="Customer Feedback Form" data-setting="Customer Feedback Form" data-action="Updated" data-change-label="Option added" data-plain="true" data-new="'LinkedIn' added to 'How did you hear about us?'" onclick="openDetail(this)">
+        <tr data-user="RK" data-source="App" data-section="Form Templates" data-days="4" data-template="true" data-tpl-name="Customer Feedback Form" data-setting="Customer Feedback Form" data-action="Updated" data-change-label="Option added" data-tpl-field="How did you hear about us?" data-plain="true" data-new="'LinkedIn' added to 'How did you hear about us?'" onclick="openDetail(this)">
           <td class="td-date">Apr 11, 2026, 10:25 AM</td>
           <td class="td-what"><div class="what-name">Customer Feedback Form</div><div class="what-section">Form Templates</div></td>
           <td class="td-source">App</td>
@@ -873,7 +873,7 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
-        <tr data-user="SA" data-source="App" data-section="Form Templates" data-days="5" data-template="true" data-tpl-name="Customer Feedback Form" data-setting="Customer Feedback Form" data-action="Updated" data-change-label="Option removed" data-plain="true" data-new="'N/A' removed from 'Support experience'" onclick="openDetail(this)">
+        <tr data-user="SA" data-source="App" data-section="Form Templates" data-days="5" data-template="true" data-tpl-name="Customer Feedback Form" data-setting="Customer Feedback Form" data-action="Updated" data-change-label="Option removed" data-tpl-field="Support experience" data-plain="true" data-new="'N/A' removed from 'Support experience'" onclick="openDetail(this)">
           <td class="td-date">Apr 10, 2026, 3:50 PM</td>
           <td class="td-what"><div class="what-name">Customer Feedback Form</div><div class="what-section">Form Templates</div></td>
           <td class="td-source">App</td>
@@ -1386,6 +1386,7 @@
             <span class="module-tag">${d.section}</span>
           </div>
         </div>
+        ${isTemplate && d.tplField ? `<div class="df"><div class="df-label">Question</div><div class="df-value">${d.tplField}</div></div>` : ''}
         ${d.toggles ? toggleHTML : changeHTML}
         ${metaHTML}`;
     }
