@@ -452,6 +452,7 @@
             <div class="sfd-item" onclick="selectSection('Project Templates', 'Project Templates')">Project Templates</div>
             <div class="sfd-item" onclick="selectSection('Document Templates', 'Document Templates')">Document Templates</div>
             <div class="sfd-item" onclick="selectSection('Project Update Templates', 'Project Update Templates')">Project Update Templates</div>
+            <div class="sfd-item" onclick="selectSection('Form Templates', 'Form Templates')">Form Templates</div>
           </div>
         </div>
         <div class="sfd-group">
@@ -806,6 +807,38 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
+        <!-- ── Form Templates ── -->
+
+        <tr data-user="VS" data-source="Sandbox" data-section="Form Templates" data-days="3" data-template="true"
+            data-tpl-name="Onboarding Intake Form"
+            data-setting="Onboarding Intake Form" data-action="Updated"
+            data-tpl-id="oif-may10"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 10, 2026, 11:00 AM</td>
+          <td class="td-what">
+            <div class="what-name">Onboarding Intake Form</div>
+            <div class="what-section">Form Templates</div>
+          </td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="RK" data-source="Sandbox" data-section="Form Templates" data-days="5" data-template="true"
+            data-tpl-name="Customer Feedback Form"
+            data-setting="Customer Feedback Form" data-action="Updated"
+            data-tpl-id="cff-may08"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 8, 2026, 2:30 PM</td>
+          <td class="td-what">
+            <div class="what-name">Customer Feedback Form</div>
+            <div class="what-section">Form Templates</div>
+          </td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
+        </tr>
+
         <!-- ── Holiday Calendar ── -->
 
         <tr data-user="VS" data-source="App" data-section="Holiday Calendar" data-days="2" data-setting="APAC Holidays" data-action="Created" data-change-label="Calendar created" data-old="" data-new="New calendar with 12 holidays added" onclick="openDetail(this)">
@@ -1060,6 +1093,57 @@
           title: 'Tasks', colHeader: 'Task',
           items: [
             { action: 'modified', name: 'Legal Review', context: 'Phase: Legal & Compliance', whatChanged: 'Dynamic condition', prod: null, sandbox: 'Deal Value > $50,000' }
+          ]
+        }
+      ]
+    },
+
+    /* ── Form Templates ── */
+    'oif-may10': {
+      sections: [
+        {
+          title: 'Form Fields', colHeader: 'Field',
+          items: [
+            { action: 'added',    name: 'Company Size',    context: 'Radio · Position 3' },
+            { action: 'modified', name: 'Project Goal',    context: 'Short text · Position 1', whatChanged: 'Label',    prod: 'Goal', sandbox: 'Project Goal' },
+            { action: 'modified', name: 'Budget Range',    context: 'Dropdown · Position 4',   whatChanged: 'Required', prod: 'Off',  sandbox: 'On' },
+            { action: 'deleted',  name: 'Referral Source', context: 'Short text · Position 5' }
+          ]
+        },
+        {
+          title: 'Conditional Branching', colHeader: 'Field',
+          items: [
+            { action: 'added', name: 'Budget Range', context: 'If "Above $50k" → show Contract Value' }
+          ]
+        },
+        {
+          title: 'Automations', colHeader: 'Setting',
+          items: [
+            { action: 'modified', name: 'Create task on form submit', whatChanged: 'Enabled', prod: 'Off', sandbox: 'On' }
+          ]
+        }
+      ]
+    },
+    'cff-may08': {
+      sections: [
+        {
+          title: 'Form Fields', colHeader: 'Field',
+          items: [
+            { action: 'modified', name: 'Satisfaction',               context: 'Star rating · Position 2', whatChanged: 'Star count',     prod: '5 stars', sandbox: '10 stars' },
+            { action: 'modified', name: 'How did you hear about us?', context: 'Radio · Position 4',       whatChanged: 'Option added',   prod: '—',       sandbox: 'LinkedIn' },
+            { action: 'modified', name: 'Support experience',         context: 'Checkbox · Position 6',    whatChanged: 'Option removed', prod: 'N/A',     sandbox: '—' }
+          ]
+        },
+        {
+          title: 'Conditional Branching', colHeader: 'Field',
+          items: [
+            { action: 'modified', name: 'Support experience', context: 'Checkbox · Position 6', whatChanged: 'Branch fields', prod: 'Testimonial Request', sandbox: 'Testimonial Request, Review Link' }
+          ]
+        },
+        {
+          title: 'Settings', colHeader: 'Setting',
+          items: [
+            { action: 'modified', name: 'Response setting', whatChanged: 'Response limit', prod: 'Multiple responses', sandbox: 'One response only' }
           ]
         }
       ]
