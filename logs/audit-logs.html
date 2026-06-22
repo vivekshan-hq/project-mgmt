@@ -1183,7 +1183,7 @@
         } else {
           whatCell    = hasWhat ? `<div class="tpl-diff-what" style="color:var(--text-4)">--</div>` : '';
           prodCell    = `<div class="tpl-diff-prod"><span class="tpl-diff-prod-empty">—</span></div>`;
-          sandboxCell = `<div class="tpl-diff-sandbox-empty">--</div>`;
+          sandboxCell = item.sandbox ? `<div class="tpl-diff-sandbox">${item.sandbox}</div>` : `<div class="tpl-diff-sandbox-empty">--</div>`;
         }
 
         return `<div class="tpl-diff-row">
