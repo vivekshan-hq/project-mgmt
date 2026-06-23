@@ -1135,6 +1135,14 @@
             { action: 'added',    name: 'Executive Review',   context: 'Phase: Go Live' },
             { action: 'modified', name: 'Final Handoff',      context: 'Phase: Post Launch Review', whatChanged: 'Phase name',  prod: 'Kickoff', sandbox: 'Post Launch Review' }
           ]
+        },
+        {
+          title: 'Allocations', colHeader: 'Allocation',
+          items: [
+            { action: 'added',   name: 'Paul (Engineer)',          context: 'Phase: Kickoff',   sandbox: '240h · 2 days · Hard · Day 1 · Sat' },
+            { action: 'added',   name: 'Priya (Solutions Engineer)', context: 'Phase: Discovery', sandbox: '160h · 5 days · Soft · Day 3' },
+            { action: 'deleted', name: 'James (Project Manager)',  context: 'Phase: Kickoff',   prod: '120h · 3 days · Hard · Day 1' }
+          ]
         }
       ]
     },
@@ -1183,7 +1191,7 @@
           sandboxCell = `<div class="tpl-diff-sandbox">${item.sandbox || ''}</div>`;
         } else {
           whatCell    = hasWhat ? `<div class="tpl-diff-what" style="color:var(--text-4)">--</div>` : '';
-          prodCell    = `<div class="tpl-diff-prod"><span class="tpl-diff-prod-empty">—</span></div>`;
+          prodCell    = `<div class="tpl-diff-prod">${item.prod ? `<span class="tpl-diff-prod-val">${item.prod}</span>` : `<span class="tpl-diff-prod-empty">—</span>`}</div>`;
           sandboxCell = item.sandbox ? `<div class="tpl-diff-sandbox">${item.sandbox}</div>` : `<div class="tpl-diff-sandbox-empty">--</div>`;
         }
 
