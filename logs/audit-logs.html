@@ -321,6 +321,9 @@
     .tpl-diff-prod-empty { font-size: 13px; color: var(--text-4); }
     .tpl-diff-sandbox { font-size: 13px; font-weight: 500; color: var(--text-1); padding: 10px 10px; }
     .tpl-diff-sandbox-empty { font-size: 13px; color: var(--text-4); font-weight: 400; padding: 10px 10px; }
+    .tpl-alloc-summary { display: flex; flex-direction: column; gap: 5px; }
+    .tpl-alloc-line { font-size: 13px; font-weight: 500; color: var(--text-1); }
+    .tpl-alloc-line.muted { color: var(--text-3); font-weight: 400; }
 
     /* Drawer fields */
     .df { display: flex; flex-direction: column; gap: 6px; }
@@ -1139,9 +1142,9 @@
         {
           title: 'Allocations', colHeader: 'Allocation',
           items: [
-            { action: 'added',   name: 'Paul (Engineer)',            sandbox: '240h · 2 days · Sat' },
-            { action: 'added',   name: 'Priya (Solutions Engineer)', sandbox: '160h · 5 days · Sat & Sun' },
-            { action: 'deleted', name: 'James (Project Manager)',    prod: '120h · 3 days' }
+            { action: 'added',   name: 'Paul (Engineer)',            allocation: { hours: '240h', days: 2,  saturday: true,  sunday: false } },
+            { action: 'added',   name: 'Priya (Solutions Engineer)', allocation: { hours: '160h', days: 5,  saturday: true,  sunday: true  } },
+            { action: 'deleted', name: 'James (Project Manager)',    allocation: { hours: '120h', days: 3,  saturday: false, sunday: false } }
           ]
         }
       ]
@@ -1185,7 +1188,25 @@
         </div>`;
 
         let whatCell = '', prodCell = '', sandboxCell = '';
-        if (item.action === 'modified') {
+        if (item.allocation) {
+          const a = item.allocation;
+          const weekend = a.saturday && a.sunday ? 'Includes Saturday & Sunday'
+                        : a.saturday ? 'Includes Saturday'
+                        : a.sunday   ? 'Includes Sunday' : '';
+          const muted = item.action === 'deleted';
+          const cls = muted ? 'tpl-alloc-line muted' : 'tpl-alloc-line';
+          const summary = `<div class="tpl-alloc-summary">
+            <div class="${cls}">Total hours allocated — ${a.hours}</div>
+            <div class="${cls}">No of days — ${a.days}${weekend ? ` (${weekend})` : ''}</div>
+          </div>`;
+          whatCell    = hasWhat ? `<div class="tpl-diff-what" style="color:var(--text-4)">--</div>` : '';
+          prodCell    = item.action === 'deleted'
+            ? `<div class="tpl-diff-prod" style="padding:10px 10px;">${summary}</div>`
+            : `<div class="tpl-diff-prod"><span class="tpl-diff-prod-empty">—</span></div>`;
+          sandboxCell = item.action === 'added'
+            ? `<div class="tpl-diff-sandbox" style="padding:10px 10px;">${summary}</div>`
+            : `<div class="tpl-diff-sandbox-empty">--</div>`;
+        } else if (item.action === 'modified') {
           whatCell    = hasWhat ? `<div class="tpl-diff-what">${item.whatChanged || ''}</div>` : '';
           prodCell    = `<div class="tpl-diff-prod">${item.prod ? `<span class="tpl-diff-prod-val">${item.prod}</span>` : `<span class="tpl-diff-prod-empty">—</span>`}</div>`;
           sandboxCell = `<div class="tpl-diff-sandbox">${item.sandbox || ''}</div>`;
