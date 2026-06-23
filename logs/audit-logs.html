@@ -457,6 +457,7 @@
             <div class="sfd-item" onclick="selectSection('Document Templates', 'Document Templates')">Document Templates</div>
             <div class="sfd-item" onclick="selectSection('Project Update Templates', 'Project Update Templates')">Project Update Templates</div>
             <div class="sfd-item" onclick="selectSection('Form Templates', 'Form Templates')">Form Templates</div>
+            <div class="sfd-item" onclick="selectSection('Customer Portal Templates', 'Customer Portal Templates')">Customer Portal Templates</div>
           </div>
         </div>
         <div class="sfd-group">
@@ -893,6 +894,38 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
         </tr>
 
+        <!-- ── Customer Portal Templates ── -->
+
+        <tr data-user="VS" data-source="Sandbox" data-section="Customer Portal Templates" data-days="3" data-template="true"
+            data-tpl-name="Client Portal v2"
+            data-setting="Client Portal v2" data-action="Updated"
+            data-tpl-id="cp-apr15"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 15, 2026, 2:30 PM</td>
+          <td class="td-what">
+            <div class="what-name">Client Portal v2</div>
+            <div class="what-section">Customer Portal Templates</div>
+          </td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="RK" data-source="Sandbox" data-section="Customer Portal Templates" data-days="9" data-template="true"
+            data-tpl-name="Enterprise Customer Portal"
+            data-setting="Enterprise Customer Portal" data-action="Updated"
+            data-tpl-id="ecp-apr09"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 9, 2026, 11:15 AM</td>
+          <td class="td-what">
+            <div class="what-name">Enterprise Customer Portal</div>
+            <div class="what-section">Customer Portal Templates</div>
+          </td>
+          <td class="td-source">Sandbox merge</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
+        </tr>
+
         <!-- ── Holiday Calendar ── -->
 
         <tr data-user="VS" data-source="App" data-section="Holiday Calendar" data-days="2" data-setting="APAC Holidays" data-action="Created" data-change-label="Calendar created" data-old="" data-new="New calendar with 12 holidays added" onclick="openDetail(this)">
@@ -1155,6 +1188,60 @@
           title: 'Tasks', colHeader: 'Task',
           items: [
             { action: 'modified', name: 'Legal Review', context: 'Phase: Legal & Compliance', whatChanged: 'Dynamic condition', prod: null, sandbox: 'Deal Value > $50,000' }
+          ]
+        }
+      ]
+    },
+
+    /* ── Customer Portal Templates ── */
+    'cp-apr15': {
+      sections: [
+        {
+          title: 'Template', colHeader: 'Field',
+          items: [
+            { action: 'modified', name: 'Template name', whatChanged: 'Name', prod: 'Client Portal', sandbox: 'Client Portal v2' }
+          ]
+        },
+        {
+          title: 'Pages', colHeader: 'Page',
+          items: [
+            { action: 'added',   name: 'Resources' },
+            { action: 'deleted', name: 'Old FAQs' }
+          ]
+        },
+        {
+          title: 'Sections', colHeader: 'Section',
+          items: [
+            { action: 'added',   name: 'Project Plan',    context: 'Home' },
+            { action: 'added',   name: 'Key information', context: 'Home' },
+            { action: 'deleted', name: 'Sheets',          context: 'Home' }
+          ]
+        },
+        {
+          title: 'Section Details', colHeader: 'Field',
+          items: [
+            { action: 'modified', name: 'Title',       context: 'Home › Team members',              whatChanged: 'Title',       prod: 'Meet the Team',       sandbox: 'Your Project Team' },
+            { action: 'modified', name: 'Description', context: 'Account Overview › Projects list', whatChanged: 'Description', prod: 'Your active projects', sandbox: "Projects you're part of" }
+          ]
+        }
+      ]
+    },
+    'ecp-apr09': {
+      sections: [
+        {
+          title: 'Section Styles', colHeader: 'Field',
+          items: [
+            { action: 'modified', name: 'Background color',      context: 'Home › Hero section',   whatChanged: 'Background color',      prod: 'White',   sandbox: 'Light blue (#eff6ff)' },
+            { action: 'modified', name: 'Top and bottom spacing', context: 'Home › Project Plan',  whatChanged: 'Top and bottom spacing', prod: 'Medium',  sandbox: 'Large' },
+            { action: 'modified', name: 'Divider',               context: 'Home › Team members',   whatChanged: 'Divider',               prod: 'Off',     sandbox: 'On' }
+          ]
+        },
+        {
+          title: 'Conditions', colHeader: 'Rule',
+          items: [
+            { action: 'added',    name: 'Project Type = Enterprise',  context: 'Home › Forms · Section condition' },
+            { action: 'modified', name: 'Project Status = Active',    context: 'Home › Project Plan · Section condition', whatChanged: 'Condition value', prod: 'Active', sandbox: 'Active or In Review' },
+            { action: 'deleted',  name: 'Account ARR > 50,000',       context: 'Home › Key information · Section condition' }
           ]
         }
       ]
