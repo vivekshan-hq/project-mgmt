@@ -458,6 +458,7 @@
             <div class="sfd-item" onclick="selectSection('Project Update Templates', 'Project Update Templates')">Project Update Templates</div>
             <div class="sfd-item" onclick="selectSection('Form Templates', 'Form Templates')">Form Templates</div>
             <div class="sfd-item" onclick="selectSection('Customer Portal Templates', 'Customer Portal Templates')">Customer Portal Templates</div>
+            <div class="sfd-item" onclick="selectSection('Sheet Templates', 'Sheet Templates')">Sheet Templates</div>
           </div>
         </div>
         <div class="sfd-group">
@@ -760,6 +761,19 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
         </tr>
 
+        <tr data-user="RK" data-source="App" data-section="Document Templates" data-days="5" data-template="true"
+            data-tpl-name="Onboarding Welcome Doc"
+            data-setting="Onboarding Welcome Doc" data-action="Updated"
+            data-change-label="Updated" data-rich-text="true"
+            data-tpl-id="doc-apr13"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 13, 2026, 11:00 AM</td>
+          <td class="td-what"><div class="what-name">Onboarding Welcome Doc</div><div class="what-section">Document Templates</div></td>
+          <td class="td-source">App</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#6929c4;">RK</div><span class="by-name">Riya K</span></div></td>
+        </tr>
+
         <!-- ── Project Update Templates ── -->
 
         <tr data-user="SA" data-source="App" data-section="Project Update Templates" data-days="9" data-template="true"
@@ -810,6 +824,46 @@
           <td class="td-source">App</td>
           <td class="td-action"><span class="action-badge badge-deleted">Deleted</span></td>
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="AM" data-source="App" data-section="Project Update Templates" data-days="11" data-template="true"
+            data-tpl-name="Weekly Status Update"
+            data-setting="Weekly Status Update" data-action="Updated"
+            data-change-label="Updated" data-rich-text="true"
+            data-tpl-id="put-apr07"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 7, 2026, 2:00 PM</td>
+          <td class="td-what"><div class="what-name">Weekly Status Update</div><div class="what-section">Project Update Templates</div></td>
+          <td class="td-source">App</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#007d79;">AM</div><span class="by-name">Alex M</span></div></td>
+        </tr>
+
+        <!-- ── Sheet Templates ── -->
+
+        <tr data-user="VS" data-source="App" data-section="Sheet Templates" data-days="6" data-template="true"
+            data-tpl-name="Project Tracker"
+            data-setting="Project Tracker" data-action="Updated"
+            data-change-label="Content updated" data-rich-text="true"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 12, 2026, 10:30 AM</td>
+          <td class="td-what"><div class="what-name">Project Tracker</div><div class="what-section">Sheet Templates</div></td>
+          <td class="td-source">App</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
+        <tr data-user="SA" data-source="App" data-section="Sheet Templates" data-days="8" data-template="true"
+            data-tpl-name="Project Tracker"
+            data-setting="Project Tracker" data-action="Updated"
+            data-change-label="Updated"
+            data-tpl-id="sheet-apr10"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 10, 2026, 3:45 PM</td>
+          <td class="td-what"><div class="what-name">Project Tracker</div><div class="what-section">Sheet Templates</div></td>
+          <td class="td-source">App</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#525252;">SA</div><span class="by-name">Sam A</span></div></td>
         </tr>
 
         <!-- ── Form Templates ── -->
@@ -1193,6 +1247,50 @@
       ]
     },
 
+    /* ── Document Templates ── */
+    'doc-apr13': {
+      sections: [
+        {
+          title: 'Widgets', colHeader: 'Widget',
+          items: [
+            { action: 'added',    name: 'Project Timeline',  context: 'Type: Timeline' },
+            { action: 'deleted',  name: 'Budget Summary',    context: 'Type: Table' },
+            { action: 'modified', name: 'Welcome Banner',    context: 'Type: Text block', whatChanged: 'Heading text', prod: 'Welcome', sandbox: 'Welcome to your project!' }
+          ]
+        }
+      ]
+    },
+
+    /* ── Project Update Templates ── */
+    'put-apr07': {
+      sections: [
+        {
+          title: 'Questions', colHeader: 'Question',
+          items: [
+            { action: 'added',    name: 'Key risks this week?' },
+            { action: 'modified', name: 'Blockers',          whatChanged: 'Label',    prod: 'Blockers',  sandbox: 'Blockers & Risks' },
+            { action: 'modified', name: 'Milestone status',  whatChanged: 'Required', prod: 'Optional',  sandbox: 'Required' },
+            { action: 'deleted',  name: 'Team morale score' }
+          ]
+        }
+      ]
+    },
+
+    /* ── Sheet Templates ── */
+    'sheet-apr10': {
+      sections: [
+        {
+          title: 'Columns', colHeader: 'Column',
+          items: [
+            { action: 'added',    name: 'Risk Level',    context: 'Type: Dropdown' },
+            { action: 'added',    name: 'Owner',         context: 'Type: People' },
+            { action: 'deleted',  name: 'Priority Flag', context: 'Type: Checkbox' },
+            { action: 'modified', name: 'Due Date',      context: 'Type: Date', whatChanged: 'Column name', prod: 'Due Date', sandbox: 'Target Date' }
+          ]
+        }
+      ]
+    },
+
     /* ── Customer Portal Templates ── */
     'cp-apr15': {
       sections: [
@@ -1458,8 +1556,8 @@
       <div class="df">
         <div class="df-label">${changeLabel}</div>
         <div class="rich-text-note">
-          <span class="rich-text-note-text">Document Template updated</span>
-          <button class="rich-text-cta" onclick="openDiffModal('${d.setting}', '${d.section}', '${datetime}')">View Changes →</button>
+          <span class="rich-text-note-text">Content updated</span>
+          <button class="rich-text-cta" onclick="openDiffModal('${d.setting}', '${d.section}', '${datetime}')">View changes side by side</button>
         </div>
       </div>` : '';
 
@@ -1484,6 +1582,14 @@
 
     if (d.tplId) {
       document.getElementById('detail-drawer').classList.add('tpl-wide');
+      const contentCTA = d.richText === 'true' ? `
+        <div class="df">
+          <div class="df-label">Content</div>
+          <div class="rich-text-note">
+            <span class="rich-text-note-text">Content updated</span>
+            <button class="rich-text-cta" onclick="openDiffModal('${d.setting}', '${d.section}', '${datetime}')">View changes side by side</button>
+          </div>
+        </div>` : '';
       document.getElementById('detail-drawer-body').innerHTML = `
         <div class="df">
           <div class="df-label">Template</div>
@@ -1492,6 +1598,7 @@
             <span class="module-tag">${d.section}</span>
           </div>
         </div>
+        ${contentCTA}
         ${buildTplDiffHTML(d.tplId, d.source)}
         ${metaHTML}`;
     } else {
