@@ -676,7 +676,7 @@ tr:hover .row-actions{opacity:1;}
         <input type="radio" name="eff-mode" value="specific" checked onchange="onEffModeChange()">
         <div style="width:100%">
           <div class="eff-radio-label">From a specific date</div>
-          <div class="eff-radio-desc">A permanent change anchored to a date — past, today, or future. Applies from the selected date onwards, replacing all existing windows from that date through to Present.</div>
+          <div class="eff-radio-desc">The new base capacity will apply to the team member from the selected date and going forward.</div>
           <div class="eff-date-wrap show" id="eff-specific-wrap">
             <div class="eff-date-label" style="margin-top:12px;">Effective from</div>
             <input class="inp-text" type="date" id="eff-specific-date" style="max-width:196px;">
@@ -687,7 +687,7 @@ tr:hover .row-actions{opacity:1;}
         <input type="radio" name="eff-mode" value="range" onchange="onEffModeChange()">
         <div style="width:100%">
           <div class="eff-radio-label">For a date range</div>
-          <div class="eff-radio-desc">A temporary change for a specific period. After the end date, the system automatically reverts to the last permanent capacity value.</div>
+          <div class="eff-radio-desc">The new base capacity will apply to the team member for the selected date range.</div>
           <div class="eff-date-wrap" id="eff-range-wrap">
             <div style="display:flex;gap:12px;margin-top:12px;align-items:flex-end;">
               <div>
