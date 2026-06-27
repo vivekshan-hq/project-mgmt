@@ -673,20 +673,33 @@ tr:hover .row-actions{opacity:1;}
     </div>
     <div class="eff-body">
       <label class="eff-radio-row">
-        <input type="radio" name="eff-mode" value="forward" checked onchange="onEffModeChange()">
-        <div>
-          <div class="eff-radio-label">Going forward</div>
-          <div class="eff-radio-desc">The new base capacity will apply to all capacity calculations for this team member going forward from today. The current window closes as of yesterday and the new window starts from today.</div>
+        <input type="radio" name="eff-mode" value="specific" checked onchange="onEffModeChange()">
+        <div style="width:100%">
+          <div class="eff-radio-label">From a specific date</div>
+          <div class="eff-radio-desc">A permanent change anchored to a date — past, today, or future. Applies from the selected date onwards, replacing all existing windows from that date through to Present.</div>
+          <div class="eff-date-wrap show" id="eff-specific-wrap">
+            <div class="eff-date-label" style="margin-top:12px;">Effective from</div>
+            <input class="inp-text" type="date" id="eff-specific-date" style="max-width:196px;">
+          </div>
         </div>
       </label>
       <label class="eff-radio-row">
-        <input type="radio" name="eff-mode" value="backdate" onchange="onEffModeChange()">
+        <input type="radio" name="eff-mode" value="range" onchange="onEffModeChange()">
         <div style="width:100%">
-          <div class="eff-radio-label">Backdate base capacity</div>
-          <div class="eff-radio-desc">The new base capacity will apply from a selected past date going forward, replacing all existing windows from that date through to Present.</div>
-          <div class="eff-date-wrap" id="eff-backdate-wrap">
-            <div class="eff-date-label" style="margin-top:12px;">Backdate from</div>
-            <input class="inp-text" type="date" id="eff-backdate" style="max-width:196px;">
+          <div class="eff-radio-label">For a date range</div>
+          <div class="eff-radio-desc">A temporary change for a specific period. After the end date, the system automatically reverts to the last permanent capacity value.</div>
+          <div class="eff-date-wrap" id="eff-range-wrap">
+            <div style="display:flex;gap:12px;margin-top:12px;align-items:flex-end;">
+              <div>
+                <div class="eff-date-label">From</div>
+                <input class="inp-text" type="date" id="eff-range-start" style="max-width:180px;">
+              </div>
+              <div>
+                <div class="eff-date-label">To</div>
+                <input class="inp-text" type="date" id="eff-range-end" style="max-width:180px;">
+              </div>
+            </div>
+            <div id="eff-range-err" style="font-size:12px;color:var(--danger);margin-top:6px;display:none;">End date must be after start date.</div>
           </div>
         </div>
       </label>
@@ -854,8 +867,8 @@ tr:hover .row-actions{opacity:1;}
       <table class="htbl">
         <thead>
           <tr>
-            <th>Base capacity updates</th>
-            <th>Updated on</th>
+            <th>Base Capacity</th>
+            <th>Effective</th>
             <th>Updated by</th>
           </tr>
         </thead>
@@ -863,27 +876,8 @@ tr:hover .row-actions{opacity:1;}
       </table>
     </div>
 
-    <!-- Audit log tab -->
-    <div id="tab-audit" style="display:none;">
-      <div class="log-date-hd">Today · 05 Jun 2026</div>
-      <div class="log-entry">
-        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
-        <div class="log-body">
-          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">2 hrs ago</span></div>
-          <div class="log-desc">Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to 04 Jun)</span></div>
-          <div class="log-diff"><span class="d-old">30 hrs / week</span><span class="d-arr">→</span><span class="d-new">40 hrs / week</span></div>
-        </div>
-      </div>
-      <div class="log-date-hd" style="position:relative;top:0;">01 May 2026</div>
-      <div class="log-entry">
-        <div class="avatar av-blue" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">VS</div>
-        <div class="log-body">
-          <div class="log-actor-row"><span class="log-actor">Vivek Shanmugasundaram</span><span class="log-time">01 May</span></div>
-          <div class="log-desc">Set <strong>Base capacity</strong></div>
-          <div class="log-diff"><span class="d-old">—</span><span class="d-arr">→</span><span class="d-new">30 hrs / week</span></div>
-        </div>
-      </div>
-    </div>
+    <!-- Audit log tab (populated dynamically by renderDrawerAudit) -->
+    <div id="tab-audit" style="display:none;"></div>
   </div>
 
   <div class="drawer-footer">
@@ -919,11 +913,34 @@ function parseCapInput(str){
 }
 function formatCapInput(){
   const el=document.getElementById('mp-cap-input');
+  const errEl=document.getElementById('mp-val-error');
   const mins=parseCapInput(el.value);
-  if(!isNaN(mins)&&mins>0){const h=Math.floor(mins/60),m=mins%60;el.value=`${h}h ${String(m).padStart(2,'0')}m`;}
+  if(isNaN(mins)||mins<=0){
+    el.classList.add('error');
+    errEl.textContent='Please enter a valid duration (e.g. 40h, 37h 30m).';
+    errEl.style.display='block';
+    return false;
+  }
+  if(mins%5!==0){
+    el.classList.add('error');
+    errEl.textContent='Value must be in multiples of 5 minutes (e.g. 40h, 37h 30m, 32h 15m).';
+    errEl.style.display='block';
+    return false;
+  }
+  el.classList.remove('error');
+  errEl.style.display='none';
+  const h=Math.floor(mins/60),m=mins%60;
+  el.value=`${h}h ${String(m).padStart(2,'0')}m`;
+  return true;
 }
 function getTotalMins(){return parseCapInput(document.getElementById('mp-cap-input').value);}
-function getCurrentWindow(name){const wins=windowsData[name]||[];return wins.find(w=>w.to===null)||(wins.length?wins[wins.length-1]:null);}
+function getCurrentWindow(name){
+  const today=todayISO();
+  const wins=windowsData[name]||[];
+  // Return whichever window covers today (from<=today<=to, or to===null)
+  const current=wins.find(w=>w.from<=today&&(w.to===null||w.to>=today));
+  return current||(wins.length?wins[wins.length-1]:null);
+}
 function refreshCapCell(name){
   const win=getCurrentWindow(name);
   document.querySelectorAll(`[data-member="${name}"]`).forEach(cell=>{
@@ -963,24 +980,27 @@ function confirmDeactivate(){
   const prevWin=getCurrentWindow(deactMember);
   const fromMins=prevWin?prevWin.totalMins:0;
   deactivateMember(deactMember,dateISO);
-  pushAuditEntry(deactMember,{mode:'deactivated',effectiveISO:dateISO,fromMins,toMins:0});
+  pushAuditEntry(deactMember,{mode:'deactivated',effectiveISO:dateISO,effectiveEndISO:null,fromMins,toMins:0});
   refreshCapCell(deactMember);
+  if(activeMember===deactMember&&document.getElementById('drawer').classList.contains('open')){
+    renderDrawerHistory(deactMember);renderDrawerAudit(deactMember);
+  }
   closeDeactDialog();
 }
 
 // ── Data (windows sorted oldest→newest) ──────────────────────────────────────
 const windowsData = {
   'Paul': [
-    {totalMins:2400,from:'2026-01-01',to:null,        type:'active',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'}
+    {totalMins:2400,from:'2026-01-01',to:null,        type:'permanent',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'}
   ],
   'Rachel': [
-    {totalMins:2400,from:'2026-01-01',to:'2026-04-30',type:'active',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'},
+    {totalMins:2400,from:'2026-01-01',to:'2026-04-30',type:'permanent',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'},
     {totalMins:0,   from:'2026-05-01',to:'2026-05-31',type:'deactivated',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 May 2026'},
-    {totalMins:2400,from:'2026-06-01',to:null,        type:'active',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jun 2026'}
+    {totalMins:2400,from:'2026-06-01',to:null,        type:'permanent',     updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jun 2026'}
   ],
   'Vivek Shanmugasundaram': [
-    {totalMins:1920,from:'2026-01-01',to:'2026-02-28',type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'},
-    {totalMins:2400,from:'2026-03-01',to:null,        type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Mar 2026'}
+    {totalMins:1920,from:'2026-01-01',to:'2026-02-28',type:'permanent',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Jan 2026'},
+    {totalMins:2400,from:'2026-03-01',to:null,        type:'permanent',updatedBy:'Vivek Shanmugasundaram',updatedOn:'01 Mar 2026'}
   ]
 };
 
@@ -1002,9 +1022,9 @@ const auditData = {
 let activeMember=null,activeMeta={},mpMember=null;
 
 // ── Audit log ────────────────────────────────────────────────────────────────
-function pushAuditEntry(name,{mode,effectiveISO,fromMins,toMins}){
+function pushAuditEntry(name,{mode,effectiveISO,effectiveEndISO,fromMins,toMins}){
   if(!auditData[name])auditData[name]=[];
-  auditData[name].push({who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:todayISO(),mode,effectiveISO,fromMins,toMins});
+  auditData[name].push({who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:todayISO(),mode,effectiveISO,effectiveEndISO:effectiveEndISO||null,fromMins,toMins});
 }
 
 function renderMpAudit(name){
@@ -1021,19 +1041,32 @@ function renderMpAudit(name){
     html+=`<div class="mp-log-date">${label}</div>`;
     groups[dateISO].forEach(e=>{
       const timeLabel=isToday?'just now':isoToDisplay(e.whenISO);
-      let desc='';
-      if(e.mode==='set')desc='Set <strong>Base capacity</strong>';
-      else if(e.mode==='forward')desc='Updated <strong>Base capacity</strong>';
-      else if(e.mode==='backdate')desc=`Updated <strong>Base capacity</strong> <span style="color:var(--danger);font-weight:590;">(backdated to ${isoToDisplay(e.effectiveISO)})</span>`;
-      else if(e.mode==='future')desc=`Updated <strong>Base capacity</strong> <span style="color:var(--brand);font-weight:590;">(effective from ${isoToDisplay(e.effectiveISO)})</span>`;
-      else if(e.mode==='deactivated')desc=`Deactivated team member <span style="color:var(--text-3);font-weight:590;">(effective ${isoToDisplay(e.effectiveISO)})</span>`;
+      // Primary text: "Updated to Xh Ym"
+      let primaryText='';
+      let secondaryText='';
+      if(e.mode==='set'){
+        primaryText=`Set to <strong>${formatCap(e.toMins)}</strong>`;
+      } else if(e.mode==='deactivated'){
+        primaryText=`Deactivated`;
+        secondaryText=`<span style="color:var(--text-3);">Effective ${isoToDisplay(e.effectiveISO)}</span>`;
+      } else {
+        primaryText=`Updated to <strong>${formatCap(e.toMins)}</strong>`;
+        if(e.mode==='backdate'){
+          secondaryText=`<span style="color:var(--danger);">Effective from ${isoToDisplay(e.effectiveISO)}</span>`;
+        } else if(e.mode==='future'){
+          secondaryText=`<span style="color:var(--brand);">Effective from ${isoToDisplay(e.effectiveISO)}</span>`;
+        } else if(e.mode==='range'){
+          secondaryText=`<span style="color:var(--danger);">Effective ${isoToDisplay(e.effectiveISO)} to ${isoToDisplay(e.effectiveEndISO)}</span>`;
+        }
+        // 'forward' / 'set' — no secondary text
+      }
       const oldStr=e.fromMins===null?'—':`${formatCap(e.fromMins)} / week`;
       const newStr=e.mode==='deactivated'?'0h (Deactivated)':`${formatCap(e.toMins)} / week`;
       html+=`<div class="mp-log-entry">
         <div class="avatar ${e.whoAvClass}" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">${e.whoInitials}</div>
         <div class="mp-log-body">
           <div class="mp-log-actor-row"><span class="mp-log-actor">${e.who}</span><span class="mp-log-time">${timeLabel}</span></div>
-          <div class="mp-log-desc">${desc}</div>
+          <div class="mp-log-desc">${primaryText}${secondaryText?`<br><span style="font-size:12px;">${secondaryText}</span>`:''}</div>
           <div class="mp-log-diff"><span class="mp-d-old">${oldStr}</span><span class="mp-d-arr">→</span><span class="mp-d-new">${newStr}</span></div>
         </div></div>`;
     });
@@ -1042,41 +1075,67 @@ function renderMpAudit(name){
 }
 
 // ── Window engine ─────────────────────────────────────────────────────────────
-function applyCapacityUpdate(name,totalMins,mode,dateISO){
+function applyCapacityUpdate(name,totalMins,mode,startISO,endISO){
   const today=todayISO(),updatedOn=isoToDisplayYear(today);
   let wins=(windowsData[name]||[]).map(w=>({...w}));
-  if(mode==='forward'){
-    const last=wins[wins.length-1];
-    // Same-day active window: amend in place
-    if(last&&last.from===today&&last.type!=='deactivated'){last.totalMins=totalMins;last.updatedOn=updatedOn;}
-    else{
-      // Drop any windows starting today or later (handles same-day deactivated window)
-      wins=wins.filter(w=>w.from<today);
-      if(wins.length){const l=wins[wins.length-1];if(l.to===null||l.to>=today)l.to=prevDayISO(today);}
-      wins.push({totalMins,from:today,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+
+  if(mode==='specific'){
+    // "From a specific date" — permanent, any date (past/today/future).
+    // Replaces all windows from startISO onwards; deactivated windows before startISO are kept.
+    const kept=[];
+    for(const w of wins){
+      const wEnd=w.to||'9999-12-31';
+      if(w.type==='deactivated'){
+        if(w.from>=startISO) continue; // drop future deactivated rows
+        if(wEnd>=startISO) kept.push({...w,to:prevDayISO(startISO)});
+        else kept.push(w);
+        continue;
+      }
+      if(w.from>=startISO) continue; // drop
+      if(wEnd>=startISO) kept.push({...w,to:prevDayISO(startISO)}); // trim
+      else kept.push(w); // keep entirely
     }
+    kept.push({totalMins,from:startISO,to:null,type:'permanent',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+    wins=kept.sort((a,b)=>a.from.localeCompare(b.from));
   }
-  else if(mode==='backdate'){
-    const deactIdx=wins.findIndex(w=>w.type==='deactivated'&&w.from>=dateISO);
-    const stopDate=deactIdx>=0?wins[deactIdx].from:null;
+
+  else if(mode==='range'){
+    // "For a date range" — temporary; auto-reverts to last permanent value after endISO.
+    // Find last permanent window active before/at startISO for the revert value.
+    const permanentsBefore=wins.filter(w=>w.type==='permanent'&&w.from<=startISO);
+    const revertWin=permanentsBefore.length?permanentsBefore[permanentsBefore.length-1]:null;
+    const revertMins=revertWin?revertWin.totalMins:2400;
+
     const kept=[];
     for(const w of wins){
       if(w.type==='deactivated'){kept.push(w);continue;}
       const wEnd=w.to||'9999-12-31';
-      if(wEnd<dateISO){kept.push(w);continue;}
-      if(w.from>=dateISO){if(stopDate&&w.from>=stopDate)kept.push(w);continue;}
-      kept.push({...w,to:prevDayISO(dateISO)});
+      // Entirely before range
+      if(wEnd<startISO){kept.push(w);continue;}
+      // Entirely after range end — keep, but the revert window below handles the gap
+      if(w.from>endISO){kept.push(w);continue;}
+      // Straddles range start (starts before, extends into/beyond)
+      if(w.from<startISO) kept.push({...w,to:prevDayISO(startISO)});
+      // Anything starting within the range is dropped (range takes over)
+      // Anything extending beyond endISO is also dropped (revert window handles it)
     }
-    const newTo=stopDate?prevDayISO(stopDate):null;
-    kept.push({totalMins,from:dateISO,to:newTo,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+
+    // Add the range window
+    kept.push({totalMins,from:startISO,to:endISO,type:'range',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+
+    // Add the revert window starting the day after endISO (unless deactivated at that point)
+    const afterEnd=nextDayISO(endISO);
+    const deactCoversAfter=wins.find(w=>w.type==='deactivated'&&w.from<=afterEnd&&(w.to===null||w.to>=afterEnd));
+    if(!deactCoversAfter){
+      // Check that we don't already have a window starting exactly at afterEnd
+      const alreadyThere=kept.find(w=>w.from===afterEnd&&w.type!=='deactivated');
+      if(!alreadyThere){
+        kept.push({totalMins:revertMins,from:afterEnd,to:null,type:'permanent',updatedBy:'Vivek Shanmugasundaram',updatedOn:'(auto-reverted)'});
+      }
+    }
     wins=kept.sort((a,b)=>a.from.localeCompare(b.from));
   }
-  else if(mode==='future'){
-    // Drop all windows starting on or after dateISO (avoids invalid date ranges)
-    wins=wins.filter(w=>w.from<dateISO);
-    if(wins.length){const l=wins[wins.length-1];if(l.to===null||l.to>=dateISO)l.to=prevDayISO(dateISO);}
-    wins.push({totalMins,from:dateISO,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn});
-  }
+
   windowsData[name]=wins;
 }
 
@@ -1085,9 +1144,13 @@ function renderDrawerHistory(name){
   const wins=(windowsData[name]||[]).slice().reverse();
   document.getElementById('hist-tbody').innerHTML=wins.map(w=>{
     const isDeact=w.type==='deactivated';
-    const capStr=isDeact?`0h <em style="color:var(--text-3)">(Deactivated)</em>`:`Updated to <strong>${formatCap(w.totalMins)}</strong>`;
+    const capCell=isDeact
+      ?`<span>0h</span> <em style="font-size:12px;color:var(--text-3);">(Deactivated)</em>`
+      :`<span style="font-weight:590;">${formatCap(w.totalMins)}</span>`;
     const effFrom=isoToDisplay(w.from),effTo=w.to?isoToDisplay(w.to):'Present';
-    return`<tr class="${isDeact?'deact-row':'Present'}"><td><div class="h-update">${capStr}</div><div style="font-size:12px;color:var(--text-4);margin-top:2px;">${effFrom} – ${effTo}</div></td><td><span class="h-date">${w.updatedOn}</span></td><td><div class="h-user"><div class="avatar av-blue" style="width:22px;height:22px;font-size:8px;flex-shrink:0;">VS</div><span class="h-user-name">${w.updatedBy}</span></div></td></tr>`;
+    const updByCell=isDeact?'<span style="color:var(--text-4);">—</span>'
+      :`<div class="h-user"><div class="avatar av-blue" style="width:22px;height:22px;font-size:8px;flex-shrink:0;">VS</div><span class="h-user-name">${w.updatedBy}</span></div>`;
+    return`<tr class="${isDeact?'deact-row':''}"><td>${capCell}</td><td><span class="h-date">${effFrom} – ${effTo}</span></td><td>${updByCell}</td></tr>`;
   }).join('');
 }
 
@@ -1095,12 +1158,17 @@ function renderMpHistory(name){
   const wins=(windowsData[name]||[]).slice().reverse();
   document.getElementById('mp-hist-tbody').innerHTML=wins.map(w=>{
     const isDeact=w.type==='deactivated';
+    const isRange=w.type==='range';
     const capCell=isDeact
       ?`<span>0h</span> <em style="font-size:13px;color:var(--text-3);">(Deactivated)</em>`
       :`<span>${formatCap(w.totalMins)}</span>`;
     const from=isoToDisplay(w.from),to=w.to?isoToDisplay(w.to):'Present';
-    const updBy=`<div class="mp-user"><div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div><span class="mp-user-name">${w.updatedBy}</span></div>`;
-    return`<tr class="${isDeact?'mp-deact-row':w.type==='gap'?'mp-gap-row':'Present'}"><td>${capCell}</td><td><span class="mp-eff">${from} – ${to}</span></td><td>${updBy}</td></tr>`;
+    const effCell=`<span class="mp-eff">${from} – ${to}</span>`;
+    const updByName=w.updatedBy==='(auto-reverted)'?'System (auto-reverted)':w.updatedBy;
+    const updBy=isDeact
+      ?`<span style="color:var(--text-4);">—</span>`
+      :`<div class="mp-user"><div class="avatar av-blue" style="width:24px;height:24px;font-size:9px;flex-shrink:0;">VS</div><span class="mp-user-name">${updByName}</span></div>`;
+    return`<tr class="${isDeact?'mp-deact-row':''}"><td>${capCell}</td><td>${effCell}</td><td>${updBy}</td></tr>`;
   }).join('');
 }
 
@@ -1111,12 +1179,49 @@ function switchTab(el) {
 }
 
 // ── Drawer ────────────────────────────────────────────────────────────────────
+function renderDrawerAudit(name){
+  const entries=(auditData[name]||[]).slice().reverse();
+  const container=document.getElementById('tab-audit');
+  if(!entries.length){container.innerHTML='<div style="padding:20px;font-size:13px;color:var(--text-3);">No changes recorded yet.</div>';return;}
+  const today=todayISO();
+  const groups={};
+  entries.forEach(e=>{if(!groups[e.whenISO])groups[e.whenISO]=[];groups[e.whenISO].push(e);});
+  let html='';
+  Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(dateISO=>{
+    const isToday=dateISO===today;
+    const label=isToday?`Today · ${isoToDisplayYear(dateISO)}`:isoToDisplayYear(dateISO);
+    html+=`<div class="log-date-hd">${label}</div>`;
+    groups[dateISO].forEach(e=>{
+      const timeLabel=isToday?'just now':isoToDisplay(e.whenISO);
+      let primaryText='',secondaryText='';
+      if(e.mode==='set'){primaryText=`Set to <strong>${formatCap(e.toMins)}</strong>`;}
+      else if(e.mode==='deactivated'){primaryText=`Deactivated`;secondaryText=`<span style="color:var(--text-3);">Effective ${isoToDisplay(e.effectiveISO)}</span>`;}
+      else{
+        primaryText=`Updated to <strong>${formatCap(e.toMins)}</strong>`;
+        if(e.mode==='backdate') secondaryText=`<span style="color:var(--danger);">Effective from ${isoToDisplay(e.effectiveISO)}</span>`;
+        else if(e.mode==='future') secondaryText=`<span style="color:var(--brand);">Effective from ${isoToDisplay(e.effectiveISO)}</span>`;
+        else if(e.mode==='range') secondaryText=`<span style="color:var(--danger);">Effective ${isoToDisplay(e.effectiveISO)} to ${isoToDisplay(e.effectiveEndISO)}</span>`;
+      }
+      const oldStr=e.fromMins===null?'—':`${formatCap(e.fromMins)} / week`;
+      const newStr=e.mode==='deactivated'?'0h (Deactivated)':`${formatCap(e.toMins)} / week`;
+      html+=`<div class="log-entry">
+        <div class="avatar ${e.whoAvClass}" style="flex-shrink:0;margin-top:1px;width:26px;height:26px;font-size:9px;">${e.whoInitials}</div>
+        <div class="log-body">
+          <div class="log-actor-row"><span class="log-actor">${e.who}</span><span class="log-time">${timeLabel}</span></div>
+          <div class="log-desc">${primaryText}${secondaryText?`<br><span style="font-size:12px;">${secondaryText}</span>`:''}</div>
+          <div class="log-diff"><span class="d-old">${oldStr}</span><span class="d-arr">→</span><span class="d-new">${newStr}</span></div>
+        </div></div>`;
+    });
+  });
+  container.innerHTML=html;
+}
+
 function openDrawer(name,role,avClass,initials){
   activeMember=name;activeMeta={name,role,avClass,initials};
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-role').textContent=role;
   const av=document.getElementById('d-avatar');av.className='avatar '+avClass;av.textContent=initials;
-  switchDrawerTab('hist');renderDrawerHistory(name);
+  switchDrawerTab('hist');renderDrawerHistory(name);renderDrawerAudit(name);
   document.getElementById('d-overlay').classList.add('open');
   document.getElementById('drawer').classList.add('open');
 }
@@ -1129,7 +1234,7 @@ function switchDrawerTab(tab){
   document.getElementById('dtab-hist').classList.toggle('active',h);
   document.getElementById('dtab-audit').classList.toggle('active',!h);
   document.getElementById('tab-hist').style.display=h?'':'none';
-  document.getElementById('tab-audit').style.display=h?'none':'Present';
+  document.getElementById('tab-audit').style.display=h?'none':'block';
 }
 
 // ── Manage Base Capacity panel ────────────────────────────────────────────────
@@ -1155,49 +1260,62 @@ function switchMpTab(tab){
   document.getElementById('mptab-hist').classList.toggle('active',h);
   document.getElementById('mptab-audit').classList.toggle('active',!h);
   document.getElementById('mp-tab-hist').style.display=h?'':'none';
-  document.getElementById('mp-tab-audit').style.display=h?'none':'Present';
+  document.getElementById('mp-tab-audit').style.display=h?'none':'block';
 }
 
 // ── Effective date popup ──────────────────────────────────────────────────────
 function openEffDialog(){
-  formatCapInput();
-  const tm=getTotalMins();
-  const inp=document.getElementById('mp-cap-input');
-  const errEl=document.getElementById('mp-val-error');
-  if(isNaN(tm)||tm<=0){inp.classList.add('error');errEl.style.display='block';return;}
-  inp.classList.remove('error');errEl.style.display='none';
-  document.querySelectorAll('input[name="eff-mode"]').forEach(r=>{r.checked=r.value==='forward';});
-  document.getElementById('eff-backdate-wrap').classList.remove('show');
-  document.getElementById('eff-backdate').value='';
+  if(!formatCapInput())return;
+  const today=todayISO();
+  // Default to "From a specific date" with today's date
+  document.querySelectorAll('input[name="eff-mode"]').forEach(r=>{r.checked=r.value==='specific';});
+  document.getElementById('eff-specific-date').value=today;
+  document.getElementById('eff-range-start').value=today;
+  document.getElementById('eff-range-end').value='';
+  document.getElementById('eff-specific-wrap').classList.add('show');
+  document.getElementById('eff-range-wrap').classList.remove('show');
+  document.getElementById('eff-range-err').style.display='none';
   document.getElementById('eff-overlay').classList.add('open');
 }
 function closeEffDialog(){document.getElementById('eff-overlay').classList.remove('open');}
 function onEffModeChange(){
   const mode=document.querySelector('input[name="eff-mode"]:checked')?.value;
-  document.getElementById('eff-backdate-wrap').classList.toggle('show',mode==='backdate');
-  if(mode==='backdate'&&!document.getElementById('eff-backdate').value)
-    document.getElementById('eff-backdate').value=prevDayISO(todayISO());
+  document.getElementById('eff-specific-wrap').classList.toggle('show',mode==='specific');
+  document.getElementById('eff-range-wrap').classList.toggle('show',mode==='range');
 }
 
 function confirmSave(){
   const totalMins=getTotalMins();
-  if(totalMins<=0)return;
-  const mode=document.querySelector('input[name="eff-mode"]:checked')?.value||'forward';
+  if(isNaN(totalMins)||totalMins<=0||totalMins%5!==0)return;
+  const mode=document.querySelector('input[name="eff-mode"]:checked')?.value||'specific';
   const today=todayISO();
-  let dateISO='';
-  if(mode==='backdate'){dateISO=document.getElementById('eff-backdate').value;if(!dateISO||dateISO>=today){document.getElementById('eff-backdate').focus();return;}}
   const name=mpMember?.name;
-  if(name){
-    const prevWin=getCurrentWindow(name);
-    const fromMins=prevWin?prevWin.totalMins:null;
-    const effectiveISO=mode==='backdate'?dateISO:today;
-    applyCapacityUpdate(name,totalMins,mode,dateISO);
-    pushAuditEntry(name,{mode:fromMins===null?'set':mode,effectiveISO,fromMins,toMins:totalMins});
-    renderMpHistory(name);renderMpAudit(name);refreshCapCell(name);
-    if(activeMember===name&&document.getElementById('drawer').classList.contains('open'))renderDrawerHistory(name);
-    const w=getCurrentWindow(name);
-    if(w)document.getElementById('mp-footer-note').textContent=`Updated by ${w.updatedBy}, just now`;
+  if(!name)return;
+
+  let startISO='',endISO='',auditMode='';
+
+  if(mode==='specific'){
+    startISO=document.getElementById('eff-specific-date').value;
+    if(!startISO){document.getElementById('eff-specific-date').focus();return;}
+    auditMode=startISO<today?'backdate':startISO===today?'forward':'future';
+  } else if(mode==='range'){
+    startISO=document.getElementById('eff-range-start').value;
+    endISO=document.getElementById('eff-range-end').value;
+    const errEl=document.getElementById('eff-range-err');
+    if(!startISO){document.getElementById('eff-range-start').focus();return;}
+    if(!endISO||endISO<=startISO){errEl.style.display='block';document.getElementById('eff-range-end').focus();return;}
+    errEl.style.display='none';
+    auditMode='range';
   }
+
+  const prevWin=getCurrentWindow(name);
+  const fromMins=prevWin?prevWin.totalMins:null;
+  applyCapacityUpdate(name,totalMins,mode,startISO,endISO);
+  pushAuditEntry(name,{mode:fromMins===null?'set':auditMode,effectiveISO:startISO,effectiveEndISO:endISO||null,fromMins,toMins:totalMins});
+  renderMpHistory(name);renderMpAudit(name);refreshCapCell(name);
+  if(activeMember===name&&document.getElementById('drawer').classList.contains('open'))renderDrawerHistory(name);
+  const w=getCurrentWindow(name);
+  if(w)document.getElementById('mp-footer-note').textContent=`Updated by ${w.updatedBy}, just now`;
   closeEffDialog();
   document.getElementById('mp-overlay').classList.remove('open');
 }
@@ -1248,7 +1366,11 @@ function onInvCapChange(){
 function formatInvCapInput(){
   const el=document.getElementById('inv-cap-input');
   const mins=parseCapInput(el.value);
-  if(!isNaN(mins)&&mins>=0){const h=Math.floor(mins/60),m=mins%60;el.value=`${h}h ${String(m).padStart(2,'0')}m`;}
+  if(!isNaN(mins)&&mins>=0){
+    const rounded=Math.round(mins/5)*5;
+    const h=Math.floor(rounded/60),m=rounded%60;
+    el.value=`${h}h ${String(m).padStart(2,'0')}m`;
+  }
 }
 
 function nameFromEmail(email){
@@ -1276,7 +1398,7 @@ function submitInvite(){
   const initials=name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
   const avClass=AVATAR_COLORS[Object.keys(windowsData).length%AVATAR_COLORS.length];
   const today=todayISO(),updatedOn=isoToDisplayYear(today);
-  windowsData[name]=[{totalMins,from:today,to:null,type:'active',updatedBy:'Vivek Shanmugasundaram',updatedOn}];
+  windowsData[name]=[{totalMins,from:today,to:null,type:'permanent',updatedBy:'Vivek Shanmugasundaram',updatedOn}];
   auditData[name]=[{who:'Vivek Shanmugasundaram',whoInitials:'VS',whoAvClass:'av-blue',whenISO:today,mode:'set',effectiveISO:today,fromMins:null,toMins:totalMins}];
 
   const approverCell=approver==='Admins'
