@@ -730,6 +730,25 @@ tr:hover .row-actions{opacity:1;}
   </div>
 </div>
 
+<!-- Activate dialog -->
+<div class="eff-overlay" id="activate-overlay">
+  <div class="eff-dialog" style="max-width:420px;">
+    <div class="eff-hd">
+      <div class="eff-title">Activate <span id="activate-name-title">member</span>?</div>
+      <button class="mp-close" onclick="closeActivateDialog()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="eff-body">
+      <p style="font-size:14px;color:var(--text-2);margin:0;">The member will be activated from today with a base capacity of <strong id="activate-cap-display">40h</strong> per week.</p>
+    </div>
+    <div class="eff-footer">
+      <button class="btn btn-ghost" onclick="closeActivateDialog()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmActivate()">Activate</button>
+    </div>
+  </div>
+</div>
+
 <!-- Invite modal -->
 <div class="eff-overlay" id="invite-overlay">
   <div class="invite-dialog" onclick="event.stopPropagation()">
@@ -830,6 +849,10 @@ tr:hover .row-actions{opacity:1;}
     Manage Base Capacity
   </div>
   <div class="dd-sep"></div>
+  <div class="dd-item" id="dd-activate" style="display:none;">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+    Activate
+  </div>
   <div class="dd-item danger" id="dd-deactivate">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
     Deactivate
@@ -963,6 +986,46 @@ function openDeactDialog(name){
   document.getElementById('deact-overlay').classList.add('open');
 }
 function closeDeactDialog(){document.getElementById('deact-overlay').classList.remove('open');}
+
+let activateMemberName=null;
+function getLastActiveCapacity(name){
+  const wins=windowsData[name]||[];
+  const permanents=wins.filter(w=>w.type==='permanent');
+  return permanents.length?permanents[permanents.length-1].totalMins:2400;
+}
+function openActivateDialog(name){
+  activateMemberName=name;
+  document.getElementById('activate-name-title').textContent=name;
+  const revertMins=getLastActiveCapacity(name);
+  document.getElementById('activate-cap-display').textContent=formatCap(revertMins);
+  document.getElementById('activate-overlay').classList.add('open');
+}
+function closeActivateDialog(){document.getElementById('activate-overlay').classList.remove('open');}
+function confirmActivate(){
+  const name=activateMemberName;
+  const today=todayISO();
+  const updatedOn=isoToDisplayYear(today);
+  const revertMins=getLastActiveCapacity(name);
+  let wins=(windowsData[name]||[]).map(w=>({...w}));
+  // Close the open deactivated window
+  const deactWin=wins.find(w=>w.type==='deactivated'&&w.to===null);
+  if(deactWin){
+    if(deactWin.from===today){
+      wins=wins.filter(w=>w!==deactWin); // same-day: remove entirely
+    } else {
+      deactWin.to=prevDayISO(today);
+    }
+  }
+  wins.push({totalMins:revertMins,from:today,to:null,type:'permanent',updatedBy:'Vivek Shanmugasundaram',updatedOn});
+  windowsData[name]=wins.sort((a,b)=>a.from.localeCompare(b.from));
+  pushAuditEntry(name,{mode:'forward',effectiveISO:today,effectiveEndISO:null,fromMins:0,toMins:revertMins});
+  refreshCapCell(name);
+  if(activeMember===name&&document.getElementById('drawer').classList.contains('open')){
+    renderDrawerHistory(name);renderDrawerAudit(name);
+  }
+  closeActivateDialog();
+  showToast(`${name} has been activated.`);
+}
 function deactivateMember(name,dateISO){
   const updatedOn=isoToDisplayYear(dateISO);
   // Drop any windows that start on or after the deactivation date (future windows)
@@ -1333,12 +1396,16 @@ function toggleMenu(e,name,role,avClass,initials){
   document.getElementById('dd-details').onclick=()=>{openDrawer(name,role,avClass,initials);closeMenu();};
   document.getElementById('dd-cost-rate').onclick=()=>{openDrawer(name,role,avClass,initials);closeMenu();};
   document.getElementById('dd-base-cap').onclick=()=>{openMpanel(name,role,avClass,initials);closeMenu();};
+  const isDeactivated=getCurrentWindow(name)?.type==='deactivated';
+  document.getElementById('dd-activate').style.display=isDeactivated?'flex':'none';
+  document.getElementById('dd-deactivate').style.display=isDeactivated?'none':'flex';
+  document.getElementById('dd-activate').onclick=()=>{openActivateDialog(name);closeMenu();};
   document.getElementById('dd-deactivate').onclick=()=>{openDeactDialog(name);closeMenu();};
   menu.classList.add('open');
 }
 function closeMenu(){document.getElementById('dropdown').classList.remove('open');}
 document.addEventListener('click',closeMenu);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDrawer();closeDeactDialog();closeEffDialog();closeInviteModal();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDrawer();closeDeactDialog();closeActivateDialog();closeEffDialog();closeInviteModal();}});
 
 // ── Invite modal ──────────────────────────────────────────────────────────────
 const AVATAR_COLORS=['av-teal','av-purple','av-green','av-orange','av-red'];
