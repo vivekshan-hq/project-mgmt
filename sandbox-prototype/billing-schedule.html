@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billing Schedule · Project Settings · Rocketlane</title>
+  <style>
+    :root {
+      --brand: #0f62fe; --brand-dark: #0043ce; --brand-light: #edf5ff; --brand-muted: #97c1ff;
+      --bg: #fafafa; --surface: #fff; --border: #e0e0e0; --border-subtle: #f0f0f0;
+      --border-strong: #c6c6c6;
+      --text-1: #161616; --text-2: #525252; --text-3: #6f6f6f; --text-4: #a8a8a8;
+      --success: #24a148; --success-bg: #defbe6;
+      --warning: #f1c21b; --warning-bg: #fdf4da; --warning-text: #8a5c00;
+      --danger: #da1e28; --danger-bg: #fff1f1;
+      --radius: 8px; --radius-sm: 4px;
+      --shadow-sm: 0px 0.8px 1.8px rgba(0,0,0,0.13), 0px 0.15px 0.45px rgba(0,0,0,0.11);
+      --shadow-md: 0px 3.2px 7.2px rgba(0,0,0,0.13), 0px 0.6px 1.8px rgba(0,0,0,0.11);
+      --shadow-lg: 0px 6.4px 14.4px rgba(0,0,0,0.13), 0px 1.2px 3.6px rgba(0,0,0,0.11);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 20px; color: var(--text-1);
+      background: var(--surface); display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    }
+
+    /* ── TRIAL BANNER ── */
+    .trial-banner {
+      height: 36px; flex-shrink: 0;
+      background: #f4f4f4; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      font-size: 13px; color: var(--text-2);
+    }
+    .trial-banner a { color: var(--brand); text-decoration: none; }
+    .trial-banner a:hover { text-decoration: underline; }
+    .banner-demo-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 0 10px; height: 24px; border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); background: var(--surface); cursor: pointer;
+      font-size: 12px; font-family: inherit; color: var(--text-2); white-space: nowrap;
+    }
+    .banner-demo-btn svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* ── LAYOUT ── */
+    .app { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── RAIL ── */
+    .rail {
+      width: 48px; flex-shrink: 0; background: #f2f2f2;
+      border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 2px;
+    }
+    .rail-logo {
+      width: 26px; height: 26px; background: #1d1d1f; border-radius: 5px;
+      display: grid; place-items: center; margin-bottom: 8px; flex-shrink: 0;
+    }
+    .rail-logo svg { width: 12px; height: 12px; color: #fff; fill: none; stroke: currentColor; stroke-width: 2.5; }
+    .rail-icon {
+      width: 32px; height: 32px; border-radius: 6px;
+      display: grid; place-items: center; cursor: pointer; color: var(--text-4); transition: all 0.12s;
+    }
+    .rail-icon:hover { background: #e8e8e8; color: var(--text-2); }
+    .rail-icon.active { background: #fff; color: var(--text-1); box-shadow: var(--shadow-sm); border-radius: 8px; }
+    .rail-icon svg { width: 16px; height: 16px; stroke-width: 1.75; fill: none; stroke: currentColor; }
+    .rail-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .rail-avatar {
+      width: 26px; height: 26px; border-radius: 50%; background: #6929c4; color: #fff;
+      font-size: 9px; font-weight: 700; display: grid; place-items: center; cursor: pointer; letter-spacing: 0.5px;
+    }
+
+    /* ── PROJECT SETTINGS SIDEBAR ── */
+    .ps-sidebar {
+      width: 240px; flex-shrink: 0; background: var(--surface);
+      border-right: 1px solid var(--border); overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .ps-back {
+      padding: 14px 20px 0; font-size: 13px; color: var(--brand);
+      cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .ps-back:hover { text-decoration: underline; }
+    .ps-back svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .ps-title { padding: 8px 20px 12px; font-size: 18px; font-weight: 600; color: var(--text-1); }
+    .ps-divider { height: 1px; background: var(--border-subtle); margin: 2px 0; }
+    .ps-section-label {
+      padding: 10px 20px 4px; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.4px; color: var(--text-4); text-transform: uppercase;
+    }
+    .ps-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 20px; font-size: 13.5px; color: var(--text-2);
+      cursor: pointer; transition: all 0.1s; text-decoration: none; position: relative;
+    }
+    .ps-item:hover { background: var(--bg); color: var(--text-1); }
+    .ps-item.active { color: var(--brand); font-weight: 590; background: var(--brand-light); }
+    .ps-item.active .ps-item-arrow {
+      position: absolute; right: 14px;
+      display: flex; align-items: center;
+    }
+    .ps-item.active .ps-item-arrow svg { width: 12px; height: 12px; fill: none; stroke: var(--brand); stroke-width: 2; }
+    .ps-item-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.75; flex-shrink: 0; }
+
+    /* ── MAIN CONTENT ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .page-header {
+      padding: 20px 32px 16px; flex-shrink: 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .page-title { font-size: 20px; font-weight: 600; color: var(--text-1); line-height: 28px; }
+    .main-scroll { flex: 1; overflow-y: auto; }
+
+    /* ── BILLING SCHEDULE OPTION ROWS ── */
+    .billing-options { max-width: 900px; margin: 0 auto; padding: 0 0 40px; }
+    .billing-option {
+      display: flex; align-items: center; gap: 0;
+      padding: 48px 32px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .billing-option:last-child { border-bottom: none; }
+    .option-visual {
+      width: 280px; flex-shrink: 0; height: 160px;
+      border-radius: var(--radius); overflow: hidden; margin-right: 40px;
+    }
+    .option-text { flex: 1; }
+    .option-text.leading { margin-right: 40px; }
+    .option-title { font-size: 18px; font-weight: 600; color: var(--text-1); margin-bottom: 8px; line-height: 26px; }
+    .option-desc { font-size: 14px; color: var(--text-2); line-height: 22px; margin-bottom: 20px; max-width: 360px; }
+    .btn-action {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 14px; height: 34px; border-radius: var(--radius-sm);
+      border: none; cursor: pointer; font-size: 14px; font-weight: 590;
+      font-family: inherit; transition: all 0.12s; white-space: nowrap;
+      background: #1d1d1f; color: #fff;
+    }
+    .btn-action:hover { background: #333; }
+    .btn-action svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+
+    /* Illustrations */
+    .illus-schedule {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f0fe 100%);
+      display: flex; align-items: flex-end; padding: 16px 12px 0; gap: 8px;
+    }
+    .illus-doc {
+      flex: 1; background: #fff; border-radius: 4px 4px 0 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1); padding: 8px 7px;
+      display: flex; flex-direction: column; gap: 4px; min-width: 0;
+    }
+    .illus-doc-line { height: 4px; background: #e8e8e8; border-radius: 2px; }
+    .illus-doc-line.short { width: 60%; }
+    .illus-doc-line.accent { background: #c0d7ff; width: 40%; }
+    .illus-timeline {
+      display: flex; align-items: center; gap: 0;
+      padding: 10px 12px; background: linear-gradient(135deg, #f0f7ff 0%, #e8f0fe 100%);
+    }
+    .illus-tl-item { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
+    .illus-tl-label { font-size: 9px; color: #6f9fe0; font-weight: 600; }
+    .illus-tl-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .illus-tl-dot.done { background: #0f62fe; }
+    .illus-tl-dot.done2 { background: #0f62fe; }
+    .illus-tl-dot.pending { background: #fff; border: 2px solid #a8c8ff; }
+    .illus-tl-line { flex: 1; height: 1.5px; background: #c0d7ff; margin: 0 -1px; }
+    .illus-docs-area {
+      flex: 1; display: flex; gap: 6px; align-items: flex-end; padding: 0 0 0 0; height: 120px;
+    }
+
+    .illus-templates {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f0fe 100%);
+      height: 100%; display: flex; flex-direction: column; padding: 10px 12px; gap: 6px;
+    }
+    .illus-tmpl-header {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 9px; font-weight: 600; color: #6f9fe0;
+    }
+    .illus-tmpl-btn {
+      background: #0f62fe; color: #fff; padding: 2px 6px;
+      border-radius: 3px; font-size: 8px; font-weight: 600;
+    }
+    .illus-tmpl-row { display: flex; gap: 6px; flex: 1; }
+    .illus-tmpl-card {
+      flex: 1; background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 6px; display: flex; flex-direction: column; gap: 3px;
+    }
+    .illus-tmpl-card.selected { border: 1.5px solid #0f62fe; }
+    .illus-tmpl-card .c-line { height: 3px; background: #e8e8e8; border-radius: 2px; margin-bottom: 1px; }
+    .illus-tmpl-card .c-line.b { background: #c0d7ff; width: 50%; }
+    .illus-check {
+      width: 10px; height: 10px; border-radius: 50%; background: #0f62fe;
+      display: grid; place-items: center; margin-left: auto;
+    }
+    .illus-check::after { content: ''; width: 4px; height: 4px; border-right: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(45deg) translate(-0.5px, -0.5px); display: block; }
+
+    /* Event setup preview card */
+    .event-preview-wrap {
+      width: 260px; flex-shrink: 0; margin-left: 40px;
+    }
+    .event-preview-card {
+      background: #f6f9ff; border: 1px solid #d4e3ff;
+      border-radius: var(--radius); padding: 16px; font-size: 13px;
+    }
+    .event-preview-title { font-weight: 600; color: var(--text-1); margin-bottom: 12px; }
+    .event-preview-label { font-size: 11px; color: var(--text-3); margin-bottom: 6px; }
+    .event-preview-val {
+      font-size: 13px; color: var(--text-1);
+      padding: 7px 10px; background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); margin-bottom: 10px;
+    }
+    .event-preview-val.muted { color: var(--text-4); }
+
+    /* ── DRAWER ── */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(22,22,22,0.4);
+      z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 480px;
+      background: var(--surface); z-index: 201;
+      display: flex; flex-direction: column;
+      box-shadow: -6.4px 0 14.4px rgba(0,0,0,0.13), -1.2px 0 3.6px rgba(0,0,0,0.11);
+      transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      border-left: 1px solid var(--border);
+    }
+    .drawer.open { transform: translateX(0); }
+
+    .drawer-hd {
+      padding: 16px 20px 14px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .drawer-title { font-size: 16px; font-weight: 600; color: var(--text-1); line-height: 22px; }
+    .drawer-subtitle { font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 16px; }
+    .drawer-close {
+      width: 28px; height: 28px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: none; cursor: pointer; display: grid; place-items: center;
+      color: var(--text-3); transition: all 0.1s; flex-shrink: 0; margin-top: 2px;
+    }
+    .drawer-close:hover { background: var(--bg); color: var(--text-1); }
+    .drawer-close svg { width: 13px; height: 13px; stroke-width: 2; fill: none; stroke: currentColor; }
+
+    .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .drawer-footer {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .drawer-step { display: none; flex-direction: column; height: 100%; }
+    .drawer-step.active { display: flex; }
+
+    /* Form controls */
+    .form-field { margin-bottom: 18px; }
+    .form-label {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; font-weight: 590; color: var(--text-1);
+      margin-bottom: 6px; line-height: 18px;
+    }
+    .form-label .required { color: var(--danger); font-weight: 400; }
+    .form-label-opt { font-size: 12px; color: var(--text-4); font-weight: 400; }
+    .form-hint { font-size: 12px; color: var(--text-3); margin-top: 4px; line-height: 16px; }
+
+    .form-select-wrap { position: relative; }
+    .form-select {
+      width: 100%; height: 36px;
+      padding: 0 32px 0 12px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px;
+      color: var(--text-1); background: var(--surface);
+      cursor: pointer; font-family: inherit; outline: none;
+      appearance: none; -webkit-appearance: none; transition: border-color 0.12s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+    }
+    .form-select:focus { border-color: var(--brand); outline: none; }
+    .form-select.placeholder-shown { color: var(--text-4); }
+
+    .form-input {
+      width: 100%; height: 36px; padding: 0 36px 0 12px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 14px; color: var(--text-1); font-family: inherit;
+      outline: none; transition: border-color 0.12s;
+    }
+    .form-input:focus { border-color: var(--brand); }
+    .form-input::placeholder { color: var(--text-4); }
+    .input-icon-wrap { position: relative; }
+    .input-icon {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; fill: none; stroke: var(--text-4); stroke-width: 1.75;
+      pointer-events: none;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .form-row .form-field { margin-bottom: 0; }
+
+    /* Conditions section */
+    .conditions-section { margin-bottom: 20px; }
+    .conditions-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 590; color: var(--text-1); margin-bottom: 8px;
+    }
+    .conditions-label .info-icon {
+      width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--text-3);
+      display: grid; place-items: center; cursor: pointer; color: var(--text-3);
+    }
+    .conditions-label .info-icon span { font-size: 9px; font-weight: 700; line-height: 1; }
+    .add-cond-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 13px; color: var(--brand); background: none; border: none;
+      cursor: pointer; padding: 0; font-family: inherit; font-weight: 590;
+    }
+    .add-cond-btn:hover { text-decoration: underline; }
+
+    /* Divider */
+    .section-divider { height: 1px; background: var(--border-subtle); margin: 20px 0; }
+    .section-heading { font-size: 15px; font-weight: 600; color: var(--text-1); margin-bottom: 16px; }
+
+    /* Date fields (step 2) */
+    .dates-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .date-field-label { font-size: 13px; color: var(--text-2); margin-bottom: 8px; }
+    .date-offset-field {
+      display: flex; align-items: center;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      height: 36px; background: var(--surface); overflow: hidden;
+      transition: border-color 0.12s;
+    }
+    .date-offset-field:focus-within { border-color: var(--brand); }
+    .offset-num {
+      width: 44px; flex-shrink: 0; border: none; outline: none;
+      padding: 0 0 0 12px; font-size: 14px; font-family: inherit;
+      color: var(--text-1); background: transparent;
+    }
+    .offset-num::-webkit-inner-spin-button,
+    .offset-num::-webkit-outer-spin-button { opacity: 0; }
+    .offset-suffix {
+      flex: 1; padding: 0 12px 0 4px; font-size: 13px; color: var(--text-3);
+      text-align: right; white-space: nowrap; pointer-events: none; overflow: hidden;
+    }
+
+    /* Line items table */
+    .line-items-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    }
+    .line-items-title { font-size: 15px; font-weight: 600; color: var(--text-1); }
+    .line-items-subtitle { font-size: 13px; color: var(--text-3); margin-bottom: 10px; }
+    .auto-gen-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 13px; color: var(--brand); background: none; border: none;
+      cursor: pointer; padding: 0; font-family: inherit; font-weight: 590; white-space: nowrap;
+    }
+    .auto-gen-btn:hover { text-decoration: underline; }
+    .auto-gen-btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+
+    .line-items-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .line-items-table th {
+      text-align: left; padding: 6px 10px; font-size: 12px; font-weight: 600;
+      color: var(--text-3); border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .line-items-table th:not(:first-child) { text-align: right; }
+    .line-items-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); }
+    .line-items-table .col-desc { width: 45%; }
+    .line-items-table .col-qty,
+    .line-items-table .col-price,
+    .line-items-table .col-amount { width: 18%; text-align: right; }
+    .line-items-table .col-action { width: 4%; }
+    .li-input {
+      width: 100%; border: none; outline: none; font-size: 13px;
+      font-family: inherit; color: var(--text-1); background: transparent;
+      padding: 3px 4px; border-radius: 3px;
+    }
+    .li-input:focus { background: var(--bg); }
+    .li-input::placeholder { color: var(--text-4); }
+    .li-input.right { text-align: right; }
+    .li-delete-btn {
+      width: 20px; height: 20px; background: none; border: none; cursor: pointer;
+      display: grid; place-items: center; color: var(--text-4); border-radius: 3px;
+      transition: all 0.1s;
+    }
+    .li-delete-btn:hover { background: var(--danger-bg); color: var(--danger); }
+    .li-delete-btn svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .line-items-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 10px 0; border-top: 1px solid var(--border-subtle);
+    }
+    .add-li-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 13px; color: var(--brand); background: none; border: none;
+      cursor: pointer; padding: 0; font-family: inherit; font-weight: 590;
+    }
+    .add-li-btn:hover { text-decoration: underline; }
+    .add-tax-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 13px; color: var(--text-3); background: none; border: none;
+      cursor: pointer; padding: 0; font-family: inherit;
+    }
+    .add-tax-btn:hover { color: var(--text-1); }
+
+    /* Buttons */
+    .btn {
+      height: 34px; padding: 0 16px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 590; font-family: inherit;
+      cursor: pointer; transition: all 0.12s; border: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-ghost {
+      background: none; border: 1px solid var(--border); color: var(--text-2);
+    }
+    .btn-ghost:hover { background: var(--bg); color: var(--text-1); }
+    .btn-primary-sm {
+      background: #1d1d1f; color: #fff;
+    }
+    .btn-primary-sm:hover { background: #333; }
+    .btn-primary-sm:disabled { background: #c6c6c6; cursor: not-allowed; }
+
+    /* ── TASK CONFIG PANEL ── */
+    .task-config-overlay {
+      position: absolute; inset: 0; z-index: 10;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 60px;
+    }
+    .task-config-overlay.hidden { display: none; }
+    .task-config-backdrop {
+      position: absolute; inset: 0; background: rgba(255,255,255,0.5); backdrop-filter: blur(2px);
+    }
+    .task-config-panel {
+      position: relative; z-index: 1;
+      width: 380px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
+    }
+    .task-config-hd {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .task-config-title { font-size: 14px; font-weight: 600; color: var(--text-1); line-height: 20px; max-width: 280px; }
+    .task-config-close {
+      width: 24px; height: 24px; background: none; border: none; cursor: pointer;
+      display: grid; place-items: center; color: var(--text-3); border-radius: 3px;
+      transition: all 0.1s; flex-shrink: 0;
+    }
+    .task-config-close:hover { background: var(--bg); color: var(--text-1); }
+    .task-config-close svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .task-config-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .task-config-footer {
+      padding: 12px 16px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end;
+    }
+
+    /* RevRec toggle */
+    .revrec-toggle {
+      width: 36px; height: 20px; border-radius: 120px; border: none; cursor: pointer;
+      background: var(--border-strong); position: relative; flex-shrink: 0;
+      transition: background 0.18s; padding: 0;
+    }
+    .revrec-toggle[aria-checked="true"] { background: var(--brand); }
+    .revrec-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%; background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.18s;
+      display: block;
+    }
+    .revrec-toggle[aria-checked="true"] .revrec-thumb { transform: translateX(16px); }
+
+    /* Utility */
+    .hidden { display: none !important; }
+
+    /* Applied line item row */
+    .li-auto-row { background: #f6f9ff; }
+    .li-auto-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; background: var(--brand-light); color: var(--brand);
+      border-radius: 3px; padding: 1px 5px; font-weight: 590;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Trial banner -->
+<div class="trial-banner">
+  <span>You're on the <strong>Enterprise plan</strong>. Your trial ends in 151 days. <a href="#">I'm ready to buy</a></span>
+  <button class="banner-demo-btn">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Book a demo with us
+  </button>
+</div>
+
+<div class="app">
+
+  <!-- Rail -->
+  <nav class="rail">
+    <div class="rail-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="rail-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </div>
+    <div class="rail-icon active">
+      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="rail-icon">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="rail-icon">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    </div>
+    <div class="rail-bottom">
+      <div class="rail-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      </div>
+      <div class="rail-avatar">VS</div>
+    </div>
+  </nav>
+
+  <!-- Project settings sidebar -->
+  <aside class="ps-sidebar">
+    <div class="ps-back">
+      <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke-width:2.5;fill:none;stroke:currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+      Test_Project_2Jul
+    </div>
+    <div class="ps-title">Project settings</div>
+    <div class="ps-divider"></div>
+
+    <div class="ps-section-label">Project information</div>
+    <a class="ps-item">
+      <svg class="ps-item-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      General information
+    </a>
+    <a class="ps-item">
+      <svg class="ps-item-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Project visibility
+    </a>
+    <a class="ps-item">
+      <svg class="ps-item-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Team members
+    </a>
+
+    <div class="ps-divider" style="margin-top:8px"></div>
+    <div class="ps-section-label">Operations and financials</div>
+    <a class="ps-item">
+      <svg class="ps-item-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Budget management
+    </a>
+    <a class="ps-item">
+      <svg class="ps-item-icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Expense budgets
+    </a>
+    <a class="ps-item">
+      <svg class="ps-item-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="23 11 17 17 14 14"/></svg>
+      Resource management
+    </a>
+    <a class="ps-item active">
+      <svg class="ps-item-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Billing schedule
+      <span class="ps-item-arrow">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </span>
+    </a>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="page-header">
+      <div class="page-title">Billing schedule</div>
+    </div>
+
+    <div class="main-scroll">
+      <div class="billing-options">
+
+        <!-- Row 1: Create custom billing schedule -->
+        <div class="billing-option">
+          <div class="option-visual">
+            <div class="illus-schedule" style="height:100%;flex-direction:column;justify-content:flex-end;padding:14px 14px 0;">
+              <div class="illus-docs-area">
+                <div class="illus-doc" style="height:90%">
+                  <div class="illus-doc-line"></div>
+                  <div class="illus-doc-line short"></div>
+                  <div class="illus-doc-line"></div>
+                  <div class="illus-doc-line accent"></div>
+                  <div class="illus-doc-line short"></div>
+                </div>
+                <div class="illus-doc" style="height:75%">
+                  <div class="illus-doc-line"></div>
+                  <div class="illus-doc-line short"></div>
+                  <div class="illus-doc-line accent"></div>
+                  <div class="illus-doc-line"></div>
+                </div>
+                <div class="illus-doc" style="height:60%">
+                  <div class="illus-doc-line"></div>
+                  <div class="illus-doc-line short"></div>
+                  <div class="illus-doc-line accent"></div>
+                </div>
+              </div>
+              <div class="illus-timeline" style="background:transparent;padding:8px 4px 0;margin:0 -2px">
+                <div class="illus-tl-item">
+                  <div class="illus-tl-label">Jan</div>
+                  <div class="illus-tl-dot done"></div>
+                </div>
+                <div class="illus-tl-line"></div>
+                <div class="illus-tl-item">
+                  <div class="illus-tl-label">Feb</div>
+                  <div class="illus-tl-dot done2"></div>
+                </div>
+                <div class="illus-tl-line" style="background: repeating-linear-gradient(90deg,#c0d7ff 0,#c0d7ff 4px,transparent 4px,transparent 8px)"></div>
+                <div class="illus-tl-item">
+                  <div class="illus-tl-label">Mar</div>
+                  <div class="illus-tl-dot pending"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="option-text">
+            <div class="option-title">Create a custom billing schedule</div>
+            <div class="option-desc">Define and organize your project's invoicing plan with a fully customizable billing schedule tailored to your project milestones or timelines.</div>
+            <button class="btn-action">
+              Create schedule
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 2: Add a billing event -->
+        <div class="billing-option">
+          <div class="option-text leading">
+            <div class="option-title">Add a billing event</div>
+            <div class="option-desc">Create fixed fee or milestone based billing events to automate invoice generation at the right stage of your project.</div>
+            <button class="btn-action" onclick="openDrawer()">
+              Add a billing event
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+          <div class="event-preview-wrap">
+            <div class="event-preview-card">
+              <div class="event-preview-title">Event setup</div>
+              <div class="event-preview-label">Trigger the billing event based on</div>
+              <div class="event-preview-val">Fixed fee</div>
+              <div class="event-preview-label">Select date</div>
+              <div class="event-preview-val muted">1 Nov 25</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Import a billing schedule -->
+        <div class="billing-option">
+          <div class="option-visual">
+            <div class="illus-templates" style="height:100%">
+              <div class="illus-tmpl-header">
+                Billing templates
+                <span class="illus-tmpl-btn">Import template</span>
+              </div>
+              <div class="illus-tmpl-row">
+                <div class="illus-tmpl-card">
+                  <div class="c-line"></div>
+                  <div class="c-line b"></div>
+                  <div class="c-line"></div>
+                  <div class="c-line b"></div>
+                </div>
+                <div class="illus-tmpl-card selected">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                    <div style="flex:1"><div class="c-line"></div><div class="c-line b" style="margin-top:3px"></div></div>
+                    <div class="illus-check"></div>
+                  </div>
+                  <div class="c-line" style="margin-top:4px"></div>
+                </div>
+                <div class="illus-tmpl-card">
+                  <div class="c-line"></div>
+                  <div class="c-line b"></div>
+                  <div class="c-line"></div>
+                  <div class="c-line b"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="option-text">
+            <div class="option-title">Import a billing schedule</div>
+            <div class="option-desc">Quickly configure your project's billing timeline by importing a predefined billing schedule. Use templates to save time and maintain consistency across similar projects.</div>
+            <button class="btn-action">
+              Import a template
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- Drawer overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- Billing event drawer -->
+<div class="drawer" id="billingDrawer">
+
+  <!-- Step 1: Set billing trigger -->
+  <div class="drawer-step active" id="step1">
+    <div class="drawer-hd">
+      <div>
+        <div class="drawer-title">Create a billing event</div>
+        <div class="drawer-subtitle">Set the billing trigger</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="form-field">
+        <div class="form-label"><span class="required">*</span> Billing event type</div>
+        <div class="form-select-wrap">
+          <select class="form-select" id="eventType" onchange="onEventTypeChange()">
+            <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+            <option value="date_based">Date based</option>
+            <option value="task_based">Task based</option>
+            <option value="project_based">Project based</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field" id="triggerDateField">
+        <div class="form-label"><span class="required">*</span> Invoice is created on this date</div>
+        <div class="input-icon-wrap">
+          <input type="text" class="form-input" id="triggerDate" placeholder="Select date">
+          <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+      </div>
+
+      <div class="form-field hidden" id="triggerMilestoneField">
+        <div class="form-label"><span class="required">*</span> Invoice is created when this task is completed</div>
+        <div class="form-select-wrap">
+          <select class="form-select">
+            <option value="" disabled selected style="color:#a8a8a8">Select task...</option>
+            <option>Requirements gathering & scoping</option>
+            <option>Design review sign-off</option>
+            <option>Development complete</option>
+            <option>UAT sign-off</option>
+            <option>Project launch</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" id="timeTimezoneRow">
+        <div class="form-field">
+          <div class="form-label"><span class="required">*</span> Time</div>
+          <select class="form-select">
+            <option>09:00</option>
+            <option>10:00</option>
+            <option>12:00</option>
+            <option>14:00</option>
+            <option>17:00</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <div class="form-label"><span class="required">*</span> Timezone</div>
+          <select class="form-select">
+            <option>(UTC+5:30) Asia/Kolkata</option>
+            <option>(UTC+0:00) UTC</option>
+            <option>(UTC-5:00) US/Eastern</option>
+            <option>(UTC-8:00) US/Pacific</option>
+            <option>(UTC+1:00) Europe/London</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <div class="form-label"><span class="required">*</span> What action would you like to take?</div>
+        <select class="form-select" id="actionSelect">
+          <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+          <option value="draft">Create draft invoice</option>
+          <option value="review">Create in review invoice</option>
+          <option value="reminder">Send reminder to create invoice</option>
+        </select>
+      </div>
+
+      <div class="conditions-section">
+        <div class="conditions-label">
+          Create the invoice only if
+          <div class="info-icon" title="Set conditions that must be met before the invoice is automatically created">
+            <span>i</span>
+          </div>
+        </div>
+        <button class="add-cond-btn" onclick="addCondition()">+ Add conditions</button>
+        <div id="conditionsList" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-ghost" onclick="closeDrawer()">Cancel</button>
+      <button class="btn btn-primary-sm" onclick="goToStep2()">Next</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Set invoice details -->
+  <div class="drawer-step" id="step2" style="position:relative">
+    <div class="drawer-hd">
+      <div>
+        <div class="drawer-title">Create a billing event</div>
+        <div class="drawer-subtitle">Set invoice details</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body" id="step2Body">
+      <div class="section-heading">Dates</div>
+      <div class="dates-row">
+        <div>
+          <div class="date-field-label">Issue date</div>
+          <div class="date-offset-field">
+            <input class="offset-num" id="issueDate" type="number" placeholder="" min="0" max="365">
+            <span class="offset-suffix">days after invoice is created</span>
+          </div>
+        </div>
+        <div>
+          <div class="date-field-label">Due date</div>
+          <div class="date-offset-field">
+            <input class="offset-num" id="dueDate" type="number" placeholder="" min="0" max="365">
+            <span class="offset-suffix">days after issue date</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="line-items-header">
+        <div class="line-items-title">Line items</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <button class="auto-gen-btn" onclick="openTaskConfig()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Auto-generate from tasks
+          </button>
+          <span style="color:var(--border-strong);font-size:13px">|</span>
+          <button class="auto-gen-btn" onclick="openExpenseConfig()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Auto-generate from expenses
+          </button>
+        </div>
+      </div>
+      <div class="line-items-subtitle">Specify the line items to be listed on the invoice</div>
+
+      <table class="line-items-table">
+        <thead>
+          <tr>
+            <th class="col-desc">Description</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-price">Unit Price</th>
+            <th class="col-amount">Amount</th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody id="lineItemsBody">
+        </tbody>
+      </table>
+      <div class="line-items-actions">
+        <button class="add-li-btn" onclick="addLineItem()">+ Add new line item</button>
+        <button class="add-tax-btn">+ Add tax</button>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-ghost" onclick="goToStep1()">Back</button>
+      <button class="btn btn-primary-sm" id="saveBtn" onclick="saveDrawer()">Save</button>
+    </div>
+
+    <!-- Task config panel (overlays step 2) -->
+    <div class="task-config-overlay hidden" id="taskConfigOverlay">
+      <div class="task-config-backdrop" onclick="closeTaskConfig()"></div>
+      <div class="task-config-panel">
+        <div class="task-config-hd">
+          <div class="task-config-title">Configure line items from tasks</div>
+          <button class="task-config-close" onclick="closeTaskConfig()">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="task-config-body">
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Include completed tasks up to</div>
+            <select class="form-select" id="tasksUpto">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="invoice_creation">Invoice creation date</option>
+              <option value="1_day_before">1 day before invoice creation date</option>
+              <option value="prev_week_end">End of previous week</option>
+              <option value="prev_month_end">Last day of the previous month</option>
+              <option value="prev_quarter_end">Last day of the previous quarter</option>
+              <option value="custom_offset">Custom offset from invoice creation date</option>
+            </select>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Group tasks in line item descriptions by</div>
+            <select class="form-select" id="tasksGroupBy">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="project">Project</option>
+              <option value="phase">Phase</option>
+              <option value="task">Task</option>
+              <option value="no_group">Show each task (Don't group)</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
+            <div>
+              <div style="font-size:13px;font-weight:590;color:var(--text-1)">RevRec Task</div>
+              <div style="font-size:12px;color:var(--text-3);margin-top:2px">Mark line items as revenue recognition tasks</div>
+            </div>
+            <button class="revrec-toggle" id="revrecToggle" onclick="toggleRevRec()" role="switch" aria-checked="false">
+              <span class="revrec-thumb"></span>
+            </button>
+          </div>
+        </div>
+        <div class="task-config-footer">
+          <button class="btn btn-primary-sm" onclick="applyTaskConfig()">Apply</button>
+        </div>
+      </div>
+    <!-- Expense config panel (overlays step 2) -->
+    <div class="task-config-overlay hidden" id="expenseConfigOverlay">
+      <div class="task-config-backdrop" onclick="closeExpenseConfig()"></div>
+      <div class="task-config-panel">
+        <div class="task-config-hd">
+          <div class="task-config-title">Configure line items from expenses</div>
+          <button class="task-config-close" onclick="closeExpenseConfig()">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="task-config-body">
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Select uninvoiced expenses for</div>
+            <select class="form-select" id="expensesUpto">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="all_uninvoiced">All uninvoiced</option>
+              <option value="last_7">Last 7 days</option>
+              <option value="last_15">Last 15 days</option>
+              <option value="last_30">Last 30 days</option>
+              <option value="upto_end">Upto end date</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Group line items by</div>
+            <select class="form-select" id="expensesGroupBy">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="expense_budget">Expense budget</option>
+              <option value="expense_category">Expense category</option>
+              <option value="expense_report">Expense report</option>
+              <option value="project">Project</option>
+              <option value="phase">Phase</option>
+              <option value="task">Task</option>
+              <option value="role">Role</option>
+              <option value="member">Team member</option>
+              <option value="reimbursed_to">Reimbursed to</option>
+              <option value="detailed">Detailed expenses</option>
+            </select>
+          </div>
+        </div>
+        <div class="task-config-footer">
+          <button class="btn btn-primary-sm" onclick="applyExpenseConfig()">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Drawer open/close
+  function openDrawer() {
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('billingDrawer').classList.add('open');
+    showStep(1);
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('billingDrawer').classList.remove('open');
+    // Reset after close animation
+    setTimeout(() => {
+      showStep(1);
+      document.getElementById('triggerDate').value = '';
+      document.getElementById('actionSelect').value = '';
+      document.getElementById('conditionsList').innerHTML = '';
+      document.getElementById('lineItemsBody').innerHTML = '';
+      document.getElementById('issueDate').value = '0';
+      document.getElementById('dueDate').value = '0';
+      closeTaskConfig();
+      closeExpenseConfig();
+    }, 300);
+  }
+
+  // Step navigation
+  function showStep(n) {
+    document.getElementById('step1').classList.toggle('active', n === 1);
+    document.getElementById('step2').classList.toggle('active', n === 2);
+  }
+
+  function goToStep2() {
+    showStep(2);
+  }
+
+  function goToStep1() {
+    showStep(1);
+    closeTaskConfig();
+    closeExpenseConfig();
+  }
+
+  // Event type change
+  function onEventTypeChange() {
+    const val = document.getElementById('eventType').value;
+    const dateField = document.getElementById('triggerDateField');
+    const milestoneField = document.getElementById('triggerMilestoneField');
+    const timeRow = document.getElementById('timeTimezoneRow');
+    if (val === 'task_based') {
+      dateField.classList.add('hidden');
+      milestoneField.classList.remove('hidden');
+      timeRow.classList.add('hidden');
+    } else {
+      dateField.classList.remove('hidden');
+      milestoneField.classList.add('hidden');
+      timeRow.classList.remove('hidden');
+    }
+  }
+
+  // Conditions
+  function addCondition() {
+    const list = document.getElementById('conditionsList');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px';
+    row.innerHTML = `
+      <select class="form-select" style="flex:1">
+        <option value="" disabled selected style="color:#a8a8a8">Select condition...</option>
+        <option>Project status is Active</option>
+        <option>Phase is completed</option>
+        <option>All tasks are completed</option>
+        <option>Approval is received</option>
+        <option>Budget utilization &gt; 80%</option>
+      </select>
+      <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#a8a8a8;padding:4px;border-radius:3px;font-size:16px;line-height:1;flex-shrink:0" title="Remove">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    list.appendChild(row);
+  }
+
+  // Line items
+  let lineItemCount = 0;
+  function addLineItem(description = '', qty = '', price = '', isAuto = false) {
+    const tbody = document.getElementById('lineItemsBody');
+    const id = ++lineItemCount;
+    const tr = document.createElement('tr');
+    if (isAuto) tr.classList.add('li-auto-row');
+    tr.id = `li-${id}`;
+    tr.innerHTML = `
+      <td class="col-desc">
+        ${isAuto ? `<div style="display:flex;align-items:center;gap:6px"><input class="li-input" value="${description}" placeholder="Description"><span class="li-auto-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> task</span></div>` : `<input class="li-input" value="${description}" placeholder="Description">`}
+      </td>
+      <td class="col-qty"><input class="li-input right" value="${qty}" placeholder="1"></td>
+      <td class="col-price"><input class="li-input right" value="${price}" placeholder="0.00"></td>
+      <td class="col-amount" style="color:#525252;font-size:13px;text-align:right">${qty && price ? formatAmount(qty, price) : '—'}</td>
+      <td class="col-action">
+        <button class="li-delete-btn" onclick="document.getElementById('li-${id}').remove()">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function formatAmount(qty, price) {
+    const a = parseFloat(qty) * parseFloat(price);
+    return isNaN(a) ? '—' : '$' + a.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  // Task config
+  function openTaskConfig() {
+    document.getElementById('taskConfigOverlay').classList.remove('hidden');
+  }
+
+  function closeTaskConfig() {
+    document.getElementById('taskConfigOverlay').classList.add('hidden');
+  }
+
+  function toggleRevRec() {
+    const btn = document.getElementById('revrecToggle');
+    const isOn = btn.getAttribute('aria-checked') === 'true';
+    btn.setAttribute('aria-checked', String(!isOn));
+  }
+
+  // Expense config
+  function openExpenseConfig() {
+    closeTaskConfig();
+    document.getElementById('expenseConfigOverlay').classList.remove('hidden');
+  }
+
+  function closeExpenseConfig() {
+    document.getElementById('expenseConfigOverlay').classList.add('hidden');
+  }
+
+  function applyExpenseConfig() {
+    const uptoEl = document.getElementById('expensesUpto');
+    const groupEl = document.getElementById('expensesGroupBy');
+    if (!uptoEl.value || !groupEl.value) {
+      uptoEl.style.borderColor = !uptoEl.value ? '#da1e28' : '';
+      groupEl.style.borderColor = !groupEl.value ? '#da1e28' : '';
+      return;
+    }
+    uptoEl.style.borderColor = '';
+    groupEl.style.borderColor = '';
+    getExpenseSampleItems(groupEl.value).forEach(item => addExpenseLineItem(item.desc, item.qty, item.price));
+    closeExpenseConfig();
+  }
+
+  function addExpenseLineItem(description, qty, price) {
+    const tbody = document.getElementById('lineItemsBody');
+    const id = ++lineItemCount;
+    const tr = document.createElement('tr');
+    tr.classList.add('li-auto-row');
+    tr.id = `li-${id}`;
+    tr.innerHTML = `
+      <td class="col-desc">
+        <div style="display:flex;align-items:center;gap:6px">
+          <input class="li-input" value="${description}" placeholder="Description">
+          <span class="li-auto-badge" style="background:#fdf4da;color:#8a5c00;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            expense
+          </span>
+        </div>
+      </td>
+      <td class="col-qty"><input class="li-input right" value="${qty}" placeholder="1"></td>
+      <td class="col-price"><input class="li-input right" value="${price}" placeholder="0.00"></td>
+      <td class="col-amount" style="color:#525252;font-size:13px;text-align:right">${formatAmount(qty, price)}</td>
+      <td class="col-action">
+        <button class="li-delete-btn" onclick="document.getElementById('li-${id}').remove()">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function getExpenseSampleItems(group) {
+    const samples = {
+      expense_budget:   [{ desc: 'Travel budget', qty: '1', price: '1200.00' }, { desc: 'Software budget', qty: '1', price: '450.00' }],
+      expense_category: [{ desc: 'Accommodation', qty: '1', price: '840.00' }, { desc: 'Meals & entertainment', qty: '1', price: '320.00' }, { desc: 'Software & tools', qty: '1', price: '450.00' }],
+      expense_report:   [{ desc: 'Q2 Onsite Visit — Expense report', qty: '1', price: '2100.00' }],
+      project:          [{ desc: 'Test_Project_2Jul — Reimbursable expenses', qty: '1', price: '2560.00' }],
+      phase:            [{ desc: 'Phase 1 — Discovery expenses', qty: '1', price: '980.00' }, { desc: 'Phase 2 — Design expenses', qty: '1', price: '620.00' }],
+      task:             [{ desc: 'Client onsite workshop', qty: '1', price: '1400.00' }, { desc: 'Design review session', qty: '1', price: '380.00' }],
+      role:             [{ desc: 'Project Manager expenses', qty: '1', price: '760.00' }, { desc: 'Engineer expenses', qty: '1', price: '920.00' }],
+      member:           [{ desc: 'Alex Chen — Expenses', qty: '1', price: '540.00' }, { desc: 'Priya Sharma — Expenses', qty: '1', price: '680.00' }],
+      reimbursed_to:    [{ desc: 'Alex Chen (reimbursement)', qty: '1', price: '540.00' }, { desc: 'Priya Sharma (reimbursement)', qty: '1', price: '680.00' }],
+      detailed:         [{ desc: 'Flight — BLR to BOM return', qty: '1', price: '420.00' }, { desc: 'Hotel — 3 nights', qty: '3', price: '180.00' }, { desc: 'Cab transfers', qty: '4', price: '35.00' }, { desc: 'Team dinner', qty: '1', price: '260.00' }],
+    };
+    return samples[group] || samples.expense_category;
+  }
+
+  function applyTaskConfig() {
+    const uptoEl = document.getElementById('tasksUpto');
+    const groupEl = document.getElementById('tasksGroupBy');
+    const upto = uptoEl.value;
+    const group = groupEl.value;
+
+    if (!upto || !group) {
+      uptoEl.style.borderColor = !upto ? '#da1e28' : '';
+      groupEl.style.borderColor = !group ? '#da1e28' : '';
+      return;
+    }
+    uptoEl.style.borderColor = '';
+    groupEl.style.borderColor = '';
+
+    const groupLabels = { task: 'Task', phase: 'Phase / Milestone', role: 'Role', member: 'Team member' };
+    const groupLabel = groupLabels[group];
+    const sampleItems = getSampleLineItems(group);
+    sampleItems.forEach(item => addLineItem(item.desc, item.qty, item.price, true));
+
+    closeTaskConfig();
+  }
+
+  function getSampleLineItems(group) {
+    const samples = {
+      project: [
+        { desc: 'Test_Project_2Jul — Fixed fee', qty: '1', price: '25000.00' },
+      ],
+      phase: [
+        { desc: 'Phase 1 — Discovery & Planning', qty: '1', price: '8500.00' },
+        { desc: 'Phase 2 — Design', qty: '1', price: '7200.00' },
+      ],
+      task: [
+        { desc: 'Requirements gathering & scoping', qty: '1', price: '4500.00' },
+        { desc: 'UI/UX design deliverables', qty: '1', price: '6200.00' },
+        { desc: 'Backend API development', qty: '1', price: '9800.00' },
+      ],
+      role: [
+        { desc: 'Product Manager', qty: '1', price: '5000.00' },
+        { desc: 'Senior Engineer', qty: '1', price: '11000.00' },
+        { desc: 'UX Designer', qty: '1', price: '6500.00' },
+      ],
+      member: [
+        { desc: 'Alex Chen — Engineering', qty: '1', price: '9600.00' },
+        { desc: 'Priya Sharma — Design', qty: '1', price: '5800.00' },
+      ],
+      no_group: [
+        { desc: 'Requirements gathering & scoping', qty: '1', price: '4500.00' },
+        { desc: 'Wireframe review session', qty: '1', price: '1200.00' },
+        { desc: 'UI/UX design deliverables', qty: '1', price: '6200.00' },
+        { desc: 'API integration — auth module', qty: '1', price: '3800.00' },
+        { desc: 'Backend API development', qty: '1', price: '9800.00' },
+      ],
+    };
+    return samples[group] || samples.task;
+  }
+
+  // Save
+  function saveDrawer() {
+    closeDrawer();
+  }
+
+  // Utility
+  document.querySelectorAll('.form-select').forEach(el => {
+    el.addEventListener('change', () => {
+      el.style.borderColor = '';
+    });
+  });
+</script>
+</body>
+</html>
