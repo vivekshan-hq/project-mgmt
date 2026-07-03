@@ -420,7 +420,7 @@
     }
     .task-config-panel {
       position: relative; z-index: 1;
-      width: 380px; background: var(--surface);
+      width: 460px; background: var(--surface);
       border: 1px solid var(--border); border-radius: var(--radius);
       box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
     }
@@ -1064,14 +1064,14 @@
       ? `<span style="font-size:12px;color:var(--text-3)">Expense amount</span>`
       : `<select class="form-select" style="height:28px;font-size:12px;width:100%">
            <option value="" disabled selected style="color:#a8a8a8">Select field...</option>
-           <option value="task.fixed_fee">Fixed fee</option>
-           <option value="task.estimated_cost">Estimated cost</option>
-           <option value="task.budget_allocated">Budget allocated</option>
+           <option value="revrec_amount">RevRec Amount</option>
+           <option value="billable_amount">Billable amount</option>
          </select>`;
     tr.innerHTML = `
-      <td class="col-desc" colspan="2">
+      <td class="col-desc">
         <span class="li-summary-text">${description}</span>
       </td>
+      <td class="col-qty"></td>
       <td class="col-price">${priceCell}</td>
       <td class="col-amount"></td>
       <td class="col-action">
