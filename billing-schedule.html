@@ -1514,7 +1514,9 @@
 
     const uptoLabels = { invoice_creation: 'invoice creation date', '1_day_before': '1 day before invoice creation date', prev_week_end: 'end of previous week', prev_month_end: 'last day of the previous month', prev_quarter_end: 'last day of the previous quarter', custom_offset: 'custom offset from invoice creation date' };
     const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'task (ungrouped)' };
-    const desc = `All completed but uninvoiced tasks up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`;
+    const isRevRec = document.getElementById('revrecToggle').getAttribute('aria-checked') === 'true';
+    const taskLabel = isRevRec ? 'RevRec tasks' : 'tasks';
+    const desc = `All completed but uninvoiced ${taskLabel} up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`;
 
     addSummaryRow(desc, 'task');
     closeTaskConfig();
@@ -1675,7 +1677,9 @@
     [uptoEl, groupEl].forEach(el => el.style.borderColor = '');
     const uptoLabels = { invoice_creation: 'invoice creation date', '1_day_before': '1 day before invoice creation date', prev_week_end: 'end of previous week', prev_month_end: 'last day of the previous month', prev_quarter_end: 'last day of the previous quarter', custom_offset: 'custom offset from invoice creation date' };
     const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'task (ungrouped)' };
-    addSchedSummaryRow(`All completed but uninvoiced tasks up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`, 'task');
+    const isSchedRevRec = document.getElementById('schedRevrecToggle').getAttribute('aria-checked') === 'true';
+    const schedTaskLabel = isSchedRevRec ? 'RevRec tasks' : 'tasks';
+    addSchedSummaryRow(`All completed but uninvoiced ${schedTaskLabel} up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`, 'task');
     closeSchedTaskConfig();
   }
 
