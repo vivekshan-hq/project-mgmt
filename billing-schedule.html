@@ -839,8 +839,7 @@
           </button>
         </div>
       </div>
-      <div class="line-items-subtitle" id="lineItemsSubtitle">Specify the line items to be listed on the invoice</div>
-      <div class="li-import-desc hidden" id="lineItemsDesc"></div>
+      <div class="line-items-subtitle">Specify the line items to be listed on the invoice</div>
 
       <table class="line-items-table">
         <thead>
@@ -1087,14 +1086,6 @@
     btn.setAttribute('aria-checked', String(!isOn));
   }
 
-  function showImportDesc(text) {
-    const desc = document.getElementById('lineItemsDesc');
-    const subtitle = document.getElementById('lineItemsSubtitle');
-    desc.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${text}`;
-    desc.classList.remove('hidden');
-    subtitle.classList.add('hidden');
-  }
-
   // Expense config
   function openExpenseConfig() {
     closeTaskConfig();
@@ -1120,8 +1111,6 @@
     const groupLabels = { expense_budget: 'expense budget', expense_category: 'expense category', expense_report: 'expense report', project: 'project', phase: 'phase', task: 'task', role: 'role', member: 'team member', reimbursed_to: 'reimbursed to', detailed: 'detailed expense' };
     const uptoLabel = uptoLabels[uptoEl.value] || uptoEl.value;
     const groupLabel = groupLabels[groupEl.value] || groupEl.value;
-
-    showImportDesc(`All uninvoiced expenses for ${uptoLabel}, grouped by ${groupLabel}, will appear here as line items.`);
 
     getExpenseSampleItems(groupEl.value).forEach(item => addExpenseLineItem(item.desc, item.qty, item.price));
     closeExpenseConfig();
@@ -1189,8 +1178,6 @@
     const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'individual task (ungrouped)' };
     const uptoLabel = uptoLabels[upto] || upto;
     const groupLabel = groupLabels[group] || group;
-
-    showImportDesc(`All completed but uninvoiced tasks up to ${uptoLabel}, grouped by ${groupLabel}, will appear here as line items.`);
 
     const sampleItems = getSampleLineItems(group);
     sampleItems.forEach(item => addLineItem(item.desc, item.qty, item.price, true));
