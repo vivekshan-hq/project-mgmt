@@ -907,18 +907,6 @@
               <option value="no_group">Show each task (Don't group)</option>
             </select>
           </div>
-          <div class="form-field" style="margin-bottom:0">
-            <div class="form-label"><span class="required">*</span> Unit price</div>
-            <div class="smartfill-select-wrap">
-              <span class="smartfill-prefix">{{}}</span>
-              <select class="form-select smartfill" id="tasksUnitPrice">
-                <option value="" disabled selected style="color:#a8a8a8;font-family:inherit">Select field...</option>
-                <option value="task.fixed_fee">task.fixed_fee</option>
-                <option value="task.estimated_cost">task.estimated_cost</option>
-                <option value="task.budget_allocated">task.budget_allocated</option>
-              </select>
-            </div>
-          </div>
           <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
             <div>
               <div style="font-size:13px;font-weight:590;color:var(--text-1)">RevRec Task</div>
@@ -973,18 +961,6 @@
               <option value="reimbursed_to">Reimbursed to</option>
               <option value="detailed">Detailed expenses</option>
             </select>
-          </div>
-        </div>
-          <div class="form-field" style="margin-bottom:0">
-            <div class="form-label"><span class="required">*</span> Unit price</div>
-            <div class="smartfill-select-wrap">
-              <span class="smartfill-prefix">{{}}</span>
-              <select class="form-select smartfill" id="expensesUnitPrice">
-                <option value="" disabled selected style="color:#a8a8a8;font-family:inherit">Select field...</option>
-                <option value="expense.total_amount">expense.total_amount</option>
-                <option value="expense.reimbursable_amount">expense.reimbursable_amount</option>
-              </select>
-            </div>
           </div>
         </div>
         <div class="task-config-footer">
@@ -1078,18 +1054,27 @@
   // Line items
   let lineItemCount = 0;
 
-  function addSummaryRow(description, priceField, type) {
+  function addSummaryRow(description, type) {
     const tbody = document.getElementById('lineItemsBody');
     const id = ++lineItemCount;
     const tr = document.createElement('tr');
     tr.classList.add('li-summary-row');
     tr.id = `li-${id}`;
+    const priceOptions = type === 'expense'
+      ? `<option value="expense.total_amount">expense.total_amount</option><option value="expense.reimbursable_amount">expense.reimbursable_amount</option>`
+      : `<option value="task.fixed_fee">task.fixed_fee</option><option value="task.estimated_cost">task.estimated_cost</option><option value="task.budget_allocated">task.budget_allocated</option>`;
     tr.innerHTML = `
       <td class="col-desc" colspan="2">
         <span class="li-summary-text">${description}</span>
       </td>
-      <td class="col-price" style="text-align:right">
-        <span class="smartfill-tag">{{ ${priceField} }}</span>
+      <td class="col-price">
+        <div class="smartfill-select-wrap" style="width:100%">
+          <span class="smartfill-prefix">{{}}</span>
+          <select class="form-select smartfill" style="height:28px;width:100%;font-size:11px">
+            <option value="" disabled selected style="color:#a8a8a8;font-family:inherit">Select field...</option>
+            ${priceOptions}
+          </select>
+        </div>
       </td>
       <td class="col-amount"></td>
       <td class="col-action">
@@ -1155,22 +1140,20 @@
   function applyExpenseConfig() {
     const uptoEl = document.getElementById('expensesUpto');
     const groupEl = document.getElementById('expensesGroupBy');
-    const priceEl = document.getElementById('expensesUnitPrice');
-    const upto = uptoEl.value, group = groupEl.value, price = priceEl.value;
+    const upto = uptoEl.value, group = groupEl.value;
 
-    if (!upto || !group || !price) {
+    if (!upto || !group) {
       uptoEl.style.borderColor = !upto ? '#da1e28' : '';
       groupEl.style.borderColor = !group ? '#da1e28' : '';
-      priceEl.style.borderColor = !price ? '#da1e28' : '';
       return;
     }
-    [uptoEl, groupEl, priceEl].forEach(el => el.style.borderColor = '');
+    [uptoEl, groupEl].forEach(el => el.style.borderColor = '');
 
     const uptoLabels = { all_uninvoiced: 'all uninvoiced', last_7: 'last 7 days', last_15: 'last 15 days', last_30: 'last 30 days', upto_end: 'up to end date', custom: 'custom period' };
     const groupLabels = { expense_budget: 'expense budget', expense_category: 'expense category', expense_report: 'expense report', project: 'project', phase: 'phase', task: 'task', role: 'role', member: 'team member', reimbursed_to: 'reimbursed to', detailed: 'detailed expense' };
     const desc = `All uninvoiced expenses for ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`;
 
-    addSummaryRow(desc, price, 'expense');
+    addSummaryRow(desc, 'expense');
     closeExpenseConfig();
   }
 
@@ -1221,22 +1204,20 @@
   function applyTaskConfig() {
     const uptoEl = document.getElementById('tasksUpto');
     const groupEl = document.getElementById('tasksGroupBy');
-    const priceEl = document.getElementById('tasksUnitPrice');
-    const upto = uptoEl.value, group = groupEl.value, price = priceEl.value;
+    const upto = uptoEl.value, group = groupEl.value;
 
-    if (!upto || !group || !price) {
+    if (!upto || !group) {
       uptoEl.style.borderColor = !upto ? '#da1e28' : '';
       groupEl.style.borderColor = !group ? '#da1e28' : '';
-      priceEl.style.borderColor = !price ? '#da1e28' : '';
       return;
     }
-    [uptoEl, groupEl, priceEl].forEach(el => el.style.borderColor = '');
+    [uptoEl, groupEl].forEach(el => el.style.borderColor = '');
 
     const uptoLabels = { invoice_creation: 'invoice creation date', '1_day_before': '1 day before invoice creation date', prev_week_end: 'end of previous week', prev_month_end: 'last day of the previous month', prev_quarter_end: 'last day of the previous quarter', custom_offset: 'custom offset from invoice creation date' };
     const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'task (ungrouped)' };
     const desc = `All completed but uninvoiced tasks up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`;
 
-    addSummaryRow(desc, price, 'task');
+    addSummaryRow(desc, 'task');
     closeTaskConfig();
   }
 
