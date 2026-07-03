@@ -485,6 +485,25 @@
       font-size: 12px; color: var(--brand); font-family: monospace; pointer-events: none; font-weight: 600;
     }
     .form-select.smartfill { padding-left: 28px; color: var(--brand); font-family: monospace; font-size: 13px; }
+
+    /* Smartfill description editor in line items */
+    .sf-desc-wrapper { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+    .sf-desc-label { font-size: 11px; font-weight: 600; color: var(--text-4); letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 6px; }
+    .sf-desc-editor { min-height: 28px; padding: 2px 0; outline: none; font-size: 13px; line-height: 26px; cursor: text; word-break: break-word; }
+    .sf-desc-editor:empty:before { content: 'Type or insert a field...'; color: var(--text-4); pointer-events: none; }
+    .sf-tag { display: inline-flex; align-items: center; padding: 2px 0 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; user-select: none; cursor: default; white-space: nowrap; vertical-align: middle; margin: 1px 2px; line-height: 1.4; }
+    .sf-tag-teal   { background: #d9fbfb; color: #007d79; }
+    .sf-tag-pink   { background: #ffd6e8; color: #9f1853; }
+    .sf-tag-purple { background: #e8daff; color: #6929c4; }
+    .sf-tag-blue   { background: #d0e2ff; color: #0043ce; }
+    .sf-tag-orange { background: #ffe8d0; color: #8a3800; }
+    .sf-fallback-btn { font-size: 11px; color: var(--text-3); background: rgba(0,0,0,0.07); border: none; border-radius: 3px; padding: 1px 5px; cursor: pointer; font-family: inherit; margin-left: 5px; }
+    .sf-fallback-btn:hover { background: rgba(0,0,0,0.13); color: var(--text-1); }
+    .sf-fallback-edit { min-width: 48px; outline: none; border-bottom: 1px dashed var(--text-4); font-size: 12px; color: var(--text-2); padding: 0 2px; cursor: text; font-family: inherit; display: inline; }
+    .sf-tag-remove { background: none; border: none; cursor: pointer; font-size: 14px; color: inherit; padding: 1px 6px 1px 3px; opacity: 0.45; line-height: 1; }
+    .sf-tag-remove:hover { opacity: 1; }
+    .sf-insert-select { display: block; margin-top: 6px; font-size: 12px; font-weight: 590; color: var(--brand); background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; appearance: none; -webkit-appearance: none; }
+    .sf-insert-select:focus { outline: none; }
   </style>
 </head>
 <body>
@@ -1369,20 +1388,34 @@
            <option value="revrec_amount">RevRec Amount</option>
            <option value="billable_amount">Billable amount</option>
          </select>`;
+    const editorSnippet = type === 'task'
+      ? `<div class="sf-desc-wrapper">
+           <div class="sf-desc-label">Line item description</div>
+           <div class="sf-desc-editor" id="sf-desc-${id}" contenteditable="true" spellcheck="false"></div>
+           <select class="sf-insert-select" onchange="insertSfField(this,'sf-desc-${id}')">
+             <option value="" disabled selected>+ Insert field</option>
+             <option value="task_name|teal">Task → Task Name</option>
+             <option value="phase_name|purple">Task → Phase Name</option>
+             <option value="project_name|blue">Task → Project Name</option>
+             <option value="completed_at|pink">Task → Completed At</option>
+             <option value="due_date|orange">Task → Due Date</option>
+           </select>
+         </div>` : '';
     tr.innerHTML = `
       <td class="col-desc">
-        <span class="li-summary-text">${description}</span>
+        <span class="li-summary-text">${description}</span>${editorSnippet}
       </td>
       <td class="col-qty"></td>
       <td class="col-price">${priceCell}</td>
       <td class="col-amount"></td>
-      <td class="col-action">
+      <td class="col-action" style="vertical-align:top;padding-top:16px">
         <button class="li-delete-btn" onclick="document.getElementById('li-${id}').remove()">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
       </td>
     `;
     tbody.appendChild(tr);
+    if (type === 'task') insertSfTagEl(document.getElementById(`sf-desc-${id}`), 'task_name', 'Task → Task Name', 'teal');
   }
   function addLineItem(description = '', qty = '', price = '', isAuto = false) {
     const tbody = document.getElementById('lineItemsBody');
@@ -1644,17 +1677,33 @@
            <option value="revrec_amount">RevRec Amount</option>
            <option value="billable_amount">Billable amount</option>
          </select>`;
+    const editorSnippet = type === 'task'
+      ? `<div class="sf-desc-wrapper">
+           <div class="sf-desc-label">Line item description</div>
+           <div class="sf-desc-editor" id="sf-sdesc-${id}" contenteditable="true" spellcheck="false"></div>
+           <select class="sf-insert-select" onchange="insertSfField(this,'sf-sdesc-${id}')">
+             <option value="" disabled selected>+ Insert field</option>
+             <option value="task_name|teal">Task → Task Name</option>
+             <option value="phase_name|purple">Task → Phase Name</option>
+             <option value="project_name|blue">Task → Project Name</option>
+             <option value="completed_at|pink">Task → Completed At</option>
+             <option value="due_date|orange">Task → Due Date</option>
+           </select>
+         </div>` : '';
     tr.innerHTML = `
-      <td class="col-desc"><span class="li-summary-text">${description}</span></td>
+      <td class="col-desc">
+        <span class="li-summary-text">${description}</span>${editorSnippet}
+      </td>
       <td class="col-qty"></td>
       <td class="col-price">${priceCell}</td>
       <td class="col-amount"></td>
-      <td class="col-action">
+      <td class="col-action" style="vertical-align:top;padding-top:16px">
         <button class="li-delete-btn" onclick="document.getElementById('sli-${id}').remove()">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
       </td>`;
     tbody.appendChild(tr);
+    if (type === 'task') insertSfTagEl(document.getElementById(`sf-sdesc-${id}`), 'task_name', 'Task → Task Name', 'teal');
   }
 
   function openSchedTaskConfig() { document.getElementById('schedTaskConfigOverlay').classList.remove('hidden'); }
@@ -1703,6 +1752,79 @@
   }
 
   function saveScheduleDrawer() { closeScheduleDrawer(); }
+
+  // ── SMARTFILL EDITOR ──
+  function insertSfField(selectEl, editorId) {
+    const val = selectEl.value;
+    if (!val) return;
+    const [field, color] = val.split('|');
+    const text = selectEl.options[selectEl.selectedIndex].text;
+    const editor = document.getElementById(editorId);
+    insertSfTagEl(editor, field, text, color);
+    selectEl.value = '';
+  }
+
+  function insertSfTagEl(editor, field, text, color) {
+    const tag = document.createElement('span');
+    tag.contentEditable = 'false';
+    tag.className = `sf-tag sf-tag-${color}`;
+    tag.setAttribute('data-field', field);
+
+    const label = document.createElement('span');
+    label.textContent = text;
+    tag.appendChild(label);
+
+    const fallbackBtn = document.createElement('button');
+    fallbackBtn.className = 'sf-fallback-btn';
+    fallbackBtn.type = 'button';
+    fallbackBtn.textContent = 'Add fallback';
+    fallbackBtn.onclick = function(e) {
+      e.preventDefault(); e.stopPropagation();
+      let edit = tag.querySelector('.sf-fallback-edit');
+      if (edit) {
+        edit.remove();
+        fallbackBtn.textContent = 'Add fallback';
+      } else {
+        edit = document.createElement('span');
+        edit.className = 'sf-fallback-edit';
+        edit.contentEditable = 'true';
+        edit.textContent = 'fallback text';
+        tag.insertBefore(edit, fallbackBtn);
+        fallbackBtn.textContent = 'Remove fallback';
+        // Select all text in fallback span
+        setTimeout(() => {
+          const sel = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(edit);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }, 0);
+      }
+    };
+    tag.appendChild(fallbackBtn);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'sf-tag-remove';
+    removeBtn.type = 'button';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); tag.remove(); };
+    tag.appendChild(removeBtn);
+
+    // Insert at cursor position or append
+    editor.focus();
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(tag);
+      range.setStartAfter(tag);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      editor.appendChild(tag);
+    }
+  }
 
   // Utility
   document.querySelectorAll('.form-select').forEach(el => {
