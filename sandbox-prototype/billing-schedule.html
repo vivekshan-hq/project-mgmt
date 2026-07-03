@@ -1060,22 +1060,19 @@
     const tr = document.createElement('tr');
     tr.classList.add('li-summary-row');
     tr.id = `li-${id}`;
-    const priceOptions = type === 'expense'
-      ? `<option value="expense.total_amount">expense.total_amount</option><option value="expense.reimbursable_amount">expense.reimbursable_amount</option>`
-      : `<option value="task.fixed_fee">task.fixed_fee</option><option value="task.estimated_cost">task.estimated_cost</option><option value="task.budget_allocated">task.budget_allocated</option>`;
+    const priceCell = type === 'expense'
+      ? `<span style="font-size:12px;color:var(--text-3)">Expense amount</span>`
+      : `<select class="form-select" style="height:28px;font-size:12px;width:100%">
+           <option value="" disabled selected style="color:#a8a8a8">Select field...</option>
+           <option value="task.fixed_fee">Fixed fee</option>
+           <option value="task.estimated_cost">Estimated cost</option>
+           <option value="task.budget_allocated">Budget allocated</option>
+         </select>`;
     tr.innerHTML = `
       <td class="col-desc" colspan="2">
         <span class="li-summary-text">${description}</span>
       </td>
-      <td class="col-price">
-        <div class="smartfill-select-wrap" style="width:100%">
-          <span class="smartfill-prefix">{{}}</span>
-          <select class="form-select smartfill" style="height:28px;width:100%;font-size:11px">
-            <option value="" disabled selected style="color:#a8a8a8;font-family:inherit">Select field...</option>
-            ${priceOptions}
-          </select>
-        </div>
-      </td>
+      <td class="col-price">${priceCell}</td>
       <td class="col-amount"></td>
       <td class="col-action">
         <button class="li-delete-btn" onclick="document.getElementById('li-${id}').remove()">
