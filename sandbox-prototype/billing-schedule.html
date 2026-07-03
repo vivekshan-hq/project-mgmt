@@ -508,8 +508,24 @@
     .sf-fallback-edit { min-width: 48px; outline: none; border-bottom: 1px dashed var(--text-4); font-size: 12px; color: var(--text-2); padding: 0 2px; cursor: text; font-family: inherit; display: inline; }
     .sf-tag-remove { background: none; border: none; cursor: pointer; font-size: 14px; color: inherit; padding: 1px 6px 1px 3px; opacity: 0.45; line-height: 1; }
     .sf-tag-remove:hover { opacity: 1; }
-    .sf-insert-select { display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 590; color: var(--brand); background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; appearance: none; -webkit-appearance: none; }
-    .sf-insert-select:focus { outline: none; }
+    /* Field picker popup */
+    .sf-field-picker {
+      position: fixed; z-index: 600; display: none; flex-direction: column; gap: 3px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 6px; min-width: 210px;
+    }
+    .sf-field-picker.open { display: flex; }
+    .sf-picker-header { font-size: 11px; font-weight: 600; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.3px; padding: 2px 6px 4px; }
+    .sf-picker-item {
+      padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: none; text-align: left; font-family: inherit; width: 100%;
+    }
+    .sf-picker-item:hover { filter: brightness(0.93); }
+    .sf-picker-item.sf-tag-teal   { background: #d9fbfb; color: #007d79; }
+    .sf-picker-item.sf-tag-pink   { background: #ffd6e8; color: #9f1853; }
+    .sf-picker-item.sf-tag-purple { background: #e8daff; color: #6929c4; }
+    .sf-picker-item.sf-tag-blue   { background: #d0e2ff; color: #0043ce; }
+    .sf-picker-item.sf-tag-orange { background: #ffe8d0; color: #8a3800; }
   </style>
 </head>
 <body>
@@ -1397,15 +1413,7 @@
     const editorSnippet = type === 'task'
       ? `<div class="sf-desc-wrapper">
            <div class="sf-desc-label">Line item description</div>
-           <div class="sf-desc-editor" id="sf-desc-${id}" contenteditable="true" spellcheck="false"></div>
-           <select class="sf-insert-select" onchange="insertSfField(this,'sf-desc-${id}')">
-             <option value="" disabled selected>+ Insert field</option>
-             <option value="task_name|teal">Task → Task Name</option>
-             <option value="phase_name|purple">Task → Phase Name</option>
-             <option value="project_name|blue">Task → Project Name</option>
-             <option value="completed_at|pink">Task → Completed At</option>
-             <option value="due_date|orange">Task → Due Date</option>
-           </select>
+           <div class="sf-desc-editor" id="sf-desc-${id}" contenteditable="true" spellcheck="false" onclick="showSfPicker(this, event)"></div>
          </div>` : '';
     tr.innerHTML = `
       <td class="col-desc">
@@ -1686,15 +1694,7 @@
     const editorSnippet = type === 'task'
       ? `<div class="sf-desc-wrapper">
            <div class="sf-desc-label">Line item description</div>
-           <div class="sf-desc-editor" id="sf-sdesc-${id}" contenteditable="true" spellcheck="false"></div>
-           <select class="sf-insert-select" onchange="insertSfField(this,'sf-sdesc-${id}')">
-             <option value="" disabled selected>+ Insert field</option>
-             <option value="task_name|teal">Task → Task Name</option>
-             <option value="phase_name|purple">Task → Phase Name</option>
-             <option value="project_name|blue">Task → Project Name</option>
-             <option value="completed_at|pink">Task → Completed At</option>
-             <option value="due_date|orange">Task → Due Date</option>
-           </select>
+           <div class="sf-desc-editor" id="sf-sdesc-${id}" contenteditable="true" spellcheck="false" onclick="showSfPicker(this, event)"></div>
          </div>` : '';
     tr.innerHTML = `
       <td class="col-desc">
@@ -1760,14 +1760,48 @@
   function saveScheduleDrawer() { closeScheduleDrawer(); }
 
   // ── SMARTFILL EDITOR ──
-  function insertSfField(selectEl, editorId) {
-    const val = selectEl.value;
-    if (!val) return;
-    const [field, color] = val.split('|');
-    const text = selectEl.options[selectEl.selectedIndex].text;
-    const editor = document.getElementById(editorId);
-    insertSfTagEl(editor, field, text, color);
-    selectEl.value = '';
+  const SF_FIELDS = [
+    { value: 'task_name',    label: 'Task → Task Name',    color: 'teal'   },
+    { value: 'phase_name',   label: 'Task → Phase Name',   color: 'purple' },
+    { value: 'project_name', label: 'Task → Project Name', color: 'blue'   },
+    { value: 'completed_at', label: 'Task → Completed At', color: 'pink'   },
+    { value: 'due_date',     label: 'Task → Due Date',     color: 'orange' },
+  ];
+  let _sfEditor = null, _sfPicker = null;
+
+  function _initSfPicker() {
+    if (_sfPicker) return;
+    _sfPicker = document.createElement('div');
+    _sfPicker.className = 'sf-field-picker';
+    _sfPicker.innerHTML = '<div class="sf-picker-header">Insert field</div>' +
+      SF_FIELDS.map(f =>
+        `<button class="sf-picker-item sf-tag-${f.color}" onclick="_sfInsert('${f.value}','${f.label}','${f.color}')">${f.label}</button>`
+      ).join('');
+    document.body.appendChild(_sfPicker);
+    document.addEventListener('mousedown', (e) => {
+      if (_sfPicker && !_sfPicker.contains(e.target) && !e.target.closest('.sf-desc-editor')) {
+        _sfPicker.classList.remove('open');
+      }
+    });
+  }
+
+  function showSfPicker(editorEl, event) {
+    event.stopPropagation();
+    // Don't show picker if click was on a tag or its buttons
+    if (event.target.closest('.sf-tag')) return;
+    _initSfPicker();
+    _sfEditor = editorEl;
+    const rect = editorEl.getBoundingClientRect();
+    const pickerH = 210;
+    const top = (rect.bottom + pickerH > window.innerHeight) ? rect.top - pickerH - 4 : rect.bottom + 4;
+    _sfPicker.style.top = top + 'px';
+    _sfPicker.style.left = rect.left + 'px';
+    _sfPicker.classList.toggle('open');
+  }
+
+  function _sfInsert(field, label, color) {
+    if (_sfEditor) insertSfTagEl(_sfEditor, field, label, color);
+    if (_sfPicker) _sfPicker.classList.remove('open');
   }
 
   function insertSfTagEl(editor, field, text, color) {
