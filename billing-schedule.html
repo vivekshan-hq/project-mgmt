@@ -626,7 +626,7 @@
           <div class="option-text">
             <div class="option-title">Create a custom billing schedule</div>
             <div class="option-desc">Define and organize your project's invoicing plan with a fully customizable billing schedule tailored to your project milestones or timelines.</div>
-            <button class="btn-action">
+            <button class="btn-action" onclick="openScheduleDrawer()">
               Create schedule
               <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
@@ -973,6 +973,310 @@
 
 </div>
 
+<!-- Schedule drawer overlay -->
+<div class="drawer-overlay" id="scheduleDrawerOverlay" onclick="closeScheduleDrawer()"></div>
+
+<!-- Billing schedule drawer -->
+<div class="drawer" id="scheduleDrawer">
+
+  <!-- Step 1: Schedule details -->
+  <div class="drawer-step active" id="sched-step1">
+    <div class="drawer-hd">
+      <div>
+        <div class="drawer-title">Create a billing schedule</div>
+        <div class="drawer-subtitle">Set the schedule details</div>
+      </div>
+      <button class="drawer-close" onclick="closeScheduleDrawer()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="form-field">
+        <div class="form-label"><span class="required">*</span> Create billing schedule based on</div>
+        <select class="form-select" id="schedBasedOn">
+          <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+          <option value="date_based">Date based</option>
+          <option value="milestone_based">Milestone based</option>
+          <option value="task_based">Task based</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <div class="form-label"><span class="required">*</span> Invoices are created</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px;color:var(--text-2);flex-shrink:0">Every</span>
+          <select class="form-select" style="width:76px">
+            <option>1</option><option>2</option><option>3</option><option>6</option><option>12</option>
+          </select>
+          <select class="form-select" style="flex:1">
+            <option>Day</option>
+            <option>Week</option>
+            <option>Month</option>
+            <option>Quarter</option>
+            <option>Year</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <div class="form-label"><span class="required">*</span> Time</div>
+          <select class="form-select">
+            <option>09:00</option><option>10:00</option><option>12:00</option><option>14:00</option><option>17:00</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <div class="form-label"><span class="required">*</span> Timezone</div>
+          <select class="form-select">
+            <option>(UTC+5:30) Asia/Kolkata</option>
+            <option>(UTC+0:00) UTC</option>
+            <option>(UTC-5:00) US/Eastern</option>
+            <option>(UTC-8:00) US/Pacific</option>
+            <option>(UTC+1:00) Europe/London</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <div class="form-label"><span class="required">*</span> Schedule starts on</div>
+        <input type="date" class="form-input" id="schedStartDate" style="padding-right:12px;cursor:pointer">
+      </div>
+
+      <div class="form-field">
+        <div class="form-label"><span class="required">*</span> Schedule ends</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer">
+            <input type="radio" name="schedEnd" value="project_completion" checked style="margin-top:3px;flex-shrink:0" onchange="onSchedEndChange()">
+            <div>
+              <div style="font-size:14px;color:var(--text-1);line-height:20px">On project completion</div>
+              <label style="display:flex;align-items:flex-start;gap:6px;margin-top:6px;cursor:pointer">
+                <input type="checkbox" style="margin-top:2px;flex-shrink:0">
+                <span style="font-size:13px;color:var(--text-2);line-height:18px">Create an event for project completion to invoice any remaining amount</span>
+              </label>
+            </div>
+          </label>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="radio" name="schedEnd" value="specified_date" onchange="onSchedEndChange()">
+              <span style="font-size:14px;color:var(--text-1)">On a specified date</span>
+            </label>
+            <div id="schedEndDatePicker" class="hidden" style="padding:8px 0 0 24px">
+              <input type="date" class="form-input" style="padding-right:12px;cursor:pointer;max-width:200px">
+            </div>
+          </div>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="radio" name="schedEnd" value="occurrences" onchange="onSchedEndChange()">
+              <span style="font-size:14px;color:var(--text-1)">After a specific number of occurrences</span>
+            </label>
+            <div id="schedEndOccurrencesPicker" class="hidden" style="padding:8px 0 0 24px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="number" class="form-input" style="width:80px;padding-left:8px" value="12" min="1">
+                <span style="font-size:13px;color:var(--text-3)">occurrences</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="form-field">
+        <div class="form-label"><span class="required">*</span> What action would you like to take?</div>
+        <select class="form-select" id="schedActionSelect">
+          <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+          <option value="draft">Create draft invoice</option>
+          <option value="review">Create in review invoice</option>
+          <option value="reminder">Send reminder to create invoice</option>
+        </select>
+      </div>
+
+      <div class="conditions-section">
+        <div class="conditions-label">
+          Create the invoice only if
+          <div class="info-icon" title="Set conditions that must be met before the invoice is automatically created"><span>i</span></div>
+        </div>
+        <button class="add-cond-btn" onclick="addSchedCondition()">+ Add conditions</button>
+        <div id="schedConditionsList" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-ghost" onclick="closeScheduleDrawer()">Cancel</button>
+      <button class="btn btn-primary-sm" onclick="goToSchedStep2()">Next</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Invoice details -->
+  <div class="drawer-step" id="sched-step2" style="position:relative">
+    <div class="drawer-hd">
+      <div>
+        <div class="drawer-title">Create a billing schedule</div>
+        <div class="drawer-subtitle">Set invoice details</div>
+      </div>
+      <button class="drawer-close" onclick="closeScheduleDrawer()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="section-heading">Dates</div>
+      <div class="dates-row">
+        <div>
+          <div class="date-field-label">Issue date</div>
+          <div class="date-offset-field">
+            <input class="offset-num" id="schedIssueDate" type="number" placeholder="" min="0" max="365">
+            <span class="offset-suffix">days after invoice is created</span>
+          </div>
+        </div>
+        <div>
+          <div class="date-field-label">Due date</div>
+          <div class="date-offset-field">
+            <input class="offset-num" id="schedDueDate" type="number" placeholder="" min="0" max="365">
+            <span class="offset-suffix">days after issue date</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="line-items-header">
+        <div class="line-items-title">Line items</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <button class="auto-gen-btn" onclick="openSchedTaskConfig()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Auto-generate from tasks
+          </button>
+          <span style="color:var(--border-strong);font-size:13px">|</span>
+          <button class="auto-gen-btn" onclick="openSchedExpenseConfig()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Auto-generate from expenses
+          </button>
+        </div>
+      </div>
+      <div class="line-items-subtitle">Specify the line items to be listed on the invoice</div>
+
+      <table class="line-items-table">
+        <thead>
+          <tr>
+            <th class="col-desc">Description</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-price">Unit Price</th>
+            <th class="col-amount">Amount</th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody id="schedLineItemsBody"></tbody>
+      </table>
+      <div class="line-items-actions">
+        <button class="add-li-btn" onclick="addSchedLineItem()">+ Add new line item</button>
+        <button class="add-tax-btn">+ Add tax</button>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-ghost" onclick="goToSchedStep1()">Back</button>
+      <button class="btn btn-primary-sm" onclick="saveScheduleDrawer()">Save</button>
+    </div>
+
+    <!-- Schedule task config overlay -->
+    <div class="task-config-overlay hidden" id="schedTaskConfigOverlay">
+      <div class="task-config-backdrop" onclick="closeSchedTaskConfig()"></div>
+      <div class="task-config-panel">
+        <div class="task-config-hd">
+          <div class="task-config-title">Configure line items from tasks</div>
+          <button class="task-config-close" onclick="closeSchedTaskConfig()">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="task-config-body">
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Include completed tasks up to</div>
+            <select class="form-select" id="schedTasksUpto">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="invoice_creation">Invoice creation date</option>
+              <option value="1_day_before">1 day before invoice creation date</option>
+              <option value="prev_week_end">End of previous week</option>
+              <option value="prev_month_end">Last day of the previous month</option>
+              <option value="prev_quarter_end">Last day of the previous quarter</option>
+              <option value="custom_offset">Custom offset from invoice creation date</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
+            <div>
+              <div style="font-size:13px;font-weight:590;color:var(--text-1)">RevRec Task</div>
+              <div style="font-size:12px;color:var(--text-3);margin-top:2px">Select tasks which are part of Milestone RevRec plans</div>
+            </div>
+            <button class="revrec-toggle" id="schedRevrecToggle" onclick="toggleSchedRevRec()" role="switch" aria-checked="false">
+              <span class="revrec-thumb"></span>
+            </button>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Group tasks in line item descriptions by</div>
+            <select class="form-select" id="schedTasksGroupBy">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="project">Project</option>
+              <option value="phase">Phase</option>
+              <option value="task">Task</option>
+              <option value="no_group">Show each task (Don't group)</option>
+            </select>
+          </div>
+        </div>
+        <div class="task-config-footer">
+          <button class="btn btn-primary-sm" onclick="applySchedTaskConfig()">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule expense config overlay -->
+    <div class="task-config-overlay hidden" id="schedExpenseConfigOverlay">
+      <div class="task-config-backdrop" onclick="closeSchedExpenseConfig()"></div>
+      <div class="task-config-panel">
+        <div class="task-config-hd">
+          <div class="task-config-title">Configure line items from expenses</div>
+          <button class="task-config-close" onclick="closeSchedExpenseConfig()">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="task-config-body">
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Select uninvoiced expenses for</div>
+            <select class="form-select" id="schedExpensesUpto">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="all_uninvoiced">All uninvoiced</option>
+              <option value="last_7">Last 7 days</option>
+              <option value="last_15">Last 15 days</option>
+              <option value="last_30">Last 30 days</option>
+              <option value="upto_end">Upto end date</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <div class="form-label"><span class="required">*</span> Group line items by</div>
+            <select class="form-select" id="schedExpensesGroupBy">
+              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
+              <option value="expense_budget">Expense budget</option>
+              <option value="expense_category">Expense category</option>
+              <option value="expense_report">Expense report</option>
+              <option value="project">Project</option>
+              <option value="phase">Phase</option>
+              <option value="task">Task</option>
+              <option value="role">Role</option>
+              <option value="member">Team member</option>
+              <option value="reimbursed_to">Reimbursed to</option>
+              <option value="detailed">Detailed expenses</option>
+            </select>
+          </div>
+        </div>
+        <div class="task-config-footer">
+          <button class="btn btn-primary-sm" onclick="applySchedExpenseConfig()">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <script>
   // Drawer open/close
   function openDrawer() {
@@ -1257,6 +1561,147 @@
   function saveDrawer() {
     closeDrawer();
   }
+
+  // ── SCHEDULE DRAWER ──
+  let schedLineItemCount = 0;
+
+  function openScheduleDrawer() {
+    document.getElementById('scheduleDrawerOverlay').classList.add('open');
+    document.getElementById('scheduleDrawer').classList.add('open');
+    showSchedStep(1);
+  }
+
+  function closeScheduleDrawer() {
+    document.getElementById('scheduleDrawerOverlay').classList.remove('open');
+    document.getElementById('scheduleDrawer').classList.remove('open');
+    setTimeout(() => {
+      showSchedStep(1);
+      document.getElementById('schedLineItemsBody').innerHTML = '';
+      schedLineItemCount = 0;
+      closeSchedTaskConfig();
+      closeSchedExpenseConfig();
+    }, 300);
+  }
+
+  function showSchedStep(n) {
+    document.getElementById('sched-step1').classList.toggle('active', n === 1);
+    document.getElementById('sched-step2').classList.toggle('active', n === 2);
+  }
+
+  function goToSchedStep2() { showSchedStep(2); }
+  function goToSchedStep1() { showSchedStep(1); closeSchedTaskConfig(); closeSchedExpenseConfig(); }
+
+  function onSchedEndChange() {
+    const val = document.querySelector('input[name="schedEnd"]:checked').value;
+    document.getElementById('schedEndDatePicker').classList.toggle('hidden', val !== 'specified_date');
+    document.getElementById('schedEndOccurrencesPicker').classList.toggle('hidden', val !== 'occurrences');
+  }
+
+  function addSchedCondition() {
+    const list = document.getElementById('schedConditionsList');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px';
+    row.innerHTML = `
+      <select class="form-select" style="flex:1">
+        <option value="" disabled selected style="color:#a8a8a8">Select condition...</option>
+        <option>Project status is Active</option><option>Phase is completed</option>
+        <option>All tasks are completed</option><option>Approval is received</option>
+        <option>Budget utilization &gt; 80%</option>
+      </select>
+      <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#a8a8a8;padding:4px;border-radius:3px;flex-shrink:0">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    list.appendChild(row);
+  }
+
+  function addSchedLineItem() {
+    const tbody = document.getElementById('schedLineItemsBody');
+    const id = ++schedLineItemCount;
+    const tr = document.createElement('tr');
+    tr.id = `sli-${id}`;
+    tr.innerHTML = `
+      <td class="col-desc"><input class="li-input" placeholder="Description"></td>
+      <td class="col-qty"><input class="li-input right" placeholder="1"></td>
+      <td class="col-price"><input class="li-input right" placeholder="0.00"></td>
+      <td class="col-amount" style="color:#525252;font-size:13px;text-align:right">—</td>
+      <td class="col-action">
+        <button class="li-delete-btn" onclick="document.getElementById('sli-${id}').remove()">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </td>`;
+    tbody.appendChild(tr);
+  }
+
+  function addSchedSummaryRow(description, type) {
+    const tbody = document.getElementById('schedLineItemsBody');
+    const id = ++schedLineItemCount;
+    const tr = document.createElement('tr');
+    tr.classList.add('li-summary-row');
+    tr.id = `sli-${id}`;
+    const priceCell = type === 'expense'
+      ? `<span style="font-size:12px;color:var(--text-3)">Expense amount</span>`
+      : `<select class="form-select" style="height:28px;font-size:12px;width:148px">
+           <option value="" disabled selected style="color:#a8a8a8">Select field...</option>
+           <option value="revrec_amount">RevRec Amount</option>
+           <option value="billable_amount">Billable amount</option>
+         </select>`;
+    tr.innerHTML = `
+      <td class="col-desc"><span class="li-summary-text">${description}</span></td>
+      <td class="col-qty"></td>
+      <td class="col-price">${priceCell}</td>
+      <td class="col-amount"></td>
+      <td class="col-action">
+        <button class="li-delete-btn" onclick="document.getElementById('sli-${id}').remove()">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </td>`;
+    tbody.appendChild(tr);
+  }
+
+  function openSchedTaskConfig() { document.getElementById('schedTaskConfigOverlay').classList.remove('hidden'); }
+  function closeSchedTaskConfig() { document.getElementById('schedTaskConfigOverlay').classList.add('hidden'); }
+
+  function toggleSchedRevRec() {
+    const btn = document.getElementById('schedRevrecToggle');
+    btn.setAttribute('aria-checked', String(btn.getAttribute('aria-checked') !== 'true'));
+  }
+
+  function applySchedTaskConfig() {
+    const uptoEl = document.getElementById('schedTasksUpto');
+    const groupEl = document.getElementById('schedTasksGroupBy');
+    const upto = uptoEl.value, group = groupEl.value;
+    if (!upto || !group) {
+      uptoEl.style.borderColor = !upto ? '#da1e28' : '';
+      groupEl.style.borderColor = !group ? '#da1e28' : '';
+      return;
+    }
+    [uptoEl, groupEl].forEach(el => el.style.borderColor = '');
+    const uptoLabels = { invoice_creation: 'invoice creation date', '1_day_before': '1 day before invoice creation date', prev_week_end: 'end of previous week', prev_month_end: 'last day of the previous month', prev_quarter_end: 'last day of the previous quarter', custom_offset: 'custom offset from invoice creation date' };
+    const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'task (ungrouped)' };
+    addSchedSummaryRow(`All completed but uninvoiced tasks up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`, 'task');
+    closeSchedTaskConfig();
+  }
+
+  function openSchedExpenseConfig() { closeSchedTaskConfig(); document.getElementById('schedExpenseConfigOverlay').classList.remove('hidden'); }
+  function closeSchedExpenseConfig() { document.getElementById('schedExpenseConfigOverlay').classList.add('hidden'); }
+
+  function applySchedExpenseConfig() {
+    const uptoEl = document.getElementById('schedExpensesUpto');
+    const groupEl = document.getElementById('schedExpensesGroupBy');
+    const upto = uptoEl.value, group = groupEl.value;
+    if (!upto || !group) {
+      uptoEl.style.borderColor = !upto ? '#da1e28' : '';
+      groupEl.style.borderColor = !group ? '#da1e28' : '';
+      return;
+    }
+    [uptoEl, groupEl].forEach(el => el.style.borderColor = '');
+    const uptoLabels = { all_uninvoiced: 'all uninvoiced', last_7: 'last 7 days', last_15: 'last 15 days', last_30: 'last 30 days', upto_end: 'up to end date', custom: 'custom period' };
+    const groupLabels = { expense_budget: 'expense budget', expense_category: 'expense category', expense_report: 'expense report', project: 'project', phase: 'phase', task: 'task', role: 'role', member: 'team member', reimbursed_to: 'reimbursed to', detailed: 'detailed expense' };
+    addSchedSummaryRow(`All uninvoiced expenses for ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`, 'expense');
+    closeSchedExpenseConfig();
+  }
+
+  function saveScheduleDrawer() { closeScheduleDrawer(); }
 
   // Utility
   document.querySelectorAll('.form-select').forEach(el => {
