@@ -213,7 +213,7 @@
     }
     .drawer-overlay.open { opacity: 1; pointer-events: all; }
     .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0; width: 480px;
+      position: fixed; top: 0; right: 0; bottom: 0; width: 580px;
       background: var(--surface); z-index: 201;
       display: flex; flex-direction: column;
       box-shadow: -6.4px 0 14.4px rgba(0,0,0,0.13), -1.2px 0 3.6px rgba(0,0,0,0.11);
@@ -441,6 +441,15 @@
       padding: 12px 16px; border-top: 1px solid var(--border);
       display: flex; justify-content: flex-end;
     }
+
+    /* Import description banner */
+    .li-import-desc {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 12px; margin-bottom: 10px;
+      background: var(--brand-light); border: 1px solid #c0d7ff;
+      border-radius: var(--radius-sm); font-size: 12px; color: var(--text-2); line-height: 18px;
+    }
+    .li-import-desc svg { flex-shrink: 0; width: 14px; height: 14px; fill: none; stroke: var(--brand); stroke-width: 2; margin-top: 1px; }
 
     /* RevRec toggle */
     .revrec-toggle {
@@ -833,7 +842,8 @@
           </button>
         </div>
       </div>
-      <div class="line-items-subtitle">Specify the line items to be listed on the invoice</div>
+      <div class="line-items-subtitle" id="lineItemsSubtitle">Specify the line items to be listed on the invoice</div>
+      <div class="li-import-desc hidden" id="lineItemsDesc"></div>
 
       <table class="line-items-table">
         <thead>
@@ -906,6 +916,8 @@
           <button class="btn btn-primary-sm" onclick="applyTaskConfig()">Apply</button>
         </div>
       </div>
+    </div>
+
     <!-- Expense config panel (overlays step 2) -->
     <div class="task-config-overlay hidden" id="expenseConfigOverlay">
       <div class="task-config-backdrop" onclick="closeExpenseConfig()"></div>
@@ -1078,6 +1090,14 @@
     btn.setAttribute('aria-checked', String(!isOn));
   }
 
+  function showImportDesc(text) {
+    const desc = document.getElementById('lineItemsDesc');
+    const subtitle = document.getElementById('lineItemsSubtitle');
+    desc.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${text}`;
+    desc.classList.remove('hidden');
+    subtitle.classList.add('hidden');
+  }
+
   // Expense config
   function openExpenseConfig() {
     closeTaskConfig();
@@ -1098,6 +1118,14 @@
     }
     uptoEl.style.borderColor = '';
     groupEl.style.borderColor = '';
+
+    const uptoLabels = { all_uninvoiced: 'all uninvoiced', last_7: 'the last 7 days', last_15: 'the last 15 days', last_30: 'the last 30 days', upto_end: 'up to the end date', custom: 'a custom period' };
+    const groupLabels = { expense_budget: 'expense budget', expense_category: 'expense category', expense_report: 'expense report', project: 'project', phase: 'phase', task: 'task', role: 'role', member: 'team member', reimbursed_to: 'reimbursed to', detailed: 'detailed expense' };
+    const uptoLabel = uptoLabels[uptoEl.value] || uptoEl.value;
+    const groupLabel = groupLabels[groupEl.value] || groupEl.value;
+
+    showImportDesc(`All uninvoiced expenses for ${uptoLabel}, grouped by ${groupLabel}, will appear here as line items.`);
+
     getExpenseSampleItems(groupEl.value).forEach(item => addExpenseLineItem(item.desc, item.qty, item.price));
     closeExpenseConfig();
   }
@@ -1160,8 +1188,13 @@
     uptoEl.style.borderColor = '';
     groupEl.style.borderColor = '';
 
-    const groupLabels = { task: 'Task', phase: 'Phase / Milestone', role: 'Role', member: 'Team member' };
-    const groupLabel = groupLabels[group];
+    const uptoLabels = { invoice_creation: 'the invoice creation date', '1_day_before': '1 day before invoice creation date', prev_week_end: 'end of previous week', prev_month_end: 'last day of the previous month', prev_quarter_end: 'last day of the previous quarter', custom_offset: 'a custom offset from invoice creation date' };
+    const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'individual task (ungrouped)' };
+    const uptoLabel = uptoLabels[upto] || upto;
+    const groupLabel = groupLabels[group] || group;
+
+    showImportDesc(`All completed but uninvoiced tasks up to ${uptoLabel}, grouped by ${groupLabel}, will appear here as line items.`);
+
     const sampleItems = getSampleLineItems(group);
     sampleItems.forEach(item => addLineItem(item.desc, item.qty, item.price, true));
 
