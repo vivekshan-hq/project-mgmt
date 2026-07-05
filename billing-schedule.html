@@ -444,7 +444,7 @@
 
     /* Task filter builder */
     .task-filter-section { display: flex; flex-direction: column; gap: 10px; }
-    .task-filter-section-label { font-size: 13px; font-weight: 400; color: var(--text-1); margin-bottom: 2px; }
+    .task-filter-section-label { font-size: 13px; font-weight: 400; color: var(--text-1); margin-bottom: 4px; }
     .task-filter-rows { display: flex; flex-direction: column; gap: 6px; }
     .task-filter-row { display: flex; align-items: center; gap: 6px; }
     .task-filter-drag { color: var(--text-4); cursor: grab; flex-shrink: 0; }
@@ -458,7 +458,7 @@
     .task-filter-value.chip-orange { background-color: #fdf4da; color: #b26800; border-color: #f8dc9a; font-weight: 590; }
     .task-filter-remove { background: none; border: none; cursor: pointer; color: var(--text-4); padding: 2px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
     .task-filter-remove:hover { background: var(--bg); color: var(--text-2); }
-    .task-filter-add-actions { display: flex; gap: 16px; }
+    .task-filter-add-actions { display: flex; gap: 16px; padding-top: 6px; }
     .task-filter-add-btn { background: none; border: none; cursor: pointer; font-size: 12px; color: var(--brand); padding: 0; font-family: inherit; }
     .task-filter-add-btn:hover { text-decoration: underline; }
 
@@ -948,7 +948,7 @@
         <div class="task-config-body">
           <!-- Filter builder -->
           <div class="task-filter-section">
-            <div class="task-filter-section-label">Show tasks...</div>
+            <div class="task-filter-section-label">Include tasks</div>
             <div class="task-filter-rows" id="taskFilterRows">
               <div class="task-filter-row">
                 <span class="task-filter-connector">Where</span>
@@ -968,7 +968,7 @@
             </div>
           </div>
           <!-- Include tasks upto -->
-          <div class="form-field" style="margin-bottom:0">
+          <div class="form-field" style="margin-bottom:0;margin-top:8px;padding-top:16px;border-top:1px solid var(--border-subtle)">
             <div class="form-label"><span class="required">*</span> Include completed tasks up to</div>
             <select class="form-select" id="tasksUpto">
               <option value="" disabled selected style="color:#a8a8a8">Select...</option>
@@ -1255,7 +1255,7 @@
         <div class="task-config-body">
           <!-- Filter builder -->
           <div class="task-filter-section">
-            <div class="task-filter-section-label">Show tasks...</div>
+            <div class="task-filter-section-label">Include tasks</div>
             <div class="task-filter-rows" id="schedTaskFilterRows">
               <div class="task-filter-row">
                 <span class="task-filter-connector">Where</span>
@@ -1275,7 +1275,7 @@
             </div>
           </div>
           <!-- Include tasks upto -->
-          <div class="form-field" style="margin-bottom:0">
+          <div class="form-field" style="margin-bottom:0;margin-top:8px;padding-top:16px;border-top:1px solid var(--border-subtle)">
             <div class="form-label"><span class="required">*</span> Include completed tasks up to</div>
             <select class="form-select" id="schedTasksUpto">
               <option value="" disabled selected style="color:#a8a8a8">Select...</option>
