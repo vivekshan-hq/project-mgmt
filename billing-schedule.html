@@ -420,7 +420,7 @@
     }
     .task-config-panel {
       position: relative; z-index: 1;
-      width: 460px; background: var(--surface);
+      width: 500px; background: var(--surface);
       border: 1px solid var(--border); border-radius: var(--radius);
       box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
     }
@@ -441,6 +441,25 @@
       padding: 12px 16px; border-top: 1px solid var(--border);
       display: flex; justify-content: flex-end;
     }
+
+    /* Task filter builder */
+    .task-filter-section { display: flex; flex-direction: column; gap: 10px; }
+    .task-filter-section-label { font-size: 11px; font-weight: 600; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+    .task-filter-rows { display: flex; flex-direction: column; gap: 6px; }
+    .task-filter-row { display: flex; align-items: center; gap: 6px; }
+    .task-filter-drag { color: var(--text-4); cursor: grab; flex-shrink: 0; }
+    .task-filter-drag:active { cursor: grabbing; }
+    .task-filter-connector { font-size: 12px; font-weight: 590; color: var(--text-3); width: 36px; flex-shrink: 0; text-align: right; }
+    .task-filter-field { flex: 0 0 118px !important; width: 118px !important; height: 30px !important; font-size: 13px !important; padding: 0 22px 0 8px !important; background-position: right 6px center !important; }
+    .task-filter-op { flex: 0 0 106px !important; width: 106px !important; height: 30px !important; font-size: 13px !important; padding: 0 22px 0 8px !important; background-position: right 6px center !important; }
+    .task-filter-value { flex: 1; min-width: 0; height: 30px !important; font-size: 13px !important; padding: 0 22px 0 8px !important; background-position: right 6px center !important; }
+    .task-filter-value-chip { display: inline-flex; align-items: center; height: 30px; padding: 0 10px; border: 1px solid; border-radius: var(--radius-sm); font-size: 12px; font-weight: 590; flex: 1; }
+    .task-filter-chip-green { background: #defbe6; color: var(--success); border-color: #a7f3c0; }
+    .task-filter-remove { background: none; border: none; cursor: pointer; color: var(--text-4); padding: 2px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
+    .task-filter-remove:hover { background: var(--bg); color: var(--text-2); }
+    .task-filter-add-actions { display: flex; gap: 16px; }
+    .task-filter-add-btn { background: none; border: none; cursor: pointer; font-size: 12px; color: var(--brand); padding: 0; font-family: inherit; }
+    .task-filter-add-btn:hover { text-decoration: underline; }
 
     /* Import description banner */
     .li-import-desc {
@@ -926,6 +945,55 @@
           </button>
         </div>
         <div class="task-config-body">
+          <!-- Filter builder -->
+          <div class="task-filter-section">
+            <div class="task-filter-section-label">Task filters</div>
+            <div class="task-filter-rows" id="taskFilterRows">
+              <div class="task-filter-row">
+                <svg class="task-filter-drag" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2.5" cy="2" r="1.5"/><circle cx="7.5" cy="2" r="1.5"/><circle cx="2.5" cy="7" r="1.5"/><circle cx="7.5" cy="7" r="1.5"/><circle cx="2.5" cy="12" r="1.5"/><circle cx="7.5" cy="12" r="1.5"/></svg>
+                <span class="task-filter-connector">Where</span>
+                <select class="form-select task-filter-field">
+                  <option value="status" selected>Status</option>
+                  <option value="revrec_task">RevRec Task</option>
+                  <option value="phase">Phase</option>
+                  <option value="task_type">Task type</option>
+                  <option value="assignee">Assignee</option>
+                </select>
+                <select class="form-select task-filter-op">
+                  <option value="is_exactly" selected>is exactly</option>
+                  <option value="is_not">is not</option>
+                  <option value="is_true">is true</option>
+                  <option value="is_false">is false</option>
+                </select>
+                <div class="task-filter-value-chip task-filter-chip-green">Completed</div>
+              </div>
+              <div class="task-filter-row">
+                <svg class="task-filter-drag" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2.5" cy="2" r="1.5"/><circle cx="7.5" cy="2" r="1.5"/><circle cx="2.5" cy="7" r="1.5"/><circle cx="7.5" cy="7" r="1.5"/><circle cx="2.5" cy="12" r="1.5"/><circle cx="7.5" cy="12" r="1.5"/></svg>
+                <span class="task-filter-connector">And</span>
+                <select class="form-select task-filter-field">
+                  <option value="status">Status</option>
+                  <option value="revrec_task" selected>RevRec Task</option>
+                  <option value="phase">Phase</option>
+                  <option value="task_type">Task type</option>
+                  <option value="assignee">Assignee</option>
+                </select>
+                <select class="form-select task-filter-op">
+                  <option value="is_exactly">is exactly</option>
+                  <option value="is_not">is not</option>
+                  <option value="is_true" selected>is true</option>
+                  <option value="is_false">is false</option>
+                </select>
+                <button class="task-filter-remove" onclick="this.closest('.task-filter-row').remove()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="task-filter-add-actions">
+              <button class="task-filter-add-btn" onclick="addTaskFilterRow('taskFilterRows')">+ Add filter</button>
+              <button class="task-filter-add-btn" onclick="addTaskFilterGroup('taskFilterRows')">+ Add filter group</button>
+            </div>
+          </div>
+          <!-- Include tasks upto -->
           <div class="form-field" style="margin-bottom:0">
             <div class="form-label"><span class="required">*</span> Include completed tasks up to</div>
             <select class="form-select" id="tasksUpto">
@@ -936,24 +1004,6 @@
               <option value="prev_month_end">Last day of the previous month</option>
               <option value="prev_quarter_end">Last day of the previous quarter</option>
               <option value="custom_offset">Custom offset from invoice creation date</option>
-            </select>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
-            <div>
-              <div style="font-size:13px;font-weight:590;color:var(--text-1)">RevRec Task</div>
-              <div style="font-size:12px;color:var(--text-3);margin-top:2px">Select tasks which are part of Milestone RevRec plans</div>
-            </div>
-            <button class="revrec-toggle" id="revrecToggle" onclick="toggleRevRec()" role="switch" aria-checked="false">
-              <span class="revrec-thumb"></span>
-            </button>
-          </div>
-          <div class="form-field" style="margin-bottom:0">
-            <div class="form-label"><span class="required">*</span> Group tasks in line item descriptions by</div>
-            <select class="form-select" id="tasksGroupBy">
-              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
-              <option value="project">Project</option>
-              <option value="phase">Phase</option>
-              <option value="no_group">Show each task (Don't group)</option>
             </select>
           </div>
         </div>
@@ -1229,6 +1279,55 @@
           </button>
         </div>
         <div class="task-config-body">
+          <!-- Filter builder -->
+          <div class="task-filter-section">
+            <div class="task-filter-section-label">Task filters</div>
+            <div class="task-filter-rows" id="schedTaskFilterRows">
+              <div class="task-filter-row">
+                <svg class="task-filter-drag" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2.5" cy="2" r="1.5"/><circle cx="7.5" cy="2" r="1.5"/><circle cx="2.5" cy="7" r="1.5"/><circle cx="7.5" cy="7" r="1.5"/><circle cx="2.5" cy="12" r="1.5"/><circle cx="7.5" cy="12" r="1.5"/></svg>
+                <span class="task-filter-connector">Where</span>
+                <select class="form-select task-filter-field">
+                  <option value="status" selected>Status</option>
+                  <option value="revrec_task">RevRec Task</option>
+                  <option value="phase">Phase</option>
+                  <option value="task_type">Task type</option>
+                  <option value="assignee">Assignee</option>
+                </select>
+                <select class="form-select task-filter-op">
+                  <option value="is_exactly" selected>is exactly</option>
+                  <option value="is_not">is not</option>
+                  <option value="is_true">is true</option>
+                  <option value="is_false">is false</option>
+                </select>
+                <div class="task-filter-value-chip task-filter-chip-green">Completed</div>
+              </div>
+              <div class="task-filter-row">
+                <svg class="task-filter-drag" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2.5" cy="2" r="1.5"/><circle cx="7.5" cy="2" r="1.5"/><circle cx="2.5" cy="7" r="1.5"/><circle cx="7.5" cy="7" r="1.5"/><circle cx="2.5" cy="12" r="1.5"/><circle cx="7.5" cy="12" r="1.5"/></svg>
+                <span class="task-filter-connector">And</span>
+                <select class="form-select task-filter-field">
+                  <option value="status">Status</option>
+                  <option value="revrec_task" selected>RevRec Task</option>
+                  <option value="phase">Phase</option>
+                  <option value="task_type">Task type</option>
+                  <option value="assignee">Assignee</option>
+                </select>
+                <select class="form-select task-filter-op">
+                  <option value="is_exactly">is exactly</option>
+                  <option value="is_not">is not</option>
+                  <option value="is_true" selected>is true</option>
+                  <option value="is_false">is false</option>
+                </select>
+                <button class="task-filter-remove" onclick="this.closest('.task-filter-row').remove()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="task-filter-add-actions">
+              <button class="task-filter-add-btn" onclick="addTaskFilterRow('schedTaskFilterRows')">+ Add filter</button>
+              <button class="task-filter-add-btn" onclick="addTaskFilterGroup('schedTaskFilterRows')">+ Add filter group</button>
+            </div>
+          </div>
+          <!-- Include tasks upto -->
           <div class="form-field" style="margin-bottom:0">
             <div class="form-label"><span class="required">*</span> Include completed tasks up to</div>
             <select class="form-select" id="schedTasksUpto">
@@ -1239,24 +1338,6 @@
               <option value="prev_month_end">Last day of the previous month</option>
               <option value="prev_quarter_end">Last day of the previous quarter</option>
               <option value="custom_offset">Custom offset from invoice creation date</option>
-            </select>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
-            <div>
-              <div style="font-size:13px;font-weight:590;color:var(--text-1)">RevRec Task</div>
-              <div style="font-size:12px;color:var(--text-3);margin-top:2px">Select tasks which are part of Milestone RevRec plans</div>
-            </div>
-            <button class="revrec-toggle" id="schedRevrecToggle" onclick="toggleSchedRevRec()" role="switch" aria-checked="false">
-              <span class="revrec-thumb"></span>
-            </button>
-          </div>
-          <div class="form-field" style="margin-bottom:0">
-            <div class="form-label"><span class="required">*</span> Group tasks in line item descriptions by</div>
-            <select class="form-select" id="schedTasksGroupBy">
-              <option value="" disabled selected style="color:#a8a8a8">Select...</option>
-              <option value="project">Project</option>
-              <option value="phase">Phase</option>
-              <option value="no_group">Show each task (Don't group)</option>
             </select>
           </div>
         </div>
@@ -1467,12 +1548,6 @@
     document.getElementById('taskConfigOverlay').classList.add('hidden');
   }
 
-  function toggleRevRec() {
-    const btn = document.getElementById('revrecToggle');
-    const isOn = btn.getAttribute('aria-checked') === 'true';
-    btn.setAttribute('aria-checked', String(!isOn));
-  }
-
   // Expense config
   function openExpenseConfig() {
     closeTaskConfig();
@@ -1549,22 +1624,14 @@
 
   function applyTaskConfig() {
     const uptoEl = document.getElementById('tasksUpto');
-    const groupEl = document.getElementById('tasksGroupBy');
-    const upto = uptoEl.value, group = groupEl.value;
-
-    if (!upto || !group) {
-      uptoEl.style.borderColor = !upto ? '#da1e28' : '';
-      groupEl.style.borderColor = !group ? '#da1e28' : '';
+    const upto = uptoEl.value;
+    if (!upto) {
+      uptoEl.style.borderColor = '#da1e28';
       return;
     }
-    [uptoEl, groupEl].forEach(el => el.style.borderColor = '');
-
+    uptoEl.style.borderColor = '';
     const uptoLabels = { invoice_creation: 'invoice creation date', '1_day_before': '1 day before invoice creation date', prev_week_end: 'end of previous week', prev_month_end: 'last day of the previous month', prev_quarter_end: 'last day of the previous quarter', custom_offset: 'custom offset from invoice creation date' };
-    const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'task (ungrouped)' };
-    const isRevRec = document.getElementById('revrecToggle').getAttribute('aria-checked') === 'true';
-    const taskLabel = isRevRec ? 'RevRec tasks' : 'tasks';
-    const desc = `All completed but uninvoiced ${taskLabel} up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`;
-
+    const desc = `All completed but uninvoiced tasks up to ${uptoLabels[upto] || upto} will appear here`;
     addSummaryRow(desc, 'task');
     closeTaskConfig();
   }
@@ -1715,26 +1782,16 @@
   function openSchedTaskConfig() { document.getElementById('schedTaskConfigOverlay').classList.remove('hidden'); }
   function closeSchedTaskConfig() { document.getElementById('schedTaskConfigOverlay').classList.add('hidden'); }
 
-  function toggleSchedRevRec() {
-    const btn = document.getElementById('schedRevrecToggle');
-    btn.setAttribute('aria-checked', String(btn.getAttribute('aria-checked') !== 'true'));
-  }
-
   function applySchedTaskConfig() {
     const uptoEl = document.getElementById('schedTasksUpto');
-    const groupEl = document.getElementById('schedTasksGroupBy');
-    const upto = uptoEl.value, group = groupEl.value;
-    if (!upto || !group) {
-      uptoEl.style.borderColor = !upto ? '#da1e28' : '';
-      groupEl.style.borderColor = !group ? '#da1e28' : '';
+    const upto = uptoEl.value;
+    if (!upto) {
+      uptoEl.style.borderColor = '#da1e28';
       return;
     }
-    [uptoEl, groupEl].forEach(el => el.style.borderColor = '');
+    uptoEl.style.borderColor = '';
     const uptoLabels = { invoice_creation: 'invoice creation date', '1_day_before': '1 day before invoice creation date', prev_week_end: 'end of previous week', prev_month_end: 'last day of the previous month', prev_quarter_end: 'last day of the previous quarter', custom_offset: 'custom offset from invoice creation date' };
-    const groupLabels = { project: 'project', phase: 'phase', task: 'task', no_group: 'task (ungrouped)' };
-    const isSchedRevRec = document.getElementById('schedRevrecToggle').getAttribute('aria-checked') === 'true';
-    const schedTaskLabel = isSchedRevRec ? 'RevRec tasks' : 'tasks';
-    addSchedSummaryRow(`All completed but uninvoiced ${schedTaskLabel} up to ${uptoLabels[upto] || upto}, grouped by ${groupLabels[group] || group}, will appear here`, 'task');
+    addSchedSummaryRow(`All completed but uninvoiced tasks up to ${uptoLabels[upto] || upto} will appear here`, 'task');
     closeSchedTaskConfig();
   }
 
@@ -1758,6 +1815,62 @@
   }
 
   function saveScheduleDrawer() { closeScheduleDrawer(); }
+
+  // ── TASK FILTER BUILDER ──
+  const _filterFieldOptions = `
+    <option value="" disabled selected style="color:#a8a8a8">Field...</option>
+    <option value="status">Status</option>
+    <option value="revrec_task">RevRec Task</option>
+    <option value="phase">Phase</option>
+    <option value="task_type">Task type</option>
+    <option value="assignee">Assignee</option>`;
+
+  const _filterDragIcon = `<svg class="task-filter-drag" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2.5" cy="2" r="1.5"/><circle cx="7.5" cy="2" r="1.5"/><circle cx="2.5" cy="7" r="1.5"/><circle cx="7.5" cy="7" r="1.5"/><circle cx="2.5" cy="12" r="1.5"/><circle cx="7.5" cy="12" r="1.5"/></svg>`;
+  const _filterRemoveBtn = `<button class="task-filter-remove" onclick="this.closest('.task-filter-row').remove()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+
+  function addTaskFilterRow(containerId) {
+    const rows = document.getElementById(containerId);
+    const isFirst = rows.children.length === 0;
+    const div = document.createElement('div');
+    div.className = 'task-filter-row';
+    div.innerHTML = `${_filterDragIcon}
+      <span class="task-filter-connector">${isFirst ? 'Where' : 'And'}</span>
+      <select class="form-select task-filter-field" onchange="onTaskFilterFieldChange(this)">${_filterFieldOptions}</select>
+      <select class="form-select task-filter-op">
+        <option value="is_exactly" selected>is exactly</option>
+        <option value="is_not">is not</option>
+        <option value="is_true">is true</option>
+        <option value="is_false">is false</option>
+      </select>
+      <select class="form-select task-filter-value">
+        <option value="" disabled selected style="color:#a8a8a8">Value...</option>
+        <option value="completed">Completed</option>
+        <option value="in_progress">In progress</option>
+        <option value="not_started">Not started</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      ${_filterRemoveBtn}`;
+    rows.appendChild(div);
+  }
+
+  function addTaskFilterGroup(containerId) {
+    addTaskFilterRow(containerId);
+  }
+
+  function onTaskFilterFieldChange(select) {
+    const row = select.closest('.task-filter-row');
+    const op = row.querySelector('.task-filter-op');
+    const val = row.querySelector('.task-filter-value');
+    if (select.value === 'revrec_task') {
+      op.innerHTML = `<option value="is_true" selected>is true</option><option value="is_false">is false</option>`;
+      if (val) val.style.visibility = 'hidden';
+    } else {
+      if (!op.querySelector('[value="is_exactly"]')) {
+        op.innerHTML = `<option value="is_exactly" selected>is exactly</option><option value="is_not">is not</option><option value="contains">contains</option><option value="is_true">is true</option><option value="is_false">is false</option>`;
+      }
+      if (val) val.style.visibility = 'visible';
+    }
+  }
 
   // ── SMARTFILL EDITOR ──
   const SF_FIELDS = [
