@@ -325,14 +325,17 @@
     .tpl-alloc-line { font-size: 13px; font-weight: 500; color: var(--text-1); }
     .tpl-alloc-line.muted { color: var(--text-3); font-weight: 400; }
     /* Row diff table (Sheet Templates — added rows preview) */
-    .tpl-row-diff { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
-    .tpl-row-diff-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .tpl-row-diff-table th { background: var(--bg); padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); white-space: nowrap; }
-    .tpl-row-diff-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-subtle); color: var(--text-2); white-space: nowrap; }
-    .tpl-row-diff-row:last-child td { border-bottom: none; }
-    .tpl-row-diff-row.row-added td { background: #f0fdf4; }
-    .tpl-row-diff-row.row-added td:first-child { border-left: 3px solid #15803d; }
-    .row-added-marker { font-size: 11px; font-weight: 700; color: #15803d; margin-right: 3px; }
+    /* Sheet diff modal — tabs */
+    .sheet-tab-bar { display: flex; gap: 0; padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg); flex-shrink: 0; overflow-x: auto; }
+    .sheet-tab { padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--text-3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.1s; white-space: nowrap; }
+    .sheet-tab:hover { color: var(--text-1); }
+    .sheet-tab.active { color: var(--text-1); border-bottom-color: var(--accent, #4f46e5); }
+    .sheet-diff-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .sheet-diff-table th { background: var(--bg); padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+    .sheet-diff-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-subtle); color: var(--text-2); white-space: nowrap; }
+    .sheet-diff-table tbody tr:last-child td { border-bottom: none; }
+    .sheet-diff-table tbody tr.row-added td { background: #f0fdf4; }
+    .sheet-diff-table tbody tr.row-added td:first-child { border-left: 3px solid #15803d; }
 
     /* Drawer fields */
     .df { display: flex; flex-direction: column; gap: 6px; }
@@ -1302,8 +1305,9 @@
     'sheet-apr11': {
       sections: [
         {
-          title: 'Rows — Sheet 1',
+          title: 'Rows',
           type: 'row-diff',
+          tabName: 'Sheet 1',
           colHeaders: ['Risk', 'Category', 'Owner', 'Likelihood', 'Impact'],
           rows: [
             { added: false, values: ['Scope creep',              'Project',   'Project Manager', 'High',   'High'] },
@@ -1394,6 +1398,113 @@
 
   };
 
+  const sheetDiffData = {
+    'sheet-apr11': {
+      tabs: ['Sheet 1', 'Sheet 2', 'Summary'],
+      before: {
+        'Sheet 1': {
+          cols: ['Risk', 'Category', 'Owner', 'Likelihood', 'Impact'],
+          rows: [
+            ['Scope creep',              'Project',  'Project Manager', 'High',   'High'],
+            ['Key resource unavailable', 'Resource', 'Account Manager', 'Medium', 'High']
+          ]
+        },
+        'Sheet 2': {
+          cols: ['Item', 'Status', 'Notes'],
+          rows: [
+            ['Setup environment',  'Done',        '—'],
+            ['Configure pipeline', 'In progress', '—']
+          ]
+        },
+        'Summary': {
+          cols: ['Metric', 'Value'],
+          rows: [
+            ['Total risks',    '2'],
+            ['High impact',    '2'],
+            ['Low likelihood', '0']
+          ]
+        }
+      },
+      after: {
+        'Sheet 1': {
+          cols: ['Risk', 'Category', 'Owner', 'Likelihood', 'Impact'],
+          rows: [
+            { values: ['Scope creep',              'Project',   'Project Manager', 'High',   'High'],     added: false },
+            { values: ['Key resource unavailable', 'Resource',  'Account Manager', 'Medium', 'High'],     added: false },
+            { values: ['Data migration failure',   'Technical', 'Tech Lead',       'Low',    'Critical'], added: true  },
+            { values: ['Customer sign-off delay',  'External',  'CSM',             'Medium', 'Medium'],   added: true  },
+            { values: ['Budget overrun',           'Financial', 'Project Manager', 'Low',    'High'],     added: true  }
+          ]
+        },
+        'Sheet 2': {
+          cols: ['Item', 'Status', 'Notes'],
+          rows: [
+            { values: ['Setup environment',  'Done',        '—'], added: false },
+            { values: ['Configure pipeline', 'In progress', '—'], added: false }
+          ]
+        },
+        'Summary': {
+          cols: ['Metric', 'Value'],
+          rows: [
+            { values: ['Total risks',    '5'], added: false },
+            { values: ['High impact',    '3'], added: false },
+            { values: ['Low likelihood', '3'], added: false }
+          ]
+        }
+      }
+    }
+  };
+
+  function buildSheetPane(tplId, tabName, side) {
+    const data = sheetDiffData[tplId];
+    const tabData = data[side][tabName];
+    if (!tabData) return '<div style="padding:20px 16px;color:var(--text-3);font-size:13px;">No data for this tab.</div>';
+    const headerCells = tabData.cols.map(c => `<th>${c}</th>`).join('');
+    const rowsHTML = tabData.rows.map(r => {
+      if (side === 'before') {
+        return `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`;
+      } else {
+        return `<tr class="${r.added ? 'row-added' : ''}">${r.values.map(v => `<td>${v}</td>`).join('')}</tr>`;
+      }
+    }).join('');
+    return `<table class="sheet-diff-table"><thead><tr>${headerCells}</tr></thead><tbody>${rowsHTML}</tbody></table>`;
+  }
+
+  function buildSheetDiffBody(tplId, activeTab) {
+    const data = sheetDiffData[tplId];
+    const tabBar = data.tabs.map(t =>
+      `<button class="sheet-tab${t === activeTab ? ' active' : ''}" onclick="switchSheetTab('${t}','${tplId}')">${t}</button>`
+    ).join('');
+    return `
+      <div class="diff-pane">
+        <div class="diff-pane-header">Before</div>
+        <div class="sheet-tab-bar">${tabBar}</div>
+        <div class="diff-pane-scroll" id="sheet-content-before">${buildSheetPane(tplId, activeTab, 'before')}</div>
+      </div>
+      <div class="diff-pane">
+        <div class="diff-pane-header">After</div>
+        <div class="sheet-tab-bar">${tabBar}</div>
+        <div class="diff-pane-scroll" id="sheet-content-after">${buildSheetPane(tplId, activeTab, 'after')}</div>
+      </div>`;
+  }
+
+  function openSheetDiffModal(tabName, tplId) {
+    const data = sheetDiffData[tplId];
+    if (!data) return;
+    document.getElementById('diff-modal-title').textContent = 'Sheet — row changes';
+    document.getElementById('diff-modal-meta').textContent = 'Tab: ' + tabName;
+    document.getElementById('diff-modal-body').innerHTML = buildSheetDiffBody(tplId, tabName);
+    document.getElementById('diff-modal').classList.add('open');
+  }
+
+  function switchSheetTab(tabName, tplId) {
+    document.querySelectorAll('.sheet-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent === tabName);
+    });
+    document.getElementById('sheet-content-before').innerHTML = buildSheetPane(tplId, tabName, 'before');
+    document.getElementById('sheet-content-after').innerHTML  = buildSheetPane(tplId, tabName, 'after');
+  }
+
   function buildTplDiffHTML(tplId, source) {
     const tc = tplChanges[tplId];
     if (!tc) return '';
@@ -1402,28 +1513,14 @@
 
     return tc.sections.map(section => {
       if (section.type === 'row-diff') {
-        const addedCount = section.rows.filter(r => r.added).length;
-        const pill = addedCount ? `<span class="tpl-diff-count-pill added">+${addedCount} rows added</span>` : '';
-        const headerCells = section.colHeaders.map(h => `<th>${h}</th>`).join('');
-        const rowCells = section.rows.map(r => {
-          const cls = r.added ? 'tpl-row-diff-row row-added' : 'tpl-row-diff-row';
-          const cells = r.values.map((v, i) =>
-            i === 0
-              ? `<td>${r.added ? `<span class="row-added-marker">+</span>` : ''}${v}</td>`
-              : `<td>${v}</td>`
-          ).join('');
-          return `<tr class="${cls}">${cells}</tr>`;
-        }).join('');
+        const tabName = section.tabName || section.title;
         return `<div class="tpl-diff-section">
           <div class="tpl-diff-section-header">
-            <span class="tpl-diff-section-title">${section.title}</span>
-            ${pill}
+            <span class="tpl-diff-section-title">Rows</span>
           </div>
-          <div class="tpl-row-diff">
-            <table class="tpl-row-diff-table">
-              <thead><tr>${headerCells}</tr></thead>
-              <tbody>${rowCells}</tbody>
-            </table>
+          <div class="rich-text-note">
+            <span class="rich-text-note-text">Content changed in sheet tab <strong>${tabName}</strong></span>
+            <button class="rich-text-cta" onclick="openSheetDiffModal('${tabName}', '${tplId}')">View changes side by side</button>
           </div>
         </div>`;
       }
@@ -1754,7 +1851,11 @@
     document.getElementById('custom-range').classList.toggle('open', input.value === 'custom');
   }
 
+  let _origDiffBody = null;
   function openDiffModal(setting, section, datetime) {
+    const body = document.getElementById('diff-modal-body');
+    if (!_origDiffBody) _origDiffBody = body.innerHTML;
+    body.innerHTML = _origDiffBody;
     document.getElementById('diff-modal-title').textContent = setting + ' — content changes';
     document.getElementById('diff-modal-meta').textContent = section + ' · ' + datetime;
     document.getElementById('diff-modal').classList.add('open');
