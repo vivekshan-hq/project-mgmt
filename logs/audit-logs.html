@@ -324,6 +324,15 @@
     .tpl-alloc-summary { display: flex; flex-direction: column; gap: 5px; }
     .tpl-alloc-line { font-size: 13px; font-weight: 500; color: var(--text-1); }
     .tpl-alloc-line.muted { color: var(--text-3); font-weight: 400; }
+    /* Row diff table (Sheet Templates — added rows preview) */
+    .tpl-row-diff { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+    .tpl-row-diff-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .tpl-row-diff-table th { background: var(--bg); padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .tpl-row-diff-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-subtle); color: var(--text-2); white-space: nowrap; }
+    .tpl-row-diff-row:last-child td { border-bottom: none; }
+    .tpl-row-diff-row.row-added td { background: #f0fdf4; }
+    .tpl-row-diff-row.row-added td:first-child { border-left: 3px solid #15803d; }
+    .row-added-marker { font-size: 11px; font-weight: 700; color: #15803d; margin-right: 3px; }
 
     /* Drawer fields */
     .df { display: flex; flex-direction: column; gap: 6px; }
@@ -853,6 +862,19 @@
           <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
         </tr>
 
+        <tr data-user="VS" data-source="App" data-section="Sheet Templates" data-days="7" data-template="true"
+            data-tpl-name="Risk Register"
+            data-setting="Risk Register" data-action="Updated"
+            data-change-label="Updated"
+            data-tpl-id="sheet-apr11"
+            onclick="openDetail(this)">
+          <td class="td-date">Apr 11, 2026, 9:00 AM</td>
+          <td class="td-what"><div class="what-name">Risk Register</div><div class="what-section">Sheet Templates</div></td>
+          <td class="td-source">App</td>
+          <td class="td-action"><span class="action-badge badge-updated">Updated</span></td>
+          <td class="td-by"><div class="by-user"><div class="by-av" style="background:#0f62fe;">VS</div><span class="by-name">Vivek S</span></div></td>
+        </tr>
+
         <tr data-user="SA" data-source="App" data-section="Sheet Templates" data-days="8" data-template="true"
             data-tpl-name="Project Tracker"
             data-setting="Project Tracker" data-action="Updated"
@@ -1277,6 +1299,31 @@
     },
 
     /* ── Sheet Templates ── */
+    'sheet-apr11': {
+      sections: [
+        {
+          title: 'Rows — Sheet 1',
+          type: 'row-diff',
+          colHeaders: ['Risk', 'Category', 'Owner', 'Likelihood', 'Impact'],
+          rows: [
+            { added: false, values: ['Scope creep',              'Project',   'Project Manager', 'High',   'High'] },
+            { added: false, values: ['Key resource unavailable', 'Resource',  'Account Manager', 'Medium', 'High'] },
+            { added: true,  values: ['Data migration failure',   'Technical', 'Tech Lead',       'Low',    'Critical'] },
+            { added: true,  values: ['Customer sign-off delay',  'External',  'CSM',             'Medium', 'Medium'] },
+            { added: true,  values: ['Budget overrun',           'Financial', 'Project Manager', 'Low',    'High'] }
+          ]
+        },
+        {
+          title: 'Fields', colHeader: 'Field',
+          items: [
+            { action: 'added',    name: 'Mitigation Plan', context: 'Type: Long text' },
+            { action: 'added',    name: 'Review Date',     context: 'Type: Date' },
+            { action: 'modified', name: 'Category',        context: 'Type: Dropdown', whatChanged: 'Options count', prod: '3 options', sandbox: '5 options' },
+            { action: 'deleted',  name: 'Legacy Notes',    context: 'Type: Text' }
+          ]
+        }
+      ]
+    },
     'sheet-apr10': {
       sections: [
         {
@@ -1354,6 +1401,33 @@
     const sandboxHeader = 'New value';
 
     return tc.sections.map(section => {
+      if (section.type === 'row-diff') {
+        const addedCount = section.rows.filter(r => r.added).length;
+        const pill = addedCount ? `<span class="tpl-diff-count-pill added">+${addedCount} rows added</span>` : '';
+        const headerCells = section.colHeaders.map(h => `<th>${h}</th>`).join('');
+        const rowCells = section.rows.map(r => {
+          const cls = r.added ? 'tpl-row-diff-row row-added' : 'tpl-row-diff-row';
+          const cells = r.values.map((v, i) =>
+            i === 0
+              ? `<td>${r.added ? `<span class="row-added-marker">+</span>` : ''}${v}</td>`
+              : `<td>${v}</td>`
+          ).join('');
+          return `<tr class="${cls}">${cells}</tr>`;
+        }).join('');
+        return `<div class="tpl-diff-section">
+          <div class="tpl-diff-section-header">
+            <span class="tpl-diff-section-title">${section.title}</span>
+            ${pill}
+          </div>
+          <div class="tpl-row-diff">
+            <table class="tpl-row-diff-table">
+              <thead><tr>${headerCells}</tr></thead>
+              <tbody>${rowCells}</tbody>
+            </table>
+          </div>
+        </div>`;
+      }
+
       const hasWhat       = section.items.some(i => i.action === 'modified' && i.whatChanged);
       const cols          = hasWhat ? 5 : 4;
       const addedCount    = section.items.filter(i => i.action === 'added').length;
