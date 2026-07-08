@@ -507,12 +507,15 @@ const SKILL_GROUPS = [
         id: 'certifications', label: 'Certifications',
         fields: [
           { id: 'cert', label: 'Certification_update', type: 'single_text', values: ['AWS Certified','Azure Certified','GCP Certified','PMP','CISSP'] },
+          { id: 'cert_score', label: 'Certification Score', type: 'number' },
+          { id: 'cert_expiry', label: 'Certification Expiry', type: 'date' },
         ]
       },
       {
         id: 'miscellaneous', label: 'Miscellaneous',
         fields: [
           { id: 'region', label: 'Region', type: 'single_text', values: ['US','EU','APAC','LATAM'] },
+          { id: 'tools', label: 'Tools', type: 'multi_text', values: ['Salesforce','Tableau','Jira','Figma','Snowflake','Looker'] },
         ]
       }
     ]
