@@ -223,6 +223,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 .fl{display:block;font-size:13px;font-weight:500;color:var(--t1);margin-bottom:5px}
 .fl .req{color:var(--err)}
 .fi{width:100%;padding:7px 11px;border:1px solid var(--bdr);border-radius:5px;font-size:14px;color:var(--t1);background:var(--bg);font-family:inherit}
+.fi-err,.msd-err .msd-trigger{border-color:var(--err)!important;animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .fi:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-bg)}
 .fh{font-size:12px;color:var(--t3);margin-top:4px}
 .fsel{width:100%;padding:7px 30px 7px 11px;border:1px solid var(--bdr);border-radius:5px;font-size:14px;color:var(--t1);background:var(--bg);font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236f6f6f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
@@ -678,7 +680,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <th>Allowed permission sets <span class="new-badge">Updated</span></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="partners-tbody">
               <tr onclick="go('s4','pb4')">
                 <td><div class="row" style="gap:9px"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Crect width='26' height='26' rx='4' fill='%23e8f5e9'/%3E%3Ctext x='13' y='18' text-anchor='middle' font-size='12' font-weight='700' fill='%23166534'%3EG%3C/text%3E%3C/svg%3E" width="26" height="26" style="border-radius:4px"><span>ajay res</span></div></td>
                 <td style="color:var(--t2)">ajaykanna+res@rocketlane.com</td>
@@ -748,14 +750,14 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
     <div class="screen" id="s4">
       <div class="ph">
         <div class="ph-bc">
-          <a onclick="go('s3','pb3')">Partners</a><span class="sep">/</span>
-          <span>ajay res</span>
+          <a onclick="go('s3','pb1')">Partners</a><span class="sep">/</span>
+          <span id="s4-bc-name">ajay res</span>
         </div>
         <div class="ph-row">
           <div style="width:28px;height:28px;border-radius:5px;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="1.6" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M12 12v4M9 14h6"/></svg>
           </div>
-          <div class="ph-title">ajay res</div>
+          <div id="s4-ph-title" class="ph-title">ajay res</div>
         </div>
       </div>
 
@@ -768,7 +770,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <svg width="30" height="30" fill="none" stroke="var(--t3)" stroke-width="1.4" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
           </div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
-            <span style="font-size:20px;font-weight:600;color:var(--t1)">ajay res</span>
+            <span id="s4-name" style="font-size:20px;font-weight:600;color:var(--t1)">ajay res</span>
             <a onclick="openMo('mo-new-partner')" style="color:var(--accent);font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;text-decoration:none">
               Edit
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -789,12 +791,12 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 
             <div class="info-row">
               <div class="info-label">Website</div>
-              <div class="info-value" style="font-weight:400;color:var(--tph)">—</div>
+              <div id="s4-website" class="info-value" style="font-weight:400;color:var(--tph)">—</div>
             </div>
 
             <div class="info-row">
               <div class="info-label">Primary partner admin</div>
-              <div class="info-value" style="font-weight:400">ajaykanna+res@rocketlane.com</div>
+              <div id="s4-admin" class="info-value" style="font-weight:400">ajaykanna+res@rocketlane.com</div>
             </div>
 
             <div class="info-row">
@@ -802,7 +804,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 Licenses used
                 <svg class="ihi" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
               </div>
-              <div class="info-value">1 / 1</div>
+              <div id="s4-licenses" class="info-value">1 / 1</div>
             </div>
 
             <div class="info-row">
@@ -820,12 +822,12 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 Mask this partner
                 <svg class="ihi" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
               </div>
-              <div class="info-value"><input type="checkbox" style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer"></div>
+              <div class="info-value"><input id="s4-mask" type="checkbox" style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer"></div>
             </div>
 
             <div class="info-row">
               <div class="info-label">Can track time</div>
-              <div class="info-value"><input type="checkbox" style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer"></div>
+              <div class="info-value"><input id="s4-track" type="checkbox" style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer"></div>
             </div>
 
             <div class="info-row" style="align-items:flex-start">
@@ -834,7 +836,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <span class="new-badge" style="margin-left:2px">New</span>
               </div>
               <div class="info-value" style="padding:10px 16px;font-weight:400">
-                <div class="chips" style="gap:5px">
+                <div id="s4-psets" class="chips" style="gap:5px">
                   <span class="chip chip-p">Permissive Admin</span>
                 </div>
               </div>
@@ -874,17 +876,17 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 
       <div class="ff">
         <label class="fl"><span class="req">*</span>Name</label>
-        <input class="fi" placeholder="eg. Modert LLC – Integration Partner">
+        <input id="np-name" class="fi" placeholder="eg. Modert LLC – Integration Partner">
       </div>
 
       <div class="fg2">
         <div class="ff">
           <label class="fl">Website</label>
-          <input class="fi" placeholder="rocketlane.com">
+          <input id="np-website" class="fi" placeholder="rocketlane.com">
         </div>
         <div class="ff">
           <label class="fl"><span class="req">*</span>Partner admin</label>
-          <input class="fi" placeholder="eg. user@rocketlane.com">
+          <input id="np-admin" class="fi" placeholder="eg. user@rocketlane.com">
           <div class="fh">Person who manages the partner company</div>
         </div>
       </div>
@@ -892,7 +894,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       <div class="fg2">
         <div class="ff">
           <label class="fl"><span class="req">*</span>No. of licenses</label>
-          <input class="fi" type="number" value="1" min="1">
+          <input id="np-licenses" class="fi" type="number" value="1" min="1">
         </div>
       </div>
 
@@ -943,18 +945,18 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <div class="row" style="gap:10px;margin-bottom:12px">
           <div><div style="font-size:14px;font-weight:500">Mask this partner</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Hide partner identity from other project participants</div></div>
           <div class="spacer"></div>
-          <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
+          <label class="sw"><input id="np-mask" type="checkbox"><span class="sw-track"></span></label>
         </div>
         <div class="row" style="gap:10px">
           <div><div style="font-size:14px;font-weight:500">Can track time</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Allow partner members to log time on tasks</div></div>
           <div class="spacer"></div>
-          <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
+          <label class="sw"><input id="np-track" type="checkbox"><span class="sw-track"></span></label>
         </div>
       </div>
     </div>
     <div class="mo-ft">
       <button class="btn btn-g" onclick="closeMo('mo-new-partner')">Back</button>
-      <button class="btn btn-p">Create Partner →</button>
+      <button class="btn btn-p" onclick="createPartner()">Create Partner →</button>
     </div>
   </div>
 </div>
@@ -1284,6 +1286,103 @@ function selectPset(item) {
   r.checked = true;
   item.parentElement.querySelectorAll('.ms-item').forEach(i => i.classList.remove('on'));
   item.classList.add('on');
+}
+
+/* ── Create partner ── */
+function createPartner() {
+  const name    = document.getElementById('np-name').value.trim();
+  const website = document.getElementById('np-website').value.trim();
+  const admin   = document.getElementById('np-admin').value.trim();
+  const licenses = parseInt(document.getElementById('np-licenses').value) || 1;
+  const mask  = document.getElementById('np-mask').checked;
+  const track = document.getElementById('np-track').checked;
+
+  const msd = document.getElementById('msd-np');
+  const psets = Array.from(msd.querySelectorAll('.msd-opt.on')).map(o => ({ val: o.dataset.val, label: o.dataset.label }));
+
+  // Validate required fields
+  let invalid = false;
+  ['np-name','np-admin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) {
+      el.classList.add('fi-err');
+      el.addEventListener('input', () => el.classList.remove('fi-err'), { once: true });
+      invalid = true;
+    }
+  });
+  if (!psets.length) {
+    msd.classList.add('msd-err');
+    setTimeout(() => msd.classList.remove('msd-err'), 1200);
+    invalid = true;
+  }
+  if (invalid) return;
+
+  function chipClass(val) {
+    if (val === 'pa' || val === 'pc') return 'chip-p';
+    if (val === 'ma' || val === 'mc') return 'chip-m';
+    if (val === 'ra' || val === 'rc') return 'chip-r';
+    return '';
+  }
+
+  // Avatar initials + color
+  const words = name.split(/\s+/).filter(Boolean);
+  const initials = ((words[0]?.[0] || '') + (words[1]?.[0] || '')).toUpperCase() || name[0].toUpperCase();
+  const palette = ['#0f62fe','#6929c4','#005d5d','#0043ce','#92400e','#166534','#0284c7','#374151'];
+  const color = palette[name.length % palette.length];
+
+  // Add row to partners list
+  const tbody = document.getElementById('partners-tbody');
+  const tr = document.createElement('tr');
+  const chipsHtml = psets.map(p => `<span class="chip ${chipClass(p.val)}">${p.label}</span>`).join('');
+  tr.innerHTML = `
+    <td><div class="row" style="gap:9px"><div class="av" style="background:${color};border-radius:4px;font-size:11px;flex-shrink:0">${initials}</div><span>${name}</span></div></td>
+    <td style="color:var(--t2)">${admin}</td>
+    <td style="color:var(--t2);font-variant-numeric:tabular-nums">0 / ${licenses} license${licenses !== 1 ? 's' : ''} used</td>
+    <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+    <td><div class="chips">${chipsHtml}</div></td>
+  `;
+  tr.onclick = () => {
+    populatePartnerProfile({ name, website, admin, licenses, mask, track, psets });
+    go('s4', 'pb2');
+  };
+  tbody.appendChild(tr);
+
+  // Populate and navigate to profile page
+  populatePartnerProfile({ name, website, admin, licenses, mask, track, psets });
+
+  // Reset form
+  document.getElementById('np-name').value = '';
+  document.getElementById('np-website').value = '';
+  document.getElementById('np-admin').value = '';
+  document.getElementById('np-licenses').value = '1';
+  document.getElementById('np-mask').checked = false;
+  document.getElementById('np-track').checked = false;
+  msd.querySelectorAll('.msd-opt').forEach(o => { o.classList.remove('on'); o.querySelector('input[type=checkbox]').checked = false; });
+  renderMsdChips('msd-np');
+
+  closeMo('mo-new-partner');
+  go('s4', 'pb2');
+}
+
+function populatePartnerProfile(p) {
+  function chipClass(val) {
+    if (val === 'pa' || val === 'pc') return 'chip-p';
+    if (val === 'ma' || val === 'mc') return 'chip-m';
+    if (val === 'ra' || val === 'rc') return 'chip-r';
+    return '';
+  }
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  document.getElementById('s4-bc-name').textContent = p.name;
+  document.getElementById('s4-ph-title').textContent = p.name;
+  document.getElementById('s4-name').textContent = p.name;
+  const ws = document.getElementById('s4-website');
+  ws.textContent = p.website || '—';
+  ws.style.color = p.website ? '' : 'var(--tph)';
+  document.getElementById('s4-admin').textContent = p.admin;
+  document.getElementById('s4-licenses').textContent = `0 / ${p.licenses}`;
+  document.getElementById('s4-mask').checked = p.mask;
+  document.getElementById('s4-track').checked = p.track;
+  document.getElementById('s4-psets').innerHTML = p.psets.map(ps => `<span class="chip ${chipClass(ps.val)}">${ps.label}</span>`).join('');
 }
 
 /* ── Sidebar section scroll ── */
