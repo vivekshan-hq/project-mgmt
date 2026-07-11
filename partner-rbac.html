@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner RBAC — Rocketlane Prototype</title>
+<style>
+/* ── Nitro tokens ── */
+:root {
+  --bg:#ffffff; --bg2:#fafafa; --bg3:#f4f4f4; --bg4:#f0f0f0; --bg5:#e3e3e3;
+  --t1:#161616; --t2:#525252; --t3:#6f6f6f; --tph:#a8a8a8; --tdis:#c6c6c6;
+  --accent:#0f62fe; --accent-bg:#edf4ff; --accent-border:#a6c8ff;
+  --btn:#1d1d1f; --btn-t:#ffffff;
+  --ok:#24a148; --ok-bg:#defbe6;
+  --err:#da1e28; --err-bg:#fff1f1;
+  --warn:#b45309; --warn-bg:#fffbeb;
+  --div:#f4f4f4; --bdr:#e3e3e3;
+  --sh2:0px 0.8px 1.8px rgba(0,0,0,.13),0px 0.15px 0.45px rgba(0,0,0,.11);
+  --sh4:0px 3.2px 7.2px rgba(0,0,0,.13),0px 0.6px 1.8px rgba(0,0,0,.11);
+  --sh6:0px 12.8px 28.8px rgba(0,0,0,.22),0px 2.4px 7.2px rgba(0,0,0,.18);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#161616;--bg2:#1c1c1c;--bg3:#262626;--bg4:#2d2d2d;--bg5:#393939;
+    --t1:#f4f4f4;--t2:#c6c6c6;--t3:#8d8d8d;--tph:#6f6f6f;--tdis:#525252;
+    --accent:#78a9ff;--accent-bg:#0a1a42;--accent-border:#2d4f8c;
+    --btn:#e8e8e8;--btn-t:#161616;
+    --ok:#42be65;--ok-bg:#02250d;
+    --err:#ff8389;--err-bg:#2d0709;
+    --warn:#f59e0b;--warn-bg:#241500;
+    --div:#2d2d2d;--bdr:#393939;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161616;--bg2:#1c1c1c;--bg3:#262626;--bg4:#2d2d2d;--bg5:#393939;
+  --t1:#f4f4f4;--t2:#c6c6c6;--t3:#8d8d8d;--tph:#6f6f6f;--tdis:#525252;
+  --accent:#78a9ff;--accent-bg:#0a1a42;--accent-border:#2d4f8c;
+  --btn:#e8e8e8;--btn-t:#161616;
+  --ok:#42be65;--ok-bg:#02250d;
+  --err:#ff8389;--err-bg:#2d0709;
+  --warn:#f59e0b;--warn-bg:#241500;
+  --div:#2d2d2d;--bdr:#393939;
+}
+:root[data-theme="light"]{
+  --bg:#ffffff;--bg2:#fafafa;--bg3:#f4f4f4;--bg4:#f0f0f0;--bg5:#e3e3e3;
+  --t1:#161616;--t2:#525252;--t3:#6f6f6f;--tph:#a8a8a8;--tdis:#c6c6c6;
+  --accent:#0f62fe;--accent-bg:#edf4ff;--accent-border:#a6c8ff;
+  --btn:#1d1d1f;--btn-t:#ffffff;
+  --ok:#24a148;--ok-bg:#defbe6;
+  --err:#da1e28;--err-bg:#fff1f1;
+  --warn:#b45309;--warn-bg:#fffbeb;
+  --div:#f4f4f4;--bdr:#e3e3e3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-serif;font-size:14px;color:var(--t1);background:var(--bg);overflow:hidden;height:100vh}
+
+/* ── Prototype nav bar ── */
+.proto-bar{
+  height:36px;background:#111;display:flex;align-items:center;gap:6px;
+  padding:0 14px;border-bottom:1px solid #2a2a2a;flex-shrink:0;
+  position:relative;z-index:200;
+}
+.proto-label{font-size:11px;font-weight:600;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-right:6px}
+.pb{
+  height:24px;padding:0 10px;border-radius:4px;border:1px solid #333;
+  background:#1e1e1e;color:#ccc;font-size:11.5px;cursor:pointer;
+  font-family:inherit;transition:all .15s;
+}
+.pb:hover{border-color:#555;color:#fff}
+.pb.on{background:#0f62fe;border-color:#0f62fe;color:#fff}
+
+/* ── App shell ── */
+.app{display:flex;height:calc(100vh - 36px)}
+.nav-rail{width:48px;background:var(--bg3);flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;border-right:1px solid var(--bdr)}
+.rail-logo{width:24px;height:24px;border-radius:3px;background:var(--btn);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.rail-logo svg{color:var(--btn-t)}
+.rail-item{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--t3);cursor:pointer;transition:background .1s}
+.rail-item:hover{background:var(--bg4);color:var(--t2)}
+.rail-item.on{background:var(--bg);box-shadow:var(--sh2);color:var(--t1)}
+.rail-spacer{flex:1}
+.rail-av{width:26px;height:26px;border-radius:50%;background:#6929c4;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ── Settings sidebar ── */
+.settings-nav{width:220px;border-right:1px solid var(--bdr);overflow-y:auto;flex-shrink:0;background:var(--bg)}
+.snav-search{margin:10px 12px;padding:5px 10px;border:1px solid var(--bdr);border-radius:5px;background:var(--bg2);font-size:13px;color:var(--tph);width:calc(100% - 24px);font-family:inherit}
+.snav-group{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase;padding:10px 16px 4px}
+.snav-item{display:flex;align-items:center;gap:7px;padding:6px 14px;font-size:13.5px;color:var(--t2);cursor:pointer;border-radius:0;transition:background .1s;user-select:none}
+.snav-item:hover{background:var(--bg2)}
+.snav-item.on{background:var(--bg3);color:var(--t1);font-weight:500}
+.snav-item svg{opacity:.65;flex-shrink:0}
+
+/* ── Main content area ── */
+.main-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.screen{display:none;height:100%;overflow-y:auto}
+.screen.on{display:flex;flex-direction:column}
+
+/* ── Page header ── */
+.ph{padding:18px 24px 0;border-bottom:1px solid var(--div)}
+.ph-bc{font-size:12.5px;color:var(--t3);display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.ph-bc a{color:var(--accent);cursor:pointer;text-decoration:none}
+.ph-bc a:hover{text-decoration:underline}
+.ph-bc .sep{color:var(--bdr)}
+.ph-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ph-title{font-size:20px;font-weight:600;line-height:28px}
+.ph-sub{font-size:13px;color:var(--t2);margin-bottom:14px;max-width:680px}
+.ph-spacer{flex:1}
+
+/* ── Tabs (line) ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr)}
+.tab{padding:9px 16px;font-size:14px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s;white-space:nowrap;user-select:none}
+.tab:hover{color:var(--t1)}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.tab-content{display:none}
+.tab-content.on{display:block}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:5px;font-size:14px;font-weight:590;cursor:pointer;border:none;font-family:inherit;letter-spacing:.16px;white-space:nowrap;transition:opacity .12s}
+.btn:hover{opacity:.82}
+.btn-p{background:var(--btn);color:var(--btn-t)}
+.btn-s{background:var(--bg3);color:var(--t1)}
+.btn-g{background:transparent;color:var(--t2);border:1px solid var(--bdr)}
+.btn-d{background:var(--err-bg);color:var(--err);border:1px solid color-mix(in srgb, var(--err) 30%, transparent)}
+.btn-sm{height:28px;padding:0 10px;font-size:13px}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;min-width:700px}
+.tbl th{text-align:left;padding:9px 16px;font-size:12px;font-weight:600;color:var(--t3);letter-spacing:.32px;border-bottom:1px solid var(--div);background:var(--bg2);white-space:nowrap;position:sticky;top:0;z-index:2}
+.tbl td{padding:11px 16px;font-size:13.5px;color:var(--t1);border-bottom:1px solid var(--div);vertical-align:middle}
+.tbl tr:hover td{background:var(--bg2);cursor:pointer}
+.tbl tr.no-hover:hover td{background:transparent;cursor:default}
+
+/* ── Badges ── */
+.bdg{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.2px}
+.bdg-def{background:var(--bg3);color:var(--t2)}
+.bdg-cust{background:#e8f5e9;color:#166534}
+.bdg-blue{background:var(--accent-bg);color:var(--accent)}
+.bdg-ok{background:var(--ok-bg);color:var(--ok)}
+
+/* ── Status toggle ── */
+.sw{position:relative;width:34px;height:18px;display:inline-block;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0}
+.sw-track{position:absolute;inset:0;background:var(--bg5);border-radius:18px;cursor:pointer;transition:background .15s}
+.sw-track:before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw input:checked+.sw-track{background:var(--accent)}
+.sw input:checked+.sw-track:before{transform:translateX(16px)}
+
+/* ── Chip / pill sets ── */
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11.5px;background:var(--bg3);color:var(--t2);border:1px solid var(--bdr)}
+.chip-p{background:#edf4ff;color:#0043ce;border-color:#a6c8ff} /* permissive */
+.chip-m{background:#fffbeb;color:#92400e;border-color:#fde68a} /* moderate */
+.chip-r{background:#fef2f2;color:#991b1b;border-color:#fecaca} /* restricted */
+
+/* ── Avatar ── */
+.av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── Checkbox row ── */
+.cb-row{display:flex;align-items:flex-start;gap:9px;padding:5px 0}
+.cb-row input[type=checkbox]{width:15px;height:15px;margin-top:1px;accent-color:var(--accent);flex-shrink:0;cursor:pointer}
+.cb-row label{font-size:14px;color:var(--t1);cursor:pointer;line-height:20px}
+.cb-row .hint{font-size:12px;color:var(--t3);margin-top:2px}
+.cb-child{padding-left:24px;border-left:2px solid var(--div);margin-left:7px;margin-top:2px}
+.cb-row.dim label{color:var(--tdis)}
+.cb-row.dim input{opacity:.4;cursor:not-allowed}
+
+/* ── Permission section block ── */
+.ps-block{padding:20px 24px;border-bottom:1px solid var(--div)}
+.ps-block-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ps-block-title{font-size:15px;font-weight:600}
+
+/* ── Segmented control ── */
+.seg{display:inline-flex;background:var(--bg3);border-radius:6px;padding:3px;gap:2px}
+.seg-opt{padding:5px 12px;border-radius:4px;font-size:13px;color:var(--t2);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .12s;user-select:none}
+.seg-opt:hover{color:var(--t1)}
+.seg-opt.on{background:var(--bg);color:var(--t1);box-shadow:var(--sh2);font-weight:500}
+.seg-opt.dim{opacity:.38;cursor:not-allowed;pointer-events:none}
+
+/* ── Scope card ── */
+.scope-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:16px 20px;margin:16px 24px 0}
+.scope-card-title{font-size:12px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase;margin-bottom:14px}
+.scope-row{display:flex;align-items:center;gap:16px;padding:8px 0;border-bottom:1px solid var(--div)}
+.scope-row:last-child{border-bottom:none;padding-bottom:0}
+.scope-label{font-size:13.5px;color:var(--t1);font-weight:500;min-width:160px}
+.scope-desc{font-size:12px;color:var(--t3);flex:1}
+.scope-warn{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--warn);background:var(--warn-bg);padding:4px 10px;border-radius:4px;margin-top:6px}
+
+/* ── Permission detail layout ── */
+.pd-layout{display:flex;flex:1;overflow:hidden}
+.pd-sidebar{width:176px;border-right:1px solid var(--bdr);padding:12px 0;flex-shrink:0;overflow-y:auto}
+.pd-sb-item{padding:7px 18px;font-size:13.5px;color:var(--t2);cursor:pointer;transition:background .1s;user-select:none}
+.pd-sb-item:hover{background:var(--bg2)}
+.pd-sb-item.on{background:var(--accent-bg);color:var(--accent);font-weight:500}
+.pd-main{flex:1;overflow-y:auto}
+
+/* ── Read-only notice ── */
+.ro-notice{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--bdr);border-radius:6px;padding:9px 14px;margin:14px 24px;font-size:13px;color:var(--t2)}
+.ro-notice svg{flex-shrink:0;color:var(--t3)}
+
+/* ── Modal (slide-in panel from right) ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;justify-content:flex-end}
+.mo.on{display:flex}
+.mo-panel{background:var(--bg);width:476px;height:100%;display:flex;flex-direction:column;box-shadow:var(--sh6);overflow:hidden}
+.mo-hd{padding:18px 22px 14px;border-bottom:1px solid var(--div);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mo-title{font-size:17px;font-weight:600;flex:1}
+.mo-close{width:30px;height:30px;border-radius:5px;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px}
+.mo-close:hover{background:var(--bg3)}
+.mo-body{flex:1;overflow-y:auto;padding:22px}
+.mo-ft{padding:14px 22px;border-top:1px solid var(--div);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:var(--bg)}
+
+/* ── Modal (centered dialog) ── */
+.mo-c{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;display:none;align-items:center;justify-content:center}
+.mo-c.on{display:flex}
+.mo-c-panel{background:var(--bg);width:400px;border-radius:10px;box-shadow:var(--sh6);overflow:hidden}
+.mo-c-panel .mo-hd{padding:16px 18px 12px}
+.mo-c-panel .mo-body{padding:4px 18px 18px}
+.mo-c-panel .mo-ft{padding:12px 18px}
+
+/* ── Form elements ── */
+.ff{margin-bottom:18px}
+.fl{display:block;font-size:13px;font-weight:500;color:var(--t1);margin-bottom:5px}
+.fl .req{color:var(--err)}
+.fi{width:100%;padding:7px 11px;border:1px solid var(--bdr);border-radius:5px;font-size:14px;color:var(--t1);background:var(--bg);font-family:inherit}
+.fi:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-bg)}
+.fh{font-size:12px;color:var(--t3);margin-top:4px}
+.fsel{width:100%;padding:7px 30px 7px 11px;border:1px solid var(--bdr);border-radius:5px;font-size:14px;color:var(--t1);background:var(--bg);font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236f6f6f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.fsel:focus{outline:none;border-color:var(--accent)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── Multi-select perm sets ── */
+.ms-box{border:1px solid var(--bdr);border-radius:7px;overflow:hidden}
+.ms-hd{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase}
+.ms-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--div);cursor:pointer;transition:background .1s;user-select:none}
+.ms-item:last-child{border-bottom:none}
+.ms-item:hover{background:var(--bg2)}
+.ms-item.on{background:var(--accent-bg)}
+.ms-item input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0}
+.ms-name{font-size:14px;font-weight:500;color:var(--t1)}
+.ms-sub{font-size:12px;color:var(--t3);margin-top:1px}
+.ms-badge{font-size:10.5px;padding:1px 6px;border-radius:3px;background:var(--bg3);color:var(--t3);margin-left:auto;flex-shrink:0}
+
+/* ── Allowed sets grid on partner profile ── */
+.aset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding:16px 0}
+.aset-card{border:1px solid var(--bdr);border-radius:7px;padding:12px 13px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;transition:border-color .12s}
+.aset-card:hover{border-color:var(--t3)}
+.aset-name{font-size:13.5px;font-weight:500;color:var(--t1);margin-bottom:4px}
+.aset-meta{font-size:11.5px;color:var(--t3)}
+.aset-rm{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;padding:0}
+.aset-rm:hover{background:var(--err-bg);color:var(--err)}
+.aset-add{border:1px dashed var(--bdr);border-radius:7px;padding:12px 13px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--accent);font-size:13px;cursor:pointer;transition:all .12s}
+.aset-add:hover{background:var(--accent-bg);border-color:var(--accent-border)}
+
+/* ── Info bar ── */
+.ib{display:flex;align-items:flex-start;gap:9px;padding:9px 13px;border-radius:6px;border-left:3px solid;font-size:13px;margin-bottom:14px}
+.ib-info{background:var(--accent-bg);border-color:var(--accent);color:var(--t1)}
+.ib-warn{background:var(--warn-bg);border-color:var(--warn);color:var(--t1)}
+.ib-err{background:var(--err-bg);border-color:var(--err);color:var(--t1)}
+
+/* ── Misc ── */
+.row{display:flex;align-items:center;gap:8px}
+.spacer{flex:1}
+.dot-sep{width:3px;height:3px;border-radius:50%;background:var(--bg5);flex-shrink:0}
+.more-btn{width:28px;height:28px;border-radius:4px;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+.more-btn:hover{background:var(--bg3)}
+
+/* Partner RBAC new badge */
+.new-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:#ede9fe;color:#5b21b6;letter-spacing:.3px;text-transform:uppercase}
+
+/* Count pill */
+.cpill{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--t2)}
+
+/* ── Permission set row (Screen 1) ── */
+.ps-row{display:flex;align-items:center;gap:0;padding:13px 20px;border-bottom:1px solid var(--div);cursor:pointer;transition:background .1s}
+.ps-row:hover{background:var(--bg2)}
+.ps-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px}
+.ps-icon svg{width:18px;height:18px}
+.ps-info{flex:1;min-width:0}
+.ps-name-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.ps-name{font-size:14px;font-weight:600;color:var(--t1)}
+.ps-desc{font-size:12.5px;color:var(--t3)}
+.ps-stats{font-size:12px;color:var(--t3);flex-shrink:0;margin-right:16px}
+.ps-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ── Prototype nav ── -->
+<div class="proto-bar">
+  <span class="proto-label">Partner RBAC Prototype</span>
+  <button class="pb on" id="pb1" onclick="go('s1','pb1')">1 · Permissions → Partner tab</button>
+  <button class="pb" id="pb2" onclick="go('s2','pb2')">2 · Permission set detail</button>
+  <button class="pb" id="pb3" onclick="go('s3','pb3')">3 · Partners settings</button>
+  <button class="pb" id="pb4" onclick="go('s4','pb4')">4 · Partner company page</button>
+</div>
+
+<!-- ── App shell ── -->
+<div class="app">
+
+  <!-- Nav rail -->
+  <div class="nav-rail">
+    <div class="rail-logo"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2zM8 8h4v4H8z" fill="currentColor"/></svg></div>
+    <div class="rail-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <div class="rail-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+    <div class="rail-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <div class="rail-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M12 2v2M12 20v2M4.93 4.93L6.34 6.34M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg></div>
+    <div class="rail-spacer"></div>
+    <div class="rail-av">VS</div>
+  </div>
+
+  <!-- Settings sidebar -->
+  <div class="settings-nav">
+    <input class="snav-search" placeholder="Search" readonly>
+    <div class="snav-group">Account</div>
+    <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Preferences</div>
+    <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Team members</div>
+    <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Roles &amp; Placeholders</div>
+    <div class="snav-item on" onclick="go('s1','pb1')" id="snav-perm"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Permissions</div>
+    <div class="snav-item" onclick="go('s3','pb3')" id="snav-partners"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners</div>
+    <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>Integrations</div>
+
+    <div class="snav-group" style="margin-top:8px">Meeting intelligence</div>
+    <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Setup &amp; recording</div>
+    <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>AI Fills</div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-wrap">
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 1 · Permissions — Partner tab
+    ════════════════════════════════════════════════════ -->
+    <div class="screen on" id="s1">
+      <div class="ph">
+        <div class="ph-row">
+          <div class="ph-title">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:8px;vertical-align:-3px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Permissions
+          </div>
+        </div>
+        <div class="ph-sub">Create customized account and project level permissions that grant team members precise access levels to various modules in Rocketlane.</div>
+        <div class="tabs" id="perms-tabs">
+          <div class="tab" onclick="switchPermTab('account')">Account</div>
+          <div class="tab" onclick="switchPermTab('project')">Project</div>
+          <div class="tab" onclick="switchPermTab('customer')">Customer</div>
+          <div class="tab on" onclick="switchPermTab('partner')">Partner <span class="new-badge" style="margin-left:4px">New</span></div>
+        </div>
+      </div>
+
+      <!-- Partner tab content -->
+      <div id="partner-tab-content" style="flex:1;overflow-y:auto">
+        <div style="padding:14px 20px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--div)">
+          <div style="font-size:13px;color:var(--t2);flex:1">6 default permission sets cover all partner access combinations. Create custom sets for specific needs.</div>
+          <button class="btn btn-p btn-sm" onclick="openMo('mo-new-pset')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            New permission
+          </button>
+        </div>
+
+        <!-- Default sets header -->
+        <div style="padding:12px 20px 6px;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase">Default sets</div>
+
+        <!-- Permissive Admin -->
+        <div class="ps-row" onclick="go('s2','pb2')">
+          <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="ps-info">
+            <div class="ps-name-row"><span class="ps-name">Permissive Admin</span><span class="bdg bdg-def">Default</span></div>
+            <div class="ps-desc">Full access to shared &amp; private resources · Company-restricted project scope · All tasks visible</div>
+          </div>
+          <div class="ps-stats">4 users</div>
+          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+        </div>
+
+        <!-- Permissive Collaborator -->
+        <div class="ps-row" onclick="go('s2','pb2')">
+          <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
+          <div class="ps-info">
+            <div class="ps-name-row"><span class="ps-name">Permissive Collaborator</span><span class="bdg bdg-def">Default</span></div>
+            <div class="ps-desc">Full access to shared &amp; private resources · Strict participant scope · All tasks visible</div>
+          </div>
+          <div class="ps-stats">7 users</div>
+          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+        </div>
+
+        <!-- Moderate Admin -->
+        <div class="ps-row" onclick="go('s2','pb2')">
+          <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="ps-info">
+            <div class="ps-name-row"><span class="ps-name">Moderate Admin</span><span class="bdg bdg-def">Default</span></div>
+            <div class="ps-desc">Shared resources only · Company-restricted project scope · All tasks visible</div>
+          </div>
+          <div class="ps-stats">12 users</div>
+          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+        </div>
+
+        <!-- Moderate Collaborator -->
+        <div class="ps-row" onclick="go('s2','pb2')">
+          <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
+          <div class="ps-info">
+            <div class="ps-name-row"><span class="ps-name">Moderate Collaborator</span><span class="bdg bdg-def">Default</span></div>
+            <div class="ps-desc">Shared resources only · Strict participant scope · All tasks visible</div>
+          </div>
+          <div class="ps-stats">9 users</div>
+          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+        </div>
+
+        <!-- Restricted Admin -->
+        <div class="ps-row" onclick="go('s2','pb2')">
+          <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="ps-info">
+            <div class="ps-name-row"><span class="ps-name">Restricted Admin</span><span class="bdg bdg-def">Default</span></div>
+            <div class="ps-desc">Assigned shared resources only · Company-restricted scope · Company-assigned tasks only</div>
+          </div>
+          <div class="ps-stats">5 users</div>
+          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+        </div>
+
+        <!-- Restricted Collaborator -->
+        <div class="ps-row" onclick="go('s2','pb2')">
+          <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
+          <div class="ps-info">
+            <div class="ps-name-row"><span class="ps-name">Restricted Collaborator</span><span class="bdg bdg-def">Default</span></div>
+            <div class="ps-desc">Assigned shared resources only · Strict participant scope · Company-assigned tasks only</div>
+          </div>
+          <div class="ps-stats">3 users</div>
+          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+        </div>
+
+        <!-- Custom sets header -->
+        <div style="padding:16px 20px 6px;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase;border-top:1px solid var(--div);margin-top:4px">Custom sets</div>
+
+        <!-- Custom example -->
+        <div class="ps-row">
+          <div class="ps-icon" style="background:#f3e8ff"><svg fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="ps-info">
+            <div class="ps-name-row"><span class="ps-name">Partner Read-Only</span><span class="bdg bdg-cust">Custom</span></div>
+            <div class="ps-desc">View-only access to shared resources · Strict participant · No task edits</div>
+          </div>
+          <div class="ps-stats">2 users</div>
+          <div class="ps-actions">
+            <button class="btn btn-g btn-sm" onclick="event.stopPropagation()">Edit</button>
+            <button class="more-btn" onclick="event.stopPropagation()">···</button>
+          </div>
+        </div>
+
+        <div class="ps-row" style="border-bottom:none;color:var(--accent);gap:8px;cursor:pointer" onclick="openMo('mo-new-pset')">
+          <div style="width:36px;height:36px;border-radius:8px;border:1.5px dashed var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span style="font-size:14px">Create custom permission set…</span>
+        </div>
+      </div>
+    </div><!-- /s1 -->
+
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 2 · Permission set detail — Permissive Admin
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="s2" style="flex-direction:column">
+      <div class="ph">
+        <div class="ph-bc">
+          <a onclick="go('s1','pb1')">Permissions</a><span class="sep">/</span>
+          <a onclick="go('s1','pb1')">Partner</a><span class="sep">/</span>
+          <span>Permissive Admin</span>
+        </div>
+        <div class="ph-row">
+          <div class="ph-title">Permissive Admin</div>
+          <span class="bdg bdg-def">Default</span>
+          <div class="spacer"></div>
+          <button class="btn btn-s btn-sm">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Duplicate to customize
+          </button>
+        </div>
+      </div>
+
+      <!-- Read-only notice -->
+      <div class="ro-notice">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Default permission sets are read-only. Duplicate this set to create a customizable version.
+      </div>
+
+      <!-- Access scope card -->
+      <div class="scope-card">
+        <div class="scope-card-title">Access scope</div>
+
+        <div class="scope-row">
+          <div class="scope-label">Resource visibility</div>
+          <div class="seg" id="seg-res">
+            <button class="seg-opt" onclick="setScope('res','shared')">Shared only</button>
+            <button class="seg-opt on" onclick="setScope('res','private')">Shared + Private</button>
+          </div>
+          <div class="scope-desc" id="res-desc">Partners can view all shared and private project resources.</div>
+        </div>
+
+        <div class="scope-row">
+          <div class="scope-label">Project scope</div>
+          <div class="seg" id="seg-proj">
+            <button class="seg-opt on" onclick="setScope('proj','company')">Company restricted</button>
+            <button class="seg-opt" onclick="setScope('proj','strict')">Strict participant</button>
+          </div>
+          <div class="scope-desc" id="proj-desc">Can view all projects where their partner company has been added.</div>
+        </div>
+
+        <div class="scope-row" id="task-scope-row">
+          <div class="scope-label">Task scope</div>
+          <div class="seg" id="seg-task">
+            <button class="seg-opt on" onclick="setScope('task','all')">All tasks</button>
+            <button class="seg-opt" id="task-company-opt" onclick="setScope('task','company')">Company-assigned only</button>
+          </div>
+          <div class="scope-desc" id="task-desc">Can view all tasks in projects they have access to.</div>
+        </div>
+      </div>
+
+      <!-- Detail layout -->
+      <div class="pd-layout" style="flex:1;margin-top:12px">
+        <div class="pd-sidebar">
+          <div class="pd-sb-item on" onclick="scrollToSection('sec-projects')">Projects</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-phase')">Phase</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-tasks')">Tasks</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-spaces')">Spaces</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-chat')">Chat</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-files')">Files and Folders</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-forms')">Form responses</div>
+        </div>
+
+        <div class="pd-main" id="pd-main">
+          <!-- Projects -->
+          <div class="ps-block" id="sec-projects">
+            <div class="ps-block-hd"><span class="ps-block-title">Projects</span></div>
+            <div class="cb-row"><input type="checkbox" checked id="p-invite" disabled><label for="p-invite">Can invite their team members from their company</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="p-overview" disabled><label for="p-overview">Can view project overview</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="p-health" disabled><label for="p-health">Can view project health</label></div>
+          </div>
+
+          <!-- Phase -->
+          <div class="ps-block" id="sec-phase">
+            <div class="ps-block-hd"><span class="ps-block-title">Phase</span></div>
+            <div class="cb-row"><input type="checkbox" checked id="ph-view" disabled><label for="ph-view">Can view phases</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="ph-edit" disabled><label for="ph-edit">Can edit phase</label></div>
+            <div class="cb-child">
+              <div class="cb-row"><input type="checkbox" checked id="ph-name" disabled><label for="ph-name">Can edit phase name</label></div>
+              <div class="cb-row"><input type="checkbox" checked id="ph-dates" disabled><label for="ph-dates">Can edit phase dates<div class="hint">If user has task edit permissions on start and due date, it can implicitly change phase dates</div></label></div>
+            </div>
+            <div class="cb-row"><input type="checkbox" checked id="ph-del" disabled><label for="ph-del">Can delete phases</label></div>
+          </div>
+
+          <!-- Tasks -->
+          <div class="ps-block" id="sec-tasks">
+            <div class="ps-block-hd"><span class="ps-block-title">Tasks</span></div>
+            <div id="task-scope-note" style="display:none" class="ib ib-info">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              Task scope is locked to <strong>Company-assigned only</strong> when resource visibility is Shared only. Switch to Shared + Private to enable all task scoping options.
+            </div>
+            <div class="cb-row"><input type="checkbox" checked id="t-view" disabled><label for="t-view">Can view tasks</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="t-create" disabled><label for="t-create">Can create tasks</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="t-edit" disabled><label for="t-edit">Can edit tasks</label></div>
+            <div class="cb-child">
+              <div class="cb-row"><input type="checkbox" checked id="t-assignee" disabled><label for="t-assignee">Can edit assignee</label></div>
+              <div class="cb-row"><input type="checkbox" checked id="t-status" disabled><label for="t-status">Can change status of the task</label></div>
+              <div class="cb-row"><input type="checkbox" checked id="t-dates" disabled><label for="t-dates">Can change start and due date</label></div>
+              <div class="cb-row"><input type="checkbox" checked id="t-name" disabled><label for="t-name">Can edit task name</label></div>
+              <div class="cb-row"><input type="checkbox" checked id="t-comment" disabled><label for="t-comment">Can add comments</label></div>
+            </div>
+            <div class="cb-row" id="t-private-row"><input type="checkbox" checked id="t-private" disabled><label for="t-private">Can view private task details</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="t-del" disabled><label for="t-del">Can delete tasks</label></div>
+          </div>
+
+          <!-- Spaces -->
+          <div class="ps-block" id="sec-spaces">
+            <div class="ps-block-hd"><span class="ps-block-title">Spaces</span></div>
+            <div class="cb-row"><input type="checkbox" checked id="sp-view" disabled><label for="sp-view">Can view spaces</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="sp-create" disabled><label for="sp-create">Can create spaces</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="sp-edit" disabled><label for="sp-edit">Can edit spaces</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="sp-del" disabled><label for="sp-del">Can delete spaces</label></div>
+          </div>
+
+          <!-- Chat -->
+          <div class="ps-block" id="sec-chat">
+            <div class="ps-block-hd"><span class="ps-block-title">Chat</span></div>
+            <div class="cb-row"><input type="checkbox" checked id="ch-view" disabled><label for="ch-view">Can view messages</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="ch-send" disabled><label for="ch-send">Can send messages</label></div>
+          </div>
+
+          <!-- Files and Folders -->
+          <div class="ps-block" id="sec-files">
+            <div class="ps-block-hd"><span class="ps-block-title">Files and Folders</span></div>
+            <div class="cb-row"><input type="checkbox" checked id="f-view" disabled><label for="f-view">Can view files</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="f-upload" disabled><label for="f-upload">Can upload files</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="f-del" disabled><label for="f-del">Can delete files</label></div>
+          </div>
+
+          <!-- Form responses -->
+          <div class="ps-block" id="sec-forms" style="border-bottom:none">
+            <div class="ps-block-hd"><span class="ps-block-title">Form responses</span></div>
+            <div class="cb-row"><input type="checkbox" checked id="fr-view" disabled><label for="fr-view">Can view form responses</label></div>
+            <div class="cb-row"><input type="checkbox" checked id="fr-submit" disabled><label for="fr-submit">Can submit form responses</label></div>
+          </div>
+        </div><!-- /pd-main -->
+      </div>
+    </div><!-- /s2 -->
+
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 3 · Partners settings
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="s3">
+      <div class="ph">
+        <div class="ph-row">
+          <div class="ph-title">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:8px;vertical-align:-3px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-s btn-sm"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+          <button class="btn btn-p btn-sm" onclick="openMo('mo-new-partner')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            New partner
+          </button>
+        </div>
+        <div class="tabs">
+          <div class="tab on">Partners</div>
+          <div class="tab">Client partners</div>
+        </div>
+      </div>
+
+      <div style="flex:1;overflow-y:auto">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Partner admin</th>
+                <th>Team members</th>
+                <th>Status</th>
+                <th>Allowed permission sets <span class="new-badge">Updated</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="go('s4','pb4')">
+                <td><div class="row" style="gap:9px"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Crect width='26' height='26' rx='4' fill='%23e8f5e9'/%3E%3Ctext x='13' y='18' text-anchor='middle' font-size='12' font-weight='700' fill='%23166534'%3EG%3C/text%3E%3C/svg%3E" width="26" height="26" style="border-radius:4px"><span>ajay res</span></div></td>
+                <td style="color:var(--t2)">ajaykanna+res@rocketlane.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">1 / 1 license used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-p">Permissive Admin</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="row" style="gap:9px"><div class="av" style="background:#ddd;color:#666;border-radius:4px;font-size:11px">ST</div><span>Sashi Test</span></div></td>
+                <td style="color:var(--t2)">sashi+4@rocketlane.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">1 / 3 licenses used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-p">Permissive Admin</span><span class="chip chip-p">Permissive Collaborator</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="row" style="gap:9px"><div class="av" style="background:#ddd;color:#666;border-radius:4px;font-size:11px">AT</div><span>ajay test</span></div></td>
+                <td style="color:var(--t2)">ajaykanna+ppadmin@rocketlane.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">1 / 1 license used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-p">Permissive Admin</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="row" style="gap:9px"><div class="av" style="background:#fbbf24;border-radius:4px;font-size:11px">TV</div><span>test vishnu</span></div></td>
+                <td style="color:var(--t2)">test@tes.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">2 / 2 licenses used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-m">Moderate Admin</span><span class="chip chip-m">Moderate Collaborator</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="row" style="gap:9px"><div class="av" style="background:#374151;border-radius:4px;font-size:11px">T1</div><span>Test1234</span></div></td>
+                <td style="color:var(--t2)">test123@rocketlane.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">1 / 3 licenses used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-p">Permissive Collaborator</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="row" style="gap:9px"><div class="av" style="background:#374151;border-radius:4px;font-size:11px">TG</div><span>Testing123</span></div></td>
+                <td style="color:var(--t2)">test@rocketlane.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">1 / 3 licenses used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-m">Moderate Collaborator</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="row" style="gap:9px"><div class="av" style="background:#6929c4;border-radius:4px;font-size:11px">CV</div><span>chargevee</span></div></td>
+                <td style="color:var(--t2)">rishab+764@rocketlane.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">1 / 1 license used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-r">Restricted Admin</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="row" style="gap:9px"><div class="av" style="background:#0284c7;border-radius:4px;font-size:11px">PX</div><span>Partner X</span></div></td>
+                <td style="color:var(--t2)">cengelha@hotmail.com</td>
+                <td style="color:var(--t2);font-variant-numeric:tabular-nums">3 / 5 licenses used</td>
+                <td><div class="row" style="gap:6px"><label class="sw"><input type="checkbox" checked><span class="sw-track"></span></label><span style="font-size:13px">Active</span></div></td>
+                <td><div class="chips"><span class="chip chip-p">Permissive Admin</span><span class="chip chip-m">Moderate Collaborator</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /s3 -->
+
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 4 · Partner company page — ajay res
+    ════════════════════════════════════════════════════ -->
+    <div class="screen" id="s4">
+      <div class="ph">
+        <div class="ph-bc">
+          <a onclick="go('s3','pb3')">Partners</a><span class="sep">/</span>
+          <span>ajay res</span>
+        </div>
+        <div class="ph-row">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23e8f5e9'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-weight='700' fill='%23166534'%3EG%3C/text%3E%3C/svg%3E" width="32" height="32" style="border-radius:4px">
+          <div class="ph-title">ajay res</div>
+        </div>
+        <div class="tabs" id="partner-detail-tabs">
+          <div class="tab" onclick="switchPartnerTab('profile')">Profile</div>
+          <div class="tab on" onclick="switchPartnerTab('members')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-1px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            Partner team members
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile tab -->
+      <div id="tab-profile" class="tab-content" style="flex:1;overflow-y:auto;padding:24px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px">
+          <div class="ff">
+            <label class="fl">Partner name</label>
+            <div style="font-size:14px;color:var(--t1);padding:7px 0">ajay res</div>
+          </div>
+          <div class="ff">
+            <label class="fl">Website</label>
+            <div style="font-size:14px;color:var(--t1);padding:7px 0">—</div>
+          </div>
+          <div class="ff">
+            <label class="fl">Partner admin</label>
+            <div style="font-size:14px;color:var(--t1);padding:7px 0">ajaykanna+res@rocketlane.com</div>
+          </div>
+          <div class="ff">
+            <label class="fl">Licenses</label>
+            <div style="font-size:14px;color:var(--t1);padding:7px 0">1 / 1 used</div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--div);margin-top:4px;padding-top:20px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div style="font-size:15px;font-weight:600">Allowed permission sets</div>
+            <span class="new-badge">New</span>
+            <div class="spacer"></div>
+            <button class="btn btn-g btn-sm" onclick="openMo('mo-manage-sets')">Manage sets</button>
+          </div>
+          <div style="font-size:13px;color:var(--t2);margin-bottom:0">Only these sets can be assigned to members of this partner company.</div>
+
+          <div class="aset-grid">
+            <div class="aset-card">
+              <div><div class="aset-name">Permissive Admin</div><div class="aset-meta">4 members assigned</div></div>
+              <button class="aset-rm" title="Remove set" onclick="openMo('mo-remove-warn')">×</button>
+            </div>
+            <div class="aset-add" onclick="openMo('mo-manage-sets')">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              Add permission set
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--div);padding-top:20px;margin-top:4px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:12px">Settings</div>
+          <div class="row" style="gap:12px;margin-bottom:14px">
+            <div><div style="font-size:14px;font-weight:500">Mask this partner</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Hide partner identity from project participants</div></div>
+            <div class="spacer"></div>
+            <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
+          </div>
+          <div class="row" style="gap:12px">
+            <div><div style="font-size:14px;font-weight:500">Can track time</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Allow partner members to log time on tasks</div></div>
+            <div class="spacer"></div>
+            <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members tab -->
+      <div id="tab-members" class="tab-content on" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:10px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--div)">
+          <div class="tabs" style="border:none;margin:0;flex:1" id="members-subtabs">
+            <div class="tab on" style="padding:5px 12px;font-size:13px">Active (1)</div>
+            <div class="tab" style="padding:5px 12px;font-size:13px">Invited</div>
+            <div class="tab" style="padding:5px 12px;font-size:13px">Deactivated</div>
+          </div>
+          <div style="font-size:13px;color:var(--t2);font-weight:500;padding:0 8px">1 / 1 license used</div>
+          <button class="btn btn-g btn-sm"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+          <button class="btn btn-p btn-sm" onclick="openMo('mo-invite')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Invite members
+          </button>
+        </div>
+
+        <div style="flex:1;overflow-y:auto">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Permission set <span class="new-badge">Updated</span></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="no-hover">
+                <td><div class="row" style="gap:8px"><div class="av" style="background:#0f62fe">A</div>ajaykannares</div></td>
+                <td style="color:var(--t2)">ajaykanna+res@rocketlane.com</td>
+                <td style="color:var(--t2)">Customer Development</td>
+                <td>
+                  <div class="row" style="gap:6px">
+                    <span class="chip chip-p">Permissive Admin</span>
+                    <span style="font-size:11px;color:var(--t3)">(Primary)</span>
+                  </div>
+                </td>
+                <td><button class="more-btn">···</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /s4 -->
+
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL · New Partner (updated with permission sets)
+════════════════════════════════════════════════════ -->
+<div class="mo" id="mo-new-partner" onclick="closeMoOverlay(event,'mo-new-partner')">
+  <div class="mo-panel" onclick="event.stopPropagation()">
+    <div class="mo-hd">
+      <div class="mo-title">New partner</div>
+      <button class="mo-close" onclick="closeMo('mo-new-partner')">×</button>
+    </div>
+    <div class="mo-body">
+      <!-- Logo upload -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="28" height="28" fill="none" stroke="var(--t3)" stroke-width="1.4" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 4-4 4 4"/><path d="M3 15l4 4 4-4 4 4 4-4"/></svg>
+        </div>
+        <div>
+          <div style="color:var(--accent);font-size:13.5px;cursor:pointer;margin-bottom:3px">Upload logo…</div>
+          <div style="font-size:12px;color:var(--t3)">Recommended: 250×250 px</div>
+          <div style="font-size:12px;color:var(--t3)">Upload a square image (1:1) · Max 2MB</div>
+        </div>
+      </div>
+
+      <div class="ff">
+        <label class="fl"><span class="req">*</span>Name</label>
+        <input class="fi" placeholder="eg. Modert LLC – Integration Partner">
+      </div>
+
+      <div class="fg2">
+        <div class="ff">
+          <label class="fl">Website</label>
+          <input class="fi" placeholder="rocketlane.com">
+        </div>
+        <div class="ff">
+          <label class="fl"><span class="req">*</span>Partner admin</label>
+          <input class="fi" placeholder="eg. user@rocketlane.com">
+          <div class="fh">Person who manages the partner company</div>
+        </div>
+      </div>
+
+      <div class="fg2">
+        <div class="ff">
+          <label class="fl"><span class="req">*</span>No. of licenses</label>
+          <input class="fi" type="number" value="1" min="1">
+        </div>
+      </div>
+
+      <!-- Allowed permission sets — NEW -->
+      <div class="ff">
+        <label class="fl"><span class="req">*</span>Allowed permission sets <span class="new-badge" style="margin-left:4px">New</span></label>
+        <div class="fh" style="margin-bottom:8px">Choose which permission sets members of this company can be assigned. Select at least one.</div>
+        <div class="ms-box" id="ms-psets">
+          <div class="ms-hd">Default sets</div>
+          <div class="ms-item" onclick="toggleMs(this)">
+            <input type="checkbox"><div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+          </div>
+          <div class="ms-item" onclick="toggleMs(this)">
+            <input type="checkbox"><div><div class="ms-name">Permissive Collaborator</div><div class="ms-sub">Shared + Private · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+          </div>
+          <div class="ms-item" onclick="toggleMs(this)">
+            <input type="checkbox"><div><div class="ms-name">Moderate Admin</div><div class="ms-sub">Shared only · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+          </div>
+          <div class="ms-item" onclick="toggleMs(this)">
+            <input type="checkbox"><div><div class="ms-name">Moderate Collaborator</div><div class="ms-sub">Shared only · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+          </div>
+          <div class="ms-item" onclick="toggleMs(this)">
+            <input type="checkbox"><div><div class="ms-name">Restricted Admin</div><div class="ms-sub">Assigned shared only · Company restricted · Company tasks</div></div><span class="ms-badge">Default</span>
+          </div>
+          <div class="ms-item" onclick="toggleMs(this)">
+            <input type="checkbox"><div><div class="ms-name">Restricted Collaborator</div><div class="ms-sub">Assigned shared only · Strict participant · Company tasks</div></div><span class="ms-badge">Default</span>
+          </div>
+          <div class="ms-hd" style="border-top:1px solid var(--bdr)">Custom sets</div>
+          <div class="ms-item" onclick="toggleMs(this)">
+            <input type="checkbox"><div><div class="ms-name">Partner Read-Only</div><div class="ms-sub">View-only · Strict participant · No task edits</div></div><span class="ms-badge" style="background:#ede9fe;color:#5b21b6">Custom</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ff">
+        <div class="row" style="gap:10px;margin-bottom:12px">
+          <div><div style="font-size:14px;font-weight:500">Mask this partner</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Hide partner identity from other project participants</div></div>
+          <div class="spacer"></div>
+          <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
+        </div>
+        <div class="row" style="gap:10px">
+          <div><div style="font-size:14px;font-weight:500">Can track time</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Allow partner members to log time on tasks</div></div>
+          <div class="spacer"></div>
+          <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-g" onclick="closeMo('mo-new-partner')">Back</button>
+      <button class="btn btn-p">Create Partner →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL · Invite member (with permission set dropdown)
+════════════════════════════════════════════════════ -->
+<div class="mo" id="mo-invite" onclick="closeMoOverlay(event,'mo-invite')">
+  <div class="mo-panel" onclick="event.stopPropagation()">
+    <div class="mo-hd">
+      <div class="mo-title">Invite team member</div>
+      <button class="mo-close" onclick="closeMo('mo-invite')">×</button>
+    </div>
+    <div class="mo-body">
+      <div class="ib ib-info">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Inviting to <strong>ajay res</strong>. Permission sets shown are limited to those allowed for this partner company.
+      </div>
+
+      <div class="ff">
+        <label class="fl"><span class="req">*</span>Email address</label>
+        <input class="fi" placeholder="eg. partner@example.com">
+        <div class="fh">An invitation will be sent to this email</div>
+      </div>
+
+      <div class="ff">
+        <label class="fl"><span class="req">*</span>Role</label>
+        <select class="fsel">
+          <option>Customer Development</option>
+          <option>Solutions Engineer</option>
+          <option>Account Manager</option>
+          <option>Technical Consultant</option>
+        </select>
+      </div>
+
+      <!-- Permission set — NEW -->
+      <div class="ff">
+        <label class="fl"><span class="req">*</span>Permission set <span class="new-badge" style="margin-left:4px">New</span></label>
+        <div class="fh" style="margin-bottom:8px">Choose a permission set from those allowed for <strong>ajay res</strong>.</div>
+        <div class="ms-box">
+          <div class="ms-item on" onclick="selectPset(this)" style="border-radius:7px 7px 0 0">
+            <input type="radio" name="pset" checked style="accent-color:var(--accent);width:15px;height:15px;flex-shrink:0">
+            <div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted · All tasks</div></div>
+            <span class="ms-badge">Default</span>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--t3);margin-top:6px;display:flex;align-items:center;gap:5px">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          Only 1 set is allowed for this partner. <a onclick="go('s4','pb4');switchPartnerTab('profile');closeMo('mo-invite')" style="color:var(--accent);cursor:pointer;margin-left:2px">Manage allowed sets →</a>
+        </div>
+      </div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-g" onclick="closeMo('mo-invite')">Cancel</button>
+      <button class="btn btn-p">Send invitation →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL · New custom permission set
+════════════════════════════════════════════════════ -->
+<div class="mo" id="mo-new-pset" onclick="closeMoOverlay(event,'mo-new-pset')">
+  <div class="mo-panel" onclick="event.stopPropagation()">
+    <div class="mo-hd">
+      <div class="mo-title">Create permission set</div>
+      <button class="mo-close" onclick="closeMo('mo-new-pset')">×</button>
+    </div>
+    <div class="mo-body">
+      <div class="ff">
+        <label class="fl"><span class="req">*</span>Name</label>
+        <input class="fi" placeholder="eg. Agency Partner - Read Only">
+      </div>
+
+      <div class="ff">
+        <label class="fl">Start from</label>
+        <select class="fsel">
+          <option value="">Blank — configure from scratch</option>
+          <option>Permissive Admin (Default)</option>
+          <option>Permissive Collaborator (Default)</option>
+          <option>Moderate Admin (Default)</option>
+          <option>Moderate Collaborator (Default)</option>
+          <option>Restricted Admin (Default)</option>
+          <option>Restricted Collaborator (Default)</option>
+        </select>
+        <div class="fh">Copying from a default set pre-fills all settings. You can customize after creation.</div>
+      </div>
+
+      <div style="border-top:1px solid var(--div);padding-top:18px;margin-top:4px">
+        <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:12px">Access scope preview</div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:6px">Resource visibility</div>
+          <div class="seg" id="new-seg-res">
+            <button class="seg-opt on" onclick="setNewScope(this)">Shared only</button>
+            <button class="seg-opt" onclick="setNewScope(this)">Shared + Private</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:6px">Project scope</div>
+          <div class="seg">
+            <button class="seg-opt on" onclick="setNewScope(this)">Company restricted</button>
+            <button class="seg-opt" onclick="setNewScope(this)">Strict participant</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:6px">Task scope</div>
+          <div class="seg" id="new-seg-task">
+            <button class="seg-opt on" onclick="setNewScope(this)">All tasks</button>
+            <button class="seg-opt dim" id="new-task-company">Company-assigned only</button>
+          </div>
+          <div style="font-size:12px;color:var(--warn);margin-top:5px;display:none" id="new-task-note">
+            Switch to "Shared + Private" to enable company-assigned task scoping.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-g" onclick="closeMo('mo-new-pset')">Cancel</button>
+      <button class="btn btn-p">Create and configure →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL · Manage allowed sets (partner profile)
+════════════════════════════════════════════════════ -->
+<div class="mo" id="mo-manage-sets" onclick="closeMoOverlay(event,'mo-manage-sets')">
+  <div class="mo-panel" onclick="event.stopPropagation()">
+    <div class="mo-hd">
+      <div class="mo-title">Manage allowed sets</div>
+      <button class="mo-close" onclick="closeMo('mo-manage-sets')">×</button>
+    </div>
+    <div class="mo-body">
+      <div class="ib ib-info">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Only selected sets can be assigned to members of <strong>ajay res</strong>.
+      </div>
+
+      <div class="ms-box" id="ms-manage-psets">
+        <div class="ms-hd">Default sets</div>
+        <div class="ms-item on" onclick="toggleMs(this)">
+          <input type="checkbox" checked><div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+        </div>
+        <div class="ms-item" onclick="toggleMs(this)">
+          <input type="checkbox"><div><div class="ms-name">Permissive Collaborator</div><div class="ms-sub">Shared + Private · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+        </div>
+        <div class="ms-item" onclick="toggleMs(this)">
+          <input type="checkbox"><div><div class="ms-name">Moderate Admin</div><div class="ms-sub">Shared only · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+        </div>
+        <div class="ms-item" onclick="toggleMs(this)">
+          <input type="checkbox"><div><div class="ms-name">Moderate Collaborator</div><div class="ms-sub">Shared only · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+        </div>
+        <div class="ms-item" onclick="toggleMs(this)">
+          <input type="checkbox"><div><div class="ms-name">Restricted Admin</div><div class="ms-sub">Assigned shared only · Company restricted · Company tasks</div></div><span class="ms-badge">Default</span>
+        </div>
+        <div class="ms-item" onclick="toggleMs(this)">
+          <input type="checkbox"><div><div class="ms-name">Restricted Collaborator</div><div class="ms-sub">Assigned shared only · Strict participant · Company tasks</div></div><span class="ms-badge">Default</span>
+        </div>
+        <div class="ms-hd" style="border-top:1px solid var(--bdr)">Custom sets</div>
+        <div class="ms-item" onclick="toggleMs(this)">
+          <input type="checkbox"><div><div class="ms-name">Partner Read-Only</div><div class="ms-sub">View-only · Strict participant · No task edits</div></div><span class="ms-badge" style="background:#ede9fe;color:#5b21b6">Custom</span>
+        </div>
+      </div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-g" onclick="closeMo('mo-manage-sets')">Cancel</button>
+      <button class="btn btn-p">Save changes</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL · Remove set warning (centered dialog)
+════════════════════════════════════════════════════ -->
+<div class="mo-c" id="mo-remove-warn" onclick="closeMoOverlay(event,'mo-remove-warn')">
+  <div class="mo-c-panel" onclick="event.stopPropagation()">
+    <div class="mo-hd">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:32px;height:32px;border-radius:6px;background:var(--err-bg);display:flex;align-items:center;justify-content:center">
+          <svg width="16" height="16" fill="none" stroke="var(--err)" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        </div>
+        <div class="mo-title">Remove permission set?</div>
+      </div>
+      <button class="mo-close" onclick="closeMo('mo-remove-warn')">×</button>
+    </div>
+    <div class="mo-body">
+      <div class="ib ib-err" style="margin-bottom:12px">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <strong>Permissive Admin</strong> is currently assigned to 4 active members of <strong>ajay res</strong>.
+      </div>
+      <p style="font-size:13.5px;color:var(--t2);line-height:20px">Removing this set will leave those members without a permission set. You'll need to reassign them before they can access projects.</p>
+      <p style="font-size:13px;color:var(--t2);margin-top:10px">Affected members: <strong style="color:var(--t1)">ajaykannares</strong> and 3 others.</p>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-g" onclick="closeMo('mo-remove-warn')">Cancel</button>
+      <button class="btn btn-g" onclick="closeMo('mo-remove-warn');openMo('mo-manage-sets')">Reassign members first →</button>
+      <button class="btn btn-d" onclick="closeMo('mo-remove-warn')">Remove anyway</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ── Screen navigation ── */
+function go(screenId, btnId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.pb').forEach(b => b.classList.remove('on'));
+  document.getElementById(screenId).classList.add('on');
+  document.getElementById(btnId).classList.add('on');
+
+  // Sync sidebar highlights
+  document.querySelectorAll('.snav-item').forEach(i => i.classList.remove('on'));
+  if (screenId === 's1' || screenId === 's2') document.getElementById('snav-perm').classList.add('on');
+  if (screenId === 's3' || screenId === 's4') document.getElementById('snav-partners').classList.add('on');
+}
+
+/* ── Modal helpers ── */
+function openMo(id) { document.getElementById(id).classList.add('on'); }
+function closeMo(id) { document.getElementById(id).classList.remove('on'); }
+function closeMoOverlay(e, id) { if (e.target === document.getElementById(id)) closeMo(id); }
+
+/* ── Permissions page tab switch (placeholder) ── */
+function switchPermTab(tab) {
+  document.querySelectorAll('#perms-tabs .tab').forEach(t => t.classList.remove('on'));
+  if (tab === 'account') document.querySelectorAll('#perms-tabs .tab')[0].classList.add('on');
+  if (tab === 'project') document.querySelectorAll('#perms-tabs .tab')[1].classList.add('on');
+  if (tab === 'customer') document.querySelectorAll('#perms-tabs .tab')[2].classList.add('on');
+  if (tab === 'partner') document.querySelectorAll('#perms-tabs .tab')[3].classList.add('on');
+}
+
+/* ── Partner detail tab switch ── */
+function switchPartnerTab(tab) {
+  document.querySelectorAll('#partner-detail-tabs .tab').forEach(t => t.classList.remove('on'));
+  if (tab === 'profile') {
+    document.querySelectorAll('#partner-detail-tabs .tab')[0].classList.add('on');
+    document.getElementById('tab-profile').classList.add('on');
+    document.getElementById('tab-members').classList.remove('on');
+  } else {
+    document.querySelectorAll('#partner-detail-tabs .tab')[1].classList.add('on');
+    document.getElementById('tab-members').classList.add('on');
+    document.getElementById('tab-profile').classList.remove('on');
+  }
+}
+
+/* ── Scope segmented control (Screen 2 - read-only demo) ── */
+const scopeDescs = {
+  res: {
+    shared: 'Partners can view shared resources only. Private resources are not visible.',
+    private: 'Partners can view all shared and private project resources.'
+  },
+  proj: {
+    company: 'Can view all projects where their partner company has been added.',
+    strict: 'Must be individually added to each project to gain access.'
+  },
+  task: {
+    all: 'Can view all tasks in projects they have access to.',
+    company: 'Can only view tasks that have been explicitly assigned to their company.'
+  }
+};
+
+function setScope(type, val) {
+  const seg = document.getElementById('seg-' + type);
+  seg.querySelectorAll('.seg-opt').forEach(b => b.classList.remove('on'));
+  event.target.classList.add('on');
+  document.getElementById(type + '-desc').textContent = scopeDescs[type][val];
+
+  if (type === 'res') {
+    const isSharedOnly = val === 'shared';
+    const taskRow = document.getElementById('task-scope-row');
+    const taskNote = document.getElementById('task-scope-note');
+    const tPrivate = document.getElementById('t-private-row');
+
+    if (isSharedOnly) {
+      // Auto-disable task scope — set to company-only and show note
+      document.querySelectorAll('#seg-task .seg-opt').forEach(b => {
+        b.classList.remove('on');
+        b.classList.add('dim');
+      });
+      taskNote.style.display = 'flex';
+      tPrivate.style.display = 'none';
+    } else {
+      document.querySelectorAll('#seg-task .seg-opt').forEach(b => b.classList.remove('dim'));
+      document.querySelectorAll('#seg-task .seg-opt')[0].classList.add('on');
+      taskNote.style.display = 'none';
+      tPrivate.style.display = 'flex';
+    }
+  }
+}
+
+/* ── New permission set modal scope ── */
+function setNewScope(btn) {
+  const seg = btn.parentElement;
+  seg.querySelectorAll('.seg-opt').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+
+  const resOpts = document.querySelectorAll('#new-seg-res .seg-opt');
+  const isSharedOnly = resOpts[0].classList.contains('on');
+  const taskOpts = document.querySelectorAll('#new-seg-task .seg-opt');
+  const taskNote = document.getElementById('new-task-note');
+
+  if (isSharedOnly) {
+    taskOpts[0].classList.add('on');
+    taskOpts[1].classList.add('dim');
+    taskNote.style.display = 'block';
+  } else {
+    taskOpts[1].classList.remove('dim');
+    taskNote.style.display = 'none';
+  }
+}
+
+/* ── Multi-select toggle ── */
+function toggleMs(item) {
+  const cb = item.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  item.classList.toggle('on', cb.checked);
+}
+
+/* ── Radio pset select ── */
+function selectPset(item) {
+  const r = item.querySelector('input[type=radio]');
+  r.checked = true;
+  item.parentElement.querySelectorAll('.ms-item').forEach(i => i.classList.remove('on'));
+  item.classList.add('on');
+}
+
+/* ── Sidebar section scroll ── */
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.pd-sb-item').forEach(i => i.classList.remove('on'));
+  const labels = ['sec-projects','sec-phase','sec-tasks','sec-spaces','sec-chat','sec-files','sec-forms'];
+  const idx = labels.indexOf(id);
+  if (idx >= 0) document.querySelectorAll('.pd-sb-item')[idx].classList.add('on');
+}
+</script>
+</body>
+</html>
