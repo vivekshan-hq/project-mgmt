@@ -311,6 +311,15 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 /* Count pill */
 .cpill{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--t2)}
 
+/* ── Partner profile info table ── */
+.info-tbl{border:1px solid var(--bdr);border-radius:8px;overflow:hidden}
+.info-row{display:grid;grid-template-columns:210px 1fr;min-height:44px;border-bottom:1px solid var(--div);align-items:center}
+.info-row:last-child{border-bottom:none}
+.info-row:nth-child(even){background:var(--bg2)}
+.info-label{padding:10px 16px;font-size:14px;color:var(--t2);display:flex;align-items:center;gap:5px;line-height:20px}
+.info-value{padding:10px 16px;font-size:14px;color:var(--t1);font-weight:500;line-height:20px}
+.ihi{color:var(--tph);cursor:default;flex-shrink:0}
+
 /* ── Permission set row (Screen 1) ── */
 .ps-row{display:flex;align-items:center;gap:0;padding:13px 20px;border-bottom:1px solid var(--div);cursor:pointer;transition:background .1s}
 .ps-row:hover{background:var(--bg2)}
@@ -750,12 +759,17 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <span>ajay res</span>
         </div>
         <div class="ph-row">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23e8f5e9'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-weight='700' fill='%23166534'%3EG%3C/text%3E%3C/svg%3E" width="32" height="32" style="border-radius:4px">
+          <div style="width:28px;height:28px;border-radius:5px;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="1.6" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M12 12v4M9 14h6"/></svg>
+          </div>
           <div class="ph-title">ajay res</div>
         </div>
         <div class="tabs" id="partner-detail-tabs">
-          <div class="tab" onclick="switchPartnerTab('profile')">Profile</div>
-          <div class="tab on" onclick="switchPartnerTab('members')">
+          <div class="tab on" onclick="switchPartnerTab('profile')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-1px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Profile
+          </div>
+          <div class="tab" onclick="switchPartnerTab('members')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-1px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
             Partner team members
           </div>
@@ -763,64 +777,93 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       </div>
 
       <!-- Profile tab -->
-      <div id="tab-profile" class="tab-content" style="flex:1;overflow-y:auto;padding:24px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px">
-          <div class="ff">
-            <label class="fl">Partner name</label>
-            <div style="font-size:14px;color:var(--t1);padding:7px 0">ajay res</div>
+      <div id="tab-profile" class="tab-content on" style="flex:1;overflow-y:auto">
+
+        <!-- Identity header -->
+        <div style="padding:24px 24px 18px">
+          <div style="width:72px;height:72px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;margin-bottom:14px">
+            <svg width="30" height="30" fill="none" stroke="var(--t3)" stroke-width="1.4" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
           </div>
-          <div class="ff">
-            <label class="fl">Website</label>
-            <div style="font-size:14px;color:var(--t1);padding:7px 0">—</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+            <span style="font-size:20px;font-weight:600;color:var(--t1)">ajay res</span>
+            <a onclick="openMo('mo-new-partner')" style="color:var(--accent);font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;text-decoration:none">
+              Edit
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </a>
           </div>
-          <div class="ff">
-            <label class="fl">Partner admin</label>
-            <div style="font-size:14px;color:var(--t1);padding:7px 0">ajaykanna+res@rocketlane.com</div>
-          </div>
-          <div class="ff">
-            <label class="fl">Licenses</label>
-            <div style="font-size:14px;color:var(--t1);padding:7px 0">1 / 1 used</div>
+          <div style="display:flex;align-items:center;gap:6px;color:var(--t3);font-size:13px">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Created at 11 Jul
           </div>
         </div>
 
-        <div style="border-top:1px solid var(--div);margin-top:4px;padding-top:20px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <div style="font-size:15px;font-weight:600">Allowed permission sets</div>
-            <span class="new-badge">New</span>
-            <div class="spacer"></div>
-            <button class="btn btn-g btn-sm" onclick="openMo('mo-manage-sets')">Manage sets</button>
-          </div>
-          <div style="font-size:13px;color:var(--t2);margin-bottom:0">Only these sets can be assigned to members of this partner company.</div>
+        <div style="border-top:1px solid var(--div)"></div>
 
-          <div class="aset-grid">
-            <div class="aset-card">
-              <div><div class="aset-name">Permissive Admin</div><div class="aset-meta">4 members assigned</div></div>
-              <button class="aset-rm" title="Remove set" onclick="openMo('mo-remove-warn')">×</button>
-            </div>
-            <div class="aset-add" onclick="openMo('mo-manage-sets')">
-              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-              Add permission set
-            </div>
-          </div>
-        </div>
+        <!-- Information -->
+        <div style="padding:20px 24px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:14px">Information</div>
+          <div class="info-tbl">
 
-        <div style="border-top:1px solid var(--div);padding-top:20px;margin-top:4px">
-          <div style="font-size:15px;font-weight:600;margin-bottom:12px">Settings</div>
-          <div class="row" style="gap:12px;margin-bottom:14px">
-            <div><div style="font-size:14px;font-weight:500">Mask this partner</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Hide partner identity from project participants</div></div>
-            <div class="spacer"></div>
-            <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
-          </div>
-          <div class="row" style="gap:12px">
-            <div><div style="font-size:14px;font-weight:500">Can track time</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Allow partner members to log time on tasks</div></div>
-            <div class="spacer"></div>
-            <label class="sw"><input type="checkbox"><span class="sw-track"></span></label>
+            <div class="info-row">
+              <div class="info-label">Website</div>
+              <div class="info-value" style="font-weight:400;color:var(--tph)">—</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Primary partner admin</div>
+              <div class="info-value" style="font-weight:400">ajaykanna+res@rocketlane.com</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">
+                Licenses used
+                <svg class="ihi" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              </div>
+              <div class="info-value">1 / 1</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Active projects</div>
+              <div class="info-value">2</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Completed projects</div>
+              <div class="info-value">0</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">
+                Mask this partner
+                <svg class="ihi" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              </div>
+              <div class="info-value"><input type="checkbox" style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer"></div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Can track time</div>
+              <div class="info-value"><input type="checkbox" style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer"></div>
+            </div>
+
+            <div class="info-row" style="align-items:flex-start">
+              <div class="info-label" style="padding-top:12px">
+                Allowed permission sets
+                <span class="new-badge" style="margin-left:2px">New</span>
+              </div>
+              <div class="info-value" style="padding:10px 16px;font-weight:400">
+                <div class="chips" style="gap:5px">
+                  <span class="chip chip-p">Permissive Admin</span>
+                </div>
+                <div style="font-size:11.5px;color:var(--t3);margin-top:6px">To change, click Edit next to the partner name above.</div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
 
       <!-- Members tab -->
-      <div id="tab-members" class="tab-content on" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div id="tab-members" class="tab-content" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
         <div style="padding:10px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--div)">
           <div class="tabs" style="border:none;margin:0;flex:1" id="members-subtabs">
             <div class="tab on" style="padding:5px 12px;font-size:13px">Active (1)</div>
@@ -1215,14 +1258,20 @@ function switchPermTab(tab) {
 /* ── Partner detail tab switch ── */
 function switchPartnerTab(tab) {
   document.querySelectorAll('#partner-detail-tabs .tab').forEach(t => t.classList.remove('on'));
+  const profileTab = document.getElementById('tab-profile');
+  const membersTab = document.getElementById('tab-members');
   if (tab === 'profile') {
     document.querySelectorAll('#partner-detail-tabs .tab')[0].classList.add('on');
-    document.getElementById('tab-profile').classList.add('on');
-    document.getElementById('tab-members').classList.remove('on');
+    profileTab.classList.add('on');
+    membersTab.classList.remove('on');
+    membersTab.style.display = 'none';
+    profileTab.style.display = '';
   } else {
     document.querySelectorAll('#partner-detail-tabs .tab')[1].classList.add('on');
-    document.getElementById('tab-members').classList.add('on');
-    document.getElementById('tab-profile').classList.remove('on');
+    membersTab.classList.add('on');
+    profileTab.classList.remove('on');
+    profileTab.style.display = 'none';
+    membersTab.style.display = 'flex';
   }
 }
 
