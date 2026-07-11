@@ -338,10 +338,10 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 <!-- ── Prototype nav ── -->
 <div class="proto-bar">
   <span class="proto-label">Partner RBAC Prototype</span>
-  <button class="pb on" id="pb1" onclick="go('s1','pb1')">1 · Permissions → Partner tab</button>
-  <button class="pb" id="pb2" onclick="go('s2','pb2')">2 · Permission set detail</button>
-  <button class="pb" id="pb3" onclick="go('s3','pb3')">3 · Partners settings</button>
-  <button class="pb" id="pb4" onclick="go('s4','pb4')">4 · Partner company page</button>
+  <button class="pb on" id="pb1" onclick="go('s3','pb1')">1 · Partners settings</button>
+  <button class="pb" id="pb2" onclick="go('s4','pb2')">2 · Partner company page</button>
+  <button class="pb" id="pb3" onclick="go('s1','pb3')">3 · Permissions → Partner tab</button>
+  <button class="pb" id="pb4" onclick="go('s2','pb4')">4 · Permission set detail</button>
 </div>
 
 <!-- ── App shell ── -->
@@ -365,8 +365,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
     <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Preferences</div>
     <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Team members</div>
     <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Roles &amp; Placeholders</div>
-    <div class="snav-item on" onclick="go('s1','pb1')" id="snav-perm"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Permissions</div>
-    <div class="snav-item" onclick="go('s3','pb3')" id="snav-partners"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners</div>
+    <div class="snav-item" onclick="go('s1','pb3')" id="snav-perm"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Permissions</div>
+    <div class="snav-item on" onclick="go('s3','pb1')" id="snav-partners"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Partners</div>
     <div class="snav-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>Integrations</div>
 
     <div class="snav-group" style="margin-top:8px">Meeting intelligence</div>
@@ -380,7 +380,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
     <!-- ═══════════════════════════════════════════════════
          SCREEN 1 · Permissions — Partner tab
     ════════════════════════════════════════════════════ -->
-    <div class="screen on" id="s1">
+    <div class="screen" id="s1">
       <div class="ph">
         <div class="ph-row">
           <div class="ph-title">
@@ -416,8 +416,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-name-row"><span class="ps-name">Permissive Admin</span><span class="bdg bdg-def">Default</span></div>
             <div class="ps-desc">Full access to shared &amp; private resources · Company-restricted project scope</div>
           </div>
-          <div class="ps-stats">4 users</div>
-          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
         </div>
 
         <!-- Permissive Collaborator -->
@@ -427,8 +426,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-name-row"><span class="ps-name">Permissive Collaborator</span><span class="bdg bdg-def">Default</span></div>
             <div class="ps-desc">Full access to shared &amp; private resources · Strict participant scope</div>
           </div>
-          <div class="ps-stats">7 users</div>
-          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
         </div>
 
         <!-- Moderate Admin -->
@@ -438,8 +436,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-name-row"><span class="ps-name">Moderate Admin</span><span class="bdg bdg-def">Default</span></div>
             <div class="ps-desc">Shared resources only · Company-restricted project scope</div>
           </div>
-          <div class="ps-stats">12 users</div>
-          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
         </div>
 
         <!-- Moderate Collaborator -->
@@ -449,8 +446,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-name-row"><span class="ps-name">Moderate Collaborator</span><span class="bdg bdg-def">Default</span></div>
             <div class="ps-desc">Shared resources only · Strict participant scope</div>
           </div>
-          <div class="ps-stats">9 users</div>
-          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
         </div>
 
         <!-- Restricted Admin -->
@@ -460,8 +456,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-name-row"><span class="ps-name">Restricted Admin</span><span class="bdg bdg-def">Default</span></div>
             <div class="ps-desc">Assigned shared resources only · Company-restricted scope</div>
           </div>
-          <div class="ps-stats">5 users</div>
-          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
         </div>
 
         <!-- Restricted Collaborator -->
@@ -471,8 +466,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-name-row"><span class="ps-name">Restricted Collaborator</span><span class="bdg bdg-def">Default</span></div>
             <div class="ps-desc">Assigned shared resources only · Strict participant scope</div>
           </div>
-          <div class="ps-stats">3 users</div>
-          <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
         </div>
 
         <!-- Custom sets header -->
@@ -485,8 +479,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-name-row"><span class="ps-name">Partner Read-Only</span><span class="bdg bdg-cust">Custom</span></div>
             <div class="ps-desc">View-only access to shared resources · Strict participant</div>
           </div>
-          <div class="ps-stats">2 users</div>
-          <div class="ps-actions">
+                    <div class="ps-actions">
             <button class="btn btn-g btn-sm" onclick="event.stopPropagation()">Edit</button>
             <button class="more-btn" onclick="event.stopPropagation()">···</button>
           </div>
@@ -534,7 +527,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <div class="scope-card-title">Access scope</div>
 
         <div class="scope-row" style="flex-direction:column;align-items:flex-start;gap:10px">
-          <div class="scope-label">Resource visibility</div>
+          <div class="scope-label">Visibility</div>
           <div class="radio-group">
             <label class="radio-opt">
               <input type="radio" name="s2-res" value="private" checked onchange="setResScope('private')">
@@ -654,7 +647,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
     <!-- ═══════════════════════════════════════════════════
          SCREEN 3 · Partners settings
     ════════════════════════════════════════════════════ -->
-    <div class="screen" id="s3">
+    <div class="screen on" id="s3">
       <div class="ph">
         <div class="ph-row">
           <div class="ph-title">
@@ -854,7 +847,6 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <div class="chips" style="gap:5px">
                   <span class="chip chip-p">Permissive Admin</span>
                 </div>
-                <div style="font-size:11.5px;color:var(--t3);margin-top:6px">To change, click Edit next to the partner name above.</div>
               </div>
             </div>
 
@@ -1111,7 +1103,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:14px">Access scope preview</div>
 
         <div style="margin-bottom:16px">
-          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Resource visibility</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Visibility</div>
           <div class="radio-group">
             <label class="radio-opt">
               <input type="radio" name="new-res" value="private" checked>
