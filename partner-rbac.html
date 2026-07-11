@@ -169,12 +169,14 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 .ps-block-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .ps-block-title{font-size:15px;font-weight:600}
 
-/* ── Segmented control ── */
-.seg{display:inline-flex;background:var(--bg3);border-radius:6px;padding:3px;gap:2px}
-.seg-opt{padding:5px 12px;border-radius:4px;font-size:13px;color:var(--t2);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .12s;user-select:none}
-.seg-opt:hover{color:var(--t1)}
-.seg-opt.on{background:var(--bg);color:var(--t1);box-shadow:var(--sh2);font-weight:500}
-.seg-opt.dim{opacity:.38;cursor:not-allowed;pointer-events:none}
+/* ── Radio option group ── */
+.radio-group{display:flex;flex-direction:column;gap:6px;width:100%}
+.radio-opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--bdr);border-radius:6px;cursor:pointer;transition:border-color .12s,background .12s}
+.radio-opt:hover{border-color:var(--t3)}
+.radio-opt:has(input:checked){border-color:var(--accent);background:var(--accent-bg)}
+.radio-opt input[type=radio]{accent-color:var(--accent);margin-top:2px;flex-shrink:0;width:15px;height:15px;cursor:pointer}
+.radio-opt-label{font-size:14px;font-weight:500;color:var(--t1);line-height:20px}
+.radio-opt-desc{font-size:12px;color:var(--t3);margin-top:1px;line-height:16px}
 
 /* ── Scope card ── */
 .scope-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:16px 20px;margin:16px 24px 0}
@@ -363,7 +365,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Permissive Admin</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Full access to shared &amp; private resources · Company-restricted project scope · All tasks visible</div>
+            <div class="ps-desc">Full access to shared &amp; private resources · Company-restricted project scope</div>
           </div>
           <div class="ps-stats">4 users</div>
           <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
@@ -374,7 +376,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Permissive Collaborator</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Full access to shared &amp; private resources · Strict participant scope · All tasks visible</div>
+            <div class="ps-desc">Full access to shared &amp; private resources · Strict participant scope</div>
           </div>
           <div class="ps-stats">7 users</div>
           <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
@@ -385,7 +387,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Moderate Admin</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Shared resources only · Company-restricted project scope · All tasks visible</div>
+            <div class="ps-desc">Shared resources only · Company-restricted project scope</div>
           </div>
           <div class="ps-stats">12 users</div>
           <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
@@ -396,7 +398,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Moderate Collaborator</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Shared resources only · Strict participant scope · All tasks visible</div>
+            <div class="ps-desc">Shared resources only · Strict participant scope</div>
           </div>
           <div class="ps-stats">9 users</div>
           <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
@@ -407,7 +409,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Restricted Admin</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Assigned shared resources only · Company-restricted scope · Company-assigned tasks only</div>
+            <div class="ps-desc">Assigned shared resources only · Company-restricted scope</div>
           </div>
           <div class="ps-stats">5 users</div>
           <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
@@ -418,7 +420,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Restricted Collaborator</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Assigned shared resources only · Strict participant scope · Company-assigned tasks only</div>
+            <div class="ps-desc">Assigned shared resources only · Strict participant scope</div>
           </div>
           <div class="ps-stats">3 users</div>
           <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
@@ -432,7 +434,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="ps-icon" style="background:#f3e8ff"><svg fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Partner Read-Only</span><span class="bdg bdg-cust">Custom</span></div>
-            <div class="ps-desc">View-only access to shared resources · Strict participant · No task edits</div>
+            <div class="ps-desc">View-only access to shared resources · Strict participant</div>
           </div>
           <div class="ps-stats">2 users</div>
           <div class="ps-actions">
@@ -482,31 +484,32 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       <div class="scope-card">
         <div class="scope-card-title">Access scope</div>
 
-        <div class="scope-row">
+        <div class="scope-row" style="flex-direction:column;align-items:flex-start;gap:10px">
           <div class="scope-label">Resource visibility</div>
-          <div class="seg" id="seg-res">
-            <button class="seg-opt" onclick="setScope('res','shared')">Shared only</button>
-            <button class="seg-opt on" onclick="setScope('res','private')">Shared + Private</button>
+          <div class="radio-group">
+            <label class="radio-opt">
+              <input type="radio" name="s2-res" value="private" checked onchange="setResScope('private')">
+              <div><div class="radio-opt-label">Shared + Private</div><div class="radio-opt-desc">Partners can view all shared and private project resources, including tasks.</div></div>
+            </label>
+            <label class="radio-opt">
+              <input type="radio" name="s2-res" value="shared" onchange="setResScope('shared')">
+              <div><div class="radio-opt-label">Shared only</div><div class="radio-opt-desc">Partners can view shared resources only. Private resources and tasks are not visible.</div></div>
+            </label>
           </div>
-          <div class="scope-desc" id="res-desc">Partners can view all shared and private project resources.</div>
         </div>
 
-        <div class="scope-row">
+        <div class="scope-row" style="flex-direction:column;align-items:flex-start;gap:10px">
           <div class="scope-label">Project scope</div>
-          <div class="seg" id="seg-proj">
-            <button class="seg-opt on" onclick="setScope('proj','company')">Company restricted</button>
-            <button class="seg-opt" onclick="setScope('proj','strict')">Strict participant</button>
+          <div class="radio-group">
+            <label class="radio-opt">
+              <input type="radio" name="s2-proj" value="company" checked>
+              <div><div class="radio-opt-label">Company restricted</div><div class="radio-opt-desc">Can view all projects where their partner company has been added.</div></div>
+            </label>
+            <label class="radio-opt">
+              <input type="radio" name="s2-proj" value="strict">
+              <div><div class="radio-opt-label">Strict participant</div><div class="radio-opt-desc">Must be individually added to each project to gain access.</div></div>
+            </label>
           </div>
-          <div class="scope-desc" id="proj-desc">Can view all projects where their partner company has been added.</div>
-        </div>
-
-        <div class="scope-row" id="task-scope-row">
-          <div class="scope-label">Task scope</div>
-          <div class="seg" id="seg-task">
-            <button class="seg-opt on" onclick="setScope('task','all')">All tasks</button>
-            <button class="seg-opt" id="task-company-opt" onclick="setScope('task','company')">Company-assigned only</button>
-          </div>
-          <div class="scope-desc" id="task-desc">Can view all tasks in projects they have access to.</div>
         </div>
       </div>
 
@@ -546,9 +549,9 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <!-- Tasks -->
           <div class="ps-block" id="sec-tasks">
             <div class="ps-block-hd"><span class="ps-block-title">Tasks</span></div>
-            <div id="task-scope-note" style="display:none" class="ib ib-info">
+            <div id="task-private-notice" style="display:none" class="ib ib-info">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-              Task scope is locked to <strong>Company-assigned only</strong> when resource visibility is Shared only. Switch to Shared + Private to enable all task scoping options.
+              Private tasks are hidden when resource visibility is set to Shared only.
             </div>
             <div class="cb-row"><input type="checkbox" checked id="t-view" disabled><label for="t-view">Can view tasks</label></div>
             <div class="cb-row"><input type="checkbox" checked id="t-create" disabled><label for="t-create">Can create tasks</label></div>
@@ -879,22 +882,22 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <div class="ms-box" id="ms-psets">
           <div class="ms-hd">Default sets</div>
           <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+            <input type="checkbox"><div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted</div></div><span class="ms-badge">Default</span>
           </div>
           <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Permissive Collaborator</div><div class="ms-sub">Shared + Private · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+            <input type="checkbox"><div><div class="ms-name">Permissive Collaborator</div><div class="ms-sub">Shared + Private · Strict participant</div></div><span class="ms-badge">Default</span>
           </div>
           <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Moderate Admin</div><div class="ms-sub">Shared only · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+            <input type="checkbox"><div><div class="ms-name">Moderate Admin</div><div class="ms-sub">Shared only · Company restricted</div></div><span class="ms-badge">Default</span>
           </div>
           <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Moderate Collaborator</div><div class="ms-sub">Shared only · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+            <input type="checkbox"><div><div class="ms-name">Moderate Collaborator</div><div class="ms-sub">Shared only · Strict participant</div></div><span class="ms-badge">Default</span>
           </div>
           <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Restricted Admin</div><div class="ms-sub">Assigned shared only · Company restricted · Company tasks</div></div><span class="ms-badge">Default</span>
+            <input type="checkbox"><div><div class="ms-name">Restricted Admin</div><div class="ms-sub">Assigned shared only · Company restricted</div></div><span class="ms-badge">Default</span>
           </div>
           <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Restricted Collaborator</div><div class="ms-sub">Assigned shared only · Strict participant · Company tasks</div></div><span class="ms-badge">Default</span>
+            <input type="checkbox"><div><div class="ms-name">Restricted Collaborator</div><div class="ms-sub">Assigned shared only · Strict participant</div></div><span class="ms-badge">Default</span>
           </div>
           <div class="ms-hd" style="border-top:1px solid var(--bdr)">Custom sets</div>
           <div class="ms-item" onclick="toggleMs(this)">
@@ -962,7 +965,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <div class="ms-box">
           <div class="ms-item on" onclick="selectPset(this)" style="border-radius:7px 7px 0 0">
             <input type="radio" name="pset" checked style="accent-color:var(--accent);width:15px;height:15px;flex-shrink:0">
-            <div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted · All tasks</div></div>
+            <div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted</div></div>
             <span class="ms-badge">Default</span>
           </div>
         </div>
@@ -1010,32 +1013,33 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       </div>
 
       <div style="border-top:1px solid var(--div);padding-top:18px;margin-top:4px">
-        <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:12px">Access scope preview</div>
+        <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:14px">Access scope preview</div>
 
-        <div style="margin-bottom:14px">
-          <div style="font-size:13px;font-weight:500;margin-bottom:6px">Resource visibility</div>
-          <div class="seg" id="new-seg-res">
-            <button class="seg-opt on" onclick="setNewScope(this)">Shared only</button>
-            <button class="seg-opt" onclick="setNewScope(this)">Shared + Private</button>
-          </div>
-        </div>
-
-        <div style="margin-bottom:14px">
-          <div style="font-size:13px;font-weight:500;margin-bottom:6px">Project scope</div>
-          <div class="seg">
-            <button class="seg-opt on" onclick="setNewScope(this)">Company restricted</button>
-            <button class="seg-opt" onclick="setNewScope(this)">Strict participant</button>
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Resource visibility</div>
+          <div class="radio-group">
+            <label class="radio-opt">
+              <input type="radio" name="new-res" value="private" checked>
+              <div><div class="radio-opt-label">Shared + Private</div><div class="radio-opt-desc">Partners can view all shared and private resources, including tasks.</div></div>
+            </label>
+            <label class="radio-opt">
+              <input type="radio" name="new-res" value="shared">
+              <div><div class="radio-opt-label">Shared only</div><div class="radio-opt-desc">Partners can view shared resources only. Private content is not visible.</div></div>
+            </label>
           </div>
         </div>
 
         <div>
-          <div style="font-size:13px;font-weight:500;margin-bottom:6px">Task scope</div>
-          <div class="seg" id="new-seg-task">
-            <button class="seg-opt on" onclick="setNewScope(this)">All tasks</button>
-            <button class="seg-opt dim" id="new-task-company">Company-assigned only</button>
-          </div>
-          <div style="font-size:12px;color:var(--warn);margin-top:5px;display:none" id="new-task-note">
-            Switch to "Shared + Private" to enable company-assigned task scoping.
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Project scope</div>
+          <div class="radio-group">
+            <label class="radio-opt">
+              <input type="radio" name="new-proj" value="company" checked>
+              <div><div class="radio-opt-label">Company restricted</div><div class="radio-opt-desc">Can view all projects where their partner company has been added.</div></div>
+            </label>
+            <label class="radio-opt">
+              <input type="radio" name="new-proj" value="strict">
+              <div><div class="radio-opt-label">Strict participant</div><div class="radio-opt-desc">Must be individually added to each project to gain access.</div></div>
+            </label>
           </div>
         </div>
       </div>
@@ -1066,22 +1070,22 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       <div class="ms-box" id="ms-manage-psets">
         <div class="ms-hd">Default sets</div>
         <div class="ms-item on" onclick="toggleMs(this)">
-          <input type="checkbox" checked><div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+          <input type="checkbox" checked><div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted</div></div><span class="ms-badge">Default</span>
         </div>
         <div class="ms-item" onclick="toggleMs(this)">
-          <input type="checkbox"><div><div class="ms-name">Permissive Collaborator</div><div class="ms-sub">Shared + Private · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+          <input type="checkbox"><div><div class="ms-name">Permissive Collaborator</div><div class="ms-sub">Shared + Private · Strict participant</div></div><span class="ms-badge">Default</span>
         </div>
         <div class="ms-item" onclick="toggleMs(this)">
-          <input type="checkbox"><div><div class="ms-name">Moderate Admin</div><div class="ms-sub">Shared only · Company restricted · All tasks</div></div><span class="ms-badge">Default</span>
+          <input type="checkbox"><div><div class="ms-name">Moderate Admin</div><div class="ms-sub">Shared only · Company restricted</div></div><span class="ms-badge">Default</span>
         </div>
         <div class="ms-item" onclick="toggleMs(this)">
-          <input type="checkbox"><div><div class="ms-name">Moderate Collaborator</div><div class="ms-sub">Shared only · Strict participant · All tasks</div></div><span class="ms-badge">Default</span>
+          <input type="checkbox"><div><div class="ms-name">Moderate Collaborator</div><div class="ms-sub">Shared only · Strict participant</div></div><span class="ms-badge">Default</span>
         </div>
         <div class="ms-item" onclick="toggleMs(this)">
-          <input type="checkbox"><div><div class="ms-name">Restricted Admin</div><div class="ms-sub">Assigned shared only · Company restricted · Company tasks</div></div><span class="ms-badge">Default</span>
+          <input type="checkbox"><div><div class="ms-name">Restricted Admin</div><div class="ms-sub">Assigned shared only · Company restricted</div></div><span class="ms-badge">Default</span>
         </div>
         <div class="ms-item" onclick="toggleMs(this)">
-          <input type="checkbox"><div><div class="ms-name">Restricted Collaborator</div><div class="ms-sub">Assigned shared only · Strict participant · Company tasks</div></div><span class="ms-badge">Default</span>
+          <input type="checkbox"><div><div class="ms-name">Restricted Collaborator</div><div class="ms-sub">Assigned shared only · Strict participant</div></div><span class="ms-badge">Default</span>
         </div>
         <div class="ms-hd" style="border-top:1px solid var(--bdr)">Custom sets</div>
         <div class="ms-item" onclick="toggleMs(this)">
@@ -1170,69 +1174,16 @@ function switchPartnerTab(tab) {
   }
 }
 
-/* ── Scope segmented control (Screen 2 - read-only demo) ── */
-const scopeDescs = {
-  res: {
-    shared: 'Partners can view shared resources only. Private resources are not visible.',
-    private: 'Partners can view all shared and private project resources.'
-  },
-  proj: {
-    company: 'Can view all projects where their partner company has been added.',
-    strict: 'Must be individually added to each project to gain access.'
-  },
-  task: {
-    all: 'Can view all tasks in projects they have access to.',
-    company: 'Can only view tasks that have been explicitly assigned to their company.'
-  }
-};
-
-function setScope(type, val) {
-  const seg = document.getElementById('seg-' + type);
-  seg.querySelectorAll('.seg-opt').forEach(b => b.classList.remove('on'));
-  event.target.classList.add('on');
-  document.getElementById(type + '-desc').textContent = scopeDescs[type][val];
-
-  if (type === 'res') {
-    const isSharedOnly = val === 'shared';
-    const taskRow = document.getElementById('task-scope-row');
-    const taskNote = document.getElementById('task-scope-note');
-    const tPrivate = document.getElementById('t-private-row');
-
-    if (isSharedOnly) {
-      // Auto-disable task scope — set to company-only and show note
-      document.querySelectorAll('#seg-task .seg-opt').forEach(b => {
-        b.classList.remove('on');
-        b.classList.add('dim');
-      });
-      taskNote.style.display = 'flex';
-      tPrivate.style.display = 'none';
-    } else {
-      document.querySelectorAll('#seg-task .seg-opt').forEach(b => b.classList.remove('dim'));
-      document.querySelectorAll('#seg-task .seg-opt')[0].classList.add('on');
-      taskNote.style.display = 'none';
-      tPrivate.style.display = 'flex';
-    }
-  }
-}
-
-/* ── New permission set modal scope ── */
-function setNewScope(btn) {
-  const seg = btn.parentElement;
-  seg.querySelectorAll('.seg-opt').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-
-  const resOpts = document.querySelectorAll('#new-seg-res .seg-opt');
-  const isSharedOnly = resOpts[0].classList.contains('on');
-  const taskOpts = document.querySelectorAll('#new-seg-task .seg-opt');
-  const taskNote = document.getElementById('new-task-note');
-
-  if (isSharedOnly) {
-    taskOpts[0].classList.add('on');
-    taskOpts[1].classList.add('dim');
-    taskNote.style.display = 'block';
+/* ── Resource visibility radio (Screen 2) ── */
+function setResScope(val) {
+  const notice = document.getElementById('task-private-notice');
+  const tPrivate = document.getElementById('t-private-row');
+  if (val === 'shared') {
+    notice.style.display = 'flex';
+    tPrivate.style.display = 'none';
   } else {
-    taskOpts[1].classList.remove('dim');
-    taskNote.style.display = 'none';
+    notice.style.display = 'none';
+    tPrivate.style.display = 'flex';
   }
 }
 
