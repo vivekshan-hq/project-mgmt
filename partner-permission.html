@@ -412,7 +412,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <div style="padding:12px 20px 6px;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase">Default sets</div>
 
         <!-- Permissive Admin -->
-        <div class="ps-row" onclick="go('s2','pb2')">
+        <div class="ps-row" onclick="openPset('pa')">
           <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Permissive Admin</span><span class="bdg bdg-def">Default</span></div>
@@ -422,7 +422,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         </div>
 
         <!-- Permissive Collaborator -->
-        <div class="ps-row" onclick="go('s2','pb2')">
+        <div class="ps-row" onclick="openPset('pc')">
           <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Permissive Collaborator</span><span class="bdg bdg-def">Default</span></div>
@@ -432,7 +432,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         </div>
 
         <!-- Moderate Admin -->
-        <div class="ps-row" onclick="go('s2','pb2')">
+        <div class="ps-row" onclick="openPset('ma')">
           <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Moderate Admin</span><span class="bdg bdg-def">Default</span></div>
@@ -442,7 +442,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         </div>
 
         <!-- Moderate Collaborator -->
-        <div class="ps-row" onclick="go('s2','pb2')">
+        <div class="ps-row" onclick="openPset('mc')">
           <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Moderate Collaborator</span><span class="bdg bdg-def">Default</span></div>
@@ -452,7 +452,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         </div>
 
         <!-- Restricted Admin -->
-        <div class="ps-row" onclick="go('s2','pb2')">
+        <div class="ps-row" onclick="openPset('ra')">
           <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Restricted Admin</span><span class="bdg bdg-def">Default</span></div>
@@ -462,7 +462,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         </div>
 
         <!-- Restricted Collaborator -->
-        <div class="ps-row" onclick="go('s2','pb2')">
+        <div class="ps-row" onclick="openPset('rc')">
           <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Restricted Collaborator</span><span class="bdg bdg-def">Default</span></div>
@@ -475,7 +475,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <div style="padding:16px 20px 6px;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase;border-top:1px solid var(--div);margin-top:4px">Custom sets</div>
 
         <!-- Custom example -->
-        <div class="ps-row">
+        <div class="ps-row" onclick="openPset('prl')">
           <div class="ps-icon" style="background:#f3e8ff"><svg fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="ps-info">
             <div class="ps-name-row"><span class="ps-name">Partner Read-Only</span><span class="bdg bdg-cust">Custom</span></div>
@@ -503,15 +503,15 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
     <div class="screen" id="s2" style="flex-direction:column">
       <div class="ph">
         <div class="ph-bc">
-          <a onclick="go('s1','pb1')">Permissions</a><span class="sep">/</span>
-          <a onclick="go('s1','pb1')">Partner</a><span class="sep">/</span>
-          <span>Permissive Admin</span>
+          <a onclick="go('s1','pb3')">Permissions</a><span class="sep">/</span>
+          <a onclick="go('s1','pb3')">Partner</a><span class="sep">/</span>
+          <span id="s2-bc-name">Permissive Admin</span>
         </div>
         <div class="ph-row">
-          <div class="ph-title">Permissive Admin</div>
-          <span class="bdg bdg-def">Default</span>
+          <div id="s2-title" class="ph-title">Permissive Admin</div>
+          <span id="s2-badge" class="bdg bdg-def">Default</span>
           <div class="spacer"></div>
-          <button class="btn btn-s btn-sm">
+          <button id="s2-cta-btn" class="btn btn-s btn-sm" onclick="openMo('mo-new-pset')">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Duplicate to customize
           </button>
@@ -519,7 +519,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       </div>
 
       <!-- Read-only notice -->
-      <div class="ro-notice">
+      <div id="s2-ro-notice" class="ro-notice">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
         Default permission sets are read-only. Duplicate this set to create a customizable version.
       </div>
@@ -1286,6 +1286,69 @@ function selectPset(item) {
   r.checked = true;
   item.parentElement.querySelectorAll('.ms-item').forEach(i => i.classList.remove('on'));
   item.classList.add('on');
+}
+
+/* ── Permission set data ── */
+const PSETS = {
+  pa:  { name:'Permissive Admin',        type:'default', vis:'private', proj:'company',
+         p:{pInvite:1,pOverview:1,pHealth:1,phView:1,phEdit:1,phName:1,phDates:1,phDel:1,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:1,tDel:1,spView:1,spCreate:1,spEdit:1,spDel:1,chView:1,chSend:1,fView:1,fUpload:1,fDel:1,frView:1,frSubmit:1} },
+  pc:  { name:'Permissive Collaborator', type:'default', vis:'private', proj:'strict',
+         p:{pInvite:0,pOverview:1,pHealth:1,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:1,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:1,fDel:0,frView:1,frSubmit:1} },
+  ma:  { name:'Moderate Admin',          type:'default', vis:'shared',  proj:'company',
+         p:{pInvite:1,pOverview:1,pHealth:1,phView:1,phEdit:1,phName:1,phDates:1,phDel:0,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:1,spEdit:1,spDel:0,chView:1,chSend:1,fView:1,fUpload:1,fDel:0,frView:1,frSubmit:1} },
+  mc:  { name:'Moderate Collaborator',   type:'default', vis:'shared',  proj:'strict',
+         p:{pInvite:0,pOverview:1,pHealth:1,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:1} },
+  ra:  { name:'Restricted Admin',        type:'default', vis:'shared',  proj:'company',
+         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:1,tDates:0,tName:0,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0} },
+  rc:  { name:'Restricted Collaborator', type:'default', vis:'shared',  proj:'strict',
+         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:1,tDates:0,tName:0,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0} },
+  prl: { name:'Partner Read-Only',       type:'custom',  vis:'shared',  proj:'strict',
+         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:0,tDates:0,tName:0,tComment:0,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:0,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0} }
+};
+const CB_MAP = {
+  'p-invite':'pInvite','p-overview':'pOverview','p-health':'pHealth',
+  'ph-view':'phView','ph-edit':'phEdit','ph-name':'phName','ph-dates':'phDates','ph-del':'phDel',
+  't-view':'tView','t-create':'tCreate','t-edit':'tEdit','t-assignee':'tAssignee',
+  't-status':'tStatus','t-dates':'tDates','t-name':'tName','t-comment':'tComment',
+  't-private':'tPrivate','t-del':'tDel',
+  'sp-view':'spView','sp-create':'spCreate','sp-edit':'spEdit','sp-del':'spDel',
+  'ch-view':'chView','ch-send':'chSend',
+  'f-view':'fView','f-upload':'fUpload','f-del':'fDel',
+  'fr-view':'frView','fr-submit':'frSubmit'
+};
+
+function openPset(key) {
+  const ps = PSETS[key];
+  if (!ps) return;
+  const isDefault = ps.type === 'default';
+
+  // Header
+  document.getElementById('s2-bc-name').textContent = ps.name;
+  document.getElementById('s2-title').textContent = ps.name;
+  const badge = document.getElementById('s2-badge');
+  badge.textContent = isDefault ? 'Default' : 'Custom';
+  badge.className = isDefault ? 'bdg bdg-def' : 'bdg bdg-cust';
+
+  // Read-only notice + CTA
+  const notice = document.getElementById('s2-ro-notice');
+  const ctaBtn = document.getElementById('s2-cta-btn');
+  notice.style.display = isDefault ? '' : 'none';
+  ctaBtn.innerHTML = isDefault
+    ? '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Duplicate to customize'
+    : '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit';
+
+  // Scope radios
+  document.querySelector('input[name="s2-res"][value="' + ps.vis + '"]').checked = true;
+  document.querySelector('input[name="s2-proj"][value="' + ps.proj + '"]').checked = true;
+  setResScope(ps.vis);
+
+  // Checkboxes
+  Object.entries(CB_MAP).forEach(([id, key]) => {
+    const cb = document.getElementById(id);
+    if (cb) cb.checked = !!ps.p[key];
+  });
+
+  go('s2', 'pb4');
 }
 
 /* ── Create partner ── */
