@@ -757,20 +757,10 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           </div>
           <div class="ph-title">ajay res</div>
         </div>
-        <div class="tabs" id="partner-detail-tabs">
-          <div class="tab on" onclick="switchPartnerTab('profile')">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-1px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
-            Profile
-          </div>
-          <div class="tab" onclick="switchPartnerTab('members')">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-1px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            Partner team members
-          </div>
-        </div>
       </div>
 
-      <!-- Profile tab -->
-      <div id="tab-profile" class="tab-content on" style="flex:1;overflow-y:auto">
+      <!-- Profile -->
+      <div id="tab-profile" style="flex:1;overflow-y:auto">
 
         <!-- Identity header -->
         <div style="padding:24px 24px 18px">
@@ -854,50 +844,6 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         </div>
       </div>
 
-      <!-- Members tab -->
-      <div id="tab-members" class="tab-content" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-        <div style="padding:10px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--div)">
-          <div class="tabs" style="border:none;margin:0;flex:1" id="members-subtabs">
-            <div class="tab on" style="padding:5px 12px;font-size:13px">Active (1)</div>
-            <div class="tab" style="padding:5px 12px;font-size:13px">Invited</div>
-            <div class="tab" style="padding:5px 12px;font-size:13px">Deactivated</div>
-          </div>
-          <div style="font-size:13px;color:var(--t2);font-weight:500;padding:0 8px">1 / 1 license used</div>
-          <button class="btn btn-g btn-sm"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
-          <button class="btn btn-p btn-sm" onclick="openMo('mo-invite')">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            Invite members
-          </button>
-        </div>
-
-        <div style="flex:1;overflow-y:auto">
-          <table class="tbl">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Permission set <span class="new-badge">Updated</span></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="no-hover">
-                <td><div class="row" style="gap:8px"><div class="av" style="background:#0f62fe">A</div>ajaykannares</div></td>
-                <td style="color:var(--t2)">ajaykanna+res@rocketlane.com</td>
-                <td style="color:var(--t2)">Customer Development</td>
-                <td>
-                  <div class="row" style="gap:6px">
-                    <span class="chip chip-p">Permissive Admin</span>
-                    <span style="font-size:11px;color:var(--t3)">(Primary)</span>
-                  </div>
-                </td>
-                <td><button class="more-btn">···</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div><!-- /s4 -->
 
   </div><!-- /main-wrap -->
@@ -1058,7 +1004,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         </div>
         <div style="font-size:12px;color:var(--t3);margin-top:6px;display:flex;align-items:center;gap:5px">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-          Only 1 set is allowed for this partner. <a onclick="go('s4','pb4');switchPartnerTab('profile');closeMo('mo-invite')" style="color:var(--accent);cursor:pointer;margin-left:2px">Manage allowed sets →</a>
+          Only 1 set is allowed for this partner. <a onclick="go('s4','pb4');closeMo('mo-invite')" style="color:var(--accent);cursor:pointer;margin-left:2px">Manage allowed sets →</a>
         </div>
       </div>
     </div>
@@ -1245,26 +1191,6 @@ function switchPermTab(tab) {
   if (tab === 'project') document.querySelectorAll('#perms-tabs .tab')[1].classList.add('on');
   if (tab === 'customer') document.querySelectorAll('#perms-tabs .tab')[2].classList.add('on');
   if (tab === 'partner') document.querySelectorAll('#perms-tabs .tab')[3].classList.add('on');
-}
-
-/* ── Partner detail tab switch ── */
-function switchPartnerTab(tab) {
-  document.querySelectorAll('#partner-detail-tabs .tab').forEach(t => t.classList.remove('on'));
-  const profileTab = document.getElementById('tab-profile');
-  const membersTab = document.getElementById('tab-members');
-  if (tab === 'profile') {
-    document.querySelectorAll('#partner-detail-tabs .tab')[0].classList.add('on');
-    profileTab.classList.add('on');
-    membersTab.classList.remove('on');
-    membersTab.style.display = 'none';
-    profileTab.style.display = '';
-  } else {
-    document.querySelectorAll('#partner-detail-tabs .tab')[1].classList.add('on');
-    membersTab.classList.add('on');
-    profileTab.classList.remove('on');
-    profileTab.style.display = 'none';
-    membersTab.style.display = 'flex';
-  }
 }
 
 /* ── Resource visibility radio (Screen 2) ── */
