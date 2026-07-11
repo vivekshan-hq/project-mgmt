@@ -241,6 +241,46 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 .ms-sub{font-size:12px;color:var(--t3);margin-top:1px}
 .ms-badge{font-size:10.5px;padding:1px 6px;border-radius:3px;background:var(--bg3);color:var(--t3);margin-left:auto;flex-shrink:0}
 
+/* ── Multi-select dropdown ── */
+.msd{position:relative}
+.msd-trigger{
+  min-height:38px;padding:5px 32px 5px 7px;border:1px solid var(--bdr);border-radius:6px;
+  background:var(--bg);cursor:pointer;display:flex;align-items:flex-start;flex-wrap:wrap;
+  gap:4px;position:relative;transition:border-color .12s;
+}
+.msd-trigger:hover{border-color:var(--t3)}
+.msd.open .msd-trigger{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-bg)}
+.msd-arrow{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;transition:transform .15s;flex-shrink:0}
+.msd.open .msd-arrow{transform:translateY(-50%) rotate(180deg)}
+.msd-ph{font-size:14px;color:var(--tph);padding:2px 2px;align-self:center}
+.msd-chip{
+  display:inline-flex;align-items:center;gap:3px;padding:2px 5px 2px 8px;
+  background:var(--bg3);border:1px solid var(--bdr);border-radius:4px;
+  font-size:12.5px;color:var(--t1);
+}
+.msd-chip-rm{width:14px;height:14px;border:none;background:transparent;color:var(--t3);
+  cursor:pointer;padding:0;font-size:13px;line-height:1;display:flex;align-items:center;
+  justify-content:center;border-radius:2px;flex-shrink:0}
+.msd-chip-rm:hover{background:var(--bg5);color:var(--t1)}
+.msd-drop{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg);
+  border:1px solid var(--bdr);border-radius:7px;box-shadow:var(--sh4);z-index:100;
+  display:none;overflow:hidden;max-height:300px;overflow-y:auto;
+}
+.msd.open .msd-drop{display:block}
+.msd-search-wrap{padding:7px 8px;border-bottom:1px solid var(--div);position:sticky;top:0;background:var(--bg);z-index:1}
+.msd-search{width:100%;padding:5px 10px;border:1px solid var(--bdr);border-radius:5px;font-size:13px;background:var(--bg2);color:var(--t1);font-family:inherit}
+.msd-search:focus{outline:none;border-color:var(--accent)}
+.msd-gl{padding:7px 12px 3px;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase}
+.msd-opt{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;transition:background .1s}
+.msd-opt:hover{background:var(--bg2)}
+.msd-opt.on{background:var(--accent-bg)}
+.msd-opt input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;pointer-events:none}
+.msd-opt-name{font-size:13.5px;font-weight:500;color:var(--t1)}
+.msd-opt-sub{font-size:11.5px;color:var(--t3);margin-top:1px}
+.msd-opt-bdg{font-size:10.5px;padding:1px 6px;border-radius:3px;background:var(--bg3);color:var(--t3);margin-left:auto;flex-shrink:0}
+.msd-empty{padding:16px 12px;font-size:13px;color:var(--t3);text-align:center}
+
 /* ── Allowed sets grid on partner profile ── */
 .aset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding:16px 0}
 .aset-card{border:1px solid var(--bdr);border-radius:7px;padding:12px 13px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;transition:border-color .12s}
@@ -878,30 +918,42 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       <!-- Allowed permission sets — NEW -->
       <div class="ff">
         <label class="fl"><span class="req">*</span>Allowed permission sets <span class="new-badge" style="margin-left:4px">New</span></label>
-        <div class="fh" style="margin-bottom:8px">Choose which permission sets members of this company can be assigned. Select at least one.</div>
-        <div class="ms-box" id="ms-psets">
-          <div class="ms-hd">Default sets</div>
-          <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Permissive Admin</div><div class="ms-sub">Shared + Private · Company restricted</div></div><span class="ms-badge">Default</span>
+        <div class="fh" style="margin-bottom:8px">Choose which permission sets can be assigned to members of this company. Select at least one.</div>
+        <div class="msd" id="msd-np">
+          <div class="msd-trigger" onclick="toggleMsd('msd-np')">
+            <div id="msd-np-chips" style="display:flex;flex-wrap:wrap;gap:4px;flex:1;align-items:center">
+              <span class="msd-ph">Select permission sets…</span>
+            </div>
+            <svg class="msd-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
           </div>
-          <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Permissive Collaborator</div><div class="ms-sub">Shared + Private · Strict participant</div></div><span class="ms-badge">Default</span>
-          </div>
-          <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Moderate Admin</div><div class="ms-sub">Shared only · Company restricted</div></div><span class="ms-badge">Default</span>
-          </div>
-          <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Moderate Collaborator</div><div class="ms-sub">Shared only · Strict participant</div></div><span class="ms-badge">Default</span>
-          </div>
-          <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Restricted Admin</div><div class="ms-sub">Assigned shared only · Company restricted</div></div><span class="ms-badge">Default</span>
-          </div>
-          <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Restricted Collaborator</div><div class="ms-sub">Assigned shared only · Strict participant</div></div><span class="ms-badge">Default</span>
-          </div>
-          <div class="ms-hd" style="border-top:1px solid var(--bdr)">Custom sets</div>
-          <div class="ms-item" onclick="toggleMs(this)">
-            <input type="checkbox"><div><div class="ms-name">Partner Read-Only</div><div class="ms-sub">View-only · Strict participant · No task edits</div></div><span class="ms-badge" style="background:#ede9fe;color:#5b21b6">Custom</span>
+          <div class="msd-drop" id="msd-np-drop">
+            <div class="msd-search-wrap">
+              <input class="msd-search" placeholder="Search permission sets…" oninput="filterMsd(this,'msd-np-drop')" onclick="event.stopPropagation()">
+            </div>
+            <div class="msd-gl">Default</div>
+            <div class="msd-opt" onclick="pickMsd(this,'msd-np')" data-val="pa" data-label="Permissive Admin">
+              <input type="checkbox"><div><div class="msd-opt-name">Permissive Admin</div><div class="msd-opt-sub">Shared + Private · Company restricted</div></div><span class="msd-opt-bdg">Default</span>
+            </div>
+            <div class="msd-opt" onclick="pickMsd(this,'msd-np')" data-val="pc" data-label="Permissive Collaborator">
+              <input type="checkbox"><div><div class="msd-opt-name">Permissive Collaborator</div><div class="msd-opt-sub">Shared + Private · Strict participant</div></div><span class="msd-opt-bdg">Default</span>
+            </div>
+            <div class="msd-opt" onclick="pickMsd(this,'msd-np')" data-val="ma" data-label="Moderate Admin">
+              <input type="checkbox"><div><div class="msd-opt-name">Moderate Admin</div><div class="msd-opt-sub">Shared only · Company restricted</div></div><span class="msd-opt-bdg">Default</span>
+            </div>
+            <div class="msd-opt" onclick="pickMsd(this,'msd-np')" data-val="mc" data-label="Moderate Collaborator">
+              <input type="checkbox"><div><div class="msd-opt-name">Moderate Collaborator</div><div class="msd-opt-sub">Shared only · Strict participant</div></div><span class="msd-opt-bdg">Default</span>
+            </div>
+            <div class="msd-opt" onclick="pickMsd(this,'msd-np')" data-val="ra" data-label="Restricted Admin">
+              <input type="checkbox"><div><div class="msd-opt-name">Restricted Admin</div><div class="msd-opt-sub">Assigned shared only · Company restricted</div></div><span class="msd-opt-bdg">Default</span>
+            </div>
+            <div class="msd-opt" onclick="pickMsd(this,'msd-np')" data-val="rc" data-label="Restricted Collaborator">
+              <input type="checkbox"><div><div class="msd-opt-name">Restricted Collaborator</div><div class="msd-opt-sub">Assigned shared only · Strict participant</div></div><span class="msd-opt-bdg">Default</span>
+            </div>
+            <div class="msd-gl" style="border-top:1px solid var(--div);padding-top:8px">Custom</div>
+            <div class="msd-opt" onclick="pickMsd(this,'msd-np')" data-val="prl" data-label="Partner Read-Only">
+              <input type="checkbox"><div><div class="msd-opt-name">Partner Read-Only</div><div class="msd-opt-sub">View-only · Strict participant</div></div><span class="msd-opt-bdg" style="background:#ede9fe;color:#5b21b6">Custom</span>
+            </div>
+            <div id="msd-np-empty" class="msd-empty" style="display:none">No permission sets match your search.</div>
           </div>
         </div>
       </div>
@@ -1187,7 +1239,72 @@ function setResScope(val) {
   }
 }
 
-/* ── Multi-select toggle ── */
+/* ── Multi-select dropdown ── */
+function toggleMsd(id) {
+  const msd = document.getElementById(id);
+  const isOpen = msd.classList.contains('open');
+  // Close all first
+  document.querySelectorAll('.msd.open').forEach(m => m.classList.remove('open'));
+  if (!isOpen) {
+    msd.classList.add('open');
+    const si = msd.querySelector('.msd-search');
+    if (si) { si.value = ''; filterMsd(si, id + '-drop'); si.focus(); }
+  }
+}
+
+function pickMsd(opt, msdId) {
+  const cb = opt.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  opt.classList.toggle('on', cb.checked);
+  renderMsdChips(msdId);
+}
+
+function renderMsdChips(msdId) {
+  const msd = document.getElementById(msdId);
+  const wrap = document.getElementById(msdId + '-chips');
+  const selected = msd.querySelectorAll('.msd-opt.on');
+  wrap.innerHTML = '';
+  if (!selected.length) {
+    wrap.innerHTML = '<span class="msd-ph">Select permission sets…</span>';
+    return;
+  }
+  selected.forEach(opt => {
+    const lbl = opt.dataset.label;
+    const chip = document.createElement('span');
+    chip.className = 'msd-chip';
+    chip.innerHTML = lbl + '<button class="msd-chip-rm" onclick="rmMsdChip(event,\'' + msdId + '\',\'' + opt.dataset.val + '\')">×</button>';
+    wrap.appendChild(chip);
+  });
+}
+
+function rmMsdChip(e, msdId, val) {
+  e.stopPropagation();
+  const opt = document.querySelector('#' + msdId + ' .msd-opt[data-val="' + val + '"]');
+  if (opt) { opt.querySelector('input').checked = false; opt.classList.remove('on'); }
+  renderMsdChips(msdId);
+}
+
+function filterMsd(input, dropId) {
+  const q = input.value.toLowerCase();
+  const drop = document.getElementById(dropId);
+  let visible = 0;
+  drop.querySelectorAll('.msd-opt').forEach(opt => {
+    const match = opt.dataset.label.toLowerCase().includes(q);
+    opt.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  const empty = document.getElementById(dropId.replace('-drop', '-empty'));
+  if (empty) empty.style.display = visible === 0 ? '' : 'none';
+}
+
+// Close on outside click
+document.addEventListener('click', function(e) {
+  document.querySelectorAll('.msd.open').forEach(msd => {
+    if (!msd.contains(e.target)) msd.classList.remove('open');
+  });
+});
+
+/* ── Legacy multi-select toggle (manage sets modal) ── */
 function toggleMs(item) {
   const cb = item.querySelector('input[type=checkbox]');
   cb.checked = !cb.checked;
