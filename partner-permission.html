@@ -323,7 +323,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 .ihi{color:var(--tph);cursor:default;flex-shrink:0}
 
 /* ── Permission set row (Screen 1) ── */
-.ps-row{display:flex;align-items:center;gap:0;padding:13px 20px;border-bottom:1px solid var(--div);cursor:pointer;transition:background .1s}
+.ps-row{display:flex;align-items:center;gap:0;padding:11px 20px;border-bottom:1px solid var(--div);cursor:pointer;transition:background .1s}
 .ps-row:hover{background:var(--bg2)}
 .ps-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px}
 .ps-icon svg{width:18px;height:18px}
@@ -383,115 +383,65 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
          SCREEN 1 · Permissions — Partner tab
     ════════════════════════════════════════════════════ -->
     <div class="screen" id="s1">
-      <div class="ph">
-        <div class="ph-row">
+      <div class="ph" style="border-bottom:none;padding-bottom:0">
+        <div class="ph-row" style="margin-bottom:6px">
           <div class="ph-title">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="margin-right:8px;vertical-align:-3px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Permissions
           </div>
         </div>
-        <div class="ph-sub">Create customized account and project level permissions that grant team members precise access levels to various modules in Rocketlane.</div>
-        <div class="tabs" id="perms-tabs">
-          <div class="tab" onclick="switchPermTab('account')">Account</div>
-          <div class="tab" onclick="switchPermTab('project')">Project</div>
-          <div class="tab" onclick="switchPermTab('customer')">Customer</div>
-          <div class="tab on" onclick="switchPermTab('partner')">Partner <span class="new-badge" style="margin-left:4px">New</span></div>
+        <div class="ph-sub" style="margin-bottom:0">Create customized account and project level permissions that grant team members precise access levels to various modules in Rocketlane.</div>
+        <!-- Tabs + New permission button on same row -->
+        <div style="display:flex;align-items:center;margin-top:10px">
+          <div class="tabs" id="perms-tabs" style="border:none;flex:1">
+            <div class="tab" onclick="switchPermTab('account')">Account</div>
+            <div class="tab" onclick="switchPermTab('project')">Project</div>
+            <div class="tab" onclick="switchPermTab('customer')">Customer</div>
+            <div class="tab on" onclick="switchPermTab('partner')">Partner <span class="new-badge" style="margin-left:4px">New</span></div>
+          </div>
+          <div style="padding:0 24px 0 16px;border-bottom:1px solid var(--bdr);align-self:stretch;display:flex;align-items:flex-end;padding-bottom:9px">
+            <button class="btn btn-p btn-sm" onclick="openMo('mo-new-pset')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              New permission
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Partner tab content -->
       <div id="partner-tab-content" style="flex:1;overflow-y:auto">
-        <div style="padding:14px 20px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--div)">
-          <div style="font-size:13px;color:var(--t2);flex:1">6 default permission sets cover all partner access combinations. Create custom sets for specific needs.</div>
-          <button class="btn btn-p btn-sm" onclick="openMo('mo-new-pset')">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            New permission
-          </button>
-        </div>
+        <!-- Column header -->
+        <div style="padding:10px 20px;font-size:11.5px;font-weight:600;color:var(--t3);letter-spacing:.32px;border-bottom:1px solid var(--div)">Permissions</div>
 
-        <!-- Default sets header -->
-        <div style="padding:12px 20px 6px;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase">Default sets</div>
-
-        <!-- Permissive Admin -->
         <div class="ps-row" onclick="openPset('pa')">
-          <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
-          <div class="ps-info">
-            <div class="ps-name-row"><span class="ps-name">Permissive Admin</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Full access to shared &amp; private resources · Company-restricted project scope</div>
-          </div>
-                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+          <div style="flex:1;display:flex;align-items:center;gap:8px"><span class="ps-name">Permissive Admin</span><span class="bdg bdg-def">Default</span></div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
         </div>
-
-        <!-- Permissive Collaborator -->
         <div class="ps-row" onclick="openPset('pc')">
-          <div class="ps-icon" style="background:#edf4ff"><svg fill="none" stroke="#0f62fe" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
-          <div class="ps-info">
-            <div class="ps-name-row"><span class="ps-name">Permissive Collaborator</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Full access to shared &amp; private resources · Strict participant scope</div>
-          </div>
-                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+          <div style="flex:1;display:flex;align-items:center;gap:8px"><span class="ps-name">Permissive Collaborator</span><span class="bdg bdg-def">Default</span></div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
         </div>
-
-        <!-- Moderate Admin -->
         <div class="ps-row" onclick="openPset('ma')">
-          <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
-          <div class="ps-info">
-            <div class="ps-name-row"><span class="ps-name">Moderate Admin</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Shared resources only · Company-restricted project scope</div>
-          </div>
-                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+          <div style="flex:1;display:flex;align-items:center;gap:8px"><span class="ps-name">Moderate Admin</span><span class="bdg bdg-def">Default</span></div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
         </div>
-
-        <!-- Moderate Collaborator -->
         <div class="ps-row" onclick="openPset('mc')">
-          <div class="ps-icon" style="background:#fffbeb"><svg fill="none" stroke="#b45309" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
-          <div class="ps-info">
-            <div class="ps-name-row"><span class="ps-name">Moderate Collaborator</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Shared resources only · Strict participant scope</div>
-          </div>
-                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+          <div style="flex:1;display:flex;align-items:center;gap:8px"><span class="ps-name">Moderate Collaborator</span><span class="bdg bdg-def">Default</span></div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
         </div>
-
-        <!-- Restricted Admin -->
         <div class="ps-row" onclick="openPset('ra')">
-          <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
-          <div class="ps-info">
-            <div class="ps-name-row"><span class="ps-name">Restricted Admin</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Assigned shared resources only · Company-restricted scope</div>
-          </div>
-                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+          <div style="flex:1;display:flex;align-items:center;gap:8px"><span class="ps-name">Restricted Admin</span><span class="bdg bdg-def">Default</span></div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
         </div>
-
-        <!-- Restricted Collaborator -->
         <div class="ps-row" onclick="openPset('rc')">
-          <div class="ps-icon" style="background:#fef2f2"><svg fill="none" stroke="#991b1b" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg></div>
-          <div class="ps-info">
-            <div class="ps-name-row"><span class="ps-name">Restricted Collaborator</span><span class="bdg bdg-def">Default</span></div>
-            <div class="ps-desc">Assigned shared resources only · Strict participant scope</div>
-          </div>
-                    <div class="ps-actions"><button class="more-btn" onclick="event.stopPropagation()">···</button></div>
+          <div style="flex:1;display:flex;align-items:center;gap:8px"><span class="ps-name">Restricted Collaborator</span><span class="bdg bdg-def">Default</span></div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
         </div>
-
-        <!-- Custom sets header -->
-        <div style="padding:16px 20px 6px;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase;border-top:1px solid var(--div);margin-top:4px">Custom sets</div>
-
-        <!-- Custom example -->
         <div class="ps-row" onclick="openPset('prl')">
-          <div class="ps-icon" style="background:#f3e8ff"><svg fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
-          <div class="ps-info">
-            <div class="ps-name-row"><span class="ps-name">Partner Read-Only</span><span class="bdg bdg-cust">Custom</span></div>
-            <div class="ps-desc">View-only access to shared resources · Strict participant</div>
-          </div>
-                    <div class="ps-actions">
+          <div style="flex:1;display:flex;align-items:center;gap:8px"><span class="ps-name">Partner Read-Only</span><span class="bdg bdg-cust">Custom</span></div>
+          <div class="ps-actions">
             <button class="btn btn-g btn-sm" onclick="event.stopPropagation()">Edit</button>
             <button class="more-btn" onclick="event.stopPropagation()">···</button>
           </div>
-        </div>
-
-        <div class="ps-row" style="border-bottom:none;color:var(--accent);gap:8px;cursor:pointer" onclick="openMo('mo-new-pset')">
-          <div style="width:36px;height:36px;border-radius:8px;border:1.5px dashed var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          </div>
-          <span style="font-size:14px">Create custom permission set…</span>
         </div>
       </div>
     </div><!-- /s1 -->
