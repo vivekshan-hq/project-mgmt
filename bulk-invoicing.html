@@ -411,7 +411,7 @@
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
             <div>
               <div class="h3">Tax settings</div>
-              <p class="sub" style="margin-top:2px;font-size:13px;">Chosen per account. Accounts without a resolvable code are treated as tax exempt.</p>
+              <p class="sub" style="margin-top:2px;font-size:13px;">Chosen per billing type. Accounts without a resolvable code are treated as tax exempt.</p>
             </div>
             <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
               <div class="sel-wrap"><select class="sel" id="s2-applyall-src" aria-label="Tax source to apply to all">
@@ -423,7 +423,7 @@
             </div>
           </div>
           <table class="grid" style="margin-top:12px;">
-            <thead><tr><th>Account</th><th>Currency</th><th>Tax source</th><th>Resolution</th></tr></thead>
+            <thead><tr><th>Billing type</th><th>Accounts</th><th>Tax source</th><th>Resolution</th></tr></thead>
             <tbody id="s2-tax-tbody"></tbody>
           </table>
         </div>
@@ -584,15 +584,12 @@ const POOLS = {
 const SUB_PLANS = ['Gold support plan', 'Silver support plan', 'Platinum support plan'];
 const SUB_MONTHS = ['Jun 2026', 'Jul 2026'];
 
-const PERIODS = {
-  tm:  [['all', 'All uninvoiced time'], ['7', 'Last 7 days'], ['15', 'Last 15 days'], ['30', 'Last 30 days'], ['custom', 'Custom range']],
-  ff:  [['all', 'All completed uninvoiced'], ['7', 'Last 7 days'], ['15', 'Last 15 days'], ['30', 'Last 30 days'], ['custom', 'Custom range']],
-  sub: [['all', 'All periods'], ['current', 'Current period'], ['previous', 'Previous period'], ['custom', 'Custom range']],
-};
 const GROUPS = {
   tm: [['member', 'Team member'], ['role', 'Role'], ['phase', 'Phase'], ['task', 'Task'], ['date', 'Date (weekly)']],
-  ff: [['milestone', 'Milestone'], ['phase', 'Phase'], ['task', 'Task']],
 };
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function fmtD(iso) { const [y, m, d] = iso.split('-'); return `${MON[+m - 1]} ${+d}, ${y}`; }
+function rangeLabel(t) { const r = S.rules[t]; return `${fmtD(r.from)} – ${fmtD(r.to)}`; }
 
 const EXISTING_INVOICES = [
   ['INV-2041', 'Crestline Bank', 'Core banking rollout', 'Jul 3, 2026', 18400, 'USD', 'Paid'],
@@ -609,12 +606,12 @@ const S = {
   expanded: new Set(['brightwave']),
   search: '',
   rules: {
-    tm:  { period: 'all', group: 'member' },
-    ff:  { period: 'all', group: 'milestone' },
-    sub: { period: 'all' },
+    tm:  { from: '2026-06-12', to: '2026-07-12', group: 'member' },
+    ff:  { from: '2026-06-12', to: '2026-07-12' },
+    sub: { from: '2026-06-12', to: '2026-07-12' },
   },
-  taxSel: {},      // accountId -> global | account | exempt
-  taxOverride: {}, // accountId -> replacement active tax code id (gate resolution)
+  taxSel: {},   // billing type -> global | account | exempt
+  acctFix: {},  // accountId -> 'exempt' | replacement tax code id (gate resolution)
   gateShown: false,
   previews: [], sig: null, curPv: null, generating: false,
   run: { started: false, done: false, current: -1 },
@@ -650,23 +647,33 @@ const selProjects = () => [...S.sel].map(id => PROJ[id]);
 const selAccounts = () => ACCOUNTS.filter(a => a.projects.some(p => S.sel.has(p.id)));
 const typesInSel = () => ['tm', 'ff', 'sub'].filter(t => selProjects().some(p => p.type === t));
 
-/* Smart pre-selection: account default if configured, else global */
+/* Smart pre-selection per billing type: account default if any selected account has one, else global */
 function ensureTaxSel() {
-  selAccounts().forEach(a => { if (!S.taxSel[a.id]) S.taxSel[a.id] = a.tax ? 'account' : 'global'; });
+  const anyDefault = selAccounts().some(a => a.tax);
+  typesInSel().forEach(t => { if (!S.taxSel[t]) S.taxSel[t] = anyDefault ? 'account' : 'global'; });
 }
-/* Resolve an account's tax → {kind: ok|exempt|block, codeId?, label} */
-function taxResolve(a) {
-  if (S.taxOverride[a.id]) {
-    const c = TAX[S.taxOverride[a.id]];
-    return { kind: 'ok', codeId: S.taxOverride[a.id], label: c.n + ' — replaced for this batch' };
+/* Accounts that have selected projects of a given billing type */
+function typeAccounts(t) { return selAccounts().filter(a => selProjects().some(p => p.accountId === a.id && p.type === t)); }
+/* Resolve tax for one account under one billing type's source → {kind: ok|exempt|block, codeId?} */
+function taxResolveFor(a, t) {
+  const src = S.taxSel[t];
+  if (src === 'exempt') return { kind: 'exempt' };
+  if (src === 'global') {
+    return TAX[GLOBAL_TAX].active ? { kind: 'ok', codeId: GLOBAL_TAX } : { kind: 'block', codeId: GLOBAL_TAX };
   }
-  const src = S.taxSel[a.id];
-  if (src === 'exempt') return { kind: 'exempt', label: 'Tax exempt — no tax code applied' };
-  const codeId = src === 'global' ? GLOBAL_TAX : a.tax;
-  if (!codeId) return { kind: 'exempt', label: 'No account default — resolves to tax exempt' };
-  const c = TAX[codeId];
-  if (!c.active) return { kind: 'block', codeId, label: c.n + ' was deactivated by an admin' };
-  return { kind: 'ok', codeId, label: c.n + ' will be applied' };
+  const fix = S.acctFix[a.id];
+  if (fix === 'exempt') return { kind: 'exempt' };
+  if (fix) return { kind: 'ok', codeId: fix };
+  if (!a.tax) return { kind: 'exempt' };
+  return TAX[a.tax].active ? { kind: 'ok', codeId: a.tax } : { kind: 'block', codeId: a.tax };
+}
+/* Accounts blocked by a deactivated code, with the billing types affected */
+function blockedAccounts() {
+  return selAccounts().map(a => {
+    const types = typesInSel().filter(t =>
+      selProjects().some(p => p.accountId === a.id && p.type === t) && taxResolveFor(a, t).kind === 'block');
+    return types.length ? { a, types } : null;
+  }).filter(Boolean);
 }
 
 /* ================= Home ================= */
@@ -732,7 +739,7 @@ function renderFooter() {
     act.innerHTML = `<button class="btn btn-sec" onclick="closeFlow()">Cancel</button>
       <button class="btn btn-pri" id="ft-next" ${n ? '' : 'disabled'} onclick="goStep(2)">Continue</button>`;
   } else if (S.step === 2) {
-    const blocked = selAccounts().filter(a => taxResolve(a).kind === 'block').length;
+    const blocked = blockedAccounts().length;
     info.innerHTML = blocked && S.gateShown
       ? `<span style="color:var(--error);font-weight:590;">${blocked} account${blocked === 1 ? '' : 's'} blocked by a deactivated tax code</span>`
       : '';
@@ -830,51 +837,70 @@ function renderStep2() {
       </div>
       <div class="field">
         <label>Billing period</label>
-        <div class="seg" role="group" aria-label="${m.title} billing period">
-          ${PERIODS[t].map(([v, l]) => `<button class="${r.period === v ? 'on' : ''}" onclick="setRule('${t}','period','${v}')">${l.replace('Last ', '').replace(' days', 'd').replace('All uninvoiced time', 'All uninvoiced').replace('All completed uninvoiced', 'All completed').replace('Custom range', 'Custom')}</button>`).join('')}
+        <div class="daterow">
+          <input class="inp" type="date" value="${r.from}" max="${r.to}" aria-label="${m.title} from date" onchange="setRule('${t}','from',this.value)">
+          <input class="inp" type="date" value="${r.to}" min="${r.from}" aria-label="${m.title} to date" onchange="setRule('${t}','to',this.value)">
         </div>
-        ${r.period === 'custom' ? `<div class="daterow"><input class="inp" type="date" value="2026-06-01" aria-label="From date"><input class="inp" type="date" value="2026-07-12" aria-label="To date"></div>` : ''}
+        <span class="mut" style="font-size:12px;">${t === 'tm' ? 'Bills uninvoiced time logged between these dates.' : t === 'ff' ? 'Bills tasks completed between these dates.' : 'Bills periods that fall between these dates.'}</span>
       </div>
-      ${GROUPS[t] ? `<div class="field">
+      ${t === 'tm' ? `<div class="field">
         <label>Group line items by</label>
         <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;" onchange="setRule('${t}','group',this.value)" aria-label="${m.title} grouping">
-          ${GROUPS[t].map(([v, l]) => `<option value="${v}" ${r.group === v ? 'selected' : ''}>${l}</option>`).join('')}
+          ${GROUPS.tm.map(([v, l]) => `<option value="${v}" ${r.group === v ? 'selected' : ''}>${l}</option>`).join('')}
         </select></div>
-      </div>` : `<p class="mut" style="font-size:12.5px;">Line items follow the subscription schedule — no grouping.</p>`}
+      </div>` : `<p class="mut" style="font-size:12.5px;">${t === 'ff' ? 'Each completed task is billed as its own line item — no grouping.' : 'Line items follow the subscription schedule — no grouping.'}</p>`}
     </div>`;
   }).join('');
 
-  $('s2-tax-tbody').innerHTML = selAccounts().map(a => {
-    const res = taxResolve(a);
-    const cls = res.kind === 'ok' ? 'tax-outcome-ok' : res.kind === 'exempt' ? 'tax-outcome-ex' : 'tax-outcome-bad';
+  $('s2-tax-tbody').innerHTML = types.map(t => {
+    const m = RULE_META[t];
+    const accts = typeAccounts(t);
+    const src = S.taxSel[t];
+    let resHtml;
+    if (src === 'exempt') {
+      resHtml = '<span class="tax-outcome-ex">Tax exempt — no tax code applied</span>';
+    } else if (src === 'global') {
+      resHtml = `<span class="tax-outcome-ok">${TAX[GLOBAL_TAX].n} will be applied to all accounts</span>`;
+    } else {
+      let ok = 0, ex = 0; const bad = [];
+      accts.forEach(a => {
+        const r = taxResolveFor(a, t);
+        if (r.kind === 'ok') ok++; else if (r.kind === 'exempt') ex++; else bad.push(a.name);
+      });
+      const parts = [];
+      if (ok) parts.push(`<span class="tax-outcome-ok">${ok} account${ok === 1 ? '' : 's'} use their default</span>`);
+      if (ex) parts.push(`<span class="tax-outcome-ex">${ex} without a default — tax exempt</span>`);
+      if (bad.length) parts.push(`<span class="tax-outcome-bad">${bad.length} deactivated (${bad.map(esc).join(', ')})</span>`);
+      resHtml = parts.join('<span class="mut"> · </span>') || '<span class="tax-outcome-ex">No accounts</span>';
+    }
     return `<tr>
-      <td style="font-weight:590;">${esc(a.name)}</td>
-      <td><span class="chip chip-cur">${a.cur}</span></td>
+      <td><span class="chip ${m.chip}">${m.title}</span></td>
+      <td class="sub num">${accts.length} account${accts.length === 1 ? '' : 's'}</td>
       <td>
-        <div class="sel-wrap"><select class="sel" onchange="setTaxSrc('${a.id}', this.value)" aria-label="Tax source for ${esc(a.name)}">
-          <option value="global" ${S.taxSel[a.id] === 'global' ? 'selected' : ''}>Global default — ${TAX[GLOBAL_TAX].n}</option>
-          <option value="account" ${S.taxSel[a.id] === 'account' ? 'selected' : ''}>Account default${a.tax ? ' — ' + TAX[a.tax].n : ' — not configured'}</option>
-          <option value="exempt" ${S.taxSel[a.id] === 'exempt' ? 'selected' : ''}>Tax exempt</option>
+        <div class="sel-wrap"><select class="sel" onchange="setTaxSrc('${t}', this.value)" aria-label="Tax source for ${m.title}">
+          <option value="global" ${src === 'global' ? 'selected' : ''}>Global default — ${TAX[GLOBAL_TAX].n}</option>
+          <option value="account" ${src === 'account' ? 'selected' : ''}>Account default (per account)</option>
+          <option value="exempt" ${src === 'exempt' ? 'selected' : ''}>Tax exempt</option>
         </select></div>
       </td>
-      <td><span class="${cls}">${res.label}</span></td>
+      <td>${resHtml}</td>
     </tr>`;
   }).join('');
 
   renderGate();
   renderFooter();
 }
-function setRule(t, k, v) { S.rules[t][k] = v; renderStep2(); }
-function setTaxSrc(id, v) { S.taxSel[id] = v; delete S.taxOverride[id]; renderStep2(); }
+function setRule(t, k, v) { if (v) S.rules[t][k] = v; renderStep2(); }
+function setTaxSrc(t, v) { S.taxSel[t] = v; renderStep2(); }
 $('s2-applyall').addEventListener('click', () => {
   const v = $('s2-applyall-src').value;
-  selAccounts().forEach(a => { S.taxSel[a.id] = v; delete S.taxOverride[a.id]; });
+  typesInSel().forEach(t => S.taxSel[t] = v);
   renderStep2();
-  toast('Tax source applied to all accounts', 'info');
+  toast('Tax source applied to all billing types', 'info');
 });
 
 function renderGate() {
-  const blocked = selAccounts().filter(a => taxResolve(a).kind === 'block');
+  const blocked = blockedAccounts();
   if (!S.gateShown || !blocked.length) { $('s2-gate').innerHTML = ''; return; }
   const activeCodes = Object.entries(TAX).filter(([, c]) => c.active);
   $('s2-gate').innerHTML = `<div class="gate">
@@ -885,9 +911,10 @@ function renderGate() {
         <p class="sub" style="margin-top:2px;font-size:13px;">${blocked.length} account${blocked.length === 1 ? ' references' : 's reference'} a tax code that an admin deactivated. Pick a replacement or mark the account tax exempt for this batch.</p>
       </div>
     </div>
-    ${blocked.map(a => `<div class="gate-row">
+    ${blocked.map(({ a, types }) => `<div class="gate-row">
       <span style="font-weight:590;">${esc(a.name)}</span>
-      <span class="tax-outcome-bad">${TAX[taxResolve(a).codeId].n} — deactivated</span>
+      <span class="tax-outcome-bad">${TAX[taxResolveFor(a, types[0]).codeId].n} — deactivated</span>
+      <span style="display:flex;gap:4px;">${types.map(t => `<span class="chip ${TYPE[t].chip}">${TYPE[t].name}</span>`).join('')}</span>
       <div class="gr-actions">
         <div class="sel-wrap"><select class="sel" onchange="if(this.value) resolveGate('${a.id}', this.value)" aria-label="Replacement tax code for ${esc(a.name)}">
           <option value="">Pick a replacement…</option>
@@ -898,11 +925,11 @@ function renderGate() {
     </div>`).join('')}
   </div>`;
 }
-function resolveGate(id, code) { S.taxOverride[id] = code; renderStep2(); toast(`${ACCT[id].name}: ${TAX[code].n} will be used for this batch`); }
-function exemptGate(id) { S.taxSel[id] = 'exempt'; delete S.taxOverride[id]; renderStep2(); toast(`${ACCT[id].name} marked tax exempt for this batch`); }
+function resolveGate(id, code) { S.acctFix[id] = code; renderStep2(); toast(`${ACCT[id].name}: ${TAX[code].n} will be used for this batch`); }
+function exemptGate(id) { S.acctFix[id] = 'exempt'; renderStep2(); toast(`${ACCT[id].name} marked tax exempt for this batch`); }
 
 function tryGenerate() {
-  const blocked = selAccounts().filter(a => taxResolve(a).kind === 'block');
+  const blocked = blockedAccounts();
   if (blocked.length) {
     S.gateShown = true;
     renderStep2();
@@ -915,7 +942,7 @@ function tryGenerate() {
 
 /* ================= Preview generation ================= */
 function buildSignature() {
-  return JSON.stringify([[...S.sel].sort(), S.rules, selAccounts().map(a => [a.id, taxResolve(a)])]);
+  return JSON.stringify([[...S.sel].sort(), S.rules, selAccounts().map(a => [a.id, typesInSel().map(t => taxResolveFor(a, t))])]);
 }
 function pickPool(arr, seed, n) {
   const out = []; for (let i = 0; i < n; i++) out.push(arr[(seed + i * 3) % arr.length]); return out;
@@ -935,7 +962,7 @@ function makeLines(p, a) {
     });
   }
   if (p.type === 'ff') {
-    const pool = POOLS.ff[S.rules.ff.group];
+    const pool = POOLS.ff.task; // one line per completed task — no grouping
     const n = 2 + h % 3;
     return pickPool(pool, h % pool.length, n).map((d, i) => {
       const hh = hash(p.id + d + i);
@@ -950,14 +977,15 @@ function makeLines(p, a) {
 function generatePreviews() {
   S.previews = selProjects().map(p => {
     const a = ACCT[p.accountId];
-    const res = taxResolve(a);
+    const res = taxResolveFor(a, p.type);
     const skip = p.flag === 'skip';
+    const range = `between ${fmtD(S.rules[p.type].from)} and ${fmtD(S.rules[p.type].to)}`;
     return {
       id: 'pv-' + p.id, projectId: p.id, accountId: a.id,
       name: p.name, account: a.name, cur: a.cur, type: p.type,
       taxCode: res.kind === 'ok' ? res.codeId : null,
       skipped: skip,
-      skipReason: skip ? (p.type === 'ff' ? 'No completed uninvoiced tasks in the selected period' : 'No billable items in the selected period') : null,
+      skipReason: skip ? (p.type === 'ff' ? `No tasks completed ${range}` : `No billable items ${range}`) : null,
       lines: skip ? [] : makeLines(p, a),
       decision: null, notes: '', runState: null, error: null, invNo: null,
     };
@@ -1096,7 +1124,7 @@ function renderDetail() {
   const box = $('s3-detail');
   if (!p) { box.innerHTML = '<p class="mut">Select a preview from the list.</p>'; return; }
   const st = pvStatus(p), iss = pvIssues(p), t = pvTotals(p);
-  const periodLabel = PERIODS[p.type].find(([v]) => v === S.rules[p.type].period)[1];
+  const periodLabel = rangeLabel(p.type);
   const [stCls, stLbl] = CHIP_ST[st];
 
   if (p.skipped) {
