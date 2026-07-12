@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Invoicing — Rocketlane Prototype</title>
+<style>
+  /* ---------- Nitro tokens ---------- */
+  :root {
+    --text-1: #161616;
+    --text-2: #525252;
+    --text-3: #6f6f6f;
+    --text-ph: #a8a8a8;
+    --text-dis: #c6c6c6;
+    --blue: #0f62fe;
+    --error: #da1e28;
+    --success: #24a148;
+    --warn: #f98000;
+    --purple: #6929c4;
+    --bg: #ffffff;
+    --bg-soft: #fafafa;
+    --bg-rail: #f2f2f2;
+    --bg-btn2: #f4f4f4;
+    --line: #e3e3e3;
+    --div: #f4f4f4;
+    --btn-ink: #1d1d1f;
+    --sh1: 0 .4px .9px rgba(0,0,0,.13), 0 .075px .225px rgba(0,0,0,.11);
+    --sh2: 0 .8px 1.8px rgba(0,0,0,.13), 0 .15px .45px rgba(0,0,0,.11);
+    --sh4: 0 3.2px 7.2px rgba(0,0,0,.13), 0 .6px 1.8px rgba(0,0,0,.11);
+    --sh5: 0 6.4px 14.4px rgba(0,0,0,.13), 0 1.2px 3.6px rgba(0,0,0,.11);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px; line-height: 18px; letter-spacing: .16px;
+    color: var(--text-1); background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; border-radius: 4px; }
+  input[type="checkbox"] { accent-color: var(--btn-ink); width: 16px; height: 16px; cursor: pointer; flex: none; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  .h1 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: 0; }
+  .h2 { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: 0; }
+  .h3 { font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0; }
+  .sub { color: var(--text-2); }
+  .mut { color: var(--text-3); }
+  .lbl { font-size: 12px; line-height: 16px; letter-spacing: .32px; color: var(--text-3); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 32px; padding: 0 14px; border-radius: 8px;
+    font-size: 14px; font-weight: 590; letter-spacing: .16px; line-height: 18px;
+    transition: background .15s ease, opacity .15s ease; white-space: nowrap;
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-pri { background: var(--btn-ink); color: #fff; }
+  .btn-pri:not(:disabled):hover { background: #333336; }
+  .btn-sec { background: var(--bg-btn2); }
+  .btn-sec:not(:disabled):hover { background: #e8e8e8; }
+  .btn-ghost { border: 1px solid rgba(0,0,0,.1); background: #fff; }
+  .btn-ghost:not(:disabled):hover { background: var(--bg-soft); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:not(:disabled):hover { background: #1e8a3e; }
+  .btn-danger-ghost { color: var(--error); border: 1px solid rgba(218,30,40,.25); background: #fff; }
+  .btn-danger-ghost:not(:disabled):hover { background: #fdf3f3; }
+  .btn-sm { height: 24px; padding: 0 10px; font-size: 12px; border-radius: 6px; }
+  .btn-icon { width: 32px; padding: 0; border-radius: 8px; color: var(--text-2); }
+  .btn-icon:hover { background: var(--bg-btn2); }
+
+  /* ---------- Chips / pills ---------- */
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; line-height: 16px; font-weight: 600;
+    padding: 2px 8px; border-radius: 120px; white-space: nowrap;
+  }
+  .chip svg { width: 12px; height: 12px; }
+  .chip-tm  { background: #edf4ff; color: #0043ce; }
+  .chip-ff  { background: #e6f6ec; color: #17803a; }
+  .chip-sub { background: #f2ebfd; color: var(--purple); }
+  .chip-cur { background: var(--bg-btn2); color: var(--text-2); font-weight: 500; }
+  .chip-ready   { background: #eef1f4; color: var(--text-2); }
+  .chip-issues  { background: #fef0e3; color: #ad5b00; }
+  .chip-skipped { background: var(--bg-btn2); color: var(--text-3); }
+  .chip-approved{ background: #e6f6ec; color: #17803a; }
+  .chip-draft   { background: #edf4ff; color: #0043ce; }
+  .chip-removed { background: var(--bg-btn2); color: var(--text-ph); }
+  .chip-failed  { background: #fdeaea; color: var(--error); }
+  .chip-new     { background: #d0e2ff; color: #0043ce; }
+  .chip-paid    { background: #e6f6ec; color: #17803a; }
+  .chip-unpaid  { background: #fef0e3; color: #ad5b00; }
+  .chip-tax { background: var(--bg-btn2); color: var(--text-2); font-weight: 500; gap: 5px; }
+  .chip-tax button { display: inline-flex; color: var(--text-ph); }
+  .chip-tax button:hover { color: var(--text-1); }
+
+  /* ---------- Info bars ---------- */
+  .bar {
+    display: flex; gap: 10px; align-items: flex-start;
+    border-radius: 8px; padding: 10px 16px; font-size: 14px; line-height: 18px;
+  }
+  .bar svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }
+  .bar-info { background: #edf4ff; color: #00297a; }
+  .bar-info svg { color: var(--blue); }
+  .bar-warn { background: #fef0e3; color: #6b3a00; }
+  .bar-warn svg { color: var(--warn); }
+  .bar-error { background: #fdeaea; color: #750e13; }
+  .bar-error svg { color: var(--error); }
+
+  /* ---------- Forms ---------- */
+  .sel-wrap { position: relative; display: inline-flex; }
+  .sel-wrap::after {
+    content: ''; position: absolute; right: 10px; top: 50%; width: 8px; height: 8px;
+    border-right: 1.5px solid var(--text-2); border-bottom: 1.5px solid var(--text-2);
+    transform: translateY(-70%) rotate(45deg); pointer-events: none;
+  }
+  .sel {
+    appearance: none; -webkit-appearance: none;
+    height: 32px; padding: 0 30px 0 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: #fff; font-size: 14px; cursor: pointer; min-width: 0;
+  }
+  .sel:hover { border-color: #c6c6c6; }
+  .inp {
+    height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: #fff; font-size: 14px;
+  }
+  .inp::placeholder { color: var(--text-ph); }
+  .seg { display: inline-flex; background: var(--bg-btn2); border-radius: 8px; padding: 2px; gap: 2px; flex-wrap: wrap; }
+  .seg button {
+    height: 26px; padding: 0 12px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    color: var(--text-2); transition: background .15s ease;
+  }
+  .seg button:hover { color: var(--text-1); }
+  .seg button.on { background: #fff; color: var(--text-1); font-weight: 590; box-shadow: var(--sh2); }
+
+  /* ---------- Search ---------- */
+  .search { position: relative; }
+  .search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-3); }
+  .search input { padding-left: 32px; width: 280px; }
+
+  /* ---------- Home (Invoicing page) ---------- */
+  .shell { display: flex; height: 100vh; }
+  .rail { width: 48px; background: var(--bg-rail); flex: none; display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 2px; }
+  .rail .ritem { width: 48px; height: 38px; display: flex; align-items: center; justify-content: center; }
+  .rail .ric { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text-3); }
+  .rail .ritem.on .ric { background: #fff; box-shadow: var(--sh2); border-radius: 8px; color: var(--btn-ink); }
+  .rail svg { width: 18px; height: 18px; }
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+  .pg-head { padding: 16px 16px 0 24px; border-bottom: 1px solid var(--div); }
+  .pg-head-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 12px; }
+  .tabs { display: flex; gap: 4px; }
+  .tab { height: 40px; padding: 0 12px; font-size: 14px; color: var(--text-2); border-bottom: 2px solid transparent; }
+  .tab.on { color: var(--blue); border-bottom-color: var(--blue); font-weight: 590; }
+  .pg-body { flex: 1; overflow: auto; padding: 16px 24px 48px; }
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+
+  table.grid { width: 100%; border-collapse: collapse; }
+  table.grid th {
+    text-align: left; font-size: 12px; letter-spacing: .32px; font-weight: 600; color: var(--text-3);
+    padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  table.grid td { padding: 11px 12px; border-bottom: 1px solid var(--div); font-size: 14px; }
+  table.grid tr:hover td { background: var(--bg-soft); }
+  td.r, th.r { text-align: right; }
+
+  /* ---------- Flow chrome ---------- */
+  .flow { display: flex; flex-direction: column; height: 100vh; background: var(--bg-soft); }
+  .flow-head {
+    display: flex; align-items: center; gap: 16px; background: #fff;
+    padding: 12px 24px; border-bottom: 1px solid var(--div); position: relative; z-index: 5;
+  }
+  .flow-title { display: flex; align-items: center; gap: 12px; min-width: 260px; }
+  .steps { display: flex; align-items: center; gap: 8px; margin: 0 auto; }
+  .stp { display: flex; align-items: center; gap: 8px; }
+  .stp button { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 8px; cursor: default; }
+  .stp.clickable button { cursor: pointer; }
+  .stp.clickable button:hover { background: var(--bg-soft); }
+  .stp .dot {
+    width: 24px; height: 24px; border-radius: 50%; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; border: 1.5px solid var(--line); color: var(--text-3); background: #fff;
+  }
+  .stp .slbl { font-size: 13px; color: var(--text-3); white-space: nowrap; }
+  .stp.on .dot { border-color: var(--btn-ink); color: var(--btn-ink); }
+  .stp.on .slbl { color: var(--text-1); font-weight: 590; }
+  .stp.done .dot { background: var(--btn-ink); border-color: var(--btn-ink); color: #fff; }
+  .stp.done .slbl { color: var(--text-2); }
+  .stp .conn { width: 28px; height: 1px; background: var(--line); }
+  .flow-head-right { min-width: 260px; text-align: right; }
+
+  .flow-body { flex: 1; overflow: auto; }
+  .flow-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: #fff; border-top: 1px solid var(--div); padding: 12px 24px; z-index: 5;
+  }
+  .foot-actions { display: flex; gap: 10px; }
+  .col { max-width: 880px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+  .card-pad { padding: 16px 20px; }
+
+  /* ---------- Step 1 ---------- */
+  .acct { border-bottom: 1px solid var(--div); }
+  .acct:last-child { border-bottom: none; }
+  .acct-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; }
+  .acct-row:hover { background: var(--bg-soft); }
+  .acct-name { font-weight: 590; }
+  .acct-meta { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .chev { width: 16px; height: 16px; color: var(--text-3); transition: transform .15s ease; flex: none; }
+  .acct.open .chev { transform: rotate(90deg); }
+  .projs { display: none; }
+  .acct.open .projs { display: block; }
+  .proj-row { display: flex; align-items: center; gap: 12px; padding: 9px 16px 9px 46px; border-top: 1px solid var(--div); cursor: pointer; }
+  .proj-row:hover { background: var(--bg-soft); }
+  .proj-items { margin-left: auto; color: var(--text-3); font-size: 13px; white-space: nowrap; }
+
+  /* ---------- Step 2 ---------- */
+  .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .rule-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 12px; }
+  .rule-card .rc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field > label { font-size: 12px; letter-spacing: .32px; font-weight: 600; color: var(--text-3); }
+  .daterow { display: flex; gap: 8px; }
+  .daterow input { flex: 1; min-width: 0; }
+  .tax-outcome-ok { color: var(--success); font-weight: 590; font-size: 13px; }
+  .tax-outcome-ex { color: var(--text-3); font-size: 13px; }
+  .tax-outcome-bad { color: var(--error); font-weight: 590; font-size: 13px; }
+  .gate {
+    border: 1px solid #f4c8c8; background: #fdf5f5; border-radius: 8px; padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .gate-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  .gate-row .gr-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+  /* ---------- Step 3 ---------- */
+  .s3 { display: flex; height: 100%; min-height: 0; }
+  .s3-list { width: 340px; flex: none; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .s3-list-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--div); display: flex; flex-direction: column; gap: 10px; }
+  .s3-counts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .s3-scroll { flex: 1; overflow: auto; }
+  .s3-acct { padding: 10px 16px 4px; font-size: 12px; letter-spacing: .32px; font-weight: 600; color: var(--text-3); display: flex; justify-content: space-between; gap: 8px; }
+  .pv-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 16px; border-left: 2px solid transparent; }
+  .pv-row:hover { background: var(--bg-soft); }
+  .pv-row.on { background: #f5f8ff; border-left-color: var(--blue); }
+  .pv-main { min-width: 0; flex: 1; }
+  .pv-name { font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pv-amt { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+  .pv-row.removed .pv-name { text-decoration: line-through; color: var(--text-ph); }
+  .s3-detail { flex: 1; overflow: auto; padding: 20px 24px 48px; min-width: 0; }
+  .dt-card { background: #fff; border: 1px solid var(--line); border-radius: 8px; max-width: 860px; }
+  .dt-head { padding: 16px 20px; border-bottom: 1px solid var(--div); display: flex; flex-direction: column; gap: 8px; }
+  .dt-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .dt-actions { padding: 14px 20px; border-top: 1px solid var(--div); display: flex; gap: 10px; align-items: center; }
+  .lines th { background: var(--bg-soft); }
+  .lines td { vertical-align: middle; }
+  .lines .rm { visibility: hidden; color: var(--text-3); display: inline-flex; padding: 4px; border-radius: 6px; }
+  .lines tr:hover .rm { visibility: visible; }
+  .lines .rm:hover { color: var(--error); background: #fdeaea; }
+  .cellinp { width: 90px; height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; text-align: right; font-variant-numeric: tabular-nums; }
+  .cellinp:hover { border-color: var(--line); background: #fff; }
+  .cellinp:focus { border-color: var(--blue); background: #fff; outline: none; }
+  .cellinp.bad { border-color: var(--error); background: #fff; }
+  .rate-req { color: var(--error); font-size: 11px; display: block; margin-top: 2px; }
+  .totals { padding: 12px 20px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; border-top: 1px solid var(--div); }
+  .totals .trow { display: flex; gap: 24px; font-size: 13.5px; color: var(--text-2); }
+  .totals .trow.grand { font-size: 15px; font-weight: 600; color: var(--text-1); }
+  .totals .trow span:last-child { min-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
+  .notes { padding: 12px 20px; border-top: 1px solid var(--div); }
+  .notes textarea {
+    width: 100%; min-height: 52px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+    resize: vertical; font-size: 13.5px;
+  }
+  .genwrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 14px; color: var(--text-2); }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--line); border-top-color: var(--btn-ink); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Step 4 ---------- */
+  .prog { height: 8px; background: var(--bg-btn2); border-radius: 120px; overflow: hidden; }
+  .prog > div { height: 100%; background: var(--btn-ink); border-radius: 120px; width: 0%; transition: width .3s ease; }
+  .run-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--div); }
+  .run-row:last-child { border-bottom: none; }
+  .tick { width: 20px; height: 20px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; }
+  .tick svg { width: 12px; height: 12px; }
+  .tick.wait { border: 1.5px solid var(--line); }
+  .tick.busy { border: 2px solid var(--line); border-top-color: var(--btn-ink); animation: spin .8s linear infinite; }
+  .tick.ok { background: var(--success); color: #fff; }
+  .tick.err { background: var(--error); color: #fff; }
+  .run-err { color: var(--error); font-size: 12.5px; margin-top: 2px; }
+
+  /* ---------- Summary ---------- */
+  .sum-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .tile { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 16px; text-align: left; transition: box-shadow .15s ease; display: flex; flex-direction: column; gap: 6px; }
+  .tile:hover { box-shadow: var(--sh4); }
+  .tile .tnum { font-size: 28px; line-height: 36px; font-variant-numeric: tabular-nums; }
+  .tile .tlink { font-size: 12.5px; color: var(--blue); font-weight: 590; }
+  .donewrap { max-width: 760px; margin: 0 auto; padding: 48px 24px; display: flex; flex-direction: column; gap: 20px; align-items: stretch; }
+  .done-ic { width: 48px; height: 48px; border-radius: 50%; background: #e6f6ec; color: var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+  .done-ic svg { width: 24px; height: 24px; }
+
+  /* ---------- Toast ---------- */
+  #toasts { position: fixed; left: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+  .toast {
+    width: 288px; background: #fff; border-left: 3px solid var(--success); box-shadow: var(--sh5);
+    border-radius: 6px; padding: 12px 14px 12px 16px; font-size: 13.5px; animation: toastin .25s ease;
+  }
+  .toast.err { border-left-color: var(--error); }
+  .toast.info { border-left-color: var(--blue); }
+  @keyframes toastin { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="toasts"></div>
+
+<!-- ============ INVOICING PAGE (entry) ============ -->
+<div id="view-home" class="shell">
+  <nav class="rail" aria-label="Main navigation">
+    <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6l6-4 6 4v7a1 1 0 01-1 1H3a1 1 0 01-1-1V6z"/></svg></div></div>
+    <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg></div></div>
+    <div class="ritem on"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h10v12l-2-1.2L9 14l-2-1.2L5 14l-2-1.2V2z"/><path d="M5.5 5.5h5M5.5 8h5"/></svg></div></div>
+    <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M2.5 13.5c.8-2.6 3-4 5.5-4s4.7 1.4 5.5 4"/></svg></div></div>
+    <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13.5V9M6 13.5V5.5M10 13.5V7.5M14 13.5V3"/></svg></div></div>
+  </nav>
+  <div class="main">
+    <div class="pg-head">
+      <div class="pg-head-row">
+        <span class="h1">Invoicing</span>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-sec">New invoice</button>
+          <button class="btn btn-pri" id="cta-bulk">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4.5h7M2.5 8h7M2.5 11.5h4"/><path d="M12 6.5v5M9.5 9H14.5" stroke-linecap="round"/></svg>
+            Create bulk invoices
+          </button>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab on">Invoices</button>
+        <button class="tab">Payments</button>
+        <button class="tab">Reports</button>
+        <button class="tab">Settings</button>
+      </div>
+    </div>
+    <div class="pg-body">
+      <div class="toolbar">
+        <div class="search">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+          <input class="inp" placeholder="Search invoices" aria-label="Search invoices">
+        </div>
+        <div class="sel-wrap"><select class="sel" aria-label="Filter by status"><option>All statuses</option><option>Draft</option><option>Unpaid</option><option>Paid</option></select></div>
+      </div>
+      <table class="grid" id="inv-table">
+        <thead><tr>
+          <th>Invoice</th><th>Account</th><th>Project</th><th>Issue date</th><th class="r">Amount</th><th>Status</th>
+        </tr></thead>
+        <tbody id="inv-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BULK INVOICING FLOW ============ -->
+<div id="view-flow" class="flow hidden">
+  <div class="flow-head">
+    <div class="flow-title">
+      <button class="btn-icon btn" id="flow-close" aria-label="Close bulk invoicing">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+      <span class="h2">Create bulk invoices</span>
+    </div>
+    <div class="steps" id="steps"></div>
+    <div class="flow-head-right lbl" id="head-right"></div>
+  </div>
+
+  <div class="flow-body">
+    <!-- STEP 1 -->
+    <section id="step-1" class="hidden" style="height:100%;">
+      <div class="col">
+        <div>
+          <div class="h2">Select accounts &amp; projects</div>
+          <p class="sub" style="margin-top:4px;">Only projects with uninvoiced tasks or time entries are shown. Each invoice is billed in its account's default currency — currency can't be changed in this flow.</p>
+        </div>
+        <div id="s1-warn"></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="search">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+            <input class="inp" id="s1-search" placeholder="Search accounts or projects" aria-label="Search accounts or projects">
+          </div>
+          <button class="btn btn-ghost btn-sm" id="s1-selall" style="margin-left:auto;">Select all</button>
+          <button class="btn btn-ghost btn-sm" id="s1-clear">Clear</button>
+        </div>
+        <div class="card" id="s1-list"></div>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section id="step-2" class="hidden">
+      <div class="col">
+        <div>
+          <div class="h2">Define rules &amp; tax settings</div>
+          <p class="sub" style="margin-top:4px;">One rule per billing type — it applies to every selected project of that type.</p>
+        </div>
+        <div id="s2-rules" class="rules-grid"></div>
+        <div class="card card-pad">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div class="h3">Tax settings</div>
+              <p class="sub" style="margin-top:2px;font-size:13px;">Chosen per account. Accounts without a resolvable code are treated as tax exempt.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+              <div class="sel-wrap"><select class="sel" id="s2-applyall-src" aria-label="Tax source to apply to all">
+                <option value="global">Global default</option>
+                <option value="account">Account default</option>
+                <option value="exempt">Tax exempt</option>
+              </select></div>
+              <button class="btn btn-sec" id="s2-applyall">Apply to all</button>
+            </div>
+          </div>
+          <table class="grid" style="margin-top:12px;">
+            <thead><tr><th>Account</th><th>Currency</th><th>Tax source</th><th>Resolution</th></tr></thead>
+            <tbody id="s2-tax-tbody"></tbody>
+          </table>
+        </div>
+        <div id="s2-gate"></div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section id="step-3" class="hidden" style="height:100%;"></section>
+
+    <!-- STEP 4 -->
+    <section id="step-4" class="hidden">
+      <div class="col" style="max-width:760px;">
+        <div>
+          <div class="h2">Create invoices</div>
+          <p class="sub" style="margin-top:4px;" id="s4-sub"></p>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span class="lbl" id="s4-progress-label">Ready to create</span>
+            <span class="lbl num" id="s4-progress-count"></span>
+          </div>
+          <div class="prog"><div id="s4-progbar"></div></div>
+        </div>
+        <div class="card" id="s4-list"></div>
+      </div>
+    </section>
+
+    <!-- SUMMARY -->
+    <section id="step-done" class="hidden">
+      <div class="donewrap">
+        <div class="done-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3.5 3.5L13 5"/></svg></div>
+        <div style="text-align:center;">
+          <div class="h1">Bulk invoicing complete</div>
+          <p class="sub" style="margin-top:6px;" id="done-sub"></p>
+        </div>
+        <div class="sum-tiles" id="done-tiles"></div>
+        <p class="mut" style="font-size:12.5px;text-align:center;">Each count links to the invoices on the Invoicing page.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="flow-foot">
+    <div class="sub" id="foot-info"></div>
+    <div class="foot-actions" id="foot-actions"></div>
+  </div>
+</div>
+
+<script>
+/* ================= Data ================= */
+const TAX = {
+  sales8: { n: 'Sales Tax 8.25%', r: 8.25, active: true },
+  vat20:  { n: 'VAT 20%',         r: 20,   active: true },
+  gst18:  { n: 'GST 18%',         r: 18,   active: true },
+  vat5:   { n: 'VAT 5%',          r: 5,    active: true },
+  svc15:  { n: 'Service Tax 15%', r: 15,   active: false }, // deactivated by admin
+};
+const GLOBAL_TAX = 'sales8';
+const CURM = { USD: 1, EUR: 0.95, GBP: 0.82, INR: 84, AUD: 1.55 };
+const TYPE = {
+  tm:  { chip: 'chip-tm',  name: 'T&M',          items: 'time entries' },
+  ff:  { chip: 'chip-ff',  name: 'Fixed fee',    items: 'completed tasks' },
+  sub: { chip: 'chip-sub', name: 'Subscription', items: 'billing periods' },
+};
+
+/* [name, type, uninvoicedCount, flag?]  flag: rate | skip | fail */
+const ACCOUNTS = [
+  ['brightwave', 'Brightwave Analytics', 'USD', null, [
+    ['Implementation — Phase 2', 'tm', 38, 'rate'],
+    ['Enterprise onboarding', 'ff', 5],
+    ['Managed services', 'sub', 2],
+    ['Data warehouse migration', 'tm', 22],
+    ['Analytics enablement', 'ff', 4]]],
+  ['northwind', 'Northwind Retail', 'USD', 'sales8', [
+    ['POS rollout — West', 'tm', 41],
+    ['Store rollout — Midwest', 'ff', 3, 'skip'],
+    ['Loyalty platform onboarding', 'ff', 6],
+    ['Support subscription', 'sub', 1],
+    ['Inventory sync build', 'tm', 17]]],
+  ['helios', 'Helios Energy', 'EUR', 'vat20', [
+    ['Grid analytics implementation', 'tm', 33],
+    ['Field ops onboarding', 'ff', 4],
+    ['Sustainability reporting', 'ff', 3],
+    ['Platform subscription', 'sub', 2]]],
+  ['crestline', 'Crestline Bank', 'USD', null, [
+    ['Core banking rollout', 'tm', 52, 'fail'],
+    ['KYC workflow automation', 'ff', 7],
+    ['Branch enablement — Q3', 'ff', 4],
+    ['Premium support', 'sub', 1],
+    ['Payments integration', 'tm', 28]]],
+  ['juniper', 'Juniper Health', 'USD', 'sales8', [
+    ['Patient portal onboarding', 'ff', 5],
+    ['EHR integration', 'tm', 26],
+    ['Care team training', 'ff', 3],
+    ['Managed services', 'sub', 2]]],
+  ['atlas', 'Atlas Logistics', 'INR', 'gst18', [
+    ['Fleet tracking implementation', 'tm', 44],
+    ['Warehouse onboarding — Pune', 'ff', 6],
+    ['Route optimization pilot', 'tm', 19],
+    ['Support subscription', 'sub', 2],
+    ['Driver app rollout', 'ff', 4]]],
+  ['vertex', 'Vertex Systems', 'GBP', 'vat20', [
+    ['ERP migration — Wave 1', 'tm', 36],
+    ['Finance module onboarding', 'ff', 5],
+    ['Integration hub build', 'tm', 21],
+    ['Platinum support', 'sub', 1]]],
+  ['meridian', 'Meridian Insurance', 'USD', 'svc15', [
+    ['Claims platform rollout — Wave 1', 'tm', 31],
+    ['Policy admin onboarding', 'ff', 4],
+    ['Agent portal build', 'tm', 15],
+    ['Support subscription', 'sub', 2]]],
+  ['bluepeak', 'Bluepeak Telecom', 'AUD', null, [
+    ['5G provisioning system', 'tm', 47],
+    ['Retail systems onboarding', 'ff', 5],
+    ['Billing migration', 'tm', 24, 'skip'],
+    ['NOC managed services', 'sub', 2],
+    ['Field service rollout', 'ff', 3]]],
+  ['orchard', 'Orchard Foods', 'USD', 'sales8', [
+    ['Supply chain implementation', 'tm', 29],
+    ['Vendor portal onboarding', 'ff', 4],
+    ['Demand planning pilot', 'tm', 13],
+    ['Support subscription', 'sub', 1]]],
+  ['solstice', 'Solstice Media', 'GBP', 'vat5', [
+    ['CMS migration', 'tm', 34],
+    ['Ad platform onboarding', 'ff', 5],
+    ['Analytics rollout', 'ff', 3],
+    ['Managed hosting', 'sub', 2]]],
+  ['ravenna', 'Ravenna Labs', 'EUR', 'vat20', [
+    ['LIMS implementation', 'tm', 39],
+    ['Compliance onboarding', 'ff', 6],
+    ['Instrument integration', 'tm', 18],
+    ['Premium support', 'sub', 1],
+    ['Data pipeline build', 'ff', 4]]],
+].map(([id, name, cur, tax, projects]) => ({
+  id, name, cur, tax,
+  projects: projects.map(([pn, ty, count, flag], i) => ({
+    id: id + '-p' + i, accountId: id, name: pn, type: ty, count, flag: flag || null,
+  })),
+}));
+
+const PROJ = {}; const ACCT = {};
+ACCOUNTS.forEach(a => { ACCT[a.id] = a; a.projects.forEach(p => PROJ[p.id] = p); });
+
+const POOLS = {
+  tm: {
+    member: ['Aisha Menon', 'Diego Ramírez', 'Priya Nair', 'Sam Whitfield', 'Elena Petrova', 'Marcus Chen'],
+    role: ['Solutions architect', 'Senior consultant', 'Project manager', 'QA engineer'],
+    phase: ['Discovery', 'Solution design', 'Build & configure', 'UAT', 'Go-live'],
+    task: ['Requirements workshops', 'Integration setup', 'Custom reports', 'Admin training', 'Sandbox configuration'],
+    date: ['Jun 8–14', 'Jun 15–21', 'Jun 22–28', 'Jun 29–Jul 5', 'Jul 6–12'],
+  },
+  ff: {
+    milestone: ['Kickoff & discovery', 'Solution design sign-off', 'Configuration complete', 'Data migration complete', 'UAT sign-off', 'Go-live'],
+    phase: ['Discovery', 'Design', 'Build', 'Deploy'],
+    task: ['Requirements sign-off', 'Environment provisioning', 'Integration build', 'Training delivery', 'Hypercare'],
+  },
+};
+const SUB_PLANS = ['Gold support plan', 'Silver support plan', 'Platinum support plan'];
+const SUB_MONTHS = ['Jun 2026', 'Jul 2026'];
+
+const PERIODS = {
+  tm:  [['all', 'All uninvoiced time'], ['7', 'Last 7 days'], ['15', 'Last 15 days'], ['30', 'Last 30 days'], ['custom', 'Custom range']],
+  ff:  [['all', 'All completed uninvoiced'], ['7', 'Last 7 days'], ['15', 'Last 15 days'], ['30', 'Last 30 days'], ['custom', 'Custom range']],
+  sub: [['all', 'All periods'], ['current', 'Current period'], ['previous', 'Previous period'], ['custom', 'Custom range']],
+};
+const GROUPS = {
+  tm: [['member', 'Team member'], ['role', 'Role'], ['phase', 'Phase'], ['task', 'Task'], ['date', 'Date (weekly)']],
+  ff: [['milestone', 'Milestone'], ['phase', 'Phase'], ['task', 'Task']],
+};
+
+const EXISTING_INVOICES = [
+  ['INV-2041', 'Crestline Bank', 'Core banking rollout', 'Jul 3, 2026', 18400, 'USD', 'Paid'],
+  ['INV-2042', 'Atlas Logistics', 'Fleet tracking implementation', 'Jul 5, 2026', 1184000, 'INR', 'Unpaid'],
+  ['INV-2043', 'Helios Energy', 'Grid analytics implementation', 'Jul 8, 2026', 12300, 'EUR', 'Unpaid'],
+  ['INV-2044', 'Solstice Media', 'CMS migration', 'Jul 9, 2026', 6750, 'GBP', 'Draft'],
+  ['INV-2045', 'Juniper Health', 'Patient portal onboarding', 'Jul 10, 2026', 9200, 'USD', 'Paid'],
+];
+
+/* ================= State ================= */
+const S = {
+  step: 1, maxStep: 1,
+  sel: new Set(),
+  expanded: new Set(['brightwave']),
+  search: '',
+  rules: {
+    tm:  { period: 'all', group: 'member' },
+    ff:  { period: 'all', group: 'milestone' },
+    sub: { period: 'all' },
+  },
+  taxSel: {},      // accountId -> global | account | exempt
+  taxOverride: {}, // accountId -> replacement active tax code id (gate resolution)
+  gateShown: false,
+  previews: [], sig: null, curPv: null, generating: false,
+  run: { started: false, done: false, current: -1 },
+  createdInvoices: [],
+  invSeq: 2046,
+};
+
+/* ================= Helpers ================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function hash(s) { let x = 7; for (const c of s) x = (x * 31 + c.charCodeAt(0)) >>> 0; return x; }
+function fmt(cur, v) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: cur, maximumFractionDigits: v % 1 ? 2 : 0 }).format(v);
+}
+function toast(msg, kind) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (kind ? ' ' + kind : '');
+  t.textContent = msg;
+  $('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+const ic = {
+  warn: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L1.5 13.5h13L8 2z" stroke-linejoin="round"/><path d="M8 6.5V9.5"/><circle cx="8" cy="11.6" r=".7" fill="currentColor" stroke="none"/></svg>',
+  info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5V11"/><circle cx="8" cy="5.2" r=".7" fill="currentColor" stroke="none"/></svg>',
+  check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3.5 3.5L13 5"/></svg>',
+  x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+  trash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" width="15" height="15"><path d="M2.5 4h11M6.5 2.5h3M4 4l.7 9.2a1 1 0 001 .8h4.6a1 1 0 001-.8L12 4M6.5 6.8v4.4M9.5 6.8v4.4"/></svg>',
+  chev: '<svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3.5L10.5 8 6 12.5"/></svg>',
+  retry: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 8a5.5 5.5 0 11-1.6-3.9"/><path d="M13.7 1.8v2.7H11"/></svg>',
+};
+
+const selProjects = () => [...S.sel].map(id => PROJ[id]);
+const selAccounts = () => ACCOUNTS.filter(a => a.projects.some(p => S.sel.has(p.id)));
+const typesInSel = () => ['tm', 'ff', 'sub'].filter(t => selProjects().some(p => p.type === t));
+
+/* Smart pre-selection: account default if configured, else global */
+function ensureTaxSel() {
+  selAccounts().forEach(a => { if (!S.taxSel[a.id]) S.taxSel[a.id] = a.tax ? 'account' : 'global'; });
+}
+/* Resolve an account's tax → {kind: ok|exempt|block, codeId?, label} */
+function taxResolve(a) {
+  if (S.taxOverride[a.id]) {
+    const c = TAX[S.taxOverride[a.id]];
+    return { kind: 'ok', codeId: S.taxOverride[a.id], label: c.n + ' — replaced for this batch' };
+  }
+  const src = S.taxSel[a.id];
+  if (src === 'exempt') return { kind: 'exempt', label: 'Tax exempt — no tax code applied' };
+  const codeId = src === 'global' ? GLOBAL_TAX : a.tax;
+  if (!codeId) return { kind: 'exempt', label: 'No account default — resolves to tax exempt' };
+  const c = TAX[codeId];
+  if (!c.active) return { kind: 'block', codeId, label: c.n + ' was deactivated by an admin' };
+  return { kind: 'ok', codeId, label: c.n + ' will be applied' };
+}
+
+/* ================= Home ================= */
+function renderHome() {
+  const rows = [
+    ...S.createdInvoices.map(v => ({ ...v, isNew: true })),
+    ...EXISTING_INVOICES.map(([no, acct, proj, date, amt, cur, st]) => ({ no, acct, proj, date, amt, cur, st })),
+  ];
+  $('inv-tbody').innerHTML = rows.map(r => `
+    <tr>
+      <td><span style="font-weight:590;">${esc(r.no)}</span>${r.isNew ? ' <span class="chip chip-new">New</span>' : ''}</td>
+      <td>${esc(r.acct)}</td>
+      <td class="sub">${esc(r.proj)}</td>
+      <td class="sub">${esc(r.date)}</td>
+      <td class="r num">${fmt(r.cur, r.amt)}</td>
+      <td><span class="chip chip-${r.st === 'Paid' ? 'paid' : r.st === 'Draft' ? 'draft' : 'unpaid'}">${r.st}</span></td>
+    </tr>`).join('');
+}
+
+/* ================= Flow chrome ================= */
+const STEP_LABELS = ['Select projects', 'Rules & tax', 'Review previews', 'Create invoices'];
+function renderSteps() {
+  $('steps').innerHTML = STEP_LABELS.map((lbl, i) => {
+    const n = i + 1;
+    const st = S.step === 5 || n < S.step ? 'done' : n === S.step ? 'on' : '';
+    const clickable = n < S.step && S.step !== 5 && !S.run.started;
+    return `<div class="stp ${st} ${clickable ? 'clickable' : ''}">
+      <button ${clickable ? `onclick="goStep(${n})"` : 'tabindex="-1"'}>
+        <span class="dot">${st === 'done' ? ic.check : n}</span><span class="slbl">${lbl}</span>
+      </button>
+    </div>${n < 4 ? '<div class="stp"><span class="conn"></span></div>' : ''}`;
+  }).join('');
+  const nSel = S.sel.size;
+  $('head-right').textContent = S.step >= 2 && S.step <= 4 ? `${nSel} project${nSel === 1 ? '' : 's'} · ${selAccounts().length} accounts` : '';
+}
+
+function goStep(n) {
+  S.step = n; S.maxStep = Math.max(S.maxStep, n);
+  ['step-1', 'step-2', 'step-3', 'step-4', 'step-done'].forEach((id, i) => $(id).classList.toggle('hidden', i + 1 !== n));
+  renderSteps();
+  if (n === 1) renderStep1();
+  if (n === 2) { ensureTaxSel(); renderStep2(); }
+  if (n === 3) enterStep3();
+  if (n === 4) renderStep4();
+  if (n === 5) renderDone();
+  renderFooter();
+  document.querySelector('.flow-body').scrollTop = 0;
+}
+
+function openFlow() { $('view-home').classList.add('hidden'); $('view-flow').classList.remove('hidden'); goStep(1); }
+function closeFlow() { $('view-flow').classList.add('hidden'); $('view-home').classList.remove('hidden'); renderHome(); }
+$('cta-bulk').addEventListener('click', openFlow);
+$('flow-close').addEventListener('click', closeFlow);
+
+/* ================= Footer ================= */
+function renderFooter() {
+  const info = $('foot-info'), act = $('foot-actions');
+  if (S.step === 1) {
+    const n = S.sel.size;
+    info.innerHTML = n
+      ? `<strong>${n}</strong> project${n === 1 ? '' : 's'} selected across <strong>${selAccounts().length}</strong> account${selAccounts().length === 1 ? '' : 's'} · ≈ ${n} invoice${n === 1 ? '' : 's'}`
+      : 'Select at least one project to continue.';
+    act.innerHTML = `<button class="btn btn-sec" onclick="closeFlow()">Cancel</button>
+      <button class="btn btn-pri" id="ft-next" ${n ? '' : 'disabled'} onclick="goStep(2)">Continue</button>`;
+  } else if (S.step === 2) {
+    const blocked = selAccounts().filter(a => taxResolve(a).kind === 'block').length;
+    info.innerHTML = blocked && S.gateShown
+      ? `<span style="color:var(--error);font-weight:590;">${blocked} account${blocked === 1 ? '' : 's'} blocked by a deactivated tax code</span>`
+      : '';
+    act.innerHTML = `<button class="btn btn-sec" onclick="goStep(1)">Back</button>
+      <button class="btn btn-pri" onclick="tryGenerate()">Generate previews</button>`;
+  } else if (S.step === 3) {
+    if (S.generating) { info.textContent = ''; act.innerHTML = ''; return; }
+    const c = pvCounts();
+    info.innerHTML = `<strong>${c.approved}</strong> approved · <strong>${c.draft}</strong> draft · <strong>${c.pending}</strong> to review · <strong>${c.skipped}</strong> skipped${c.removed ? ` · ${c.removed} removed` : ''}`;
+    const ready = c.pending === 0 && (c.approved + c.draft) > 0;
+    act.innerHTML = `<button class="btn btn-sec" onclick="goStep(2)">Back</button>
+      <button class="btn btn-pri" ${ready ? '' : 'disabled'} title="${ready ? '' : 'Resolve issues and approve, draft, or remove every preview first'}" onclick="goStep(4)">Continue</button>`;
+  } else if (S.step === 4) {
+    const items = runItems();
+    if (!S.run.started) {
+      info.textContent = 'Invoices are created one at a time. You can retry any failures afterwards.';
+      act.innerHTML = `<button class="btn btn-sec" onclick="goStep(3)">Back</button>
+        <button class="btn btn-pri" onclick="startRun()">Create ${items.length} invoice${items.length === 1 ? '' : 's'}</button>`;
+    } else if (!S.run.done) {
+      info.textContent = 'Creating invoices…';
+      act.innerHTML = `<button class="btn btn-pri" disabled>Creating…</button>`;
+    } else {
+      const fails = items.filter(p => p.runState === 'fail').length;
+      info.innerHTML = fails ? `<span style="color:var(--error);font-weight:590;">${fails} failed</span> — retry above or continue to the summary.` : 'All done.';
+      act.innerHTML = `<button class="btn btn-pri" onclick="goStep(5)">View summary</button>`;
+    }
+  } else {
+    info.textContent = '';
+    act.innerHTML = `<button class="btn btn-pri" onclick="closeFlow()">Back to Invoicing</button>`;
+  }
+}
+
+/* ================= Step 1 ================= */
+function renderStep1() {
+  const q = S.search.trim().toLowerCase();
+  const list = ACCOUNTS.map(a => {
+    const projs = a.projects.filter(p => !q || a.name.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
+    if (!projs.length) return '';
+    const selCount = a.projects.filter(p => S.sel.has(p.id)).length;
+    const allSel = selCount === a.projects.length;
+    const open = S.expanded.has(a.id) || q;
+    return `<div class="acct ${open ? 'open' : ''}">
+      <div class="acct-row" onclick="toggleExpand('${a.id}')">
+        <input type="checkbox" ${allSel ? 'checked' : ''} aria-label="Select all projects for ${esc(a.name)}"
+          onclick="event.stopPropagation()" onchange="toggleAccount('${a.id}', this.checked)"
+          ${selCount && !allSel ? 'data-ind="1"' : ''}>
+        ${ic.chev}
+        <span class="acct-name">${esc(a.name)}</span>
+        <span class="chip chip-cur">${a.cur}</span>
+        <div class="acct-meta">
+          <span class="mut" style="font-size:13px;">${selCount ? selCount + ' of ' : ''}${a.projects.length} eligible project${a.projects.length === 1 ? '' : 's'}</span>
+        </div>
+      </div>
+      <div class="projs">
+        ${projs.map(p => `
+          <div class="proj-row" onclick="toggleProj('${p.id}')">
+            <input type="checkbox" ${S.sel.has(p.id) ? 'checked' : ''} aria-label="Select ${esc(p.name)}"
+              onclick="event.stopPropagation()" onchange="toggleProj('${p.id}')">
+            <span>${esc(p.name)}</span>
+            <span class="chip ${TYPE[p.type].chip}">${TYPE[p.type].name}</span>
+            <span class="proj-items num">${p.count} uninvoiced ${TYPE[p.type].items}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  $('s1-list').innerHTML = list || '<div class="card-pad mut">No accounts or projects match your search.</div>';
+  $('s1-list').querySelectorAll('input[data-ind]').forEach(cb => cb.indeterminate = true);
+  $('s1-warn').innerHTML = S.sel.size > 50
+    ? `<div class="bar bar-warn">${ic.warn}<span><strong>${S.sel.size} invoices is a large batch.</strong> Generation and review may take a while — consider splitting it into smaller batches. You can still continue.</span></div>`
+    : '';
+  renderFooter();
+}
+function toggleExpand(id) { S.expanded.has(id) ? S.expanded.delete(id) : S.expanded.add(id); renderStep1(); }
+function toggleAccount(id, on) { ACCT[id].projects.forEach(p => on ? S.sel.add(p.id) : S.sel.delete(p.id)); renderStep1(); }
+function toggleProj(id) { S.sel.has(id) ? S.sel.delete(id) : S.sel.add(id); renderStep1(); }
+$('s1-search').addEventListener('input', e => { S.search = e.target.value; renderStep1(); });
+$('s1-selall').addEventListener('click', () => { ACCOUNTS.forEach(a => a.projects.forEach(p => S.sel.add(p.id))); renderStep1(); });
+$('s1-clear').addEventListener('click', () => { S.sel.clear(); renderStep1(); });
+
+/* ================= Step 2 ================= */
+function renderStep2() {
+  const types = typesInSel();
+  const RULE_META = {
+    tm:  { title: 'Time & material', chip: 'chip-tm', desc: 'Uninvoiced time entries' },
+    ff:  { title: 'Fixed fee', chip: 'chip-ff', desc: 'Completed uninvoiced tasks' },
+    sub: { title: 'Subscription', chip: 'chip-sub', desc: 'Scheduled billing periods' },
+  };
+  $('s2-rules').innerHTML = types.map(t => {
+    const m = RULE_META[t], r = S.rules[t];
+    const nProj = selProjects().filter(p => p.type === t).length;
+    return `<div class="rule-card">
+      <div class="rc-head">
+        <span class="chip ${m.chip}">${m.title}</span>
+        <span class="mut" style="font-size:12px;">${nProj} project${nProj === 1 ? '' : 's'}</span>
+      </div>
+      <div class="field">
+        <label>Billing period</label>
+        <div class="seg" role="group" aria-label="${m.title} billing period">
+          ${PERIODS[t].map(([v, l]) => `<button class="${r.period === v ? 'on' : ''}" onclick="setRule('${t}','period','${v}')">${l.replace('Last ', '').replace(' days', 'd').replace('All uninvoiced time', 'All uninvoiced').replace('All completed uninvoiced', 'All completed').replace('Custom range', 'Custom')}</button>`).join('')}
+        </div>
+        ${r.period === 'custom' ? `<div class="daterow"><input class="inp" type="date" value="2026-06-01" aria-label="From date"><input class="inp" type="date" value="2026-07-12" aria-label="To date"></div>` : ''}
+      </div>
+      ${GROUPS[t] ? `<div class="field">
+        <label>Group line items by</label>
+        <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;" onchange="setRule('${t}','group',this.value)" aria-label="${m.title} grouping">
+          ${GROUPS[t].map(([v, l]) => `<option value="${v}" ${r.group === v ? 'selected' : ''}>${l}</option>`).join('')}
+        </select></div>
+      </div>` : `<p class="mut" style="font-size:12.5px;">Line items follow the subscription schedule — no grouping.</p>`}
+    </div>`;
+  }).join('');
+
+  $('s2-tax-tbody').innerHTML = selAccounts().map(a => {
+    const res = taxResolve(a);
+    const cls = res.kind === 'ok' ? 'tax-outcome-ok' : res.kind === 'exempt' ? 'tax-outcome-ex' : 'tax-outcome-bad';
+    return `<tr>
+      <td style="font-weight:590;">${esc(a.name)}</td>
+      <td><span class="chip chip-cur">${a.cur}</span></td>
+      <td>
+        <div class="sel-wrap"><select class="sel" onchange="setTaxSrc('${a.id}', this.value)" aria-label="Tax source for ${esc(a.name)}">
+          <option value="global" ${S.taxSel[a.id] === 'global' ? 'selected' : ''}>Global default — ${TAX[GLOBAL_TAX].n}</option>
+          <option value="account" ${S.taxSel[a.id] === 'account' ? 'selected' : ''}>Account default${a.tax ? ' — ' + TAX[a.tax].n : ' — not configured'}</option>
+          <option value="exempt" ${S.taxSel[a.id] === 'exempt' ? 'selected' : ''}>Tax exempt</option>
+        </select></div>
+      </td>
+      <td><span class="${cls}">${res.label}</span></td>
+    </tr>`;
+  }).join('');
+
+  renderGate();
+  renderFooter();
+}
+function setRule(t, k, v) { S.rules[t][k] = v; renderStep2(); }
+function setTaxSrc(id, v) { S.taxSel[id] = v; delete S.taxOverride[id]; renderStep2(); }
+$('s2-applyall').addEventListener('click', () => {
+  const v = $('s2-applyall-src').value;
+  selAccounts().forEach(a => { S.taxSel[a.id] = v; delete S.taxOverride[a.id]; });
+  renderStep2();
+  toast('Tax source applied to all accounts', 'info');
+});
+
+function renderGate() {
+  const blocked = selAccounts().filter(a => taxResolve(a).kind === 'block');
+  if (!S.gateShown || !blocked.length) { $('s2-gate').innerHTML = ''; return; }
+  const activeCodes = Object.entries(TAX).filter(([, c]) => c.active);
+  $('s2-gate').innerHTML = `<div class="gate">
+    <div style="display:flex;gap:10px;align-items:flex-start;">
+      <span style="color:var(--error);display:flex;margin-top:1px;">${ic.warn}</span>
+      <div>
+        <div class="h3" style="color:var(--error);">Resolve deactivated tax codes to continue</div>
+        <p class="sub" style="margin-top:2px;font-size:13px;">${blocked.length} account${blocked.length === 1 ? ' references' : 's reference'} a tax code that an admin deactivated. Pick a replacement or mark the account tax exempt for this batch.</p>
+      </div>
+    </div>
+    ${blocked.map(a => `<div class="gate-row">
+      <span style="font-weight:590;">${esc(a.name)}</span>
+      <span class="tax-outcome-bad">${TAX[taxResolve(a).codeId].n} — deactivated</span>
+      <div class="gr-actions">
+        <div class="sel-wrap"><select class="sel" onchange="if(this.value) resolveGate('${a.id}', this.value)" aria-label="Replacement tax code for ${esc(a.name)}">
+          <option value="">Pick a replacement…</option>
+          ${activeCodes.map(([id, c]) => `<option value="${id}">${c.n}</option>`).join('')}
+        </select></div>
+        <button class="btn btn-ghost" onclick="exemptGate('${a.id}')">Mark tax exempt</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+function resolveGate(id, code) { S.taxOverride[id] = code; renderStep2(); toast(`${ACCT[id].name}: ${TAX[code].n} will be used for this batch`); }
+function exemptGate(id) { S.taxSel[id] = 'exempt'; delete S.taxOverride[id]; renderStep2(); toast(`${ACCT[id].name} marked tax exempt for this batch`); }
+
+function tryGenerate() {
+  const blocked = selAccounts().filter(a => taxResolve(a).kind === 'block');
+  if (blocked.length) {
+    S.gateShown = true;
+    renderStep2();
+    $('s2-gate').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  S.gateShown = false;
+  goStep(3);
+}
+
+/* ================= Preview generation ================= */
+function buildSignature() {
+  return JSON.stringify([[...S.sel].sort(), S.rules, selAccounts().map(a => [a.id, taxResolve(a)])]);
+}
+function pickPool(arr, seed, n) {
+  const out = []; for (let i = 0; i < n; i++) out.push(arr[(seed + i * 3) % arr.length]); return out;
+}
+function makeLines(p, a) {
+  const h = hash(p.id + p.name), m = CURM[a.cur];
+  const round = v => Math.round(v * m);
+  if (p.type === 'tm') {
+    const pool = POOLS.tm[S.rules.tm.group];
+    const n = 3 + h % 3;
+    return pickPool(pool, h % pool.length, n).map((d, i) => {
+      const hh = hash(p.id + d + i);
+      const q = Math.round((8 + (hh % 280) / 10) * 2) / 2;
+      let r = round(140 + (hh % 5) * 10);
+      if (p.flag === 'rate' && i === 1) r = null;
+      return { d, q, r, tax: true };
+    });
+  }
+  if (p.type === 'ff') {
+    const pool = POOLS.ff[S.rules.ff.group];
+    const n = 2 + h % 3;
+    return pickPool(pool, h % pool.length, n).map((d, i) => {
+      const hh = hash(p.id + d + i);
+      return { d, q: null, r: null, amt: round(3000 + (hh % 9) * 1500), tax: true };
+    });
+  }
+  const plan = SUB_PLANS[h % SUB_PLANS.length];
+  return SUB_MONTHS.slice(0, Math.max(1, Math.min(p.count, 2))).map((mo, i) => ({
+    d: `${plan} — ${mo}`, q: null, r: null, amt: round(2400 + (h % 4) * 300), tax: true,
+  }));
+}
+function generatePreviews() {
+  S.previews = selProjects().map(p => {
+    const a = ACCT[p.accountId];
+    const res = taxResolve(a);
+    const skip = p.flag === 'skip';
+    return {
+      id: 'pv-' + p.id, projectId: p.id, accountId: a.id,
+      name: p.name, account: a.name, cur: a.cur, type: p.type,
+      taxCode: res.kind === 'ok' ? res.codeId : null,
+      skipped: skip,
+      skipReason: skip ? (p.type === 'ff' ? 'No completed uninvoiced tasks in the selected period' : 'No billable items in the selected period') : null,
+      lines: skip ? [] : makeLines(p, a),
+      decision: null, notes: '', runState: null, error: null, invNo: null,
+    };
+  });
+  const first = S.previews.find(p => !p.skipped);
+  S.curPv = first ? first.id : (S.previews[0] && S.previews[0].id);
+}
+
+/* ---- preview computed state ---- */
+function lineAmt(l) { return l.q != null ? (l.r != null ? l.q * l.r : null) : l.amt; }
+function pvIssues(p) {
+  const rate = p.lines.some(l => l.q != null && l.r == null);
+  const taxMix = p.taxCode && p.lines.some(l => l.tax) && p.lines.some(l => !l.tax);
+  return { rate, taxMix, any: rate || taxMix };
+}
+function pvStatus(p) {
+  if (p.skipped) return 'skipped';
+  if (p.decision === 'removed') return 'removed';
+  if (pvIssues(p).any) return 'issues';
+  if (p.decision) return p.decision;
+  return 'ready';
+}
+function pvTotals(p) {
+  let sub = 0, tax = 0;
+  p.lines.forEach(l => {
+    const v = lineAmt(l);
+    if (v == null) return;
+    sub += v;
+    if (p.taxCode && l.tax) tax += v * TAX[p.taxCode].r / 100;
+  });
+  return { sub, tax, total: sub + tax };
+}
+function pvCounts() {
+  const c = { approved: 0, draft: 0, pending: 0, skipped: 0, removed: 0, issues: 0 };
+  S.previews.forEach(p => {
+    const st = pvStatus(p);
+    if (st === 'approved') c.approved++;
+    else if (st === 'draft') c.draft++;
+    else if (st === 'skipped') c.skipped++;
+    else if (st === 'removed') c.removed++;
+    else { c.pending++; if (st === 'issues') c.issues++; }
+  });
+  return c;
+}
+
+/* ================= Step 3 ================= */
+function enterStep3() {
+  const sig = buildSignature();
+  if (sig !== S.sig) {
+    S.sig = sig;
+    S.generating = true;
+    generatePreviews();
+    renderGenerating();
+  } else {
+    renderStep3();
+  }
+}
+function renderGenerating() {
+  const total = S.sel.size;
+  $('step-3').innerHTML = `<div class="genwrap">
+    <div class="spinner" role="status" aria-label="Generating previews"></div>
+    <div class="h3">Generating invoice previews…</div>
+    <div class="mut num" id="gen-count">0 of ${total}</div>
+  </div>`;
+  renderFooter();
+  let i = 0;
+  const step = Math.max(1, Math.round(total / 14));
+  const iv = setInterval(() => {
+    i = Math.min(total, i + step);
+    const el = $('gen-count'); if (el) el.textContent = `${i} of ${total}`;
+    if (i >= total) {
+      clearInterval(iv);
+      setTimeout(() => { S.generating = false; renderStep3(); renderFooter(); }, 250);
+    }
+  }, 80);
+}
+
+const CHIP_ST = {
+  ready: ['chip-ready', 'Ready'], issues: ['chip-issues', 'Has issues'], skipped: ['chip-skipped', 'Skipped'],
+  approved: ['chip-approved', 'Approved'], draft: ['chip-draft', 'Draft'], removed: ['chip-removed', 'Removed'],
+};
+function renderStep3() {
+  const c = pvCounts();
+  const readyUndecided = S.previews.filter(p => pvStatus(p) === 'ready').length;
+  const byAcct = [];
+  selAccounts().forEach(a => {
+    const pvs = S.previews.filter(p => p.accountId === a.id);
+    if (pvs.length) byAcct.push([a, pvs]);
+  });
+  $('step-3').innerHTML = `<div class="s3">
+    <div class="s3-list">
+      <div class="s3-list-head">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span class="h3">${S.previews.length} previews</span>
+          <button class="btn btn-ghost btn-sm" ${readyUndecided ? '' : 'disabled'} onclick="approveAllReady()">Approve all ready (${readyUndecided})</button>
+        </div>
+        <div class="s3-counts">
+          ${c.issues ? `<span class="chip chip-issues">${c.issues} with issues</span>` : ''}
+          ${c.skipped ? `<span class="chip chip-skipped">${c.skipped} skipped</span>` : ''}
+          ${c.approved ? `<span class="chip chip-approved">${c.approved} approved</span>` : ''}
+          ${c.draft ? `<span class="chip chip-draft">${c.draft} draft</span>` : ''}
+        </div>
+      </div>
+      <div class="s3-scroll">
+        ${byAcct.map(([a, pvs]) => `
+          <div class="s3-acct"><span>${esc(a.name)}</span><span>${a.cur}</span></div>
+          ${pvs.map(p => {
+            const st = pvStatus(p);
+            const [cls, lbl] = CHIP_ST[st];
+            const t = pvTotals(p);
+            return `<button class="pv-row ${p.id === S.curPv ? 'on' : ''} ${st === 'removed' ? 'removed' : ''}" onclick="selectPv('${p.id}')">
+              <div class="pv-main">
+                <div class="pv-name">${esc(p.name)}</div>
+                <div class="pv-amt num">${st === 'skipped' ? 'Skipped' : fmt(p.cur, t.total)}</div>
+              </div>
+              <span class="chip ${cls}">${lbl}</span>
+            </button>`;
+          }).join('')}`).join('')}
+      </div>
+    </div>
+    <div class="s3-detail" id="s3-detail"></div>
+  </div>`;
+  renderDetail();
+  renderFooter();
+}
+function selectPv(id) { S.curPv = id; renderStep3(); }
+function approveAllReady() {
+  let n = 0;
+  S.previews.forEach(p => { if (pvStatus(p) === 'ready') { p.decision = 'approved'; n++; } });
+  renderStep3();
+  toast(`${n} preview${n === 1 ? '' : 's'} approved`);
+}
+
+function renderDetail() {
+  const p = S.previews.find(x => x.id === S.curPv);
+  const box = $('s3-detail');
+  if (!p) { box.innerHTML = '<p class="mut">Select a preview from the list.</p>'; return; }
+  const st = pvStatus(p), iss = pvIssues(p), t = pvTotals(p);
+  const periodLabel = PERIODS[p.type].find(([v]) => v === S.rules[p.type].period)[1];
+  const [stCls, stLbl] = CHIP_ST[st];
+
+  if (p.skipped) {
+    box.innerHTML = `<div class="dt-card">
+      <div class="dt-head">
+        <div class="dt-meta">
+          <span class="h2">${esc(p.name)}</span>
+          <span class="chip ${TYPE[p.type].chip}">${TYPE[p.type].name}</span>
+          <span class="chip chip-skipped">Skipped</span>
+        </div>
+        <div class="dt-meta sub" style="font-size:13px;">${esc(p.account)} · ${p.cur} · ${periodLabel}</div>
+      </div>
+      <div class="card-pad">
+        <div class="bar bar-warn">${ic.warn}<span><strong>This project was skipped.</strong> ${esc(p.skipReason)}. No invoice will be created — the rest of the batch is unaffected.</span></div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const taxName = p.taxCode ? TAX[p.taxCode].n : null;
+  box.innerHTML = `<div class="dt-card">
+    <div class="dt-head">
+      <div class="dt-meta">
+        <span class="h2">${esc(p.name)}</span>
+        <span class="chip ${TYPE[p.type].chip}">${TYPE[p.type].name}</span>
+        <span class="chip ${stCls}">${stLbl}</span>
+      </div>
+      <div class="dt-meta sub" style="font-size:13px;">
+        ${esc(p.account)} · <span class="chip chip-cur">${p.cur}</span> · ${periodLabel} · ${taxName ? esc(taxName) : 'Tax exempt'}
+      </div>
+      ${iss.rate ? `<div class="bar bar-error">${ic.warn}<span><strong>Missing rate.</strong> A line item has hours but no rate. Enter a rate to resolve, or remove the line.</span></div>` : ''}
+      ${iss.taxMix ? `<div class="bar bar-error">${ic.warn}<span style="flex:1;"><strong>Inconsistent tax.</strong> Either every line item carries a tax code or none do.</span>
+        <span style="display:flex;gap:8px;flex:none;">
+          <button class="btn btn-sm btn-ghost" onclick="fixTax('${p.id}', true)">Apply tax to all</button>
+          <button class="btn btn-sm btn-ghost" onclick="fixTax('${p.id}', false)">Remove tax from all</button>
+        </span></div>` : ''}
+      ${st === 'removed' ? `<div class="bar bar-warn">${ic.info}<span style="flex:1;"><strong>Removed from batch.</strong> No invoice will be created for this project.</span>
+        <button class="btn btn-sm btn-ghost" style="flex:none;" onclick="setDecision('${p.id}', null)">Restore</button></div>` : ''}
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="grid lines">
+        <thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Rate</th><th>Tax</th><th class="r">Amount</th><th style="width:36px;"></th></tr></thead>
+        <tbody>
+          ${p.lines.map((l, i) => {
+            const v = lineAmt(l);
+            return `<tr>
+              <td>${esc(l.d)}</td>
+              <td class="r num">${l.q != null ? l.q + ' h' : '—'}</td>
+              <td class="r">${l.q != null
+                ? `<input class="cellinp num ${l.r == null ? 'bad' : ''}" type="number" min="0" step="1" value="${l.r != null ? l.r : ''}" placeholder="0"
+                     aria-label="Rate for ${esc(l.d)}" onchange="editLine('${p.id}',${i},'r',this.value)">${l.r == null ? '<span class="rate-req">Rate required</span>' : ''}`
+                : '—'}</td>
+              <td>${p.taxCode
+                ? (l.tax
+                  ? `<span class="chip chip-tax">${esc(taxName)}<button aria-label="Remove tax from this line" onclick="setLineTax('${p.id}',${i},false)">${ic.x}</button></span>`
+                  : `<button class="btn btn-sm btn-ghost" onclick="setLineTax('${p.id}',${i},true)">+ Add tax</button>`)
+                : '<span class="mut">—</span>'}</td>
+              <td class="r">${l.q != null
+                ? `<span class="num">${v != null ? fmt(p.cur, v) : '—'}</span>`
+                : `<input class="cellinp num" type="number" min="0" step="1" value="${l.amt}" aria-label="Amount for ${esc(l.d)}" onchange="editLine('${p.id}',${i},'amt',this.value)">`}</td>
+              <td><button class="rm" aria-label="Remove line item" ${p.lines.length === 1 ? 'disabled' : ''} onclick="removeLine('${p.id}',${i})">${ic.trash}</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="totals">
+      <div class="trow"><span>Subtotal</span><span>${fmt(p.cur, t.sub)}</span></div>
+      <div class="trow"><span>Tax${taxName ? ' · ' + esc(taxName) : ''}</span><span>${fmt(p.cur, t.tax)}</span></div>
+      <div class="trow grand"><span>Total</span><span>${fmt(p.cur, t.total)}</span></div>
+    </div>
+    <div class="notes">
+      <textarea placeholder="Add a note to this invoice…" aria-label="Invoice note" onchange="setNote('${p.id}', this.value)">${esc(p.notes)}</textarea>
+    </div>
+    <div class="dt-actions">
+      <button class="btn btn-success" ${iss.any || st === 'removed' ? 'disabled' : ''} ${st === 'approved' ? 'disabled' : ''}
+        title="${iss.any ? 'Resolve the issues above first' : ''}" onclick="setDecision('${p.id}','approved')">
+        ${st === 'approved' ? 'Approved' : 'Approve'}</button>
+      <button class="btn btn-sec" ${iss.any || st === 'removed' || st === 'draft' ? 'disabled' : ''} onclick="setDecision('${p.id}','draft')">
+        ${st === 'draft' ? 'Saved as draft' : 'Save as draft'}</button>
+      <span style="flex:1;"></span>
+      ${st !== 'removed' ? `<button class="btn btn-danger-ghost" onclick="setDecision('${p.id}','removed')">Remove from batch</button>` : ''}
+    </div>
+  </div>`;
+}
+const findPv = id => S.previews.find(x => x.id === id);
+function editLine(id, i, k, v) {
+  const p = findPv(id);
+  const num = v === '' ? null : Math.max(0, +v);
+  p.lines[i][k] = num;
+  if (p.decision === 'approved' || p.decision === 'draft') p.decision = null;
+  renderStep3();
+}
+function setLineTax(id, i, on) { const p = findPv(id); p.lines[i].tax = on; if (p.decision) p.decision = null; renderStep3(); }
+function fixTax(id, on) { const p = findPv(id); p.lines.forEach(l => l.tax = on); renderStep3(); toast(on ? 'Tax applied to all line items' : 'Tax removed from all line items'); }
+function removeLine(id, i) { const p = findPv(id); p.lines.splice(i, 1); if (p.decision) p.decision = null; renderStep3(); }
+function setNote(id, v) { findPv(id).notes = v; }
+function setDecision(id, d) {
+  const p = findPv(id);
+  p.decision = d;
+  renderStep3();
+  if (d === 'approved') toast('Preview approved');
+  if (d === 'draft') toast('Will be created as a draft invoice', 'info');
+  if (d === 'removed') toast('Removed from batch', 'info');
+}
+
+/* ================= Step 4 ================= */
+const runItems = () => S.previews.filter(p => p.decision === 'approved' || p.decision === 'draft');
+function renderStep4() {
+  const items = runItems();
+  const done = items.filter(p => p.runState === 'ok' || p.runState === 'fail').length;
+  const ok = items.filter(p => p.runState === 'ok').length;
+  $('s4-sub').textContent = S.run.done
+    ? `Finished — ${ok} of ${items.length} created.`
+    : S.run.started
+      ? 'Creating invoices one by one. Keep this window open.'
+      : `${items.length} invoice${items.length === 1 ? '' : 's'} will be created — ${items.filter(p => p.decision === 'approved').length} finalized, ${items.filter(p => p.decision === 'draft').length} as drafts.`;
+  $('s4-progress-label').textContent = S.run.done ? 'Complete' : S.run.started ? 'Creating…' : 'Ready to create';
+  $('s4-progress-count').textContent = `${done} of ${items.length} processed`;
+  $('s4-progbar').style.width = items.length ? (done / items.length * 100) + '%' : '0%';
+  $('s4-list').innerHTML = items.map((p, i) => {
+    const t = pvTotals(p);
+    let tick = '<div class="tick wait"></div>';
+    if (p.runState === 'ok') tick = `<div class="tick ok">${ic.check}</div>`;
+    else if (p.runState === 'fail') tick = `<div class="tick err">${ic.x}</div>`;
+    else if (S.run.started && !S.run.done && i === S.run.current) tick = '<div class="tick busy"></div>';
+    return `<div class="run-row">
+      ${tick}
+      <div style="min-width:0;flex:1;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-weight:590;">${esc(p.name)}</span>
+          <span class="chip ${p.decision === 'draft' ? 'chip-draft' : 'chip-approved'}">${p.decision === 'draft' ? 'Draft' : 'Finalized'}</span>
+          ${p.invNo ? `<span class="mut num" style="font-size:12.5px;">${p.invNo}</span>` : ''}
+        </div>
+        <div class="mut" style="font-size:12.5px;margin-top:1px;">${esc(p.account)}</div>
+        ${p.runState === 'fail' ? `<div class="run-err">${esc(p.error)}</div>` : ''}
+      </div>
+      <span class="num sub">${fmt(p.cur, t.total)}</span>
+      ${p.runState === 'fail' && S.run.done ? `<button class="btn btn-sm btn-ghost" onclick="retryOne('${p.id}')" style="gap:4px;">${ic.retry} Retry</button>` : ''}
+    </div>`;
+  }).join('') || '<div class="card-pad mut">Nothing to create.</div>';
+  renderFooter();
+}
+function createOne(p) {
+  p.invNo = 'INV-' + (S.invSeq++);
+  p.runState = 'ok';
+  const t = pvTotals(p);
+  S.createdInvoices.unshift({
+    no: p.invNo, acct: p.account, proj: p.name, date: 'Jul 12, 2026',
+    amt: t.total, cur: p.cur, st: p.decision === 'draft' ? 'Draft' : 'Unpaid',
+  });
+}
+function startRun() {
+  const items = runItems();
+  S.run.started = true; S.run.done = false; S.run.current = 0;
+  renderSteps(); // lock step nav
+  let failedUsed = false;
+  const next = i => {
+    if (i >= items.length) {
+      S.run.done = true; S.run.current = -1;
+      renderStep4();
+      const fails = items.filter(p => p.runState === 'fail').length;
+      toast(fails ? `Batch finished — ${fails} invoice${fails === 1 ? '' : 's'} failed` : 'All invoices created', fails ? 'err' : undefined);
+      return;
+    }
+    S.run.current = i;
+    renderStep4();
+    setTimeout(() => {
+      const p = items[i];
+      if (PROJ[p.projectId].flag === 'fail' && !failedUsed) {
+        failedUsed = true;
+        p.runState = 'fail';
+        p.error = "Couldn't reach the accounting integration (QuickBooks). The invoice wasn't created.";
+      } else {
+        createOne(p);
+      }
+      next(i + 1);
+    }, 340);
+  };
+  next(0);
+}
+function retryOne(id) {
+  const p = findPv(id);
+  p.runState = 'retrying'; p.error = null;
+  renderStep4();
+  setTimeout(() => {
+    createOne(p);
+    renderStep4();
+    toast(`${p.invNo} created on retry`);
+  }, 700);
+}
+
+/* ================= Summary ================= */
+function renderDone() {
+  const items = runItems();
+  const created = items.filter(p => p.runState === 'ok' && p.decision === 'approved').length;
+  const drafts = items.filter(p => p.runState === 'ok' && p.decision === 'draft').length;
+  const skipped = S.previews.filter(p => p.skipped).length;
+  const failed = items.filter(p => p.runState === 'fail').length;
+  $('done-sub').textContent = `${created + drafts} of ${items.length} invoices created across ${selAccounts().length} accounts.`;
+  const tile = (n, label, color, sub) => `
+    <button class="tile" onclick="closeFlow()">
+      <span class="lbl">${label}</span>
+      <span class="tnum" style="color:${color};">${n}</span>
+      <span class="mut" style="font-size:12px;">${sub}</span>
+      <span class="tlink">View invoices →</span>
+    </button>`;
+  $('done-tiles').innerHTML =
+    tile(created, 'Created', 'var(--success)', 'Finalized and ready to send') +
+    tile(drafts, 'Created as draft', 'var(--blue)', 'Saved as draft invoices') +
+    tile(skipped, 'Skipped', 'var(--warn)', 'No billable items in period') +
+    tile(failed, 'Failed', 'var(--error)', failed ? 'Retry from the previous step' : 'Nothing failed');
+}
+
+/* ================= Init ================= */
+renderHome();
+</script>
+</body>
+</html>
