@@ -461,10 +461,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div id="s2-title" class="ph-title">Permissive Admin</div>
           <span id="s2-badge" class="bdg bdg-def">Default</span>
           <div class="spacer"></div>
-          <button id="s2-cta-btn" class="btn btn-s btn-sm" onclick="openMo('mo-new-pset')">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Duplicate to customize
-          </button>
+          <button id="s2-cta-btn" class="btn btn-s btn-sm" onclick="openMo('mo-new-pset')" style="display:none"></button>
         </div>
       </div>
 
@@ -1274,11 +1271,14 @@ function openPset(key) {
   badge.textContent = isDefault ? 'Default' : 'Custom';
   badge.className = isDefault ? 'bdg bdg-def' : 'bdg bdg-cust';
 
-  // CTA button
+  // CTA button — show Edit only for custom sets
   const ctaBtn = document.getElementById('s2-cta-btn');
-  ctaBtn.innerHTML = isDefault
-    ? '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Duplicate to customize'
-    : '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit';
+  if (isDefault) {
+    ctaBtn.style.display = 'none';
+  } else {
+    ctaBtn.style.display = '';
+    ctaBtn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit';
+  }
 
   // Scope radios
   document.querySelector('input[name="s2-res"][value="' + ps.vis + '"]').checked = true;
