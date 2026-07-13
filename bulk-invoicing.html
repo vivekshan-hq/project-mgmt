@@ -659,7 +659,7 @@ function ensureTaxSel() {
   const anyDefault = selAccounts().some(a => a.tax);
   const src = anyDefault ? 'account' : 'global';
   typesInSel().forEach(t => { if (!S.taxSel[t]) S.taxSel[t] = src; });
-  if (!S.taxSel['exp']) S.taxSel['exp'] = src;
+  S.taxSel['exp'] = 'exempt';
 }
 /* Accounts that have selected projects of a given billing type (or all accounts for expenses) */
 function typeAccounts(t) {
@@ -752,8 +752,7 @@ function renderFooter() {
     act.innerHTML = `<button class="btn btn-sec" onclick="closeFlow()">Cancel</button>
       <button class="btn btn-pri" id="ft-next" ${n ? '' : 'disabled'} onclick="goStep(2)">Continue</button>`;
   } else if (S.step === 2) {
-    const expBlocked = S.rules.exp.enabled ? selAccounts().filter(a => taxResolveFor(a,'exp').kind==='block').length : 0;
-    const blocked = blockedAccounts().length + expBlocked;
+    const blocked = blockedAccounts().length;
     info.innerHTML = blocked && S.gateShown
       ? `<span style="color:var(--error);font-weight:590;">${blocked} account${blocked === 1 ? '' : 's'} blocked by a deactivated tax code</span>`
       : '';
@@ -1071,30 +1070,7 @@ function renderStep2() {
   // Expenses card
   const exp = S.rules.exp, expSrc = S.taxSel['exp'], expOpen = S.s2.open['exp'];
   const expAccts = selAccounts();
-  const expBlockedAccts = S.gateShown ? expAccts.filter(a => taxResolveFor(a, 'exp').kind === 'block') : [];
-  const expGateHtml = expBlockedAccts.length ? `<div class="gate-inline">
-    <div style="display:flex;gap:8px;align-items:flex-start;">
-      <span style="color:var(--error);display:flex;margin-top:1px;">${ic.warn}</span>
-      <div>
-        <span class="h3" style="color:var(--error);">Resolve deactivated tax codes to continue</span>
-        <p class="sub" style="margin-top:2px;font-size:13px;">Pick a replacement code or mark as tax exempt for this batch.</p>
-      </div>
-    </div>
-    ${expBlockedAccts.map(a => {
-      const activeCodes = Object.entries(TAX).filter(([,c]) => c.active);
-      return `<div class="gate-row">
-        <span style="font-weight:590;">${esc(a.name)}</span>
-        <span class="tax-bad">${TAX[taxResolveFor(a,'exp').codeId].n} — deactivated</span>
-        <div class="gr-actions">
-          <div class="sel-wrap"><select class="sel" onchange="if(this.value) resolveGate('${a.id}',this.value)" aria-label="Replacement for ${esc(a.name)}">
-            <option value="">Pick a replacement…</option>
-            ${activeCodes.map(([id,c]) => `<option value="${id}">${c.n}</option>`).join('')}
-          </select></div>
-          <button class="btn btn-ghost" onclick="exemptGate('${a.id}')">Mark tax exempt</button>
-        </div>
-      </div>`;
-    }).join('')}
-  </div>` : '';
+  const expGateHtml = '';
 
   const expCardHtml = `<div class="bt-card ${expOpen ? 'open' : ''}" style="border-style:${exp.enabled?'solid':'dashed'};">
     <div class="bt-head" onclick="toggleBtCard('exp')">
@@ -1104,18 +1080,7 @@ function renderStep2() {
       </label>
       <span class="mut" style="font-size:12.5px;">${exp.enabled ? expAccts.length + ' account' + (expAccts.length===1?'':'s') : 'Excluded from batch'}</span>
       <span style="flex:1;"></span>
-      ${expBlockedAccts.length ? `<span style="color:var(--error);font-size:12.5px;font-weight:590;display:flex;align-items:center;gap:5px;">${ic.warn}Resolve tax issue</span>` : ''}
-      ${exp.enabled ? `<div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;">
-        <div class="sel-wrap"><select class="sel" onchange="setTaxSrc('exp',this.value)" aria-label="Tax for expenses">
-          <option value="global"  ${expSrc==='global'  ?'selected':''}>Global default — ${TAX[GLOBAL_TAX].n}</option>
-          <option value="account" ${expSrc==='account' ?'selected':''}>Account default</option>
-          <option value="exempt"  ${expSrc==='exempt'  ?'selected':''}>Tax exempt</option>
-        </select></div>
-        <div class="info-wrap">
-          <button class="btn-icon btn" style="width:28px;height:28px;color:var(--text-3);" aria-label="Tax resolution details">${IC_INFO}</button>
-          <div class="info-tip">${taxTipHtml('exp')}</div>
-        </div>
-      </div>` : ''}
+      ${exp.enabled ? `<span class="chip chip-skipped" style="font-size:12px;">Tax exempt</span>` : ''}
       <svg class="bt-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
     </div>
     ${expOpen && exp.enabled ? `<div class="bt-body">
@@ -1150,13 +1115,9 @@ function exemptGate(id) { S.acctFix[id] = 'exempt'; renderStep2(); toast(`${ACCT
 
 function tryGenerate() {
   const blocked = blockedAccounts();
-  const blockedExp = S.rules.exp.enabled
-    ? selAccounts().filter(a => taxResolveFor(a, 'exp').kind === 'block')
-    : [];
-  if (blocked.length || blockedExp.length) {
+  if (blocked.length) {
     S.gateShown = true;
     blocked.forEach(({ types }) => types.forEach(t => { S.s2.open[t] = true; }));
-    if (blockedExp.length) S.s2.open['exp'] = true;
     renderStep2();
     return;
   }
