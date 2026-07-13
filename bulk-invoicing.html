@@ -292,7 +292,7 @@
   .lines .rm { visibility: hidden; color: var(--text-3); display: inline-flex; padding: 4px; border-radius: 6px; }
   .lines tr:hover .rm { visibility: visible; }
   .lines .rm:hover { color: var(--error); background: #fdeaea; }
-  .cellinp { width: 90px; height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; text-align: right; font-variant-numeric: tabular-nums; }
+  .cellinp { width: 100%; max-width: 110px; height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; text-align: right; font-variant-numeric: tabular-nums; display: block; margin-left: auto; }
   .cellinp:hover { border-color: var(--line); background: #fff; }
   .cellinp:focus { border-color: var(--blue); background: #fff; outline: none; }
   .cellinp.bad { border-color: var(--error); background: #fff; }
@@ -1365,7 +1365,15 @@ function renderDetail() {
     </div>
     <div style="overflow-x:auto;">
       <table class="grid lines">
-        <thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th>Tax</th><th class="r">Amount</th><th style="width:36px;"></th></tr></thead>
+        <colgroup>
+          <col>
+          <col style="width:84px;">
+          <col style="width:130px;">
+          <col style="width:200px;">
+          <col style="width:116px;">
+          <col style="width:36px;">
+        </colgroup>
+        <thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th>Tax</th><th class="r">Amount</th><th></th></tr></thead>
         <tbody>
           ${p.lines.map((l, i) => {
             const v = lineAmt(l);
