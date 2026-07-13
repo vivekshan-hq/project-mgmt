@@ -593,6 +593,13 @@ const FF_AMT_FIELDS = [
   ['budgeted',     'Budgeted amount'],
   ['invoiceable',  'Invoiceable amount'],
 ];
+const TM_DESC_FIELDS = [
+  ['task_name',  'Task name'],
+  ['task_desc',  'Task description'],
+  ['task_code',  'Task code'],
+  ['phase_name', 'Phase name'],
+  ['milestone',  'Milestone'],
+];
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function fmtD(iso) { const [y, m, d] = iso.split('-'); return `${MON[+m - 1]} ${+d}, ${y}`; }
 function rangeLabel(t) { const r = S.rules[t]; return `${fmtD(r.from)} – ${fmtD(r.to)}`; }
@@ -706,7 +713,7 @@ function renderHome() {
 }
 
 /* ================= Flow chrome ================= */
-const STEP_LABELS = ['Select projects', 'Rules & tax', 'Review previews', 'Create invoices'];
+const STEP_LABELS = ['Select projects', 'Rules & tax', 'Preview', 'Create invoices'];
 function renderSteps() {
   $('steps').innerHTML = STEP_LABELS.map((lbl, i) => {
     const n = i + 1;
@@ -1168,6 +1175,7 @@ function generatePreviews() {
     return {
       id: 'pv-' + p.id, projectId: p.id, accountId: a.id,
       name: p.name, account: a.name, cur: a.cur, type: p.type,
+      descField: p.type === 'tm' ? 'task_name' : null,
       taxCode: res.kind === 'ok' ? res.codeId : null,
       skipped: skip,
       skipReason: skip ? (p.type === 'ff' ? `No tasks completed ${range}` : `No billable items ${range}`) : null,
@@ -1340,6 +1348,12 @@ function renderDetail() {
       <div class="dt-meta sub" style="font-size:13px;">
         ${esc(p.account)} · <span class="chip chip-cur">${p.cur}</span> · ${periodLabel} · ${taxName ? esc(taxName) : 'Tax exempt'}
       </div>
+      ${p.type === 'tm' ? `<div style="display:flex;align-items:center;gap:8px;padding-top:4px;">
+        <span class="lbl" style="white-space:nowrap;">Line item description from</span>
+        <div class="sel-wrap"><select class="sel" onchange="setDescField('${p.id}',this.value)" aria-label="Description field">
+          ${TM_DESC_FIELDS.map(([v,l]) => `<option value="${v}" ${p.descField===v?'selected':''}>${l}</option>`).join('')}
+        </select></div>
+      </div>` : ''}
       ${iss.rate ? `<div class="bar bar-error">${ic.warn}<span><strong>Missing rate.</strong> A line item has hours but no rate. Enter a rate to resolve, or remove the line.</span></div>` : ''}
       ${iss.taxMix ? `<div class="bar bar-error">${ic.warn}<span style="flex:1;"><strong>Inconsistent tax.</strong> Either every line item carries a tax code or none do.</span>
         <span style="display:flex;gap:8px;flex:none;">
@@ -1351,7 +1365,7 @@ function renderDetail() {
     </div>
     <div style="overflow-x:auto;">
       <table class="grid lines">
-        <thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Rate</th><th>Tax</th><th class="r">Amount</th><th style="width:36px;"></th></tr></thead>
+        <thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th>Tax</th><th class="r">Amount</th><th style="width:36px;"></th></tr></thead>
         <tbody>
           ${p.lines.map((l, i) => {
             const v = lineAmt(l);
@@ -1396,6 +1410,7 @@ function renderDetail() {
   </div>`;
 }
 const findPv = id => S.previews.find(x => x.id === id);
+function setDescField(id, v) { findPv(id).descField = v; renderDetail(); }
 function editLine(id, i, k, v) {
   const p = findPv(id);
   const num = v === '' ? null : Math.max(0, +v);
