@@ -509,7 +509,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
               <input type="checkbox" checked id="p-view" disabled>
               <label for="p-view" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
                 Can view projects
-                <span id="proj-scope-pill" class="scope-pill" onclick="openProjScopeModal()">Admin</span>
+                <span id="proj-scope-pill" class="scope-pill" onclick="openProjScopeModal()">Company Restricted</span>
               </label>
             </div>
             <div class="cb-row"><input type="checkbox" checked id="p-overview" disabled><label for="p-overview">Can view project overview</label></div>
@@ -832,14 +832,14 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <label class="radio-opt">
           <input type="radio" name="proj-scope-sel" value="company">
           <div>
-            <div class="radio-opt-label">Admin</div>
+            <div class="radio-opt-label">Company Restricted</div>
             <div class="radio-opt-desc">Can access all projects to which their company is added.</div>
           </div>
         </label>
         <label class="radio-opt">
           <input type="radio" name="proj-scope-sel" value="strict">
           <div>
-            <div class="radio-opt-label">Collaborator</div>
+            <div class="radio-opt-label">Participant</div>
             <div class="radio-opt-desc">Can access only those projects they are invited to.</div>
           </div>
         </label>
@@ -1372,8 +1372,8 @@ function openPset(key) {
 
 /* ── Project scope picker ── */
 const PROJ_SCOPE = {
-  company: { name: 'Admin',        desc: 'All company projects' },
-  strict:  { name: 'Collaborator', desc: 'Invited projects only' }
+  company: { name: 'Company Restricted', desc: 'All company projects' },
+  strict:  { name: 'Participant',        desc: 'Invited projects only' }
 };
 
 function openProjScopeModal() {
