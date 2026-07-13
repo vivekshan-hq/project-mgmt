@@ -242,22 +242,31 @@
   .s1-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 8px; color: var(--text-3); font-size: 13.5px; }
 
   /* ---------- Step 2 ---------- */
-  .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-  .rule-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 12px; }
-  .rule-card .rc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field > label { font-size: 12px; letter-spacing: .32px; font-weight: 600; color: var(--text-3); }
   .daterow { display: flex; gap: 8px; }
   .daterow input { flex: 1; min-width: 0; }
-  .tax-outcome-ok { color: var(--success); font-weight: 590; font-size: 13px; }
-  .tax-outcome-ex { color: var(--text-3); font-size: 13px; }
-  .tax-outcome-bad { color: var(--error); font-weight: 590; font-size: 13px; }
-  .gate {
-    border: 1px solid #f4c8c8; background: #fdf5f5; border-radius: 8px; padding: 16px 20px;
-    display: flex; flex-direction: column; gap: 12px;
+  .bt-card { background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: visible; }
+  .bt-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; border-radius: 8px; }
+  .bt-head:hover { background: var(--bg-soft); }
+  .bt-card.open .bt-head { border-radius: 8px 8px 0 0; }
+  .bt-chev { width: 16px; height: 16px; color: var(--text-3); transition: transform .15s ease; flex: none; }
+  .bt-card.open .bt-chev { transform: rotate(180deg); }
+  .bt-body { padding: 16px 20px; border-top: 1px solid var(--div); display: flex; flex-direction: column; gap: 14px; }
+  .info-wrap { position: relative; display: inline-flex; }
+  .info-tip {
+    position: absolute; right: 0; top: calc(100% + 6px); z-index: 30;
+    background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px;
+    box-shadow: var(--sh4); font-size: 12.5px; line-height: 1.6; width: 260px;
+    pointer-events: none; opacity: 0; transition: opacity .12s ease; white-space: normal;
   }
+  .info-wrap:hover .info-tip { opacity: 1; }
+  .iline { display: flex; align-items: flex-start; gap: 6px; }
+  .iline svg { flex: none; margin-top: 2px; }
+  .gate-inline { border: 1px solid #f4c8c8; background: #fdf5f5; border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
   .gate-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
   .gate-row .gr-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .tax-bad { color: var(--error); font-weight: 590; }
 
   /* ---------- Step 3 ---------- */
   .s3 { display: flex; height: 100%; min-height: 0; }
@@ -415,30 +424,9 @@
       <div class="col">
         <div>
           <div class="h2">Define rules &amp; tax settings</div>
-          <p class="sub" style="margin-top:4px;">One rule per billing type — it applies to every selected project of that type.</p>
+          <p class="sub" style="margin-top:4px;">One card per billing type — settings apply to every selected project of that type.</p>
         </div>
-        <div id="s2-rules" class="rules-grid"></div>
-        <div class="card card-pad">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <div>
-              <div class="h3">Tax settings</div>
-              <p class="sub" style="margin-top:2px;font-size:13px;">Chosen per billing type. Accounts without a resolvable code are treated as tax exempt.</p>
-            </div>
-            <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
-              <div class="sel-wrap"><select class="sel" id="s2-applyall-src" aria-label="Tax source to apply to all">
-                <option value="global">Global default</option>
-                <option value="account">Account default</option>
-                <option value="exempt">Tax exempt</option>
-              </select></div>
-              <button class="btn btn-sec" id="s2-applyall">Apply to all</button>
-            </div>
-          </div>
-          <table class="grid" style="margin-top:12px;">
-            <thead><tr><th>Billing type</th><th>Accounts</th><th>Tax source</th><th>Resolution</th></tr></thead>
-            <tbody id="s2-tax-tbody"></tbody>
-          </table>
-        </div>
-        <div id="s2-gate"></div>
+        <div id="s2-cards" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
     </section>
 
@@ -615,6 +603,7 @@ const S = {
   step: 1, maxStep: 1,
   sel: new Set(),
   s1: { acctQ: '', projQ: '', projType: 'all', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse' },
+  s2: { open: { tm: true, ff: true, sub: true } },
   rules: {
     tm:  { from: '2026-06-12', to: '2026-07-12', group: 'member' },
     ff:  { from: '2026-06-12', to: '2026-07-12' },
@@ -966,111 +955,104 @@ function s1ProjPage(n) { S.s1.projPage = n; renderStep1(); }
 function s1Mode(m) { S.s1.mode = m; S.s1.projQ = ''; S.s1.projType = 'all'; S.s1.projPage = 0; renderStep1(); }
 
 /* ================= Step 2 ================= */
+const RULE_META = {
+  tm:  { title: 'Time & material', chip: 'chip-tm' },
+  ff:  { title: 'Fixed fee',       chip: 'chip-ff' },
+  sub: { title: 'Subscription',    chip: 'chip-sub' },
+};
+const IC_INFO = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="15" height="15"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5V11"/><circle cx="8" cy="5.2" r=".7" fill="currentColor" stroke="none"/></svg>`;
+
+function taxTipHtml(t) {
+  const src = S.taxSel[t];
+  const accts = typeAccounts(t);
+  if (src === 'exempt') return 'No tax code applied to any invoice in this billing type.';
+  if (src === 'global') return `<span style="color:var(--success);font-weight:590;">${TAX[GLOBAL_TAX].n}</span> will be applied to all ${accts.length} account${accts.length===1?'':'s'}.`;
+  let ok=0, ex=0; const bad=[];
+  accts.forEach(a => { const r=taxResolveFor(a,t); if(r.kind==='ok') ok++; else if(r.kind==='exempt') ex++; else bad.push(esc(a.name)); });
+  const lines=[];
+  if (ok)  lines.push(`<div class="iline"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="color:var(--success)"><path d="M3 8.5l3.5 3.5L13 5"/></svg><span style="color:var(--success);font-weight:590;">${ok} account${ok===1?'':'s'} use their account default</span></div>`);
+  if (ex)  lines.push(`<div class="iline"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="color:var(--text-3)"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8h5"/></svg><span style="color:var(--text-3);">${ex} without a default — tax exempt</span></div>`);
+  if (bad.length) lines.push(`<div class="iline"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="color:var(--error)"><path d="M8 2L1.5 13.5h13L8 2z" stroke-linejoin="round"/><path d="M8 6.5V9.5"/></svg><span style="color:var(--error);font-weight:590;">${bad.length} deactivated — resolve below</span></div>`);
+  return lines.join('') || '<span style="color:var(--text-3);">No accounts in this type.</span>';
+}
+
 function renderStep2() {
   const types = typesInSel();
-  const RULE_META = {
-    tm:  { title: 'Time & material', chip: 'chip-tm', desc: 'Uninvoiced time entries' },
-    ff:  { title: 'Fixed fee', chip: 'chip-ff', desc: 'Completed uninvoiced tasks' },
-    sub: { title: 'Subscription', chip: 'chip-sub', desc: 'Scheduled billing periods' },
-  };
-  $('s2-rules').innerHTML = types.map(t => {
-    const m = RULE_META[t], r = S.rules[t];
+  $('s2-cards').innerHTML = types.map(t => {
+    const m = RULE_META[t], r = S.rules[t], src = S.taxSel[t];
     const nProj = selProjects().filter(p => p.type === t).length;
-    return `<div class="rule-card">
-      <div class="rc-head">
-        <span class="chip ${m.chip}">${m.title}</span>
-        <span class="mut" style="font-size:12px;">${nProj} project${nProj === 1 ? '' : 's'}</span>
-      </div>
-      <div class="field">
-        <label>Billing period</label>
-        <div class="daterow">
-          <input class="inp" type="date" value="${r.from}" max="${r.to}" aria-label="${m.title} from date" onchange="setRule('${t}','from',this.value)">
-          <input class="inp" type="date" value="${r.to}" min="${r.from}" aria-label="${m.title} to date" onchange="setRule('${t}','to',this.value)">
+    const isOpen = S.s2.open[t];
+    const blockedForType = S.gateShown && blockedAccounts().filter(b => b.types.includes(t));
+    const hasBlock = blockedForType && blockedForType.length > 0;
+    const activeCodes = Object.entries(TAX).filter(([, c]) => c.active);
+
+    const gateHtml = hasBlock ? `<div class="gate-inline">
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <span style="color:var(--error);display:flex;margin-top:1px;">${ic.warn}</span>
+        <div>
+          <span class="h3" style="color:var(--error);">Resolve deactivated tax codes to continue</span>
+          <p class="sub" style="margin-top:2px;font-size:13px;">Pick a replacement code or mark as tax exempt for this batch.</p>
         </div>
-        <span class="mut" style="font-size:12px;">${t === 'tm' ? 'Bills uninvoiced time logged between these dates.' : t === 'ff' ? 'Bills tasks completed between these dates.' : 'Bills periods that fall between these dates.'}</span>
       </div>
-      ${t === 'tm' ? `<div class="field">
-        <label>Group line items by</label>
-        <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;" onchange="setRule('${t}','group',this.value)" aria-label="${m.title} grouping">
-          ${GROUPS.tm.map(([v, l]) => `<option value="${v}" ${r.group === v ? 'selected' : ''}>${l}</option>`).join('')}
-        </select></div>
-      </div>` : `<p class="mut" style="font-size:12.5px;">${t === 'ff' ? 'Each completed task is billed as its own line item — no grouping.' : 'Line items follow the subscription schedule — no grouping.'}</p>`}
+      ${blockedForType.map(({ a }) => `<div class="gate-row">
+        <span style="font-weight:590;">${esc(a.name)}</span>
+        <span class="tax-bad">${TAX[taxResolveFor(a, t).codeId].n} — deactivated</span>
+        <div class="gr-actions">
+          <div class="sel-wrap"><select class="sel" onchange="if(this.value) resolveGate('${a.id}',this.value)" aria-label="Replacement for ${esc(a.name)}">
+            <option value="">Pick a replacement…</option>
+            ${activeCodes.map(([id, c]) => `<option value="${id}">${c.n}</option>`).join('')}
+          </select></div>
+          <button class="btn btn-ghost" onclick="exemptGate('${a.id}')">Mark tax exempt</button>
+        </div>
+      </div>`).join('')}
+    </div>` : '';
+
+    return `<div class="bt-card ${isOpen ? 'open' : ''}">
+      <div class="bt-head" onclick="toggleBtCard('${t}')">
+        <span class="chip ${m.chip}">${m.title}</span>
+        <span class="mut" style="font-size:12.5px;">${nProj} project${nProj===1?'':'s'}</span>
+        <span style="flex:1;"></span>
+        ${hasBlock ? `<span style="color:var(--error);font-size:12.5px;font-weight:590;display:flex;align-items:center;gap:5px;">${ic.warn}Resolve tax issue</span>` : ''}
+        <div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;">
+          <div class="sel-wrap"><select class="sel" onchange="setTaxSrc('${t}',this.value)" aria-label="Tax for ${m.title}">
+            <option value="global"  ${src==='global'  ?'selected':''}>Global default — ${TAX[GLOBAL_TAX].n}</option>
+            <option value="account" ${src==='account' ?'selected':''}>Account default</option>
+            <option value="exempt"  ${src==='exempt'  ?'selected':''}>Tax exempt</option>
+          </select></div>
+          <div class="info-wrap">
+            <button class="btn-icon btn" style="width:28px;height:28px;color:var(--text-3);" aria-label="Tax resolution details" tabindex="0">
+              ${IC_INFO}
+            </button>
+            <div class="info-tip">${taxTipHtml(t)}</div>
+          </div>
+        </div>
+        <svg class="bt-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
+      </div>
+      ${isOpen ? `<div class="bt-body">
+        <div class="field">
+          <label>Billing period</label>
+          <div class="daterow">
+            <input class="inp" type="date" value="${r.from}" max="${r.to}" aria-label="${m.title} from" onchange="setRule('${t}','from',this.value)">
+            <input class="inp" type="date" value="${r.to}" min="${r.from}" aria-label="${m.title} to" onchange="setRule('${t}','to',this.value)">
+          </div>
+          <span class="mut" style="font-size:12px;">${t==='tm'?'Bills uninvoiced time logged in this range.':t==='ff'?'Bills tasks completed in this range.':'Bills periods that fall within this range.'}</span>
+        </div>
+        ${t==='tm' ? `<div class="field">
+          <label>Group line items by</label>
+          <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;max-width:220px;" onchange="setRule('${t}','group',this.value)" aria-label="Grouping">
+            ${GROUPS.tm.map(([v,l]) => `<option value="${v}" ${r.group===v?'selected':''}>${l}</option>`).join('')}
+          </select></div>
+        </div>` : `<p class="mut" style="font-size:12.5px;">${t==='ff'?'Each completed task becomes its own line item — no grouping.':'Line items follow the subscription schedule — no grouping.'}</p>`}
+        ${gateHtml}
+      </div>` : ''}
     </div>`;
   }).join('');
 
-  $('s2-tax-tbody').innerHTML = types.map(t => {
-    const m = RULE_META[t];
-    const accts = typeAccounts(t);
-    const src = S.taxSel[t];
-    let resHtml;
-    if (src === 'exempt') {
-      resHtml = '<span class="tax-outcome-ex">Tax exempt — no tax code applied</span>';
-    } else if (src === 'global') {
-      resHtml = `<span class="tax-outcome-ok">${TAX[GLOBAL_TAX].n} will be applied to all accounts</span>`;
-    } else {
-      let ok = 0, ex = 0; const bad = [];
-      accts.forEach(a => {
-        const r = taxResolveFor(a, t);
-        if (r.kind === 'ok') ok++; else if (r.kind === 'exempt') ex++; else bad.push(a.name);
-      });
-      const parts = [];
-      if (ok) parts.push(`<span class="tax-outcome-ok">${ok} account${ok === 1 ? '' : 's'} use their default</span>`);
-      if (ex) parts.push(`<span class="tax-outcome-ex">${ex} without a default — tax exempt</span>`);
-      if (bad.length) parts.push(`<span class="tax-outcome-bad">${bad.length} deactivated (${bad.map(esc).join(', ')})</span>`);
-      resHtml = parts.join('<span class="mut"> · </span>') || '<span class="tax-outcome-ex">No accounts</span>';
-    }
-    return `<tr>
-      <td><span class="chip ${m.chip}">${m.title}</span></td>
-      <td class="sub num">${accts.length} account${accts.length === 1 ? '' : 's'}</td>
-      <td>
-        <div class="sel-wrap"><select class="sel" onchange="setTaxSrc('${t}', this.value)" aria-label="Tax source for ${m.title}">
-          <option value="global" ${src === 'global' ? 'selected' : ''}>Global default — ${TAX[GLOBAL_TAX].n}</option>
-          <option value="account" ${src === 'account' ? 'selected' : ''}>Account default (per account)</option>
-          <option value="exempt" ${src === 'exempt' ? 'selected' : ''}>Tax exempt</option>
-        </select></div>
-      </td>
-      <td>${resHtml}</td>
-    </tr>`;
-  }).join('');
-
-  renderGate();
   renderFooter();
 }
+function toggleBtCard(t) { S.s2.open[t] = !S.s2.open[t]; renderStep2(); }
 function setRule(t, k, v) { if (v) S.rules[t][k] = v; renderStep2(); }
 function setTaxSrc(t, v) { S.taxSel[t] = v; renderStep2(); }
-$('s2-applyall').addEventListener('click', () => {
-  const v = $('s2-applyall-src').value;
-  typesInSel().forEach(t => S.taxSel[t] = v);
-  renderStep2();
-  toast('Tax source applied to all billing types', 'info');
-});
-
-function renderGate() {
-  const blocked = blockedAccounts();
-  if (!S.gateShown || !blocked.length) { $('s2-gate').innerHTML = ''; return; }
-  const activeCodes = Object.entries(TAX).filter(([, c]) => c.active);
-  $('s2-gate').innerHTML = `<div class="gate">
-    <div style="display:flex;gap:10px;align-items:flex-start;">
-      <span style="color:var(--error);display:flex;margin-top:1px;">${ic.warn}</span>
-      <div>
-        <div class="h3" style="color:var(--error);">Resolve deactivated tax codes to continue</div>
-        <p class="sub" style="margin-top:2px;font-size:13px;">${blocked.length} account${blocked.length === 1 ? ' references' : 's reference'} a tax code that an admin deactivated. Pick a replacement or mark the account tax exempt for this batch.</p>
-      </div>
-    </div>
-    ${blocked.map(({ a, types }) => `<div class="gate-row">
-      <span style="font-weight:590;">${esc(a.name)}</span>
-      <span class="tax-outcome-bad">${TAX[taxResolveFor(a, types[0]).codeId].n} — deactivated</span>
-      <span style="display:flex;gap:4px;">${types.map(t => `<span class="chip ${TYPE[t].chip}">${TYPE[t].name}</span>`).join('')}</span>
-      <div class="gr-actions">
-        <div class="sel-wrap"><select class="sel" onchange="if(this.value) resolveGate('${a.id}', this.value)" aria-label="Replacement tax code for ${esc(a.name)}">
-          <option value="">Pick a replacement…</option>
-          ${activeCodes.map(([id, c]) => `<option value="${id}">${c.n}</option>`).join('')}
-        </select></div>
-        <button class="btn btn-ghost" onclick="exemptGate('${a.id}')">Mark tax exempt</button>
-      </div>
-    </div>`).join('')}
-  </div>`;
-}
 function resolveGate(id, code) { S.acctFix[id] = code; renderStep2(); toast(`${ACCT[id].name}: ${TAX[code].n} will be used for this batch`); }
 function exemptGate(id) { S.acctFix[id] = 'exempt'; renderStep2(); toast(`${ACCT[id].name} marked tax exempt for this batch`); }
 
@@ -1078,8 +1060,9 @@ function tryGenerate() {
   const blocked = blockedAccounts();
   if (blocked.length) {
     S.gateShown = true;
+    // Open cards that have a block so the gate is visible
+    blocked.forEach(({ types }) => types.forEach(t => { S.s2.open[t] = true; }));
     renderStep2();
-    $('s2-gate').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   S.gateShown = false;
