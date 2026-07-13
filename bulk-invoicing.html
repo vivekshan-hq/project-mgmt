@@ -593,7 +593,7 @@ const FF_AMT_FIELDS = [
   ['budgeted',     'Budgeted amount'],
   ['invoiceable',  'Invoiceable amount'],
 ];
-const TM_DESC_FIELDS = [
+const DESC_FIELDS = [
   ['task_name',  'Task name'],
   ['task_desc',  'Task description'],
   ['task_code',  'Task code'],
@@ -620,7 +620,7 @@ const S = {
   s2: { open: { tm: true, ff: true, sub: true, exp: true } },
   rules: {
     tm:  { from: '2026-06-12', to: '2026-07-12', group: 'member' },
-    ff:  { from: '2026-06-12', to: '2026-07-12', amtField: 'planned_fee' },
+    ff:  { from: '2026-06-12', to: '2026-07-12', amtField: 'planned_fee', descField: 'task_name' },
     sub: { from: '2026-06-12', to: '2026-07-12' },
     exp: { enabled: true, from: '2026-06-12', to: '2026-07-12', group: 'category' },
   },
@@ -1068,6 +1068,13 @@ function renderStep2() {
             ${FF_AMT_FIELDS.map(([v,l]) => `<option value="${v}" ${r.amtField===v?'selected':''}>${l}</option>`).join('')}
           </select></div>
           <span class="mut" style="font-size:12px;">Which task field holds the invoiceable amount for each completed task.</span>
+        </div>
+        <div class="field">
+          <label>Line item description from</label>
+          <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;max-width:220px;" onchange="setRule('${t}','descField',this.value)" aria-label="Description field">
+            ${DESC_FIELDS.map(([v,l]) => `<option value="${v}" ${r.descField===v?'selected':''}>${l}</option>`).join('')}
+          </select></div>
+          <span class="mut" style="font-size:12px;">Which task field to use as the line item description on the invoice.</span>
         </div>` : `<p class="mut" style="font-size:12.5px;">Line items follow the subscription schedule — no grouping.</p>`}
         ${gateHtml}
       </div>` : ''}
@@ -1175,7 +1182,6 @@ function generatePreviews() {
     return {
       id: 'pv-' + p.id, projectId: p.id, accountId: a.id,
       name: p.name, account: a.name, cur: a.cur, type: p.type,
-      descField: p.type === 'ff' ? 'task_name' : null,
       taxCode: res.kind === 'ok' ? res.codeId : null,
       skipped: skip,
       skipReason: skip ? (p.type === 'ff' ? `No tasks completed ${range}` : `No billable items ${range}`) : null,
@@ -1348,12 +1354,6 @@ function renderDetail() {
       <div class="dt-meta sub" style="font-size:13px;">
         ${esc(p.account)} · <span class="chip chip-cur">${p.cur}</span> · ${periodLabel} · ${taxName ? esc(taxName) : 'Tax exempt'}
       </div>
-      ${p.type === 'ff' ? `<div style="display:flex;align-items:center;gap:8px;padding-top:4px;">
-        <span class="lbl" style="white-space:nowrap;">Line item description from</span>
-        <div class="sel-wrap"><select class="sel" onchange="setDescField('${p.id}',this.value)" aria-label="Description field">
-          ${TM_DESC_FIELDS.map(([v,l]) => `<option value="${v}" ${p.descField===v?'selected':''}>${l}</option>`).join('')}
-        </select></div>
-      </div>` : ''}
       ${iss.rate ? `<div class="bar bar-error">${ic.warn}<span><strong>Missing rate.</strong> A line item has hours but no rate. Enter a rate to resolve, or remove the line.</span></div>` : ''}
       ${iss.taxMix ? `<div class="bar bar-error">${ic.warn}<span style="flex:1;"><strong>Inconsistent tax.</strong> Either every line item carries a tax code or none do.</span>
         <span style="display:flex;gap:8px;flex:none;">
@@ -1418,7 +1418,6 @@ function renderDetail() {
   </div>`;
 }
 const findPv = id => S.previews.find(x => x.id === id);
-function setDescField(id, v) { findPv(id).descField = v; renderDetail(); }
 function editLine(id, i, k, v) {
   const p = findPv(id);
   const num = v === '' ? null : Math.max(0, +v);
