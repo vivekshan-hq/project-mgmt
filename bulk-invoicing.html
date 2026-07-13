@@ -862,7 +862,7 @@ function renderStep1() {
           <input class="inp" value="${esc(st.projQ)}" placeholder="Search selected projects" oninput="s1ProjQ(this.value)" style="width:100%;">
         </div>
         <div class="sel-wrap"><select class="sel" onchange="s1ProjType(this.value)" aria-label="Filter by billing type">
-          <option value="all" ${st.projType === 'all' ? 'selected' : ''}>All types</option>
+          <option value="all" ${st.projType === 'all' ? 'selected' : ''}>All billing types</option>
           <option value="tm"  ${st.projType === 'tm'  ? 'selected' : ''}>T&M</option>
           <option value="ff"  ${st.projType === 'ff'  ? 'selected' : ''}>Fixed fee</option>
           <option value="sub" ${st.projType === 'sub' ? 'selected' : ''}>Subscription</option>
@@ -908,16 +908,11 @@ function renderStep1() {
             <input class="inp" value="${esc(st.projQ)}" placeholder="Search projects" oninput="s1ProjQ(this.value)" style="width:200px;">
           </div>
           <div class="sel-wrap"><select class="sel" onchange="s1ProjType(this.value)" aria-label="Filter by billing type">
-            <option value="all" ${st.projType === 'all' ? 'selected' : ''}>All types</option>
+            <option value="all" ${st.projType === 'all' ? 'selected' : ''}>All billing types</option>
             <option value="tm"  ${st.projType === 'tm'  ? 'selected' : ''}>T&M</option>
             <option value="ff"  ${st.projType === 'ff'  ? 'selected' : ''}>Fixed fee</option>
             <option value="sub" ${st.projType === 'sub' ? 'selected' : ''}>Subscription</option>
           </select></div>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;margin-left:4px;">
-            <input type="checkbox" ${allPageSel ? 'checked' : ''} ${pagePjs.length && !allPageSel && pagePjs.some(p => S.sel.has(p.id)) ? 'data-ind="1"' : ''}
-              onchange="togglePageProjs(${JSON.stringify(pagePjs.map(p => p.id))}, this.checked)">
-            Select page
-          </label>
         </div>
         <div class="s1-proj-scroll">${rows}</div>
         <div class="s1-right-foot">
