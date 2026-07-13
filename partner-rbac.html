@@ -795,7 +795,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 <div class="mo-c" id="mo-proj-scope" onclick="if(event.target===this)closeMo('mo-proj-scope')">
   <div class="mo-c-panel">
     <div class="mo-hd">
-      <div class="mo-title">Project scope</div>
+      <div class="mo-title">Permissions</div>
       <button class="mo-close" onclick="closeMo('mo-proj-scope')">×</button>
     </div>
     <div class="mo-body">
@@ -803,15 +803,15 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
         <label class="radio-opt">
           <input type="radio" name="proj-scope-sel" value="company">
           <div>
-            <div class="radio-opt-label">Company restricted</div>
-            <div class="radio-opt-desc">Can view all projects where their partner company has been added.</div>
+            <div class="radio-opt-label">Admin</div>
+            <div class="radio-opt-desc">Can access all projects to which their company is added.</div>
           </div>
         </label>
         <label class="radio-opt">
           <input type="radio" name="proj-scope-sel" value="strict">
           <div>
-            <div class="radio-opt-label">Strict participant</div>
-            <div class="radio-opt-desc">Must be individually added to each project to gain access.</div>
+            <div class="radio-opt-label">Collaborator</div>
+            <div class="radio-opt-desc">Can access only those projects they are invited to.</div>
           </div>
         </label>
       </div>
@@ -1333,8 +1333,8 @@ function openPset(key) {
 
 /* ── Project scope picker ── */
 const PROJ_SCOPE = {
-  company: { name: 'Company restricted', desc: 'All company projects' },
-  strict:  { name: 'Strict participant',  desc: 'Added individually' }
+  company: { name: 'Admin',        desc: 'All company projects' },
+  strict:  { name: 'Collaborator', desc: 'Invited projects only' }
 };
 
 function openProjScopeModal() {
