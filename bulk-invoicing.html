@@ -584,8 +584,15 @@ const SUB_PLANS = ['Gold support plan', 'Silver support plan', 'Platinum support
 const SUB_MONTHS = ['Jun 2026', 'Jul 2026'];
 
 const GROUPS = {
-  tm: [['member', 'Team member'], ['role', 'Role'], ['phase', 'Phase'], ['task', 'Task'], ['date', 'Date (weekly)']],
+  tm:  [['member', 'Team member'], ['role', 'Role'], ['phase', 'Phase'], ['task', 'Task'], ['date', 'Date (weekly)']],
+  exp: [['category', 'Expense category'], ['vendor', 'Vendor'], ['phase', 'Project phase'], ['date', 'Date (weekly)'], ['none', 'No grouping']],
 };
+const FF_AMT_FIELDS = [
+  ['planned_fee',  'Planned fee'],
+  ['actual_fee',   'Actual fee'],
+  ['budgeted',     'Budgeted amount'],
+  ['invoiceable',  'Invoiceable amount'],
+];
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function fmtD(iso) { const [y, m, d] = iso.split('-'); return `${MON[+m - 1]} ${+d}, ${y}`; }
 function rangeLabel(t) { const r = S.rules[t]; return `${fmtD(r.from)} – ${fmtD(r.to)}`; }
@@ -603,11 +610,12 @@ const S = {
   step: 1, maxStep: 1,
   sel: new Set(),
   s1: { acctQ: '', projQ: '', projType: 'all', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse' },
-  s2: { open: { tm: true, ff: true, sub: true } },
+  s2: { open: { tm: true, ff: true, sub: true, exp: true } },
   rules: {
     tm:  { from: '2026-06-12', to: '2026-07-12', group: 'member' },
-    ff:  { from: '2026-06-12', to: '2026-07-12' },
+    ff:  { from: '2026-06-12', to: '2026-07-12', amtField: 'planned_fee' },
     sub: { from: '2026-06-12', to: '2026-07-12' },
+    exp: { enabled: true, from: '2026-06-12', to: '2026-07-12', group: 'category' },
   },
   taxSel: {},   // billing type -> global | account | exempt
   acctFix: {},  // accountId -> 'exempt' | replacement tax code id (gate resolution)
@@ -649,10 +657,15 @@ const typesInSel = () => ['tm', 'ff', 'sub'].filter(t => selProjects().some(p =>
 /* Smart pre-selection per billing type: account default if any selected account has one, else global */
 function ensureTaxSel() {
   const anyDefault = selAccounts().some(a => a.tax);
-  typesInSel().forEach(t => { if (!S.taxSel[t]) S.taxSel[t] = anyDefault ? 'account' : 'global'; });
+  const src = anyDefault ? 'account' : 'global';
+  typesInSel().forEach(t => { if (!S.taxSel[t]) S.taxSel[t] = src; });
+  if (!S.taxSel['exp']) S.taxSel['exp'] = src;
 }
-/* Accounts that have selected projects of a given billing type */
-function typeAccounts(t) { return selAccounts().filter(a => selProjects().some(p => p.accountId === a.id && p.type === t)); }
+/* Accounts that have selected projects of a given billing type (or all accounts for expenses) */
+function typeAccounts(t) {
+  if (t === 'exp') return selAccounts();
+  return selAccounts().filter(a => selProjects().some(p => p.accountId === a.id && p.type === t));
+}
 /* Resolve tax for one account under one billing type's source → {kind: ok|exempt|block, codeId?} */
 function taxResolveFor(a, t) {
   const src = S.taxSel[t];
@@ -739,7 +752,8 @@ function renderFooter() {
     act.innerHTML = `<button class="btn btn-sec" onclick="closeFlow()">Cancel</button>
       <button class="btn btn-pri" id="ft-next" ${n ? '' : 'disabled'} onclick="goStep(2)">Continue</button>`;
   } else if (S.step === 2) {
-    const blocked = blockedAccounts().length;
+    const expBlocked = S.rules.exp.enabled ? selAccounts().filter(a => taxResolveFor(a,'exp').kind==='block').length : 0;
+    const blocked = blockedAccounts().length + expBlocked;
     info.innerHTML = blocked && S.gateShown
       ? `<span style="color:var(--error);font-weight:590;">${blocked} account${blocked === 1 ? '' : 's'} blocked by a deactivated tax code</span>`
       : '';
@@ -1042,26 +1056,107 @@ function renderStep2() {
           <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;max-width:220px;" onchange="setRule('${t}','group',this.value)" aria-label="Grouping">
             ${GROUPS.tm.map(([v,l]) => `<option value="${v}" ${r.group===v?'selected':''}>${l}</option>`).join('')}
           </select></div>
-        </div>` : `<p class="mut" style="font-size:12.5px;">${t==='ff'?'Each completed task becomes its own line item — no grouping.':'Line items follow the subscription schedule — no grouping.'}</p>`}
+        </div>` : t==='ff' ? `<div class="field">
+          <label>Amount from</label>
+          <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;max-width:220px;" onchange="setRule('${t}','amtField',this.value)" aria-label="Amount field">
+            ${FF_AMT_FIELDS.map(([v,l]) => `<option value="${v}" ${r.amtField===v?'selected':''}>${l}</option>`).join('')}
+          </select></div>
+          <span class="mut" style="font-size:12px;">Which task field holds the invoiceable amount for each completed task.</span>
+        </div>` : `<p class="mut" style="font-size:12.5px;">Line items follow the subscription schedule — no grouping.</p>`}
         ${gateHtml}
       </div>` : ''}
     </div>`;
   }).join('');
 
+  // Expenses card
+  const exp = S.rules.exp, expSrc = S.taxSel['exp'], expOpen = S.s2.open['exp'];
+  const expAccts = selAccounts();
+  const expBlockedAccts = S.gateShown ? expAccts.filter(a => taxResolveFor(a, 'exp').kind === 'block') : [];
+  const expGateHtml = expBlockedAccts.length ? `<div class="gate-inline">
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+      <span style="color:var(--error);display:flex;margin-top:1px;">${ic.warn}</span>
+      <div>
+        <span class="h3" style="color:var(--error);">Resolve deactivated tax codes to continue</span>
+        <p class="sub" style="margin-top:2px;font-size:13px;">Pick a replacement code or mark as tax exempt for this batch.</p>
+      </div>
+    </div>
+    ${expBlockedAccts.map(a => {
+      const activeCodes = Object.entries(TAX).filter(([,c]) => c.active);
+      return `<div class="gate-row">
+        <span style="font-weight:590;">${esc(a.name)}</span>
+        <span class="tax-bad">${TAX[taxResolveFor(a,'exp').codeId].n} — deactivated</span>
+        <div class="gr-actions">
+          <div class="sel-wrap"><select class="sel" onchange="if(this.value) resolveGate('${a.id}',this.value)" aria-label="Replacement for ${esc(a.name)}">
+            <option value="">Pick a replacement…</option>
+            ${activeCodes.map(([id,c]) => `<option value="${id}">${c.n}</option>`).join('')}
+          </select></div>
+          <button class="btn btn-ghost" onclick="exemptGate('${a.id}')">Mark tax exempt</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>` : '';
+
+  const expCardHtml = `<div class="bt-card ${expOpen ? 'open' : ''}" style="border-style:${exp.enabled?'solid':'dashed'};">
+    <div class="bt-head" onclick="toggleBtCard('exp')">
+      <label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:7px;cursor:pointer;">
+        <input type="checkbox" ${exp.enabled?'checked':''} onchange="setExpEnabled(this.checked)" aria-label="Include expenses">
+        <span class="chip" style="background:#f0f0f0;color:var(--text-2);">Expenses</span>
+      </label>
+      <span class="mut" style="font-size:12.5px;">${exp.enabled ? expAccts.length + ' account' + (expAccts.length===1?'':'s') : 'Excluded from batch'}</span>
+      <span style="flex:1;"></span>
+      ${expBlockedAccts.length ? `<span style="color:var(--error);font-size:12.5px;font-weight:590;display:flex;align-items:center;gap:5px;">${ic.warn}Resolve tax issue</span>` : ''}
+      ${exp.enabled ? `<div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;">
+        <div class="sel-wrap"><select class="sel" onchange="setTaxSrc('exp',this.value)" aria-label="Tax for expenses">
+          <option value="global"  ${expSrc==='global'  ?'selected':''}>Global default — ${TAX[GLOBAL_TAX].n}</option>
+          <option value="account" ${expSrc==='account' ?'selected':''}>Account default</option>
+          <option value="exempt"  ${expSrc==='exempt'  ?'selected':''}>Tax exempt</option>
+        </select></div>
+        <div class="info-wrap">
+          <button class="btn-icon btn" style="width:28px;height:28px;color:var(--text-3);" aria-label="Tax resolution details">${IC_INFO}</button>
+          <div class="info-tip">${taxTipHtml('exp')}</div>
+        </div>
+      </div>` : ''}
+      <svg class="bt-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
+    </div>
+    ${expOpen && exp.enabled ? `<div class="bt-body">
+      <div class="field">
+        <label>Billing period</label>
+        <div class="daterow">
+          <input class="inp" type="date" value="${exp.from}" max="${exp.to}" aria-label="Expenses from" onchange="setExpRule('from',this.value)">
+          <input class="inp" type="date" value="${exp.to}" min="${exp.from}" aria-label="Expenses to" onchange="setExpRule('to',this.value)">
+        </div>
+        <span class="mut" style="font-size:12px;">Bills all approved expenses recorded in this date range.</span>
+      </div>
+      <div class="field">
+        <label>Group line items by</label>
+        <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;max-width:220px;" onchange="setExpRule('group',this.value)" aria-label="Expense grouping">
+          ${GROUPS.exp.map(([v,l]) => `<option value="${v}" ${exp.group===v?'selected':''}>${l}</option>`).join('')}
+        </select></div>
+      </div>
+      ${expGateHtml}
+    </div>` : ''}
+  </div>`;
+
+  $('s2-cards').innerHTML += expCardHtml;
   renderFooter();
 }
 function toggleBtCard(t) { S.s2.open[t] = !S.s2.open[t]; renderStep2(); }
 function setRule(t, k, v) { if (v) S.rules[t][k] = v; renderStep2(); }
+function setExpRule(k, v) { if (v) S.rules.exp[k] = v; renderStep2(); }
+function setExpEnabled(on) { S.rules.exp.enabled = on; renderStep2(); }
 function setTaxSrc(t, v) { S.taxSel[t] = v; renderStep2(); }
 function resolveGate(id, code) { S.acctFix[id] = code; renderStep2(); toast(`${ACCT[id].name}: ${TAX[code].n} will be used for this batch`); }
 function exemptGate(id) { S.acctFix[id] = 'exempt'; renderStep2(); toast(`${ACCT[id].name} marked tax exempt for this batch`); }
 
 function tryGenerate() {
   const blocked = blockedAccounts();
-  if (blocked.length) {
+  const blockedExp = S.rules.exp.enabled
+    ? selAccounts().filter(a => taxResolveFor(a, 'exp').kind === 'block')
+    : [];
+  if (blocked.length || blockedExp.length) {
     S.gateShown = true;
-    // Open cards that have a block so the gate is visible
     blocked.forEach(({ types }) => types.forEach(t => { S.s2.open[t] = true; }));
+    if (blockedExp.length) S.s2.open['exp'] = true;
     renderStep2();
     return;
   }
