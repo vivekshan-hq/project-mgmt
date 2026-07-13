@@ -1175,7 +1175,7 @@ function generatePreviews() {
     return {
       id: 'pv-' + p.id, projectId: p.id, accountId: a.id,
       name: p.name, account: a.name, cur: a.cur, type: p.type,
-      descField: p.type === 'tm' ? 'task_name' : null,
+      descField: p.type === 'ff' ? 'task_name' : null,
       taxCode: res.kind === 'ok' ? res.codeId : null,
       skipped: skip,
       skipReason: skip ? (p.type === 'ff' ? `No tasks completed ${range}` : `No billable items ${range}`) : null,
@@ -1348,7 +1348,7 @@ function renderDetail() {
       <div class="dt-meta sub" style="font-size:13px;">
         ${esc(p.account)} · <span class="chip chip-cur">${p.cur}</span> · ${periodLabel} · ${taxName ? esc(taxName) : 'Tax exempt'}
       </div>
-      ${p.type === 'tm' ? `<div style="display:flex;align-items:center;gap:8px;padding-top:4px;">
+      ${p.type === 'ff' ? `<div style="display:flex;align-items:center;gap:8px;padding-top:4px;">
         <span class="lbl" style="white-space:nowrap;">Line item description from</span>
         <div class="sel-wrap"><select class="sel" onchange="setDescField('${p.id}',this.value)" aria-label="Description field">
           ${TM_DESC_FIELDS.map(([v,l]) => `<option value="${v}" ${p.descField===v?'selected':''}>${l}</option>`).join('')}
