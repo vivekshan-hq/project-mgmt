@@ -552,6 +552,13 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             </div>
             <div class="cb-row"><input type="checkbox" checked id="t-view" disabled><label for="t-view">Can view tasks</label></div>
             <div class="cb-row"><input type="checkbox" checked id="t-create" disabled><label for="t-create">Can create tasks</label></div>
+            <div class="cb-child">
+              <div class="cb-row"><input type="checkbox" checked id="t-create-vis" disabled><label for="t-create-vis">Visibility</label></div>
+              <div class="cb-child">
+                <div class="cb-row"><label style="display:flex;align-items:center;gap:8px;cursor:default"><input type="radio" name="t-cvis" value="both" checked disabled style="accent-color:var(--accent)">Private + Shared</label></div>
+                <div class="cb-row"><label style="display:flex;align-items:center;gap:8px;cursor:default"><input type="radio" name="t-cvis" value="shared" disabled style="accent-color:var(--accent)">Shared</label></div>
+              </div>
+            </div>
             <div class="cb-row"><input type="checkbox" checked id="t-edit" disabled><label for="t-edit">Can edit tasks</label></div>
             <div class="cb-child">
               <div class="cb-row"><input type="checkbox" checked id="t-assignee" disabled><label for="t-assignee">Can edit assignee</label></div>
@@ -585,6 +592,13 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="ps-block-hd"><span class="ps-block-title">Files and Folders</span></div>
             <div class="cb-row"><input type="checkbox" checked id="f-view" disabled><label for="f-view">Can view files</label></div>
             <div class="cb-row"><input type="checkbox" checked id="f-upload" disabled><label for="f-upload">Can upload files</label></div>
+            <div class="cb-child">
+              <div class="cb-row"><input type="checkbox" checked id="f-upload-vis" disabled><label for="f-upload-vis">Visibility</label></div>
+              <div class="cb-child">
+                <div class="cb-row"><label style="display:flex;align-items:center;gap:8px;cursor:default"><input type="radio" name="f-uvis" value="both" checked disabled style="accent-color:var(--accent)">Private + Shared</label></div>
+                <div class="cb-row"><label style="display:flex;align-items:center;gap:8px;cursor:default"><input type="radio" name="f-uvis" value="shared" disabled style="accent-color:var(--accent)">Shared</label></div>
+              </div>
+            </div>
             <div class="cb-row"><input type="checkbox" checked id="f-del" disabled><label for="f-del">Can delete files</label></div>
           </div>
 
@@ -1193,9 +1207,16 @@ function setResScope(val) {
     notice.style.display = 'none';
     tPrivate.style.display = 'flex';
   }
+  const scopeVal = val === 'shared' ? 'shared' : 'both';
   // Phase visibility radio mirrors access scope
-  const phRadio = document.querySelector('input[name="ph-vis-scope"][value="' + (val === 'shared' ? 'shared' : 'both') + '"]');
+  const phRadio = document.querySelector('input[name="ph-vis-scope"][value="' + scopeVal + '"]');
   if (phRadio) phRadio.checked = true;
+  // Task create visibility mirrors access scope
+  const tCvisRadio = document.querySelector('input[name="t-cvis"][value="' + scopeVal + '"]');
+  if (tCvisRadio) tCvisRadio.checked = true;
+  // File upload visibility mirrors access scope
+  const fUvisRadio = document.querySelector('input[name="f-uvis"][value="' + scopeVal + '"]');
+  if (fUvisRadio) fUvisRadio.checked = true;
 }
 
 /* ── Multi-select dropdown ── */
