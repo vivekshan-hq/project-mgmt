@@ -509,7 +509,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
               <input type="checkbox" checked id="p-view" disabled>
               <label for="p-view" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
                 Can view projects
-                <span id="proj-scope-pill" class="scope-pill" onclick="openProjScopeModal()">Company restricted · All company projects</span>
+                <span id="proj-scope-pill" class="scope-pill" onclick="openProjScopeModal()">Admin</span>
               </label>
             </div>
             <div class="cb-row"><input type="checkbox" checked id="p-overview" disabled><label for="p-overview">Can view project overview</label></div>
@@ -1319,7 +1319,7 @@ function openPset(key) {
   if (pill) {
     pill.dataset.val = ps.proj;
     const s = PROJ_SCOPE[ps.proj];
-    pill.textContent = s.name + ' · ' + s.desc;
+    pill.textContent = s.name;
   }
 
   // Checkboxes
@@ -1350,7 +1350,7 @@ function saveProjScope() {
   const pill = document.getElementById('proj-scope-pill');
   pill.dataset.val = sel.value;
   const s = PROJ_SCOPE[sel.value];
-  pill.textContent = s.name + ' · ' + s.desc;
+  pill.textContent = s.name;
   document.getElementById('mo-proj-scope').classList.remove('on');
 }
 
