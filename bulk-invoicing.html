@@ -145,28 +145,54 @@
 
   /* ---------- Home (Invoicing page) ---------- */
   .shell { display: flex; height: 100vh; }
-  .rail { width: 48px; background: var(--bg-rail); flex: none; display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 2px; }
-  .rail .ritem { width: 48px; height: 38px; display: flex; align-items: center; justify-content: center; }
-  .rail .ric { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text-3); }
-  .rail .ritem.on .ric { background: #fff; box-shadow: var(--sh2); border-radius: 8px; color: var(--btn-ink); }
-  .rail svg { width: 18px; height: 18px; }
+  .rail { width: 44px; background: #fff; border-right: 1px solid var(--div); flex: none; display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 1px; }
+  .rail .ritem { width: 44px; height: 36px; display: flex; align-items: center; justify-content: center; }
+  .rail .ric { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8d8d8d; }
+  .rail .ritem.on .ric { background: #e8f0fe; color: var(--blue); }
+  .rail svg { width: 17px; height: 17px; }
+  .rail-sep { width: 24px; height: 1px; background: var(--div); margin: 4px 0; }
+  .rail-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--btn-ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; }
   .main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-  .pg-head { padding: 16px 16px 0 24px; border-bottom: 1px solid var(--div); }
-  .pg-head-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 12px; }
-  .tabs { display: flex; gap: 4px; }
-  .tab { height: 40px; padding: 0 12px; font-size: 14px; color: var(--text-2); border-bottom: 2px solid transparent; }
+  .pg-head { padding: 0 20px 0 20px; border-bottom: 1px solid var(--div); flex: none; }
+  .pg-title-row { display: flex; align-items: center; gap: 8px; padding: 14px 0 10px; }
+  .pg-title-row svg { color: var(--text-2); }
+  .tabs { display: flex; gap: 0; }
+  .tab { height: 38px; padding: 0 14px; font-size: 13.5px; color: var(--text-2); border-bottom: 2px solid transparent; }
   .tab.on { color: var(--blue); border-bottom-color: var(--blue); font-weight: 590; }
-  .pg-body { flex: 1; overflow: auto; padding: 16px 24px 48px; }
-  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .pg-toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(--div); flex: none; background: #fff; }
+  .tb-btn { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 6px; font-size: 13px; color: var(--text-2); }
+  .tb-btn:hover { background: var(--bg-soft); }
+  .tb-btn svg { width: 14px; height: 14px; flex: none; }
+  .tb-div { width: 1px; height: 16px; background: var(--line); margin: 0 2px; }
+  .pg-summary { display: flex; gap: 0; border-bottom: 1px solid var(--div); flex: none; }
+  .sum-left { padding: 16px 20px; min-width: 260px; border-right: 1px solid var(--div); }
+  .sum-big { font-size: 26px; font-weight: 600; letter-spacing: -.3px; font-variant-numeric: tabular-nums; margin: 4px 0 10px; }
+  .sum-row { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; color: var(--text-2); margin-bottom: 3px; }
+  .sum-row span:last-child { font-variant-numeric: tabular-nums; font-weight: 500; }
+  .sum-right { flex: 1; padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .aging-heads { display: flex; gap: 0; }
+  .aging-col { flex: 1; min-width: 0; }
+  .aging-label { font-size: 11.5px; color: var(--text-3); letter-spacing: .2px; margin-bottom: 2px; }
+  .aging-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+  .aging-amt { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .aging-sub { font-size: 11.5px; color: var(--text-3); }
+  .aging-bar { display: flex; height: 5px; border-radius: 3px; overflow: hidden; gap: 1px; }
+  .aging-bar > div { border-radius: 2px; }
+  .pg-body { flex: 1; overflow: auto; }
 
   table.grid { width: 100%; border-collapse: collapse; }
   table.grid th {
-    text-align: left; font-size: 12px; letter-spacing: .32px; font-weight: 600; color: var(--text-3);
-    padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap;
+    text-align: left; font-size: 12px; letter-spacing: .2px; font-weight: 600; color: var(--text-3);
+    padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; background: #fff; position: sticky; top: 0; z-index: 2;
   }
-  table.grid td { padding: 11px 12px; border-bottom: 1px solid var(--div); font-size: 14px; }
+  table.grid td { padding: 10px 12px; border-bottom: 1px solid var(--div); font-size: 13.5px; }
   table.grid tr:hover td { background: var(--bg-soft); }
   td.r, th.r { text-align: right; }
+  .acct-av { width: 24px; height: 24px; border-radius: 50%; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; vertical-align: middle; margin-right: 7px; }
+  .chip-inv-draft   { background: #f0f0f0; color: #525252; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 590; display: inline-block; }
+  .chip-inv-review  { background: #fff3e0; color: #ad5b00; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 590; display: inline-block; }
+  .chip-inv-sent    { background: #e8f0fe; color: #0f62fe; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 590; display: inline-block; }
+  .chip-inv-paid    { background: #e6f4ea; color: #1a7f37; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 590; display: inline-block; }
 
   /* ---------- Flow chrome ---------- */
   .flow { display: flex; flex-direction: column; height: 100vh; background: var(--bg-soft); }
@@ -353,42 +379,112 @@
 <!-- ============ INVOICING PAGE (entry) ============ -->
 <div id="view-home" class="shell">
   <nav class="rail" aria-label="Main navigation">
+    <div class="ritem" style="margin-bottom:6px;"><div class="ric" style="background:var(--btn-ink);border-radius:6px;"><svg viewBox="0 0 16 16" fill="none" stroke-width="0" width="18" height="18"><text y="13" font-size="13" fill="#fff" font-weight="700" font-family="sans-serif">A</text></svg></div></div>
+    <div class="rail-sep"></div>
+    <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg></div></div>
     <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6l6-4 6 4v7a1 1 0 01-1 1H3a1 1 0 01-1-1V6z"/></svg></div></div>
     <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg></div></div>
-    <div class="ritem on"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h10v12l-2-1.2L9 14l-2-1.2L5 14l-2-1.2V2z"/><path d="M5.5 5.5h5M5.5 8h5"/></svg></div></div>
     <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M2.5 13.5c.8-2.6 3-4 5.5-4s4.7 1.4 5.5 4"/></svg></div></div>
+    <div class="ritem on"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h10v12l-2-1.2L9 14l-2-1.2L5 14l-2-1.2V2z"/><path d="M5.5 5.5h5M5.5 8h5"/></svg></div></div>
     <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13.5V9M6 13.5V5.5M10 13.5V7.5M14 13.5V3"/></svg></div></div>
+    <div style="flex:1;"></div>
+    <div class="rail-sep"></div>
+    <div class="ritem"><div class="ric"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5A6.5 6.5 0 118 14.5"/><path d="M8 4.5v3.8l2.5 1.5"/></svg></div></div>
+    <div class="ritem" style="margin-bottom:6px;"><div class="rail-avatar">VS</div></div>
   </nav>
   <div class="main">
     <div class="pg-head">
-      <div class="pg-head-row">
-        <span class="h1">Invoicing</span>
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-sec">New invoice</button>
-          <button class="btn btn-pri" id="cta-bulk">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4.5h7M2.5 8h7M2.5 11.5h4"/><path d="M12 6.5v5M9.5 9H14.5" stroke-linecap="round"/></svg>
+      <div class="pg-title-row">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M3 2h10v12l-2-1.2L9 14l-2-1.2L5 14l-2-1.2V2z"/><path d="M5.5 5.5h5M5.5 8h5"/></svg>
+        <span class="h1" style="font-size:18px;">Invoices</span>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-ghost" style="height:32px;gap:6px;" id="cta-bulk">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M2.5 4.5h7M2.5 8h7M2.5 11.5h4"/><path d="M12 6.5v5M9.5 9H14.5" stroke-linecap="round"/></svg>
             Create bulk invoices
+          </button>
+          <button class="btn btn-pri" style="gap:5px;">
+            New invoice
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M8 3v10M3 8h10"/></svg>
           </button>
         </div>
       </div>
       <div class="tabs">
         <button class="tab on">Invoices</button>
-        <button class="tab">Payments</button>
-        <button class="tab">Reports</button>
-        <button class="tab">Settings</button>
+        <button class="tab">Credit notes</button>
+      </div>
+    </div>
+    <div class="pg-toolbar">
+      <button class="tb-btn">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+        All views
+      </button>
+      <div class="tb-div"></div>
+      <button class="tb-btn">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
+        Filter
+      </button>
+      <button class="tb-btn">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h3M2 8h5M2 11h3"/><path d="M7 5h7M8 8h6M7 11h7"/></svg>
+        Group by: <span style="color:var(--text-1);font-weight:590;">None</span>
+      </button>
+      <div style="flex:1;"></div>
+      <button class="btn-icon btn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg></button>
+      <button class="btn-icon btn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg></button>
+      <button class="btn-icon btn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3M2 13h12"/></svg></button>
+    </div>
+    <div class="pg-summary">
+      <div class="sum-left">
+        <div class="lbl">Total invoiced</div>
+        <div class="sum-big" id="sum-total">USD 0</div>
+        <div class="sum-row"><span>Total paid</span><span id="sum-paid">USD 0</span></div>
+        <div class="sum-row"><span>Total outstanding</span><span id="sum-out">USD 0</span></div>
+      </div>
+      <div class="sum-right">
+        <div class="aging-heads">
+          <div class="aging-col">
+            <div class="aging-label"><span class="aging-dot" style="background:#1192e8;"></span>Current</div>
+            <div class="aging-amt">USD 4.37M</div>
+          </div>
+          <div class="aging-col">
+            <div class="aging-label" style="color:var(--text-2);font-weight:590;">Overdue</div>
+          </div>
+          <div class="aging-col">
+            <div class="aging-label"><span class="aging-dot" style="background:#f0a800;"></span>USD 14.13M</div>
+            <div class="aging-sub">1 – 15 days</div>
+          </div>
+          <div class="aging-col">
+            <div class="aging-label"><span class="aging-dot" style="background:#e67700;"></span>USD 220</div>
+            <div class="aging-sub">16 – 30 days</div>
+          </div>
+          <div class="aging-col">
+            <div class="aging-label"><span class="aging-dot" style="background:#d44800;"></span>USD 110</div>
+            <div class="aging-sub">31 – 45 days</div>
+          </div>
+          <div class="aging-col">
+            <div class="aging-label"><span class="aging-dot" style="background:#da1e28;"></span>USD 1.41M</div>
+            <div class="aging-sub">45+ days</div>
+          </div>
+        </div>
+        <div class="aging-bar">
+          <div style="width:21.5%;background:#1192e8;"></div>
+          <div style="width:69.8%;background:#f0a800;"></div>
+          <div style="width:0.5%;background:#e67700;"></div>
+          <div style="width:0.2%;background:#d44800;"></div>
+          <div style="width:8%;background:#da1e28;"></div>
+        </div>
       </div>
     </div>
     <div class="pg-body">
-      <div class="toolbar">
-        <div class="search">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
-          <input class="inp" placeholder="Search invoices" aria-label="Search invoices">
-        </div>
-        <div class="sel-wrap"><select class="sel" aria-label="Filter by status"><option>All statuses</option><option>Draft</option><option>Unpaid</option><option>Paid</option></select></div>
-      </div>
       <table class="grid" id="inv-table">
         <thead><tr>
-          <th>Invoice</th><th>Account</th><th>Project</th><th>Issue date</th><th class="r">Amount</th><th>Status</th>
+          <th style="width:120px;">Invoice status</th>
+          <th>Invoice number</th>
+          <th>Amount</th>
+          <th>Account</th>
+          <th>Project</th>
+          <th>Issue date</th>
+          <th>Due date</th>
+          <th>Payment status</th>
         </tr></thead>
         <tbody id="inv-tbody"></tbody>
       </table>
@@ -604,12 +700,17 @@ const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct
 function fmtD(iso) { const [y, m, d] = iso.split('-'); return `${MON[+m - 1]} ${+d}, ${y}`; }
 function rangeLabel(t) { const r = S.rules[t]; return `${fmtD(r.from)} – ${fmtD(r.to)}`; }
 
+// [no, acct, proj, issueDate, dueDate, amt, cur, invStatus, payStatus]
+// invStatus: draft | review | sent | paid
+// payStatus: display string
 const EXISTING_INVOICES = [
-  ['INV-2041', 'Crestline Bank', 'Core banking rollout', 'Jul 3, 2026', 18400, 'USD', 'Paid'],
-  ['INV-2042', 'Atlas Logistics', 'Fleet tracking implementation', 'Jul 5, 2026', 1184000, 'INR', 'Unpaid'],
-  ['INV-2043', 'Helios Energy', 'Grid analytics implementation', 'Jul 8, 2026', 12300, 'EUR', 'Unpaid'],
-  ['INV-2044', 'Solstice Media', 'CMS migration', 'Jul 9, 2026', 6750, 'GBP', 'Draft'],
-  ['INV-2045', 'Juniper Health', 'Patient portal onboarding', 'Jul 10, 2026', 9200, 'USD', 'Paid'],
+  ['INV-2041', 'Crestline Bank',   'Core banking rollout',         'Jul 3, 2026',  'Jul 17, 2026', 18400,   'USD', 'paid',   'Paid'],
+  ['INV-2042', 'Atlas Logistics',  'Fleet tracking implementation', 'Jul 5, 2026',  'Aug 4, 2026',  1184000, 'INR', 'sent',   'Pending'],
+  ['INV-2043', 'Helios Energy',    'Grid analytics implementation', 'Jul 8, 2026',  'Aug 7, 2026',  12300,   'EUR', 'sent',   'Overdue'],
+  ['INV-2044', 'Solstice Media',   'CMS migration',                'Jul 9, 2026',  'Jul 23, 2026', 6750,    'GBP', 'draft',  'Not sent'],
+  ['INV-2045', 'Juniper Health',   'Patient portal onboarding',    'Jul 10, 2026', 'Jul 24, 2026', 9200,    'USD', 'paid',   'Paid'],
+  ['INV-2040', 'Brightwave',       'Platform redesign phase 2',    'Jun 28, 2026', 'Jul 28, 2026', 34500,   'USD', 'review', 'Not sent'],
+  ['INV-2039', 'Meridian Capital', 'Risk analytics onboarding',    'Jun 25, 2026', 'Jul 25, 2026', 22100,   'USD', 'sent',   'Overdue'],
 ];
 
 /* ================= State ================= */
@@ -696,20 +797,45 @@ function blockedAccounts() {
 }
 
 /* ================= Home ================= */
+const AV_COLORS = ['#0f62fe','#24a148','#8a3ffc','#f98000','#009d9a','#da1e28','#6929c4','#198038'];
+function acctInitials(name) { const w = name.split(/\s+/); return (w[0][0] + (w[1] ? w[1][0] : '')).toUpperCase(); }
+function acctColor(name) { return AV_COLORS[hash(name) % AV_COLORS.length]; }
+function acctAvatar(name) {
+  return `<span class="acct-av" style="background:${acctColor(name)};">${acctInitials(name)}</span>`;
+}
+const INV_STATUS_LABEL = { draft: 'Draft', review: 'In review', sent: 'Sent', paid: 'Paid' };
+const PAY_STATUS_COLOR = { 'Paid': 'var(--success)', 'Overdue': '#da1e28', 'Pending': '#ad5b00', 'Not sent': 'var(--text-3)' };
+
 function renderHome() {
-  const rows = [
-    ...S.createdInvoices.map(v => ({ ...v, isNew: true })),
-    ...EXISTING_INVOICES.map(([no, acct, proj, date, amt, cur, st]) => ({ no, acct, proj, date, amt, cur, st })),
-  ];
-  $('inv-tbody').innerHTML = rows.map(r => `
-    <tr>
+  const existing = EXISTING_INVOICES.map(([no, acct, proj, date, due, amt, cur, invSt, paySt]) =>
+    ({ no, acct, proj, date, due, amt, cur, invSt, paySt }));
+  const created = S.createdInvoices.map(v => ({ ...v, isNew: true }));
+  const rows = [...created, ...existing];
+
+  // Summary totals (USD-denominated only for simplicity)
+  const usdRows = rows.filter(r => r.cur === 'USD');
+  const total = usdRows.reduce((s, r) => s + r.amt, 0);
+  const paid  = usdRows.filter(r => r.invSt === 'paid' || r.paySt === 'Paid').reduce((s, r) => s + r.amt, 0);
+  const out   = total - paid;
+  $('sum-total').textContent = fmt('USD', total);
+  $('sum-paid').textContent  = fmt('USD', paid);
+  $('sum-out').textContent   = fmt('USD', out);
+
+  $('inv-tbody').innerHTML = rows.map(r => {
+    const invSt = r.invSt || 'draft';
+    const paySt = r.paySt || 'Not sent';
+    const psColor = PAY_STATUS_COLOR[paySt] || 'var(--text-2)';
+    return `<tr>
+      <td><span class="chip-inv-${invSt}">${INV_STATUS_LABEL[invSt]}</span></td>
       <td><span style="font-weight:590;">${esc(r.no)}</span>${r.isNew ? ' <span class="chip chip-new">New</span>' : ''}</td>
-      <td>${esc(r.acct)}</td>
+      <td class="num r" style="font-variant-numeric:tabular-nums;">${fmt(r.cur, r.amt)}</td>
+      <td>${acctAvatar(r.acct)}${esc(r.acct)}</td>
       <td class="sub">${esc(r.proj)}</td>
       <td class="sub">${esc(r.date)}</td>
-      <td class="r num">${fmt(r.cur, r.amt)}</td>
-      <td><span class="chip chip-${r.st === 'Paid' ? 'paid' : r.st === 'Draft' ? 'draft' : 'unpaid'}">${r.st}</span></td>
-    </tr>`).join('');
+      <td class="sub">${esc(r.due || '—')}</td>
+      <td style="color:${psColor};font-size:13px;font-weight:${paySt === 'Not sent' ? 400 : 590};">${esc(paySt)}</td>
+    </tr>`;
+  }).join('');
 }
 
 /* ================= Flow chrome ================= */
@@ -1479,9 +1605,13 @@ function createOne(p) {
   p.invNo = 'INV-' + (S.invSeq++);
   p.runState = 'ok';
   const t = pvTotals(p);
+  const isDraft = p.decision === 'draft';
   S.createdInvoices.unshift({
-    no: p.invNo, acct: p.account, proj: p.name, date: 'Jul 12, 2026',
-    amt: t.total, cur: p.cur, st: p.decision === 'draft' ? 'Draft' : 'Unpaid',
+    no: p.invNo, acct: p.account, proj: p.name,
+    date: 'Jul 13, 2026', due: 'Aug 12, 2026',
+    amt: t.total, cur: p.cur,
+    invSt: isDraft ? 'draft' : 'review',
+    paySt: 'Not sent',
   });
 }
 function startRun() {
