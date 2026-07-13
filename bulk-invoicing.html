@@ -1206,12 +1206,26 @@ function taxTipHtml(t) {
   const accts = typeAccounts(t);
   if (src === 'exempt') return 'No tax code applied to any invoice in this billing type.';
   if (src === 'global') return `<span style="color:var(--success);font-weight:590;">${TAX[GLOBAL_TAX].n}</span> will be applied to all ${accts.length} account${accts.length===1?'':'s'}.`;
-  let ok=0, ex=0; const bad=[];
-  accts.forEach(a => { const r=taxResolveFor(a,t); if(r.kind==='ok') ok++; else if(r.kind==='exempt') ex++; else bad.push(esc(a.name)); });
-  const lines=[];
-  if (ok)  lines.push(`<div class="iline"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="color:var(--success)"><path d="M3 8.5l3.5 3.5L13 5"/></svg><span style="color:var(--success);font-weight:590;">${ok} account${ok===1?'':'s'} use their account default</span></div>`);
-  if (ex)  lines.push(`<div class="iline"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="color:var(--text-3)"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8h5"/></svg><span style="color:var(--text-3);">${ex} without a default — tax exempt</span></div>`);
-  if (bad.length) lines.push(`<div class="iline"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="color:var(--error)"><path d="M8 2L1.5 13.5h13L8 2z" stroke-linejoin="round"/><path d="M8 6.5V9.5"/></svg><span style="color:var(--error);font-weight:590;">${bad.length} deactivated — resolve below</span></div>`);
+  // Account default — show per-account code name
+  const lines = accts.map(a => {
+    const res = taxResolveFor(a, t);
+    if (res.kind === 'ok') {
+      return `<div class="iline">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="color:var(--success);flex:none"><path d="M3 8.5l3.5 3.5L13 5"/></svg>
+        <span><span style="font-weight:590;">${esc(a.name)}</span> — <span style="color:var(--success);">${esc(TAX[res.codeId].n)}</span></span>
+      </div>`;
+    }
+    if (res.kind === 'exempt') {
+      return `<div class="iline">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="color:var(--text-3);flex:none"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8h5"/></svg>
+        <span><span style="font-weight:590;">${esc(a.name)}</span> — <span style="color:var(--text-3);">no default, tax exempt</span></span>
+      </div>`;
+    }
+    return `<div class="iline">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="color:var(--error);flex:none"><path d="M8 2L1.5 13.5h13L8 2z" stroke-linejoin="round"/><path d="M8 6.5V9.5"/></svg>
+      <span><span style="font-weight:590;">${esc(a.name)}</span> — <span style="color:var(--error);">${esc(TAX[res.codeId].n)} (deactivated)</span></span>
+    </div>`;
+  });
   return lines.join('') || '<span style="color:var(--text-3);">No accounts in this type.</span>';
 }
 
@@ -1571,7 +1585,7 @@ function renderDetail() {
       <div class="dt-meta sub" style="font-size:13px;">
         ${esc(p.account)} · <span class="chip chip-cur">${p.cur}</span> · ${periodLabel} · ${taxName ? esc(taxName) : 'Tax exempt'}
       </div>
-      ${iss.rate ? `<div class="bar bar-error">${ic.warn}<span><strong>Missing rate.</strong> A line item has hours but no rate. Enter a rate to resolve, or remove the line.</span></div>` : ''}
+      ${iss.rate ? `<div class="bar bar-error">${ic.warn}<span><strong>Missing Unit price.</strong> A line item has hours but no Unit price. Enter a Unit price to resolve, or remove the line.</span></div>` : ''}
       ${iss.taxMix ? `<div class="bar bar-error">${ic.warn}<span style="flex:1;"><strong>Inconsistent tax.</strong> Either every line item carries a tax code or none do.</span>
         <span style="display:flex;gap:8px;flex:none;">
           <button class="btn btn-sm btn-ghost" onclick="fixTax('${p.id}', true)">Apply tax to all</button>
