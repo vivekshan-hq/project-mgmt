@@ -525,6 +525,21 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
               <div class="cb-row"><input type="checkbox" checked id="ph-name" disabled><label for="ph-name">Can edit phase name</label></div>
               <div class="cb-row"><input type="checkbox" checked id="ph-dates" disabled><label for="ph-dates">Can edit phase dates<div class="hint">If user has task edit permissions on start and due date, it can implicitly change phase dates</div></label></div>
             </div>
+            <div class="cb-row"><input type="checkbox" checked id="ph-vis" disabled><label for="ph-vis">Can manage phase visibility</label></div>
+            <div class="cb-child" id="ph-vis-options">
+              <div class="cb-row">
+                <label style="display:flex;align-items:flex-start;gap:8px;cursor:default">
+                  <input type="radio" name="ph-vis-scope" value="both" checked disabled style="margin-top:3px;accent-color:var(--accent);flex-shrink:0">
+                  <div><div style="font-size:13.5px;font-weight:500;color:var(--t1)">Private + Shared</div><div style="font-size:12px;color:var(--t3);margin-top:1px">Can set phase visibility to both private and shared</div></div>
+                </label>
+              </div>
+              <div class="cb-row">
+                <label style="display:flex;align-items:flex-start;gap:8px;cursor:default">
+                  <input type="radio" name="ph-vis-scope" value="shared" disabled style="margin-top:3px;accent-color:var(--accent);flex-shrink:0">
+                  <div><div style="font-size:13.5px;font-weight:500;color:var(--t1)">Shared</div><div style="font-size:12px;color:var(--t3);margin-top:1px">Can set phase visibility to shared only</div></div>
+                </label>
+              </div>
+            </div>
             <div class="cb-row"><input type="checkbox" checked id="ph-del" disabled><label for="ph-del">Can delete phases</label></div>
           </div>
 
@@ -1178,6 +1193,9 @@ function setResScope(val) {
     notice.style.display = 'none';
     tPrivate.style.display = 'flex';
   }
+  // Phase visibility radio mirrors access scope
+  const phRadio = document.querySelector('input[name="ph-vis-scope"][value="' + (val === 'shared' ? 'shared' : 'both') + '"]');
+  if (phRadio) phRadio.checked = true;
 }
 
 /* ── Multi-select dropdown ── */
