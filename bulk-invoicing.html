@@ -262,7 +262,7 @@
   .s1-acct-cnt { font-size: 12px; color: var(--text-3); white-space: nowrap; }
   .s1-acct-cnt.has-sel { color: var(--blue); font-weight: 590; }
 
-  .s1-right { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-soft); }
+  .s1-right { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-soft); position: relative; overflow: hidden; }
   .s1-right-head { padding: 12px 20px 0; background: #fff; border-bottom: 1px solid var(--div); flex: none; }
   .s1-right-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; }
   .s1-tabs { display: flex; gap: 2px; }
@@ -285,18 +285,27 @@
   .s1-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 8px; color: var(--text-3); font-size: 13.5px; }
   .s1-panes { display: flex; flex: 1; min-height: 0; overflow: hidden; }
   .s1-grouping-bar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--div); background: #fff; flex: none; }
-  .s1-seg { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
-  .s1-seg-btn { padding: 4px 14px; font-size: 13px; color: var(--text-2); background: transparent; border: none; cursor: pointer; }
-  .s1-seg-btn.on { background: var(--btn-ink); color: #fff; font-weight: 590; }
-  .s1-seg-btn:not(.on):hover { background: var(--bg-soft); }
+  .s1-radio { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-1); cursor: pointer; }
+  .s1-radio input { cursor: pointer; accent-color: var(--blue); }
   .s1-filter-btn.on { background: var(--bg-btn2); }
   .s1-filter-badge { background: var(--blue); color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 11px; font-weight: 700; margin-left: 2px; }
-  .s1-filter-panel { background: #fafafa; border-bottom: 1px solid var(--div); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
-  .s1-filter-row { display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--div); }
-  .s1-filter-label { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: .2px; min-width: 100px; }
-  .s1-filter-opts { display: flex; gap: 12px; flex-wrap: wrap; }
-  .s1-fopt { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-1); cursor: pointer; }
-  .s1-fopt input { cursor: pointer; }
+  .s1-drawer-scrim { position: absolute; inset: 0; background: rgba(22,22,22,.12); z-index: 20; }
+  .s1-drawer {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 420px; max-width: 90%;
+    background: #fff; z-index: 21; display: flex; flex-direction: column;
+    box-shadow: -8px 0 24px rgba(0,0,0,.1); border-left: 1px solid var(--div);
+    animation: drawerIn .18s ease-out;
+  }
+  @keyframes drawerIn { from { transform: translateX(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .s1-drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--div); flex: none; }
+  .s1-drawer-body { flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .s1-drawer-title { font-size: 14px; font-weight: 590; color: var(--text-1); margin-bottom: 2px; }
+  .s1-drawer-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--div); flex: none; background: var(--bg-soft); }
+  .s1-cond { display: flex; align-items: center; gap: 8px; }
+  .s1-cond-where { font-size: 13px; color: var(--text-2); min-width: 44px; text-align: right; flex: none; }
+  .s1-cond-op { font-size: 13px; color: var(--text-3); flex: none; }
+  .s1-cond .sel-wrap { flex: 1; min-width: 0; }
+  .s1-cond .sel { width: 100%; }
 
   /* ---------- Step 2 ---------- */
   .field { display: flex; flex-direction: column; gap: 6px; }
@@ -767,7 +776,7 @@ const EXISTING_INVOICES = [
 const S = {
   step: 1, maxStep: 1,
   sel: new Set(),
-  s1: { acctQ: '', projQ: '', projType: 'all', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse', filterOpen: false, projStatus: 'all', completedWithin: '30', uninvoicedFilter: [], projCur: 'all' },
+  s1: { acctQ: '', projQ: '', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse', filterOpen: false, filters: [] },
   s2: { open: { tm: true, ff: true, sub: true, exp: true } },
   rules: {
     tm:  { from: '2026-06-12', to: '2026-07-12', group: 'member' },
@@ -973,37 +982,40 @@ function renderFooter() {
 /* ================= Step 1 ================= */
 const ACCTS_PG = 10, PROJS_PG = 8;
 
+/* ---- Filter drawer: condition-based, Rocketlane style ---- */
+const FILTER_FIELDS = {
+  type:       { label: 'Billing type',     options: [['tm','T&M'],['ff','Fixed fee'],['sub','Subscription']] },
+  status:     { label: 'Project status',   options: [['active','In progress'],['completed','Completed']] },
+  completed:  { label: 'Completed within', options: [['30','Last 30 days'],['90','Last 3 months'],['all','All time']] },
+  uninvoiced: { label: 'Has uninvoiced',   options: [['time','Time entries'],['tasks','Tasks'],['expenses','Expenses']] },
+  cur:        { label: 'Currency',         options: [] }, // filled dynamically
+};
+
+function filterFieldOptions(field) {
+  if (field === 'cur') return allProjectCurrencies().map(c => [c, c]);
+  return FILTER_FIELDS[field].options;
+}
+function activeFilters() { return S.s1.filters.filter(f => f.field && f.value); }
 function projectMatchesFilters(p) {
-  const st = S.s1;
-  if (st.projType !== 'all' && p.type !== st.projType) return false;
-  if (st.projStatus === 'active' && p.status !== 'active') return false;
-  if (st.projStatus === 'completed') {
-    if (p.status !== 'completed') return false;
-    if (st.completedWithin !== 'all' && p.completedDaysAgo > parseInt(st.completedWithin)) return false;
-  }
-  if (st.uninvoicedFilter.length > 0 && !st.uninvoicedFilter.some(ut => p.uninvoicedTypes.includes(ut))) return false;
-  if (st.projCur !== 'all' && p.cur !== st.projCur) return false;
-  return true;
+  return activeFilters().every(f => {
+    switch (f.field) {
+      case 'type':       return p.type === f.value;
+      case 'status':     return p.status === f.value;
+      case 'completed':  return p.status === 'completed' && (f.value === 'all' || p.completedDaysAgo <= parseInt(f.value));
+      case 'uninvoiced': return p.uninvoicedTypes.includes(f.value);
+      case 'cur':        return p.cur === f.value;
+      default: return true;
+    }
+  });
 }
 function filteredAccounts() {
   const q = S.s1.acctQ.trim().toLowerCase();
   return ACCOUNTS.filter(a => (!q || a.name.toLowerCase().includes(q)) && a.projects.some(projectMatchesFilters));
 }
 function filteredProjects(acctId) {
-  const st = S.s1;
-  const q = st.projQ.trim().toLowerCase();
-  return ACCT[acctId].projects.filter(p => {
-    if (q && !p.name.toLowerCase().includes(q)) return false;
-    if (st.projType !== 'all' && p.type !== st.projType) return false;
-    if (st.projStatus === 'active' && p.status !== 'active') return false;
-    if (st.projStatus === 'completed') {
-      if (p.status !== 'completed') return false;
-      if (st.completedWithin !== 'all' && p.completedDaysAgo > parseInt(st.completedWithin)) return false;
-    }
-    if (st.uninvoicedFilter.length > 0 && !st.uninvoicedFilter.some(ut => p.uninvoicedTypes.includes(ut))) return false;
-    if (st.projCur !== 'all' && p.cur !== st.projCur) return false;
-    return true;
-  });
+  const q = S.s1.projQ.trim().toLowerCase();
+  return ACCT[acctId].projects.filter(p =>
+    (!q || p.name.toLowerCase().includes(q)) && projectMatchesFilters(p));
 }
 function allProjectCurrencies() {
   const set = new Set();
@@ -1029,7 +1041,6 @@ function renderStep1() {
         onclick="event.stopPropagation()" onchange="toggleAccount('${a.id}',this.checked)"
         ${selCount && !allSel ? 'data-ind="1"' : ''}>
       <span class="s1-acct-name" onclick="focusAcct('${a.id}')">${esc(a.name)}</span>
-      <span class="chip chip-cur">${a.cur}</span>
       <span class="s1-acct-cnt ${selCount ? 'has-sel' : ''}" onclick="focusAcct('${a.id}')">${selCount ? selCount + '/' + a.projects.length : a.projects.length}</span>
     </div>`;
   }).join('') || '<div style="padding:16px;font-size:13px;color:var(--text-3);">No accounts match.</div>';
@@ -1045,42 +1056,43 @@ function renderStep1() {
     return `<div class="pager">${btns}</div>`;
   }
 
-  // Filter panel
-  const activeFilterCount = (st.projStatus !== 'all' ? 1 : 0) + st.uninvoicedFilter.length + (st.projCur !== 'all' ? 1 : 0);
-  const filterPanelHtml = st.filterOpen ? `
-  <div class="s1-filter-panel">
-    <div class="s1-filter-row">
-      <span class="s1-filter-label">Project status</span>
-      <div class="s1-filter-opts">
-        ${[['all','All'],['active','In progress'],['completed','Completed']].map(([v,l]) =>
-          `<label class="s1-fopt"><input type="radio" name="pstatus" value="${v}" ${st.projStatus===v?'checked':''} onchange="s1SetStatus('${v}')"><span>${l}</span></label>`
-        ).join('')}
-      </div>
+  // Filter drawer (slide-in over right pane)
+  const activeFilterCount = activeFilters().length;
+  const filterDrawerHtml = st.filterOpen ? `
+  <div class="s1-drawer-scrim" onclick="s1ToggleFilter()"></div>
+  <div class="s1-drawer" role="dialog" aria-label="Filters">
+    <div class="s1-drawer-head">
+      <span class="h3">Filters</span>
+      <button class="btn-icon btn" onclick="s1ToggleFilter()" aria-label="Close filters">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
     </div>
-    ${st.projStatus === 'completed' ? `
-    <div class="s1-filter-row">
-      <span class="s1-filter-label">Completed within</span>
-      <div class="s1-filter-opts">
-        ${[['30','Last 30 days'],['90','Last 3 months'],['all','All time']].map(([v,l]) =>
-          `<label class="s1-fopt"><input type="radio" name="cwithin" value="${v}" ${st.completedWithin===v?'checked':''} onchange="s1SetCompletedWithin('${v}')"><span>${l}</span></label>`
-        ).join('')}
-      </div>
-    </div>` : ''}
-    <div class="s1-filter-row">
-      <span class="s1-filter-label">Has uninvoiced</span>
-      <div class="s1-filter-opts">
-        ${[['time','Time entries'],['tasks','Tasks'],['expenses','Expenses']].map(([v,l]) =>
-          `<label class="s1-fopt"><input type="checkbox" value="${v}" ${st.uninvoicedFilter.includes(v)?'checked':''} onchange="s1ToggleUninvoiced('${v}',this.checked)"><span>${l}</span></label>`
-        ).join('')}
-      </div>
+    <div class="s1-drawer-body">
+      <p class="s1-drawer-title">Show projects...</p>
+      ${st.filters.map((f, i) => {
+        const used = st.filters.filter((x, j) => j !== i && x.field).map(x => x.field);
+        return `<div class="s1-cond">
+          <span class="s1-cond-where">${i === 0 ? 'Where' : 'And'}</span>
+          <div class="sel-wrap"><select class="sel" onchange="s1SetFilterField(${i}, this.value)" aria-label="Filter field">
+            <option value="" ${!f.field ? 'selected' : ''} disabled>Select...</option>
+            ${Object.entries(FILTER_FIELDS).filter(([k]) => k === f.field || !used.includes(k)).map(([k, d]) =>
+              `<option value="${k}" ${f.field === k ? 'selected' : ''}>${d.label}</option>`).join('')}
+          </select></div>
+          ${f.field ? `<span class="s1-cond-op">is</span>
+          <div class="sel-wrap"><select class="sel" onchange="s1SetFilterValue(${i}, this.value)" aria-label="Filter value">
+            <option value="" ${!f.value ? 'selected' : ''} disabled>Select...</option>
+            ${filterFieldOptions(f.field).map(([v, l]) => `<option value="${v}" ${f.value === v ? 'selected' : ''}>${l}</option>`).join('')}
+          </select></div>` : ''}
+          <button class="btn-icon btn" style="width:26px;height:26px;color:var(--text-3);flex:none;" onclick="s1RemoveFilter(${i})" aria-label="Remove filter">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>`;
+      }).join('')}
+      <button class="btn btn-ghost btn-sm" style="align-self:flex-start;" onclick="s1AddFilter()">+ Add filter</button>
     </div>
-    <div class="s1-filter-row" style="border-bottom:none;">
-      <span class="s1-filter-label">Currency</span>
-      <div class="sel-wrap"><select class="sel" onchange="s1SetCur(this.value)">
-        <option value="all" ${st.projCur==='all'?'selected':''}>All currencies</option>
-        ${allProjectCurrencies().map(c => `<option value="${c}" ${st.projCur===c?'selected':''}>${c}</option>`).join('')}
-      </select></div>
-      ${activeFilterCount > 0 ? `<button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="s1ClearFilters()">Clear filters</button>` : ''}
+    <div class="s1-drawer-foot">
+      <span class="mut" style="font-size:12.5px;">${activeFilterCount ? `${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'} applied` : 'No filters applied'}</span>
+      ${st.filters.length ? `<button class="btn btn-ghost btn-sm" onclick="s1ClearFilters()">Clear all</button>` : ''}
     </div>
   </div>` : '';
 
@@ -1090,8 +1102,7 @@ function renderStep1() {
     const allSel = [...S.sel].map(id => PROJ[id]);
     const filtered = allSel.filter(p => {
       const q = st.projQ.trim().toLowerCase();
-      const t = st.projType;
-      return (!q || p.name.toLowerCase().includes(q) || ACCT[p.accountId].name.toLowerCase().includes(q)) && (t === 'all' || p.type === t);
+      return (!q || p.name.toLowerCase().includes(q) || ACCT[p.accountId].name.toLowerCase().includes(q)) && projectMatchesFilters(p);
     });
     const totalProjPages = Math.max(1, Math.ceil(filtered.length / PROJS_PG));
     if (st.projPage >= totalProjPages) st.projPage = 0;
@@ -1115,18 +1126,11 @@ function renderStep1() {
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
           <input class="inp" value="${esc(st.projQ)}" placeholder="Search selected projects" oninput="s1ProjQ(this.value)" style="width:100%;">
         </div>
-        <div class="sel-wrap"><select class="sel" onchange="s1ProjType(this.value)" aria-label="Filter by billing type">
-          <option value="all" ${st.projType === 'all' ? 'selected' : ''}>All billing types</option>
-          <option value="tm"  ${st.projType === 'tm'  ? 'selected' : ''}>T&M</option>
-          <option value="ff"  ${st.projType === 'ff'  ? 'selected' : ''}>Fixed fee</option>
-          <option value="sub" ${st.projType === 'sub' ? 'selected' : ''}>Subscription</option>
-        </select></div>
         <button class="btn btn-ghost btn-sm s1-filter-btn ${st.filterOpen ? 'on' : ''}" onclick="s1ToggleFilter()">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
           Filter${activeFilterCount > 0 ? ` <span class="s1-filter-badge">${activeFilterCount}</span>` : ''}
         </button>
       </div>
-      ${filterPanelHtml}
       <div class="s1-proj-scroll">${rows}</div>
       <div class="s1-right-foot">
         <span class="mut num" style="font-size:12.5px;">${filtered.length} project${filtered.length === 1 ? '' : 's'}${filtered.length < allSel.length ? ' (filtered)' : ''}</span>
@@ -1150,14 +1154,13 @@ function renderStep1() {
             onclick="event.stopPropagation()" onchange="toggleProj('${p.id}')">
           <span class="s1-proj-name">${esc(p.name)}</span>
           <span class="chip ${TYPE[p.type].chip}">${TYPE[p.type].name}</span>
-          ${p.cur !== ACCT[p.accountId].cur ? `<span class="chip chip-cur" style="font-size:11px;">${p.cur}</span>` : ''}
+          <span class="chip chip-cur" style="font-size:11px;">${p.cur}</span>
           <span class="s1-proj-cnt num">${p.count} uninvoiced ${TYPE[p.type].items}</span>
         </div>`).join('') || `<div class="s1-empty"><span>No projects match the filter.</span></div>`;
       rightContent = `
         <div class="s1-right-title">
           <div style="display:flex;align-items:center;gap:10px;min-width:0;">
             <span class="h3" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(a.name)}</span>
-            <span class="chip chip-cur">${a.cur}</span>
             ${selCount ? `<span class="chip chip-approved">${selCount} selected</span>` : ''}
           </div>
           <button class="btn btn-ghost btn-sm" onclick="toggleAccount('${a.id}',${selCount < a.projects.length})">${selCount === a.projects.length ? 'Deselect all' : 'Select all ' + a.projects.length}</button>
@@ -1167,18 +1170,12 @@ function renderStep1() {
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
             <input class="inp" value="${esc(st.projQ)}" placeholder="Search projects" oninput="s1ProjQ(this.value)" style="width:200px;">
           </div>
-          <div class="sel-wrap"><select class="sel" onchange="s1ProjType(this.value)" aria-label="Filter by billing type">
-            <option value="all" ${st.projType === 'all' ? 'selected' : ''}>All billing types</option>
-            <option value="tm"  ${st.projType === 'tm'  ? 'selected' : ''}>T&M</option>
-            <option value="ff"  ${st.projType === 'ff'  ? 'selected' : ''}>Fixed fee</option>
-            <option value="sub" ${st.projType === 'sub' ? 'selected' : ''}>Subscription</option>
-          </select></div>
+          <span style="flex:1;"></span>
           <button class="btn btn-ghost btn-sm s1-filter-btn ${st.filterOpen ? 'on' : ''}" onclick="s1ToggleFilter()">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
             Filter${activeFilterCount > 0 ? ` <span class="s1-filter-badge">${activeFilterCount}</span>` : ''}
           </button>
         </div>
-        ${filterPanelHtml}
         <div class="s1-proj-scroll">${rows}</div>
         <div class="s1-right-foot">
           <span class="mut num" style="font-size:12.5px;">${projs.length} project${projs.length === 1 ? '' : 's'}${projs.length < a.projects.length ? ' (filtered)' : ''} · ${a.projects.length} total eligible</span>
@@ -1189,11 +1186,9 @@ function renderStep1() {
 
   $('s1-body').innerHTML = `
     <div class="s1-grouping-bar">
-      <span class="lbl">Invoice grouping</span>
-      <div class="s1-seg">
-        <button class="s1-seg-btn ${S.grouping === 'project' ? 'on' : ''}" onclick="setGrouping('project')">Per project</button>
-        <button class="s1-seg-btn ${S.grouping === 'account' ? 'on' : ''}" onclick="setGrouping('account')">Per account</button>
-      </div>
+      <span class="lbl">Generate invoices</span>
+      <label class="s1-radio"><input type="radio" name="invgroup" ${S.grouping === 'project' ? 'checked' : ''} onchange="setGrouping('project')"><span>Per project</span></label>
+      <label class="s1-radio"><input type="radio" name="invgroup" ${S.grouping === 'account' ? 'checked' : ''} onchange="setGrouping('account')"><span>Per account</span></label>
       ${S.grouping === 'account' ? `<span class="mut" style="font-size:12px;">Projects with the same currency are grouped into one invoice per account.</span>` : ''}
     </div>
     <div class="s1-panes">
@@ -1221,6 +1216,7 @@ function renderStep1() {
           </div>
         </div>
         ${rightContent}
+        ${filterDrawerHtml}
       </div>
     </div>`;
 
@@ -1228,28 +1224,27 @@ function renderStep1() {
   renderFooter();
 }
 
-function focusAcct(id) { S.s1.focusAcct = id; S.s1.projQ = ''; S.s1.projType = 'all'; S.s1.projPage = 0; renderStep1(); }
+function focusAcct(id) { S.s1.focusAcct = id; S.s1.projQ = ''; S.s1.projPage = 0; renderStep1(); }
 function toggleAccount(id, on) { ACCT[id].projects.forEach(p => on ? S.sel.add(p.id) : S.sel.delete(p.id)); renderStep1(); }
 function toggleProj(id) { S.sel.has(id) ? S.sel.delete(id) : S.sel.add(id); renderStep1(); }
 function togglePageProjs(ids, on) { ids.forEach(id => on ? S.sel.add(id) : S.sel.delete(id)); renderStep1(); }
 function s1ClearAll() { S.sel.clear(); renderStep1(); }
 function s1AcctQ(v) { S.s1.acctQ = v; S.s1.acctPage = 0; renderStep1(); }
 function s1ProjQ(v) { S.s1.projQ = v; S.s1.projPage = 0; renderStep1(); }
-function s1ProjType(v) { S.s1.projType = v; S.s1.projPage = 0; renderStep1(); }
 function s1AcctPage(n) { S.s1.acctPage = n; renderStep1(); }
 function s1ProjPage(n) { S.s1.projPage = n; renderStep1(); }
-function s1Mode(m) { S.s1.mode = m; S.s1.projQ = ''; S.s1.projType = 'all'; S.s1.projPage = 0; S.s1.filterOpen = false; renderStep1(); }
+function s1Mode(m) { S.s1.mode = m; S.s1.projQ = ''; S.s1.projPage = 0; S.s1.filterOpen = false; renderStep1(); }
 function setGrouping(v) { S.grouping = v; renderStep1(); }
-function s1ToggleFilter() { S.s1.filterOpen = !S.s1.filterOpen; renderStep1(); }
-function s1SetStatus(v) { S.s1.projStatus = v; S.s1.projPage = 0; renderStep1(); }
-function s1SetCompletedWithin(v) { S.s1.completedWithin = v; S.s1.projPage = 0; renderStep1(); }
-function s1ToggleUninvoiced(v, on) {
-  if (on) { if (!S.s1.uninvoicedFilter.includes(v)) S.s1.uninvoicedFilter.push(v); }
-  else S.s1.uninvoicedFilter = S.s1.uninvoicedFilter.filter(x => x !== v);
-  S.s1.projPage = 0; renderStep1();
+function s1ToggleFilter() {
+  S.s1.filterOpen = !S.s1.filterOpen;
+  if (S.s1.filterOpen && S.s1.filters.length === 0) S.s1.filters.push({ field: '', value: '' });
+  renderStep1();
 }
-function s1SetCur(v) { S.s1.projCur = v; S.s1.projPage = 0; renderStep1(); }
-function s1ClearFilters() { S.s1.projStatus = 'all'; S.s1.completedWithin = '30'; S.s1.uninvoicedFilter = []; S.s1.projCur = 'all'; S.s1.projPage = 0; renderStep1(); }
+function s1AddFilter() { S.s1.filters.push({ field: '', value: '' }); renderStep1(); }
+function s1SetFilterField(i, v) { S.s1.filters[i] = { field: v, value: '' }; S.s1.projPage = 0; renderStep1(); }
+function s1SetFilterValue(i, v) { S.s1.filters[i].value = v; S.s1.projPage = 0; S.s1.acctPage = 0; renderStep1(); }
+function s1RemoveFilter(i) { S.s1.filters.splice(i, 1); S.s1.projPage = 0; S.s1.acctPage = 0; renderStep1(); }
+function s1ClearFilters() { S.s1.filters = []; S.s1.projPage = 0; S.s1.acctPage = 0; renderStep1(); }
 
 /* ================= Desc area ================= */
 function renderDescAreaHtml(t) {
