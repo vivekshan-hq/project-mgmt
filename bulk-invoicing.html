@@ -557,8 +557,19 @@
       <div style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;" id="s1-body"></div>
     </section>
 
-    <!-- STEP 2 -->
+    <!-- STEP 2: Invoice fields -->
     <section id="step-2" class="hidden">
+      <div class="col" style="max-width:640px;">
+        <div>
+          <div class="h2">Configure invoice fields</div>
+          <p class="sub" style="margin-top:4px;">These values are applied to every invoice created in this batch.</p>
+        </div>
+        <div class="card" id="if-card" style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;"></div>
+      </div>
+    </section>
+
+    <!-- STEP 3: Rules & tax -->
+    <section id="step-3" class="hidden">
       <div class="col">
         <div>
           <div class="h2">Define rules &amp; tax settings</div>
@@ -568,11 +579,11 @@
       </div>
     </section>
 
-    <!-- STEP 3 -->
-    <section id="step-3" class="hidden" style="height:100%;"></section>
+    <!-- STEP 4: Preview -->
+    <section id="step-4" class="hidden" style="height:100%;"></section>
 
-    <!-- STEP 4 -->
-    <section id="step-4" class="hidden">
+    <!-- STEP 5: Create invoices -->
+    <section id="step-5" class="hidden">
       <div class="col" style="max-width:760px;">
         <div>
           <div class="h2">Create invoices</div>
@@ -784,6 +795,7 @@ const S = {
   step: 1, maxStep: 1,
   sel: new Set(),
   s1: { acctQ: '', projQ: '', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse', filterOpen: false, filters: [] },
+  invFields: { issueDate: '2026-07-14', billDate: '2026-07-14', paymentTerms: 'net30', poNumber: '', costCenter: '', notes: '' },
   s2: { open: { tm: true, ff: true, sub: true } },
   rules: {
     tm:  { periodMode: 'between', from: '2026-06-12', to: '2026-07-12', group: 'member', expGroup: 'category' },
@@ -904,31 +916,33 @@ function renderHome() {
 }
 
 /* ================= Flow chrome ================= */
-const STEP_LABELS = ['Select projects', 'Rules & tax', 'Preview', 'Create invoices'];
+const STEP_LABELS = ['Select projects', 'Invoice fields', 'Rules & tax', 'Preview', 'Create invoices'];
+const DONE_STEP = STEP_LABELS.length + 1; // 6
 function renderSteps() {
   $('steps').innerHTML = STEP_LABELS.map((lbl, i) => {
     const n = i + 1;
-    const st = S.step === 5 || n < S.step ? 'done' : n === S.step ? 'on' : '';
-    const clickable = n < S.step && S.step !== 5 && !S.run.started;
+    const st = S.step === DONE_STEP || n < S.step ? 'done' : n === S.step ? 'on' : '';
+    const clickable = n < S.step && S.step !== DONE_STEP && !S.run.started;
     return `<div class="stp ${st} ${clickable ? 'clickable' : ''}">
       <button ${clickable ? `onclick="goStep(${n})"` : 'tabindex="-1"'}>
         <span class="dot">${st === 'done' ? ic.check : n}</span><span class="slbl">${lbl}</span>
       </button>
-    </div>${n < 4 ? '<div class="stp"><span class="conn"></span></div>' : ''}`;
+    </div>${n < STEP_LABELS.length ? '<div class="stp"><span class="conn"></span></div>' : ''}`;
   }).join('');
   const nSel = S.sel.size;
-  $('head-right').textContent = S.step >= 2 && S.step <= 4 ? `${nSel} project${nSel === 1 ? '' : 's'} · ${selAccounts().length} accounts` : '';
+  $('head-right').textContent = S.step >= 2 && S.step <= 5 ? `${nSel} project${nSel === 1 ? '' : 's'} · ${selAccounts().length} accounts` : '';
 }
 
 function goStep(n) {
   S.step = n; S.maxStep = Math.max(S.maxStep, n);
-  ['step-1', 'step-2', 'step-3', 'step-4', 'step-done'].forEach((id, i) => $(id).classList.toggle('hidden', i + 1 !== n));
+  ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-done'].forEach((id, i) => $(id).classList.toggle('hidden', i + 1 !== n));
   renderSteps();
   if (n === 1) renderStep1();
-  if (n === 2) { ensureTaxSel(); renderStep2(); }
-  if (n === 3) enterStep3();
-  if (n === 4) renderStep4();
-  if (n === 5) renderDone();
+  if (n === 2) renderInvFields();
+  if (n === 3) { ensureTaxSel(); renderStep2(); }
+  if (n === 4) enterStep3();
+  if (n === 5) renderStep4();
+  if (n === 6) renderDone();
   renderFooter();
   const fb = document.querySelector('.flow-body');
   if (fb) fb.scrollTop = 0;
@@ -950,24 +964,30 @@ function renderFooter() {
     act.innerHTML = `<button class="btn btn-sec" onclick="closeFlow()">Cancel</button>
       <button class="btn btn-pri" id="ft-next" ${n ? '' : 'disabled'} onclick="goStep(2)">Continue</button>`;
   } else if (S.step === 2) {
+    const f = S.invFields;
+    const ok = f.issueDate && f.billDate;
+    info.innerHTML = ok ? '' : `<span style="color:var(--error);font-weight:590;">Issue date and Bill date are required.</span>`;
+    act.innerHTML = `<button class="btn btn-sec" onclick="goStep(1)">Back</button>
+      <button class="btn btn-pri" ${ok ? '' : 'disabled'} onclick="goStep(3)">Continue</button>`;
+  } else if (S.step === 3) {
     const blocked = blockedAccounts().length;
     info.innerHTML = blocked && S.gateShown
       ? `<span style="color:var(--error);font-weight:590;">${blocked} account${blocked === 1 ? '' : 's'} blocked by a deactivated tax code</span>`
       : '';
-    act.innerHTML = `<button class="btn btn-sec" onclick="goStep(1)">Back</button>
+    act.innerHTML = `<button class="btn btn-sec" onclick="goStep(2)">Back</button>
       <button class="btn btn-pri" onclick="tryGenerate()">Generate previews</button>`;
-  } else if (S.step === 3) {
+  } else if (S.step === 4) {
     if (S.generating) { info.textContent = ''; act.innerHTML = ''; return; }
     const c = pvCounts();
     info.innerHTML = `<strong>${c.approved}</strong> approved · <strong>${c.draft}</strong> draft · <strong>${c.pending}</strong> to review · <strong>${c.skipped}</strong> skipped${c.removed ? ` · ${c.removed} removed` : ''}`;
     const ready = c.pending === 0 && (c.approved + c.draft) > 0;
-    act.innerHTML = `<button class="btn btn-sec" onclick="goStep(2)">Back</button>
-      <button class="btn btn-pri" ${ready ? '' : 'disabled'} title="${ready ? '' : 'Resolve issues and approve, draft, or remove every preview first'}" onclick="goStep(4)">Continue</button>`;
-  } else if (S.step === 4) {
+    act.innerHTML = `<button class="btn btn-sec" onclick="goStep(3)">Back</button>
+      <button class="btn btn-pri" ${ready ? '' : 'disabled'} title="${ready ? '' : 'Resolve issues and approve, draft, or remove every preview first'}" onclick="goStep(5)">Continue</button>`;
+  } else if (S.step === 5) {
     const items = runItems();
     if (!S.run.started) {
       info.textContent = 'Invoices are created one at a time. You can retry any failures afterwards.';
-      act.innerHTML = `<button class="btn btn-sec" onclick="goStep(3)">Back</button>
+      act.innerHTML = `<button class="btn btn-sec" onclick="goStep(4)">Back</button>
         <button class="btn btn-pri" onclick="startRun()">Create ${items.length} invoice${items.length === 1 ? '' : 's'}</button>`;
     } else if (!S.run.done) {
       info.textContent = 'Creating invoices…';
@@ -975,13 +995,58 @@ function renderFooter() {
     } else {
       const fails = items.filter(p => p.runState === 'fail').length;
       info.innerHTML = fails ? `<span style="color:var(--error);font-weight:590;">${fails} failed</span> — retry above or continue to the summary.` : 'All done.';
-      act.innerHTML = `<button class="btn btn-pri" onclick="goStep(5)">View summary</button>`;
+      act.innerHTML = `<button class="btn btn-pri" onclick="goStep(6)">View summary</button>`;
     }
   } else {
     info.textContent = '';
     act.innerHTML = `<button class="btn btn-pri" onclick="closeFlow()">Back to Invoicing</button>`;
   }
 }
+
+/* ================= Step 2: Invoice fields ================= */
+const PAYMENT_TERMS = [['net15','Net 15'],['net30','Net 30'],['net45','Net 45'],['net60','Net 60'],['receipt','Due on receipt']];
+function renderInvFields() {
+  const f = S.invFields;
+  $('if-card').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="field">
+        <label>Issue date <span style="color:var(--error);">*</span></label>
+        <input class="inp" type="date" value="${f.issueDate}" onchange="setInvField('issueDate',this.value)" aria-label="Issue date">
+        <span class="mut" style="font-size:12px;">Date shown on every invoice in this batch.</span>
+      </div>
+      <div class="field">
+        <label>Bill date <span style="color:var(--error);">*</span></label>
+        <input class="inp" type="date" value="${f.billDate}" onchange="setInvField('billDate',this.value)" aria-label="Bill date">
+        <span class="mut" style="font-size:12px;">Date the billing becomes effective.</span>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--div);padding-top:14px;display:flex;flex-direction:column;gap:14px;">
+      <span class="lbl">Custom fields (optional)</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="field">
+          <label>Payment terms</label>
+          <div class="sel-wrap"><select class="sel" onchange="setInvField('paymentTerms',this.value)" aria-label="Payment terms">
+            ${PAYMENT_TERMS.map(([v,l]) => `<option value="${v}" ${f.paymentTerms===v?'selected':''}>${l}</option>`).join('')}
+          </select></div>
+        </div>
+        <div class="field">
+          <label>PO number</label>
+          <input class="inp" type="text" value="${esc(f.poNumber)}" placeholder="e.g. PO-2026-104" oninput="S.invFields.poNumber=this.value" aria-label="PO number">
+        </div>
+        <div class="field">
+          <label>Cost center</label>
+          <input class="inp" type="text" value="${esc(f.costCenter)}" placeholder="e.g. CC-EMEA-04" oninput="S.invFields.costCenter=this.value" aria-label="Cost center">
+        </div>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea class="inp" rows="3" style="height:auto;resize:vertical;padding-top:8px;" placeholder="Shown at the bottom of every invoice" oninput="S.invFields.notes=this.value" aria-label="Invoice notes">${esc(f.notes)}</textarea>
+      </div>
+    </div>`;
+}
+function setInvField(k, v) { S.invFields[k] = v; renderFooter(); }
+const TERMS_DAYS = { net15: 15, net30: 30, net45: 45, net60: 60, receipt: 0 };
+function addDays(iso, d) { const dt = new Date(iso + 'T00:00:00'); dt.setDate(dt.getDate() + d); return dt.toISOString().slice(0, 10); }
 
 /* ================= Step 1 ================= */
 const ACCTS_PG = 10, PROJS_PG = 8;
@@ -1497,7 +1562,7 @@ function tryGenerate() {
     return;
   }
   S.gateShown = false;
-  goStep(3);
+  goStep(4);
 }
 
 /* ================= Preview generation ================= */
@@ -1607,7 +1672,7 @@ function enterStep3() {
 }
 function renderGenerating() {
   const total = S.sel.size;
-  $('step-3').innerHTML = `<div class="genwrap">
+  $('step-4').innerHTML = `<div class="genwrap">
     <div class="spinner" role="status" aria-label="Generating previews"></div>
     <div class="h3">Generating invoice previews…</div>
     <div class="mut num" id="gen-count">0 of ${total}</div>
@@ -1637,7 +1702,7 @@ function renderStep3() {
     const pvs = S.previews.filter(p => p.accountId === a.id);
     if (pvs.length) byAcct.push([a, pvs]);
   });
-  $('step-3').innerHTML = `<div class="s3">
+  $('step-4').innerHTML = `<div class="s3">
     <div class="s3-list">
       <div class="s3-list-head">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
@@ -1718,7 +1783,7 @@ function renderDetail() {
         <span class="chip ${stCls}">${stLbl}</span>
       </div>
       <div class="dt-meta sub" style="font-size:13px;">
-        ${esc(p.account)} · <span class="chip chip-cur">${p.cur}</span> · ${periodLabel} · ${taxName ? esc(taxName) : 'Tax exempt'}
+        ${esc(p.account)} · <span class="chip chip-cur">${p.cur}</span> · ${periodLabel} · ${taxName ? esc(taxName) : 'Tax exempt'} · Issue ${fmtD(S.invFields.issueDate)} · Bill ${fmtD(S.invFields.billDate)}
       </div>
       ${iss.rate ? `<div class="bar bar-error">${ic.warn}<span><strong>Missing Unit price.</strong> A line item has hours but no Unit price. Enter a Unit price to resolve, or remove the line.</span></div>` : ''}
       ${iss.taxMix ? `<div class="bar bar-error">${ic.warn}<span style="flex:1;"><strong>Inconsistent tax.</strong> Either every line item carries a tax code or none do.</span>
@@ -1846,9 +1911,10 @@ function createOne(p) {
   p.runState = 'ok';
   const t = pvTotals(p);
   const isDraft = p.decision === 'draft';
+  const f = S.invFields;
   S.createdInvoices.unshift({
     no: p.invNo, acct: p.account, proj: p.name,
-    date: 'Jul 13, 2026', due: 'Aug 12, 2026',
+    date: fmtD(f.issueDate), due: fmtD(addDays(f.issueDate, TERMS_DAYS[f.paymentTerms] ?? 30)),
     amt: t.total, cur: p.cur,
     invSt: isDraft ? 'draft' : 'review',
     paySt: 'Not sent',
