@@ -582,11 +582,11 @@
     <!-- STEP 4: Preview -->
     <section id="step-4" class="hidden" style="height:100%;"></section>
 
-    <!-- STEP 5: Create invoices -->
+    <!-- STEP 5: Review & create invoices -->
     <section id="step-5" class="hidden">
-      <div class="col" style="max-width:760px;">
+      <div class="col" style="max-width:860px;">
         <div>
-          <div class="h2">Create invoices</div>
+          <div class="h2">Review &amp; create invoices</div>
           <p class="sub" style="margin-top:4px;" id="s4-sub"></p>
         </div>
         <div>
@@ -806,7 +806,7 @@ const S = {
   acctFix: {},  // accountId -> 'exempt' | replacement tax code id (gate resolution)
   gateShown: false,
   previews: [], sig: null, curPv: null, generating: false,
-  run: { started: false, done: false, current: -1 },
+  run: { started: false, done: false, current: -1, groups: null },
   createdInvoices: [],
   invSeq: 2046,
   grouping: 'project',
@@ -916,7 +916,7 @@ function renderHome() {
 }
 
 /* ================= Flow chrome ================= */
-const STEP_LABELS = ['Select projects', 'Invoice fields', 'Rules & tax', 'Preview', 'Create invoices'];
+const STEP_LABELS = ['Select projects', 'Invoice fields', 'Rules & tax', 'Preview', 'Review & create'];
 const DONE_STEP = STEP_LABELS.length + 1; // 6
 function renderSteps() {
   $('steps').innerHTML = STEP_LABELS.map((lbl, i) => {
@@ -984,7 +984,7 @@ function renderFooter() {
     act.innerHTML = `<button class="btn btn-sec" onclick="goStep(3)">Back</button>
       <button class="btn btn-pri" ${ready ? '' : 'disabled'} title="${ready ? '' : 'Resolve issues and approve, draft, or remove every preview first'}" onclick="goStep(5)">Continue</button>`;
   } else if (S.step === 5) {
-    const items = runItems();
+    const items = S.run.groups || [];
     if (!S.run.started) {
       info.textContent = 'Invoices are created one at a time. You can retry any failures afterwards.';
       act.innerHTML = `<button class="btn btn-sec" onclick="goStep(4)">Back</button>
@@ -993,7 +993,7 @@ function renderFooter() {
       info.textContent = 'Creating invoices…';
       act.innerHTML = `<button class="btn btn-pri" disabled>Creating…</button>`;
     } else {
-      const fails = items.filter(p => p.runState === 'fail').length;
+      const fails = items.filter(g => g.runState === 'fail').length;
       info.innerHTML = fails ? `<span style="color:var(--error);font-weight:590;">${fails} failed</span> — retry above or continue to the summary.` : 'All done.';
       act.innerHTML = `<button class="btn btn-pri" onclick="goStep(6)">View summary</button>`;
     }
@@ -1869,105 +1869,146 @@ function setDecision(id, d) {
   if (d === 'removed') toast('Removed from batch', 'info');
 }
 
-/* ================= Step 4 ================= */
+/* ================= Step 5: Review & create ================= */
 const runItems = () => S.previews.filter(p => p.decision === 'approved' || p.decision === 'draft');
-function renderStep4() {
+/* Group approved/draft previews into invoice units: one per project, or one per account+currency */
+function buildRunGroups() {
   const items = runItems();
-  const done = items.filter(p => p.runState === 'ok' || p.runState === 'fail').length;
-  const ok = items.filter(p => p.runState === 'ok').length;
+  if (S.grouping === 'project') {
+    return items.map(p => ({
+      gid: p.id, acctId: p.accountId, acct: p.account, cur: p.cur,
+      pvs: [p], projNames: [p.name], total: pvTotals(p).total,
+      draft: p.decision === 'draft', runState: null, invNo: null, error: null,
+    }));
+  }
+  const map = new Map();
+  items.forEach(p => {
+    const k = p.accountId + '|' + p.cur;
+    if (!map.has(k)) map.set(k, { gid: 'grp-' + k, acctId: p.accountId, acct: p.account, cur: p.cur, pvs: [], projNames: [], total: 0, runState: null, invNo: null, error: null });
+    const g = map.get(k);
+    g.pvs.push(p); g.projNames.push(p.name); g.total += pvTotals(p).total;
+  });
+  return [...map.values()].map(g => ({ ...g, draft: g.pvs.every(p => p.decision === 'draft') }));
+}
+/* Project column: shown for project-level grouping, or when an account splits into multiple invoices (mixed currency) */
+function showProjCol(groups) {
+  if (S.grouping === 'project') return true;
+  const seen = new Set();
+  return groups.some(g => seen.has(g.acctId) || (seen.add(g.acctId), false));
+}
+function runStatusChip(g, i) {
+  if (g.runState === 'ok')   return `<span class="chip-inv-paid">Created</span>`;
+  if (g.runState === 'fail') return `<span style="background:#fde8e8;color:var(--error);font-size:12px;padding:2px 8px;border-radius:4px;font-weight:590;display:inline-block;">Failed</span>`;
+  if (g.runState === 'retrying' || (S.run.started && !S.run.done && i === S.run.current)) return `<span class="mut" style="font-size:12.5px;">Creating…</span>`;
+  return `<span class="chip-inv-draft">Draft</span>`;
+}
+function renderStep4() {
+  if (!S.run.started) S.run.groups = buildRunGroups();
+  const groups = S.run.groups || [];
+  const done = groups.filter(g => g.runState === 'ok' || g.runState === 'fail').length;
+  const ok = groups.filter(g => g.runState === 'ok').length;
+  const showProj = showProjCol(groups);
   $('s4-sub').textContent = S.run.done
-    ? `Finished — ${ok} of ${items.length} created.`
+    ? `Finished — ${ok} of ${groups.length} created.`
     : S.run.started
       ? 'Creating invoices one by one. Keep this window open.'
-      : `${items.length} invoice${items.length === 1 ? '' : 's'} will be created — ${items.filter(p => p.decision === 'approved').length} finalized, ${items.filter(p => p.decision === 'draft').length} as drafts.`;
+      : `${groups.length} invoice${groups.length === 1 ? '' : 's'} will be created${S.grouping === 'account' ? ' — one per account and currency' : ' — one per project'}.`;
   $('s4-progress-label').textContent = S.run.done ? 'Complete' : S.run.started ? 'Creating…' : 'Ready to create';
-  $('s4-progress-count').textContent = `${done} of ${items.length} processed`;
-  $('s4-progbar').style.width = items.length ? (done / items.length * 100) + '%' : '0%';
-  $('s4-list').innerHTML = items.map((p, i) => {
-    const t = pvTotals(p);
-    let tick = '<div class="tick wait"></div>';
-    if (p.runState === 'ok') tick = `<div class="tick ok">${ic.check}</div>`;
-    else if (p.runState === 'fail') tick = `<div class="tick err">${ic.x}</div>`;
-    else if (S.run.started && !S.run.done && i === S.run.current) tick = '<div class="tick busy"></div>';
-    return `<div class="run-row">
-      ${tick}
-      <div style="min-width:0;flex:1;">
-        <div style="display:flex;gap:8px;align-items:center;">
-          <span style="font-weight:590;">${esc(p.name)}</span>
-          <span class="chip ${p.decision === 'draft' ? 'chip-draft' : 'chip-approved'}">${p.decision === 'draft' ? 'Draft' : 'Finalized'}</span>
-          ${p.invNo ? `<span class="mut num" style="font-size:12.5px;">${p.invNo}</span>` : ''}
-        </div>
-        <div class="mut" style="font-size:12.5px;margin-top:1px;">${esc(p.account)}</div>
-        ${p.runState === 'fail' ? `<div class="run-err">${esc(p.error)}</div>` : ''}
-      </div>
-      <span class="num sub">${fmt(p.cur, t.total)}</span>
-      ${p.runState === 'fail' && S.run.done ? `<button class="btn btn-sm btn-ghost" onclick="retryOne('${p.id}')" style="gap:4px;">${ic.retry} Retry</button>` : ''}
-    </div>`;
-  }).join('') || '<div class="card-pad mut">Nothing to create.</div>';
+  $('s4-progress-count').textContent = `${done} of ${groups.length} processed`;
+  $('s4-progbar').style.width = groups.length ? (done / groups.length * 100) + '%' : '0%';
+  $('s4-list').innerHTML = groups.length ? `
+    <table class="grid">
+      <thead><tr>
+        <th style="width:34px;"></th>
+        <th>Account</th>
+        ${showProj ? '<th>Project</th>' : ''}
+        <th>Invoice number</th>
+        <th class="r">Amount</th>
+        <th>Invoice status</th>
+        <th style="width:90px;"></th>
+      </tr></thead>
+      <tbody>
+        ${groups.map((g, i) => {
+          let tick = '<div class="tick wait"></div>';
+          if (g.runState === 'ok') tick = `<div class="tick ok">${ic.check}</div>`;
+          else if (g.runState === 'fail') tick = `<div class="tick err">${ic.x}</div>`;
+          else if (g.runState === 'retrying' || (S.run.started && !S.run.done && i === S.run.current)) tick = '<div class="tick busy"></div>';
+          return `<tr>
+            <td>${tick}</td>
+            <td>${acctAvatar(g.acct)}<span style="font-weight:590;">${esc(g.acct)}</span> <span class="chip chip-cur" style="font-size:11px;">${g.cur}</span></td>
+            ${showProj ? `<td class="sub" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(g.projNames.join(', '))}">${esc(g.projNames.join(', '))}</td>` : ''}
+            <td class="num">${g.invNo ? `<span style="font-weight:590;">${g.invNo}</span>` : '<span class="mut">—</span>'}</td>
+            <td class="r num">${fmt(g.cur, g.total)}</td>
+            <td>${runStatusChip(g, i)}${g.runState === 'fail' ? `<div class="run-err">${esc(g.error)}</div>` : ''}</td>
+            <td>${g.runState === 'fail' && S.run.done ? `<button class="btn btn-sm btn-ghost" onclick="retryOne('${g.gid}')" style="gap:4px;">${ic.retry} Retry</button>` : ''}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>` : '<div class="card-pad mut">Nothing to create.</div>';
   renderFooter();
 }
-function createOne(p) {
-  p.invNo = 'INV-' + (S.invSeq++);
-  p.runState = 'ok';
-  const t = pvTotals(p);
-  const isDraft = p.decision === 'draft';
+function createOne(g) {
+  g.invNo = 'INV-' + (S.invSeq++);
+  g.runState = 'ok';
+  g.pvs.forEach(p => { p.runState = 'ok'; p.invNo = g.invNo; });
   const f = S.invFields;
   S.createdInvoices.unshift({
-    no: p.invNo, acct: p.account, proj: p.name,
+    no: g.invNo, acct: g.acct, proj: g.projNames.join(', '),
     date: fmtD(f.issueDate), due: fmtD(addDays(f.issueDate, TERMS_DAYS[f.paymentTerms] ?? 30)),
-    amt: t.total, cur: p.cur,
-    invSt: isDraft ? 'draft' : 'review',
+    amt: g.total, cur: g.cur,
+    invSt: g.draft ? 'draft' : 'review',
     paySt: 'Not sent',
   });
 }
 function startRun() {
-  const items = runItems();
+  const groups = S.run.groups || (S.run.groups = buildRunGroups());
   S.run.started = true; S.run.done = false; S.run.current = 0;
   renderSteps(); // lock step nav
   let failedUsed = false;
   const next = i => {
-    if (i >= items.length) {
+    if (i >= groups.length) {
       S.run.done = true; S.run.current = -1;
       renderStep4();
-      const fails = items.filter(p => p.runState === 'fail').length;
+      const fails = groups.filter(g => g.runState === 'fail').length;
       toast(fails ? `Batch finished — ${fails} invoice${fails === 1 ? '' : 's'} failed` : 'All invoices created', fails ? 'err' : undefined);
       return;
     }
     S.run.current = i;
     renderStep4();
     setTimeout(() => {
-      const p = items[i];
-      if (PROJ[p.projectId].flag === 'fail' && !failedUsed) {
+      const g = groups[i];
+      if (!failedUsed && g.pvs.some(p => PROJ[p.projectId].flag === 'fail')) {
         failedUsed = true;
-        p.runState = 'fail';
-        p.error = "Couldn't reach the accounting integration (QuickBooks). The invoice wasn't created.";
+        g.runState = 'fail';
+        g.error = "Couldn't reach the accounting integration (QuickBooks). The invoice wasn't created.";
       } else {
-        createOne(p);
+        createOne(g);
       }
       next(i + 1);
     }, 340);
   };
   next(0);
 }
-function retryOne(id) {
-  const p = findPv(id);
-  p.runState = 'retrying'; p.error = null;
+function retryOne(gid) {
+  const g = (S.run.groups || []).find(x => x.gid === gid);
+  if (!g) return;
+  g.runState = 'retrying'; g.error = null;
   renderStep4();
   setTimeout(() => {
-    createOne(p);
+    createOne(g);
     renderStep4();
-    toast(`${p.invNo} created on retry`);
+    toast(`${g.invNo} created on retry`);
   }, 700);
 }
 
 /* ================= Summary ================= */
 function renderDone() {
-  const items = runItems();
-  const created = items.filter(p => p.runState === 'ok' && p.decision === 'approved').length;
-  const drafts = items.filter(p => p.runState === 'ok' && p.decision === 'draft').length;
+  const groups = S.run.groups || [];
+  const created = groups.filter(g => g.runState === 'ok' && !g.draft).length;
+  const drafts = groups.filter(g => g.runState === 'ok' && g.draft).length;
   const skipped = S.previews.filter(p => p.skipped).length;
-  const failed = items.filter(p => p.runState === 'fail').length;
-  $('done-sub').textContent = `${created + drafts} of ${items.length} invoices created across ${selAccounts().length} accounts.`;
+  const failed = groups.filter(g => g.runState === 'fail').length;
+  $('done-sub').textContent = `${created + drafts} of ${groups.length} invoices created across ${selAccounts().length} accounts.`;
   const tile = (n, label, color, sub) => `
     <button class="tile" onclick="closeFlow()">
       <span class="lbl">${label}</span>
