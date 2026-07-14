@@ -734,6 +734,13 @@ const GROUPS = {
   tm:  [['member', 'Team member'], ['role', 'Role'], ['phase', 'Phase'], ['task', 'Task'], ['date', 'Date (weekly)']],
   exp: [['category', 'Expense category'], ['vendor', 'Vendor'], ['phase', 'Project phase'], ['date', 'Date (weekly)'], ['none', 'No grouping']],
 };
+const TASK_FILTER_FIELDS = {
+  status:   { label: 'Task status', options: [['completed','Completed'],['inprogress','In progress'],['notstarted','Not started']] },
+  phase:    { label: 'Phase',       options: [['discovery','Discovery'],['implementation','Implementation'],['testing','Testing'],['golive','Go-live']] },
+  billable: { label: 'Billable',    options: [['yes','Billable'],['no','Non-billable']] },
+  priority: { label: 'Priority',    options: [['high','High'],['medium','Medium'],['low','Low']] },
+  ttype:    { label: 'Task type',   options: [['milestone','Milestone'],['deliverable','Deliverable'],['internal','Internal']] },
+};
 const FF_AMT_FIELDS = [
   ['planned_fee',  'Planned fee'],
   ['actual_fee',   'Actual fee'],
@@ -757,7 +764,7 @@ const DESC_TOKENS = [
 ];
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function fmtD(iso) { const [y, m, d] = iso.split('-'); return `${MON[+m - 1]} ${+d}, ${y}`; }
-function rangeLabel(t) { const r = S.rules[t]; return `${fmtD(r.from)} – ${fmtD(r.to)}`; }
+function rangeLabel(t) { const r = S.rules[t]; return r.periodMode === 'upto' ? `Up to ${fmtD(r.to)}` : `${fmtD(r.from)} – ${fmtD(r.to)}`; }
 
 // [no, acct, proj, issueDate, dueDate, amt, cur, invStatus, payStatus]
 // invStatus: draft | review | sent | paid
@@ -777,12 +784,11 @@ const S = {
   step: 1, maxStep: 1,
   sel: new Set(),
   s1: { acctQ: '', projQ: '', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse', filterOpen: false, filters: [] },
-  s2: { open: { tm: true, ff: true, sub: true, exp: true } },
+  s2: { open: { tm: true, ff: true, sub: true } },
   rules: {
-    tm:  { from: '2026-06-12', to: '2026-07-12', group: 'member' },
-    ff:  { from: '2026-06-12', to: '2026-07-12', amtField: 'planned_fee', descTokens: [{key:'task_name', label:'Task name', bg:'#dcf3e4', fg:'#1a7f37'}] },
-    sub: { from: '2026-06-12', to: '2026-07-12' },
-    exp: { enabled: true, from: '2026-06-12', to: '2026-07-12', group: 'category' },
+    tm:  { periodMode: 'between', from: '2026-06-12', to: '2026-07-12', group: 'member', expGroup: 'category' },
+    ff:  { periodMode: 'between', from: '2026-06-12', to: '2026-07-12', amtField: 'planned_fee', descTokens: [{key:'task_name', label:'Task name', bg:'#dcf3e4', fg:'#1a7f37'}], taskFilters: [], expGroup: 'category' },
+    sub: { periodMode: 'between', from: '2026-06-12', to: '2026-07-12', expGroup: 'category' },
   },
   taxSel: {},   // billing type -> global | account | exempt
   acctFix: {},  // accountId -> 'exempt' | replacement tax code id (gate resolution)
@@ -828,11 +834,9 @@ function ensureTaxSel() {
   const anyDefault = selAccounts().some(a => a.tax);
   const src = anyDefault ? 'account' : 'global';
   typesInSel().forEach(t => { if (!S.taxSel[t]) S.taxSel[t] = src; });
-  S.taxSel['exp'] = 'exempt';
 }
-/* Accounts that have selected projects of a given billing type (or all accounts for expenses) */
+/* Accounts that have selected projects of a given billing type */
 function typeAccounts(t) {
-  if (t === 'exp') return selAccounts();
   return selAccounts().filter(a => selProjects().some(p => p.accountId === a.id && p.type === t));
 }
 /* Resolve tax for one account under one billing type's source → {kind: ok|exempt|block, codeId?} */
@@ -1406,10 +1410,18 @@ function renderStep2() {
         <div class="field">
           <label>Billing period</label>
           <div class="daterow">
-            <input class="inp" type="date" value="${r.from}" max="${r.to}" aria-label="${m.title} from" onchange="setRule('${t}','from',this.value)">
-            <input class="inp" type="date" value="${r.to}" min="${r.from}" aria-label="${m.title} to" onchange="setRule('${t}','to',this.value)">
+            <div class="sel-wrap"><select class="sel" onchange="setRule('${t}','periodMode',this.value)" aria-label="${m.title} period mode">
+              <option value="between" ${r.periodMode!=='upto'?'selected':''}>Between two dates</option>
+              <option value="upto"    ${r.periodMode==='upto'?'selected':''}>Up to a date</option>
+            </select></div>
+            ${r.periodMode==='upto'
+              ? `<input class="inp" type="date" value="${r.to}" aria-label="${m.title} up to" onchange="setRule('${t}','to',this.value)">`
+              : `<input class="inp" type="date" value="${r.from}" max="${r.to}" aria-label="${m.title} from" onchange="setRule('${t}','from',this.value)">
+                 <input class="inp" type="date" value="${r.to}" min="${r.from}" aria-label="${m.title} to" onchange="setRule('${t}','to',this.value)">`}
           </div>
-          <span class="mut" style="font-size:12px;">${t==='tm'?'Bills uninvoiced time logged in this range.':t==='ff'?'Bills tasks completed in this range.':'Bills periods that fall within this range.'}</span>
+          <span class="mut" style="font-size:12px;">${r.periodMode==='upto'
+            ? (t==='tm'?'Bills all uninvoiced time logged up to this date.':t==='ff'?'Bills all uninvoiced completed tasks up to this date.':'Bills all uninvoiced periods up to this date.')
+            : (t==='tm'?'Bills uninvoiced time logged in this range.':t==='ff'?'Bills tasks completed in this range.':'Bills periods that fall within this range.')}</span>
         </div>
         ${t==='tm' ? `<div class="field">
           <label>Group line items by</label>
@@ -1423,58 +1435,55 @@ function renderStep2() {
           </select></div>
           <span class="mut" style="font-size:12px;">Which task field holds the invoiceable amount for each completed task.</span>
         </div>
+        <div class="field">
+          <label>Filter tasks</label>
+          ${r.taskFilters.map((f, i) => {
+            const used = r.taskFilters.filter((x, j) => j !== i && x.field).map(x => x.field);
+            return `<div class="s1-cond" style="max-width:520px;">
+              <span class="s1-cond-where">${i === 0 ? 'Where' : 'And'}</span>
+              <div class="sel-wrap"><select class="sel" onchange="ffSetTaskFilterField(${i}, this.value)" aria-label="Task filter field">
+                <option value="" ${!f.field ? 'selected' : ''} disabled>Select...</option>
+                ${Object.entries(TASK_FILTER_FIELDS).filter(([k]) => k === f.field || !used.includes(k)).map(([k, d]) =>
+                  `<option value="${k}" ${f.field === k ? 'selected' : ''}>${d.label}</option>`).join('')}
+              </select></div>
+              ${f.field ? `<span class="s1-cond-op">is</span>
+              <div class="sel-wrap"><select class="sel" onchange="ffSetTaskFilterValue(${i}, this.value)" aria-label="Task filter value">
+                <option value="" ${!f.value ? 'selected' : ''} disabled>Select...</option>
+                ${TASK_FILTER_FIELDS[f.field].options.map(([v, l]) => `<option value="${v}" ${f.value === v ? 'selected' : ''}>${l}</option>`).join('')}
+              </select></div>` : ''}
+              <button class="btn-icon btn" style="width:26px;height:26px;color:var(--text-3);flex:none;" onclick="ffRemoveTaskFilter(${i})" aria-label="Remove task filter">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+              </button>
+            </div>`;
+          }).join('')}
+          <button class="btn btn-ghost btn-sm" style="align-self:flex-start;" onclick="ffAddTaskFilter()">+ Add filter</button>
+          <span class="mut" style="font-size:12px;">Only tasks matching these conditions are billed. Leave empty to bill all completed tasks.</span>
+        </div>
         <div class="field" onclick="event.stopPropagation()">
           <label>Line item description</label>
           <div id="desc-wrap-${t}">${renderDescAreaHtml(t)}</div>
           <span class="mut" style="font-size:12px;">Build the description template by inserting task fields. Each line item will use this pattern.</span>
         </div>` : `<p class="mut" style="font-size:12.5px;">Line items follow the subscription schedule — no grouping.</p>`}
+        <div class="field">
+          <label>Group expenses by</label>
+          <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;max-width:220px;" onchange="setRule('${t}','expGroup',this.value)" aria-label="Expense grouping for ${m.title}">
+            ${GROUPS.exp.map(([v,l]) => `<option value="${v}" ${r.expGroup===v?'selected':''}>${l}</option>`).join('')}
+          </select></div>
+          <span class="mut" style="font-size:12px;">Approved expenses in the billing period are added as line items. Expenses are always tax exempt.</span>
+        </div>
         ${gateHtml}
       </div>` : ''}
     </div>`;
   }).join('');
 
-  // Expenses card
-  const exp = S.rules.exp, expSrc = S.taxSel['exp'], expOpen = S.s2.open['exp'];
-  const expAccts = selAccounts();
-  const expGateHtml = '';
-
-  const expCardHtml = `<div class="bt-card ${expOpen ? 'open' : ''}" style="border-style:${exp.enabled?'solid':'dashed'};">
-    <div class="bt-head" onclick="toggleBtCard('exp')">
-      <label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:7px;cursor:pointer;">
-        <input type="checkbox" ${exp.enabled?'checked':''} onchange="setExpEnabled(this.checked)" aria-label="Include expenses">
-        <span class="chip" style="background:#f0f0f0;color:var(--text-2);">Expenses</span>
-      </label>
-      <span class="mut" style="font-size:12.5px;">${exp.enabled ? expAccts.length + ' account' + (expAccts.length===1?'':'s') : 'Excluded from batch'}</span>
-      <span style="flex:1;"></span>
-      ${exp.enabled ? `<span class="chip chip-skipped" style="font-size:12px;">Tax exempt</span>` : ''}
-      <svg class="bt-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
-    </div>
-    ${expOpen && exp.enabled ? `<div class="bt-body">
-      <div class="field">
-        <label>Billing period</label>
-        <div class="daterow">
-          <input class="inp" type="date" value="${exp.from}" max="${exp.to}" aria-label="Expenses from" onchange="setExpRule('from',this.value)">
-          <input class="inp" type="date" value="${exp.to}" min="${exp.from}" aria-label="Expenses to" onchange="setExpRule('to',this.value)">
-        </div>
-        <span class="mut" style="font-size:12px;">Bills all approved expenses recorded in this date range.</span>
-      </div>
-      <div class="field">
-        <label>Group line items by</label>
-        <div class="sel-wrap" style="display:flex;"><select class="sel" style="flex:1;max-width:220px;" onchange="setExpRule('group',this.value)" aria-label="Expense grouping">
-          ${GROUPS.exp.map(([v,l]) => `<option value="${v}" ${exp.group===v?'selected':''}>${l}</option>`).join('')}
-        </select></div>
-      </div>
-      ${expGateHtml}
-    </div>` : ''}
-  </div>`;
-
-  $('s2-cards').innerHTML += expCardHtml;
   renderFooter();
 }
 function toggleBtCard(t) { S.s2.open[t] = !S.s2.open[t]; renderStep2(); }
 function setRule(t, k, v) { if (v) S.rules[t][k] = v; renderStep2(); }
-function setExpRule(k, v) { if (v) S.rules.exp[k] = v; renderStep2(); }
-function setExpEnabled(on) { S.rules.exp.enabled = on; renderStep2(); }
+function ffAddTaskFilter() { S.rules.ff.taskFilters.push({ field: '', value: '' }); renderStep2(); }
+function ffSetTaskFilterField(i, v) { S.rules.ff.taskFilters[i] = { field: v, value: '' }; renderStep2(); }
+function ffSetTaskFilterValue(i, v) { S.rules.ff.taskFilters[i].value = v; renderStep2(); }
+function ffRemoveTaskFilter(i) { S.rules.ff.taskFilters.splice(i, 1); renderStep2(); }
 function setTaxSrc(t, v) { S.taxSel[t] = v; renderStep2(); }
 function resolveGate(id, code) { S.acctFix[id] = code; renderStep2(); toast(`${ACCT[id].name}: ${TAX[code].n} will be used for this batch`); }
 function exemptGate(id) { S.acctFix[id] = 'exempt'; renderStep2(); toast(`${ACCT[id].name} marked tax exempt for this batch`); }
@@ -1530,7 +1539,9 @@ function generatePreviews() {
     const a = ACCT[p.accountId];
     const res = taxResolveFor(a, p.type);
     const skip = p.flag === 'skip';
-    const range = `between ${fmtD(S.rules[p.type].from)} and ${fmtD(S.rules[p.type].to)}`;
+    const range = S.rules[p.type].periodMode === 'upto'
+      ? `up to ${fmtD(S.rules[p.type].to)}`
+      : `between ${fmtD(S.rules[p.type].from)} and ${fmtD(S.rules[p.type].to)}`;
     return {
       id: 'pv-' + p.id, projectId: p.id, accountId: a.id,
       name: p.name, account: a.name, cur: p.cur, type: p.type,
