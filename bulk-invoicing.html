@@ -283,6 +283,20 @@
   .pager button.on { background: var(--btn-ink); color: #fff; font-weight: 590; }
   .pager button:disabled { opacity: .35; cursor: not-allowed; }
   .s1-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 8px; color: var(--text-3); font-size: 13.5px; }
+  .s1-panes { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+  .s1-grouping-bar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--div); background: #fff; flex: none; }
+  .s1-seg { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+  .s1-seg-btn { padding: 4px 14px; font-size: 13px; color: var(--text-2); background: transparent; border: none; cursor: pointer; }
+  .s1-seg-btn.on { background: var(--btn-ink); color: #fff; font-weight: 590; }
+  .s1-seg-btn:not(.on):hover { background: var(--bg-soft); }
+  .s1-filter-btn.on { background: var(--bg-btn2); }
+  .s1-filter-badge { background: var(--blue); color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 11px; font-weight: 700; margin-left: 2px; }
+  .s1-filter-panel { background: #fafafa; border-bottom: 1px solid var(--div); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .s1-filter-row { display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--div); }
+  .s1-filter-label { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: .2px; min-width: 100px; }
+  .s1-filter-opts { display: flex; gap: 12px; flex-wrap: wrap; }
+  .s1-fopt { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-1); cursor: pointer; }
+  .s1-fopt input { cursor: pointer; }
 
   /* ---------- Step 2 ---------- */
   .field { display: flex; flex-direction: column; gap: 6px; }
@@ -531,7 +545,7 @@
         <div class="h2">Select accounts &amp; projects</div>
         <p class="sub" style="margin-top:3px;font-size:13px;">Only projects with uninvoiced items are shown. Each invoice bills in the account's default currency.</p>
       </div>
-      <div style="flex:1;min-height:0;display:flex;overflow:hidden;" id="s1-body"></div>
+      <div style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;" id="s1-body"></div>
     </section>
 
     <!-- STEP 2 -->
@@ -603,14 +617,14 @@ const TYPE = {
   sub: { chip: 'chip-sub', name: 'Subscription', items: 'billing periods' },
 };
 
-/* [name, type, uninvoicedCount, flag?]  flag: rate | skip | fail */
+/* [name, type, uninvoicedCount, flag?, meta?]  flag: rate | skip | fail */
 const ACCOUNTS = [
   ['brightwave', 'Brightwave Analytics', 'USD', null, [
     ['Implementation — Phase 2', 'tm', 38, 'rate'],
     ['Enterprise onboarding', 'ff', 5],
     ['Managed services', 'sub', 2],
     ['Data warehouse migration', 'tm', 22],
-    ['Analytics enablement', 'ff', 4]]],
+    ['Analytics enablement', 'ff', 4, null, {cur: 'EUR'}]]],
   ['northwind', 'Northwind Retail', 'USD', 'sales8', [
     ['POS rollout — West', 'tm', 41],
     ['Store rollout — Midwest', 'ff', 3, 'skip'],
@@ -673,9 +687,18 @@ const ACCOUNTS = [
     ['Data pipeline build', 'ff', 4]]],
 ].map(([id, name, cur, tax, projects]) => ({
   id, name, cur, tax,
-  projects: projects.map(([pn, ty, count, flag], i) => ({
-    id: id + '-p' + i, accountId: id, name: pn, type: ty, count, flag: flag || null,
-  })),
+  projects: projects.map(([pn, ty, count, flag, meta], i) => {
+    const m = meta || {};
+    return {
+      id: id + '-p' + i, accountId: id, name: pn, type: ty, count, flag: flag || null,
+      cur: m.cur || cur,
+      status: m.status || (count <= 3 ? 'completed' : 'active'),
+      completedDaysAgo: m.daysAgo != null ? m.daysAgo : (count <= 3 ? (i * 15 + 8) : null),
+      uninvoicedTypes: m.types || (ty === 'tm' ? (i % 3 === 0 ? ['time', 'expenses'] : ['time'])
+                                               : ty === 'ff' ? (i % 2 === 0 ? ['tasks', 'expenses'] : ['tasks'])
+                                               : ['tasks']),
+    };
+  }),
 }));
 
 const PROJ = {}; const ACCT = {};
@@ -744,7 +767,7 @@ const EXISTING_INVOICES = [
 const S = {
   step: 1, maxStep: 1,
   sel: new Set(),
-  s1: { acctQ: '', projQ: '', projType: 'all', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse' },
+  s1: { acctQ: '', projQ: '', projType: 'all', acctPage: 0, projPage: 0, focusAcct: 'brightwave', mode: 'browse', filterOpen: false, projStatus: 'all', completedWithin: '30', uninvoicedFilter: [], projCur: 'all' },
   s2: { open: { tm: true, ff: true, sub: true, exp: true } },
   rules: {
     tm:  { from: '2026-06-12', to: '2026-07-12', group: 'member' },
@@ -759,6 +782,7 @@ const S = {
   run: { started: false, done: false, current: -1 },
   createdInvoices: [],
   invSeq: 2046,
+  grouping: 'project',
   descFocused: null,
 };
 
@@ -949,15 +973,42 @@ function renderFooter() {
 /* ================= Step 1 ================= */
 const ACCTS_PG = 10, PROJS_PG = 8;
 
+function projectMatchesFilters(p) {
+  const st = S.s1;
+  if (st.projType !== 'all' && p.type !== st.projType) return false;
+  if (st.projStatus === 'active' && p.status !== 'active') return false;
+  if (st.projStatus === 'completed') {
+    if (p.status !== 'completed') return false;
+    if (st.completedWithin !== 'all' && p.completedDaysAgo > parseInt(st.completedWithin)) return false;
+  }
+  if (st.uninvoicedFilter.length > 0 && !st.uninvoicedFilter.some(ut => p.uninvoicedTypes.includes(ut))) return false;
+  if (st.projCur !== 'all' && p.cur !== st.projCur) return false;
+  return true;
+}
 function filteredAccounts() {
   const q = S.s1.acctQ.trim().toLowerCase();
-  return ACCOUNTS.filter(a => !q || a.name.toLowerCase().includes(q));
+  return ACCOUNTS.filter(a => (!q || a.name.toLowerCase().includes(q)) && a.projects.some(projectMatchesFilters));
 }
 function filteredProjects(acctId) {
-  const q = S.s1.projQ.trim().toLowerCase();
-  const t = S.s1.projType;
-  return ACCT[acctId].projects.filter(p =>
-    (!q || p.name.toLowerCase().includes(q)) && (t === 'all' || p.type === t));
+  const st = S.s1;
+  const q = st.projQ.trim().toLowerCase();
+  return ACCT[acctId].projects.filter(p => {
+    if (q && !p.name.toLowerCase().includes(q)) return false;
+    if (st.projType !== 'all' && p.type !== st.projType) return false;
+    if (st.projStatus === 'active' && p.status !== 'active') return false;
+    if (st.projStatus === 'completed') {
+      if (p.status !== 'completed') return false;
+      if (st.completedWithin !== 'all' && p.completedDaysAgo > parseInt(st.completedWithin)) return false;
+    }
+    if (st.uninvoicedFilter.length > 0 && !st.uninvoicedFilter.some(ut => p.uninvoicedTypes.includes(ut))) return false;
+    if (st.projCur !== 'all' && p.cur !== st.projCur) return false;
+    return true;
+  });
+}
+function allProjectCurrencies() {
+  const set = new Set();
+  ACCOUNTS.forEach(a => a.projects.forEach(p => set.add(p.cur)));
+  return [...set].sort();
 }
 function selProjectsForAcct(acctId) { return ACCT[acctId].projects.filter(p => S.sel.has(p.id)); }
 
@@ -994,6 +1045,45 @@ function renderStep1() {
     return `<div class="pager">${btns}</div>`;
   }
 
+  // Filter panel
+  const activeFilterCount = (st.projStatus !== 'all' ? 1 : 0) + st.uninvoicedFilter.length + (st.projCur !== 'all' ? 1 : 0);
+  const filterPanelHtml = st.filterOpen ? `
+  <div class="s1-filter-panel">
+    <div class="s1-filter-row">
+      <span class="s1-filter-label">Project status</span>
+      <div class="s1-filter-opts">
+        ${[['all','All'],['active','In progress'],['completed','Completed']].map(([v,l]) =>
+          `<label class="s1-fopt"><input type="radio" name="pstatus" value="${v}" ${st.projStatus===v?'checked':''} onchange="s1SetStatus('${v}')"><span>${l}</span></label>`
+        ).join('')}
+      </div>
+    </div>
+    ${st.projStatus === 'completed' ? `
+    <div class="s1-filter-row">
+      <span class="s1-filter-label">Completed within</span>
+      <div class="s1-filter-opts">
+        ${[['30','Last 30 days'],['90','Last 3 months'],['all','All time']].map(([v,l]) =>
+          `<label class="s1-fopt"><input type="radio" name="cwithin" value="${v}" ${st.completedWithin===v?'checked':''} onchange="s1SetCompletedWithin('${v}')"><span>${l}</span></label>`
+        ).join('')}
+      </div>
+    </div>` : ''}
+    <div class="s1-filter-row">
+      <span class="s1-filter-label">Has uninvoiced</span>
+      <div class="s1-filter-opts">
+        ${[['time','Time entries'],['tasks','Tasks'],['expenses','Expenses']].map(([v,l]) =>
+          `<label class="s1-fopt"><input type="checkbox" value="${v}" ${st.uninvoicedFilter.includes(v)?'checked':''} onchange="s1ToggleUninvoiced('${v}',this.checked)"><span>${l}</span></label>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="s1-filter-row" style="border-bottom:none;">
+      <span class="s1-filter-label">Currency</span>
+      <div class="sel-wrap"><select class="sel" onchange="s1SetCur(this.value)">
+        <option value="all" ${st.projCur==='all'?'selected':''}>All currencies</option>
+        ${allProjectCurrencies().map(c => `<option value="${c}" ${st.projCur===c?'selected':''}>${c}</option>`).join('')}
+      </select></div>
+      ${activeFilterCount > 0 ? `<button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="s1ClearFilters()">Clear filters</button>` : ''}
+    </div>
+  </div>` : '';
+
   // Right pane content
   let rightContent = '';
   if (st.mode === 'selected') {
@@ -1012,6 +1102,7 @@ function renderStep1() {
         <span class="s1-proj-name">${esc(p.name)}</span>
         <span class="s1-proj-acct">${esc(ACCT[p.accountId].name)}</span>
         <span class="chip ${TYPE[p.type].chip}">${TYPE[p.type].name}</span>
+        <span class="chip chip-cur" style="font-size:11px;">${p.cur}</span>
         <span class="s1-proj-cnt num">${p.count} uninvoiced ${TYPE[p.type].items}</span>
       </div>`).join('') || `<div class="s1-empty"><span>No selected projects match the filter.</span></div>`;
     rightContent = `
@@ -1030,7 +1121,12 @@ function renderStep1() {
           <option value="ff"  ${st.projType === 'ff'  ? 'selected' : ''}>Fixed fee</option>
           <option value="sub" ${st.projType === 'sub' ? 'selected' : ''}>Subscription</option>
         </select></div>
+        <button class="btn btn-ghost btn-sm s1-filter-btn ${st.filterOpen ? 'on' : ''}" onclick="s1ToggleFilter()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
+          Filter${activeFilterCount > 0 ? ` <span class="s1-filter-badge">${activeFilterCount}</span>` : ''}
+        </button>
       </div>
+      ${filterPanelHtml}
       <div class="s1-proj-scroll">${rows}</div>
       <div class="s1-right-foot">
         <span class="mut num" style="font-size:12.5px;">${filtered.length} project${filtered.length === 1 ? '' : 's'}${filtered.length < allSel.length ? ' (filtered)' : ''}</span>
@@ -1054,6 +1150,7 @@ function renderStep1() {
             onclick="event.stopPropagation()" onchange="toggleProj('${p.id}')">
           <span class="s1-proj-name">${esc(p.name)}</span>
           <span class="chip ${TYPE[p.type].chip}">${TYPE[p.type].name}</span>
+          ${p.cur !== ACCT[p.accountId].cur ? `<span class="chip chip-cur" style="font-size:11px;">${p.cur}</span>` : ''}
           <span class="s1-proj-cnt num">${p.count} uninvoiced ${TYPE[p.type].items}</span>
         </div>`).join('') || `<div class="s1-empty"><span>No projects match the filter.</span></div>`;
       rightContent = `
@@ -1076,7 +1173,12 @@ function renderStep1() {
             <option value="ff"  ${st.projType === 'ff'  ? 'selected' : ''}>Fixed fee</option>
             <option value="sub" ${st.projType === 'sub' ? 'selected' : ''}>Subscription</option>
           </select></div>
+          <button class="btn btn-ghost btn-sm s1-filter-btn ${st.filterOpen ? 'on' : ''}" onclick="s1ToggleFilter()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
+            Filter${activeFilterCount > 0 ? ` <span class="s1-filter-badge">${activeFilterCount}</span>` : ''}
+          </button>
         </div>
+        ${filterPanelHtml}
         <div class="s1-proj-scroll">${rows}</div>
         <div class="s1-right-foot">
           <span class="mut num" style="font-size:12.5px;">${projs.length} project${projs.length === 1 ? '' : 's'}${projs.length < a.projects.length ? ' (filtered)' : ''} · ${a.projects.length} total eligible</span>
@@ -1086,30 +1188,40 @@ function renderStep1() {
   }
 
   $('s1-body').innerHTML = `
-    <div class="s1-left">
-      <div class="s1-left-head">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <span class="h3">Accounts</span>
-          <span class="mut num" style="font-size:12px;">${accts.length} of ${ACCOUNTS.length}</span>
-        </div>
-        <div class="search">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
-          <input class="inp" value="${esc(st.acctQ)}" placeholder="Search accounts" oninput="s1AcctQ(this.value)" style="width:100%;">
-        </div>
+    <div class="s1-grouping-bar">
+      <span class="lbl">Invoice grouping</span>
+      <div class="s1-seg">
+        <button class="s1-seg-btn ${S.grouping === 'project' ? 'on' : ''}" onclick="setGrouping('project')">Per project</button>
+        <button class="s1-seg-btn ${S.grouping === 'account' ? 'on' : ''}" onclick="setGrouping('account')">Per account</button>
       </div>
-      <div class="s1-acct-scroll">${acctRows}</div>
-      <div class="s1-left-foot">
-        ${pagerHtml(st.acctPage, totalAcctPages, 's1AcctPage')}
-      </div>
+      ${S.grouping === 'account' ? `<span class="mut" style="font-size:12px;">Projects with the same currency are grouped into one invoice per account.</span>` : ''}
     </div>
-    <div class="s1-right">
-      <div class="s1-right-head">
-        <div class="s1-tabs">
-          <button class="s1-tab ${st.mode === 'browse' ? 'on' : ''}" onclick="s1Mode('browse')">Browse</button>
-          <button class="s1-tab ${st.mode === 'selected' ? 'on' : ''}" onclick="s1Mode('selected')">Selected (${S.sel.size})</button>
+    <div class="s1-panes">
+      <div class="s1-left">
+        <div class="s1-left-head">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span class="h3">Accounts</span>
+            <span class="mut num" style="font-size:12px;">${accts.length} of ${ACCOUNTS.length}</span>
+          </div>
+          <div class="search">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+            <input class="inp" value="${esc(st.acctQ)}" placeholder="Search accounts" oninput="s1AcctQ(this.value)" style="width:100%;">
+          </div>
+        </div>
+        <div class="s1-acct-scroll">${acctRows}</div>
+        <div class="s1-left-foot">
+          ${pagerHtml(st.acctPage, totalAcctPages, 's1AcctPage')}
         </div>
       </div>
-      ${rightContent}
+      <div class="s1-right">
+        <div class="s1-right-head">
+          <div class="s1-tabs">
+            <button class="s1-tab ${st.mode === 'browse' ? 'on' : ''}" onclick="s1Mode('browse')">Browse</button>
+            <button class="s1-tab ${st.mode === 'selected' ? 'on' : ''}" onclick="s1Mode('selected')">Selected (${S.sel.size})</button>
+          </div>
+        </div>
+        ${rightContent}
+      </div>
     </div>`;
 
   $('s1-body').querySelectorAll('input[data-ind]').forEach(cb => cb.indeterminate = true);
@@ -1126,7 +1238,18 @@ function s1ProjQ(v) { S.s1.projQ = v; S.s1.projPage = 0; renderStep1(); }
 function s1ProjType(v) { S.s1.projType = v; S.s1.projPage = 0; renderStep1(); }
 function s1AcctPage(n) { S.s1.acctPage = n; renderStep1(); }
 function s1ProjPage(n) { S.s1.projPage = n; renderStep1(); }
-function s1Mode(m) { S.s1.mode = m; S.s1.projQ = ''; S.s1.projType = 'all'; S.s1.projPage = 0; renderStep1(); }
+function s1Mode(m) { S.s1.mode = m; S.s1.projQ = ''; S.s1.projType = 'all'; S.s1.projPage = 0; S.s1.filterOpen = false; renderStep1(); }
+function setGrouping(v) { S.grouping = v; renderStep1(); }
+function s1ToggleFilter() { S.s1.filterOpen = !S.s1.filterOpen; renderStep1(); }
+function s1SetStatus(v) { S.s1.projStatus = v; S.s1.projPage = 0; renderStep1(); }
+function s1SetCompletedWithin(v) { S.s1.completedWithin = v; S.s1.projPage = 0; renderStep1(); }
+function s1ToggleUninvoiced(v, on) {
+  if (on) { if (!S.s1.uninvoicedFilter.includes(v)) S.s1.uninvoicedFilter.push(v); }
+  else S.s1.uninvoicedFilter = S.s1.uninvoicedFilter.filter(x => x !== v);
+  S.s1.projPage = 0; renderStep1();
+}
+function s1SetCur(v) { S.s1.projCur = v; S.s1.projPage = 0; renderStep1(); }
+function s1ClearFilters() { S.s1.projStatus = 'all'; S.s1.completedWithin = '30'; S.s1.uninvoicedFilter = []; S.s1.projCur = 'all'; S.s1.projPage = 0; renderStep1(); }
 
 /* ================= Desc area ================= */
 function renderDescAreaHtml(t) {
@@ -1381,7 +1504,7 @@ function pickPool(arr, seed, n) {
   const out = []; for (let i = 0; i < n; i++) out.push(arr[(seed + i * 3) % arr.length]); return out;
 }
 function makeLines(p, a) {
-  const h = hash(p.id + p.name), m = CURM[a.cur];
+  const h = hash(p.id + p.name), m = CURM[p.cur] || CURM[a.cur];
   const round = v => Math.round(v * m);
   if (p.type === 'tm') {
     const pool = POOLS.tm[S.rules.tm.group];
@@ -1415,7 +1538,7 @@ function generatePreviews() {
     const range = `between ${fmtD(S.rules[p.type].from)} and ${fmtD(S.rules[p.type].to)}`;
     return {
       id: 'pv-' + p.id, projectId: p.id, accountId: a.id,
-      name: p.name, account: a.name, cur: a.cur, type: p.type,
+      name: p.name, account: a.name, cur: p.cur, type: p.type,
       taxCode: res.kind === 'ok' ? res.codeId : null,
       skipped: skip,
       skipReason: skip ? (p.type === 'ff' ? `No tasks completed ${range}` : `No billable items ${range}`) : null,
