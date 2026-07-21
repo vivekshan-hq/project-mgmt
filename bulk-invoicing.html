@@ -193,6 +193,8 @@
   .chip-inv-review  { background: #fff3e0; color: #ad5b00; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 590; display: inline-block; }
   .chip-inv-sent    { background: #e8f0fe; color: #0f62fe; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 590; display: inline-block; }
   .chip-inv-paid    { background: #e6f4ea; color: #1a7f37; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 590; display: inline-block; }
+  .inv-link { color: var(--blue); font-weight: 590; text-decoration: none; }
+  .inv-link:hover { text-decoration: underline; }
 
   /* ---------- Desc template area ---------- */
   .desc-area { border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: text; min-height: 38px; transition: border-color .15s, box-shadow .15s; }
@@ -803,7 +805,7 @@ const S = {
   acctFix: {},  // accountId -> 'exempt' | replacement tax code id (gate resolution)
   gateShown: false,
   previews: [],
-  run: { started: false, done: false, current: -1, groups: null },
+  run: { started: false, done: false, halted: false, techUsed: false, current: -1, groups: null },
   createdInvoices: [],
   invSeq: 2046,
   grouping: 'project',
@@ -974,17 +976,22 @@ function renderFooter() {
       <button class="btn btn-pri" onclick="tryGenerate()">Continue</button>`;
   } else if (S.step === 4) {
     const items = S.run.groups || [];
+    const fails = items.filter(g => g.runState === 'fail').length;
     if (!S.run.started) {
       info.textContent = 'Invoices are created one at a time. You can retry any failures afterwards.';
       act.innerHTML = `<button class="btn btn-sec" onclick="goStep(3)">Back</button>
         <button class="btn btn-pri" onclick="startRun()">Create ${items.length} invoice${items.length === 1 ? '' : 's'}</button>`;
+    } else if (S.run.halted) {
+      const queued = items.filter(g => !g.runState).length;
+      info.innerHTML = `<span style="color:var(--error);font-weight:590;">Batch stopped by a technical error.</span> ${queued} invoice${queued === 1 ? '' : 's'} still queued.`;
+      act.innerHTML = `<button class="btn btn-pri" onclick="resumeRun()">Resume batch (${queued} remaining)</button>`;
     } else if (!S.run.done) {
       info.textContent = 'Creating invoices…';
       act.innerHTML = `<button class="btn btn-pri" disabled>Creating…</button>`;
     } else {
-      const fails = items.filter(g => g.runState === 'fail').length;
-      info.innerHTML = fails ? `<span style="color:var(--error);font-weight:590;">${fails} failed</span> — retry above or continue to the summary.` : 'All done.';
-      act.innerHTML = `<button class="btn btn-pri" onclick="goStep(5)">View summary</button>`;
+      info.innerHTML = fails ? `<span style="color:var(--error);font-weight:590;">${fails} failed</span> — retry individually, in bulk, or continue to the summary.` : 'All done.';
+      act.innerHTML = `${fails ? `<button class="btn btn-sec" onclick="retryAllFailed()" style="gap:5px;">${ic.retry} Retry all failed (${fails})</button>` : ''}
+        <button class="btn btn-pri" onclick="goStep(5)">View summary</button>`;
     }
   } else {
     info.textContent = '';
@@ -1646,10 +1653,16 @@ function showProjCol(groups) {
   const seen = new Set();
   return groups.some(g => seen.has(g.acctId) || (seen.add(g.acctId), false));
 }
+/* Failure kinds:
+   - tech: transient integration/infra error. The batch halts; remaining rows stay queued.
+           Resume continues the batch; plain Retry succeeds.
+   - data: bad data or config (deactivated tax code, missing rate, filter matched nothing).
+           The batch continues past it; plain Retry fails again until the fix action is applied. */
 function runStatusChip(g, i) {
-  if (g.runState === 'ok')   return `<span class="chip-inv-paid">Created</span>`;
-  if (g.runState === 'fail') return `<span style="background:#fde8e8;color:var(--error);font-size:12px;padding:2px 8px;border-radius:4px;font-weight:590;display:inline-block;">Failed</span>`;
-  if (g.runState === 'retrying' || (S.run.started && !S.run.done && i === S.run.current)) return `<span class="mut" style="font-size:12.5px;">Creating…</span>`;
+  if (g.runState === 'ok')   return `<span class="chip-inv-paid">Success</span>`;
+  if (g.runState === 'fail') return `<span style="background:#fde8e8;color:var(--error);font-size:12px;padding:2px 8px;border-radius:4px;font-weight:590;display:inline-block;">Failure</span>`;
+  if (g.runState === 'retrying' || (S.run.started && !S.run.done && !S.run.halted && i === S.run.current)) return `<span class="mut" style="font-size:12.5px;">Creating…</span>`;
+  if (S.run.started && !g.runState) return `<span class="mut" style="font-size:12.5px;">Queued</span>`;
   return `<span class="chip-inv-draft">Draft</span>`;
 }
 function renderStep4() {
@@ -1658,12 +1671,15 @@ function renderStep4() {
   const done = groups.filter(g => g.runState === 'ok' || g.runState === 'fail').length;
   const ok = groups.filter(g => g.runState === 'ok').length;
   const showProj = showProjCol(groups);
+  const canRetry = S.run.done || S.run.halted;
   $('s4-sub').textContent = S.run.done
     ? `Finished — ${ok} of ${groups.length} created.`
-    : S.run.started
-      ? 'Creating invoices one by one. Keep this window open.'
-      : `${groups.length} invoice${groups.length === 1 ? '' : 's'} will be created${S.grouping === 'account' ? ' — one per account and currency' : ' — one per project'}.`;
-  $('s4-progress-label').textContent = S.run.done ? 'Complete' : S.run.started ? 'Creating…' : 'Ready to create';
+    : S.run.halted
+      ? 'The batch was stopped by a technical error. Resume to continue with the queued invoices.'
+      : S.run.started
+        ? 'Creating invoices one by one. Keep this window open.'
+        : `${groups.length} invoice${groups.length === 1 ? '' : 's'} will be created${S.grouping === 'account' ? ' — one per account and currency' : ' — one per project'}.`;
+  $('s4-progress-label').textContent = S.run.done ? 'Complete' : S.run.halted ? 'Stopped' : S.run.started ? 'Creating…' : 'Ready to create';
   $('s4-progress-count').textContent = `${done} of ${groups.length} processed`;
   $('s4-progbar').style.width = groups.length ? (done / groups.length * 100) + '%' : '0%';
   $('s4-list').innerHTML = groups.length ? `
@@ -1675,22 +1691,28 @@ function renderStep4() {
         <th>Invoice number</th>
         <th class="r">Amount</th>
         <th>Invoice status</th>
-        <th style="width:90px;"></th>
+        <th style="width:170px;"></th>
       </tr></thead>
       <tbody>
         ${groups.map((g, i) => {
           let tick = '<div class="tick wait"></div>';
           if (g.runState === 'ok') tick = `<div class="tick ok">${ic.check}</div>`;
           else if (g.runState === 'fail') tick = `<div class="tick err">${ic.x}</div>`;
-          else if (g.runState === 'retrying' || (S.run.started && !S.run.done && i === S.run.current)) tick = '<div class="tick busy"></div>';
+          else if (g.runState === 'retrying' || (S.run.started && !S.run.done && !S.run.halted && i === S.run.current)) tick = '<div class="tick busy"></div>';
           return `<tr>
             <td>${tick}</td>
             <td>${acctAvatar(g.acct)}<span style="font-weight:590;">${esc(g.acct)}</span> <span class="chip chip-cur" style="font-size:11px;">${g.cur}</span></td>
             ${showProj ? `<td class="sub" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(g.projNames.join(', '))}">${esc(g.projNames.join(', '))}</td>` : ''}
-            <td class="num">${g.invNo ? `<span style="font-weight:590;">${g.invNo}</span>` : '<span class="mut">—</span>'}</td>
+            <td class="num">${g.runState === 'ok' && g.invNo
+              ? `<a class="inv-link" href="#" onclick="closeFlow();return false;" title="Open invoice">${g.invNo}</a>`
+              : '<span class="mut">—</span>'}</td>
             <td class="r num">${fmt(g.cur, g.total)}</td>
             <td>${runStatusChip(g, i)}${g.runState === 'fail' ? `<div class="run-err">${esc(g.error)}</div>` : ''}</td>
-            <td>${g.runState === 'fail' && S.run.done ? `<button class="btn btn-sm btn-ghost" onclick="retryOne('${g.gid}')" style="gap:4px;">${ic.retry} Retry</button>` : ''}</td>
+            <td>${g.runState === 'fail' && canRetry ? `
+              <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+                <button class="btn btn-sm btn-ghost" onclick="retryOne('${g.gid}')" style="gap:4px;">${ic.retry} Retry</button>
+                ${g.failKind === 'data' && !g.fixed ? `<button class="btn btn-sm btn-ghost" style="color:var(--blue);" onclick="fixAndRetry('${g.gid}')">Apply default rate &amp; retry</button>` : ''}
+              </div>` : ''}</td>
           </tr>`;
         }).join('')}
       </tbody>
@@ -1699,7 +1721,7 @@ function renderStep4() {
 }
 function createOne(g) {
   g.invNo = 'INV-' + (S.invSeq++);
-  g.runState = 'ok';
+  g.runState = 'ok'; g.failKind = null; g.error = null;
   g.pvs.forEach(p => { p.runState = 'ok'; p.invNo = g.invNo; });
   const f = S.invFields;
   S.createdInvoices.unshift({
@@ -1710,45 +1732,98 @@ function createOne(g) {
     paySt: 'Not sent',
   });
 }
-function startRun() {
-  const groups = S.run.groups || (S.run.groups = buildRunGroups());
-  S.run.started = true; S.run.done = false; S.run.current = 0;
-  renderSteps(); // lock step nav
-  let failedUsed = false;
-  const next = i => {
-    if (i >= groups.length) {
-      S.run.done = true; S.run.current = -1;
+/* Process one group: simulate the two failure kinds via project flags */
+function processGroup(g) {
+  if (!S.run.techUsed && g.pvs.some(p => PROJ[p.projectId].flag === 'fail')) {
+    S.run.techUsed = true;
+    g.runState = 'fail'; g.failKind = 'tech';
+    g.error = "Technical error — couldn't reach the accounting integration (QuickBooks).";
+    return 'halt';
+  }
+  if (!g.fixed && g.pvs.some(p => PROJ[p.projectId].flag === 'rate')) {
+    g.runState = 'fail'; g.failKind = 'data';
+    g.error = 'Data issue — a line item has hours but no unit price (no rate card found for a team member).';
+    g.dataError = g.error;
+    return 'continue';
+  }
+  createOne(g);
+  return 'continue';
+}
+function finishRun() {
+  S.run.done = true; S.run.halted = false; S.run.current = -1;
+  renderStep4();
+  const fails = S.run.groups.filter(g => g.runState === 'fail').length;
+  toast(fails ? `Batch finished — ${fails} invoice${fails === 1 ? '' : 's'} failed` : 'All invoices created', fails ? 'err' : undefined);
+}
+function runFrom(i) {
+  const groups = S.run.groups;
+  while (i < groups.length && groups[i].runState) i++; // skip already-processed rows
+  if (i >= groups.length) { finishRun(); return; }
+  S.run.current = i;
+  renderStep4();
+  setTimeout(() => {
+    const outcome = processGroup(groups[i]);
+    if (outcome === 'halt') {
+      S.run.halted = true; S.run.current = -1;
       renderStep4();
-      const fails = groups.filter(g => g.runState === 'fail').length;
-      toast(fails ? `Batch finished — ${fails} invoice${fails === 1 ? '' : 's'} failed` : 'All invoices created', fails ? 'err' : undefined);
+      toast('Batch stopped — technical error. Resume when ready.', 'err');
       return;
     }
-    S.run.current = i;
-    renderStep4();
-    setTimeout(() => {
-      const g = groups[i];
-      if (!failedUsed && g.pvs.some(p => PROJ[p.projectId].flag === 'fail')) {
-        failedUsed = true;
-        g.runState = 'fail';
-        g.error = "Couldn't reach the accounting integration (QuickBooks). The invoice wasn't created.";
-      } else {
-        createOne(g);
-      }
-      next(i + 1);
-    }, 340);
-  };
-  next(0);
+    runFrom(i + 1);
+  }, 340);
 }
-function retryOne(gid) {
+function startRun() {
+  S.run.groups = S.run.groups || buildRunGroups();
+  S.run.started = true; S.run.done = false; S.run.halted = false; S.run.techUsed = false;
+  renderSteps(); // lock step nav
+  runFrom(0);
+}
+function resumeRun() {
+  S.run.halted = false;
+  runFrom(0); // skips processed rows, continues from the first queued one
+}
+function retryOne(gid, silent) {
   const g = (S.run.groups || []).find(x => x.gid === gid);
   if (!g) return;
   g.runState = 'retrying'; g.error = null;
   renderStep4();
   setTimeout(() => {
-    createOne(g);
+    if (g.failKind === 'data' && !g.fixed) {
+      g.runState = 'fail'; g.error = g.dataError;
+      if (!silent) toast('Retry failed — fix the data issue first', 'err');
+    } else {
+      createOne(g);
+      if (!silent) toast(`${g.invNo} created on retry`);
+    }
     renderStep4();
-    toast(`${g.invNo} created on retry`);
   }, 700);
+}
+function fixAndRetry(gid) {
+  const g = (S.run.groups || []).find(x => x.gid === gid);
+  if (!g) return;
+  g.fixed = true;
+  toast('Default rate applied to the affected line item', 'info');
+  retryOne(gid);
+}
+function retryAllFailed() {
+  const fails = (S.run.groups || []).filter(g => g.runState === 'fail');
+  const step = k => {
+    if (k >= fails.length) {
+      renderStep4();
+      const left = S.run.groups.filter(g => g.runState === 'fail').length;
+      toast(left ? `${left} invoice${left === 1 ? '' : 's'} still failing — data issues need a fix before retrying` : 'All failed invoices created', left ? 'err' : undefined);
+      return;
+    }
+    const g = fails[k];
+    g.runState = 'retrying'; g.error = null;
+    renderStep4();
+    setTimeout(() => {
+      if (g.failKind === 'data' && !g.fixed) { g.runState = 'fail'; g.error = g.dataError; }
+      else createOne(g);
+      step(k + 1);
+    }, 500);
+  };
+  step(0);
 }
 
 /* ================= Summary ================= */
