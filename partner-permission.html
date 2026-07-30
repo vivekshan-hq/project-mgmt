@@ -498,6 +498,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <div class="pd-sb-item" onclick="scrollToSection('sec-chat')">Chat</div>
           <div class="pd-sb-item" onclick="scrollToSection('sec-files')">Files and Folders</div>
           <div class="pd-sb-item" onclick="scrollToSection('sec-forms')">Form responses</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-skills')">Skills matrix <span class="new-badge" style="margin-left:2px">New</span></div>
         </div>
 
         <div class="pd-main" id="pd-main">
@@ -603,10 +604,40 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           </div>
 
           <!-- Form responses -->
-          <div class="ps-block" id="sec-forms" style="border-bottom:none">
+          <div class="ps-block" id="sec-forms">
             <div class="ps-block-hd"><span class="ps-block-title">Form responses</span></div>
             <div class="cb-row"><input type="checkbox" checked id="fr-view" disabled><label for="fr-view">Can view form responses</label></div>
             <div class="cb-row"><input type="checkbox" checked id="fr-submit" disabled><label for="fr-submit">Can submit form responses</label></div>
+          </div>
+
+          <!-- Skills matrix -->
+          <div class="ps-block" id="sec-skills" style="border-bottom:none">
+            <div class="ps-block-hd"><span class="ps-block-title">Skills matrix <span class="new-badge" style="margin-left:4px">New</span></span></div>
+
+            <div class="cb-row">
+              <input type="checkbox" id="sk-manage" disabled>
+              <label for="sk-manage">Can manage skills matrix<div class="hint">Access the skills matrix page for their partner company and manage its skills.</div></label>
+            </div>
+
+            <div style="font-size:13px;font-weight:600;color:var(--t1);margin:18px 0 4px">Skill values</div>
+            <div class="hint" style="margin-bottom:8px">Determines whose skill values a partner member can see and change within their company.</div>
+
+            <div class="cb-row">
+              <input type="checkbox" id="sk-view" disabled>
+              <label for="sk-view" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+                Can view skill values
+                <span id="sk-view-pill" class="scope-pill" onclick="openSkillScopeModal('view')">Global · All team members</span>
+              </label>
+            </div>
+
+            <div class="cb-row">
+              <input type="checkbox" id="sk-edit" disabled>
+              <label for="sk-edit" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+                Can edit skill values
+                <span id="sk-edit-pill" class="scope-pill" onclick="openSkillScopeModal('edit')">Global · All team members</span>
+                <div class="hint" style="flex-basis:100%;margin-top:0">Editing a skill value requires view access. Partner members can change skill details for the members in scope.</div>
+              </label>
+            </div>
           </div>
         </div><!-- /pd-main -->
       </div>
@@ -848,6 +879,41 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
     <div class="mo-ft">
       <button class="btn btn-g" onclick="closeMo('mo-proj-scope')">Cancel</button>
       <button class="btn btn-p" onclick="saveProjScope()">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL · Skill values scope picker (centered dialog)
+════════════════════════════════════════════════════ -->
+<div class="mo-c" id="mo-skill-scope" onclick="if(event.target===this)closeMo('mo-skill-scope')">
+  <div class="mo-c-panel">
+    <div class="mo-hd">
+      <div class="mo-title" id="skill-scope-title">Skill values access</div>
+      <button class="mo-close" onclick="closeMo('mo-skill-scope')">×</button>
+    </div>
+    <div class="mo-body">
+      <div class="radio-group">
+        <label class="radio-opt">
+          <input type="radio" name="skill-scope-sel" value="global">
+          <div>
+            <div class="radio-opt-label">Global</div>
+            <div class="radio-opt-desc" id="skill-scope-global-desc">Can view the skills of all team members in their partner company.</div>
+          </div>
+        </label>
+        <label class="radio-opt">
+          <input type="radio" name="skill-scope-sel" value="mine">
+          <div>
+            <div class="radio-opt-label">Only my skills</div>
+            <div class="radio-opt-desc" id="skill-scope-mine-desc">Can view only their own skill values.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-g" onclick="closeMo('mo-skill-scope')">Cancel</button>
+      <button class="btn btn-p" onclick="saveSkillScope()">Save</button>
     </div>
   </div>
 </div>
@@ -1301,20 +1367,20 @@ function selectPset(item) {
 
 /* ── Permission set data ── */
 const PSETS = {
-  pa:  { name:'Permissive Admin',        type:'default', vis:'private', proj:'company',
-         p:{pInvite:1,pOverview:1,pHealth:1,phView:1,phEdit:1,phName:1,phDates:1,phDel:1,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:1,tDel:1,spView:1,spCreate:1,spEdit:1,spDel:1,chView:1,chSend:1,fView:1,fUpload:1,fDel:1,frView:1,frSubmit:1} },
-  pc:  { name:'Permissive Collaborator', type:'default', vis:'private', proj:'strict',
-         p:{pInvite:0,pOverview:1,pHealth:1,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:1,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:1,fDel:0,frView:1,frSubmit:1} },
-  ma:  { name:'Moderate Admin',          type:'default', vis:'shared',  proj:'company',
-         p:{pInvite:1,pOverview:1,pHealth:1,phView:1,phEdit:1,phName:1,phDates:1,phDel:0,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:1,spEdit:1,spDel:0,chView:1,chSend:1,fView:1,fUpload:1,fDel:0,frView:1,frSubmit:1} },
-  mc:  { name:'Moderate Collaborator',   type:'default', vis:'shared',  proj:'strict',
-         p:{pInvite:0,pOverview:1,pHealth:1,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:1} },
-  ra:  { name:'Restricted Admin',        type:'default', vis:'shared',  proj:'company',
-         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:1,tDates:0,tName:0,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0} },
-  rc:  { name:'Restricted Collaborator', type:'default', vis:'shared',  proj:'strict',
-         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:1,tDates:0,tName:0,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0} },
-  prl: { name:'Partner Read-Only',       type:'custom',  vis:'shared',  proj:'strict',
-         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:0,tDates:0,tName:0,tComment:0,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:0,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0} }
+  pa:  { name:'Permissive Admin',        type:'default', vis:'private', proj:'company', skViewScope:'global', skEditScope:'global',
+         p:{pInvite:1,pOverview:1,pHealth:1,phView:1,phEdit:1,phName:1,phDates:1,phDel:1,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:1,tDel:1,spView:1,spCreate:1,spEdit:1,spDel:1,chView:1,chSend:1,fView:1,fUpload:1,fDel:1,frView:1,frSubmit:1,skManage:1,skView:1,skEdit:1} },
+  pc:  { name:'Permissive Collaborator', type:'default', vis:'private', proj:'strict', skViewScope:'global', skEditScope:'mine',
+         p:{pInvite:0,pOverview:1,pHealth:1,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:1,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:1,fDel:0,frView:1,frSubmit:1,skManage:0,skView:1,skEdit:1} },
+  ma:  { name:'Moderate Admin',          type:'default', vis:'shared',  proj:'company', skViewScope:'global', skEditScope:'mine',
+         p:{pInvite:1,pOverview:1,pHealth:1,phView:1,phEdit:1,phName:1,phDates:1,phDel:0,tView:1,tCreate:1,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:1,spEdit:1,spDel:0,chView:1,chSend:1,fView:1,fUpload:1,fDel:0,frView:1,frSubmit:1,skManage:1,skView:1,skEdit:1} },
+  mc:  { name:'Moderate Collaborator',   type:'default', vis:'shared',  proj:'strict', skViewScope:'mine',   skEditScope:'mine',
+         p:{pInvite:0,pOverview:1,pHealth:1,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:1,tAssignee:1,tStatus:1,tDates:1,tName:1,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:1,skManage:0,skView:1,skEdit:0} },
+  ra:  { name:'Restricted Admin',        type:'default', vis:'shared',  proj:'company', skViewScope:'mine',   skEditScope:'mine',
+         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:1,tDates:0,tName:0,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0,skManage:0,skView:1,skEdit:0} },
+  rc:  { name:'Restricted Collaborator', type:'default', vis:'shared',  proj:'strict', skViewScope:'mine',   skEditScope:'mine',
+         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:1,tDates:0,tName:0,tComment:1,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:1,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0,skManage:0,skView:1,skEdit:0} },
+  prl: { name:'Partner Read-Only',       type:'custom',  vis:'shared',  proj:'strict', skViewScope:'mine',   skEditScope:'mine',
+         p:{pInvite:0,pOverview:1,pHealth:0,phView:1,phEdit:0,phName:0,phDates:0,phDel:0,tView:1,tCreate:0,tEdit:0,tAssignee:0,tStatus:0,tDates:0,tName:0,tComment:0,tPrivate:0,tDel:0,spView:1,spCreate:0,spEdit:0,spDel:0,chView:1,chSend:0,fView:1,fUpload:0,fDel:0,frView:1,frSubmit:0,skManage:0,skView:1,skEdit:0} }
 };
 const CB_MAP = {
   'p-invite':'pInvite','p-overview':'pOverview','p-health':'pHealth',
@@ -1325,7 +1391,8 @@ const CB_MAP = {
   'sp-view':'spView','sp-create':'spCreate','sp-edit':'spEdit','sp-del':'spDel',
   'ch-view':'chView','ch-send':'chSend',
   'f-view':'fView','f-upload':'fUpload','f-del':'fDel',
-  'fr-view':'frView','fr-submit':'frSubmit'
+  'fr-view':'frView','fr-submit':'frSubmit',
+  'sk-manage':'skManage','sk-view':'skView','sk-edit':'skEdit'
 };
 
 function openPset(key) {
@@ -1367,6 +1434,22 @@ function openPset(key) {
     if (cb) cb.checked = !!ps.p[key];
   });
 
+  // Skill values scope pills — shown only when the permission is enabled
+  const skViewPill = document.getElementById('sk-view-pill');
+  if (skViewPill) {
+    const sv = ps.skViewScope || 'global';
+    skViewPill.dataset.val = sv;
+    skViewPill.textContent = SKILL_SCOPE[sv].name;
+    skViewPill.style.display = ps.p.skView ? '' : 'none';
+  }
+  const skEditPill = document.getElementById('sk-edit-pill');
+  if (skEditPill) {
+    const se = ps.skEditScope || 'global';
+    skEditPill.dataset.val = se;
+    skEditPill.textContent = SKILL_SCOPE[se].name;
+    skEditPill.style.display = ps.p.skEdit ? '' : 'none';
+  }
+
   go('s2', 'pb4');
 }
 
@@ -1391,6 +1474,38 @@ function saveProjScope() {
   const s = PROJ_SCOPE[sel.value];
   pill.textContent = s.name;
   document.getElementById('mo-proj-scope').classList.remove('on');
+}
+
+/* ── Skill values scope picker ── */
+const SKILL_SCOPE = {
+  global: { name: 'Global · All team members' },
+  mine:   { name: 'Only my skills' }
+};
+let skillScopeTarget = 'view';
+
+function openSkillScopeModal(which) {
+  skillScopeTarget = which;
+  const pill = document.getElementById('sk-' + which + '-pill');
+  const val = pill ? (pill.dataset.val || 'global') : 'global';
+  const verb = which === 'edit' ? 'edit' : 'view';
+  document.getElementById('skill-scope-title').textContent =
+    which === 'edit' ? 'Edit skill values access' : 'View skill values access';
+  document.getElementById('skill-scope-global-desc').textContent =
+    'Can ' + verb + ' the skills of all team members in their partner company.';
+  document.getElementById('skill-scope-mine-desc').textContent =
+    'Can ' + verb + ' only their own skill values.';
+  const opt = document.querySelector('input[name="skill-scope-sel"][value="' + val + '"]');
+  if (opt) opt.checked = true;
+  document.getElementById('mo-skill-scope').classList.add('on');
+}
+
+function saveSkillScope() {
+  const sel = document.querySelector('input[name="skill-scope-sel"]:checked');
+  if (!sel) return;
+  const pill = document.getElementById('sk-' + skillScopeTarget + '-pill');
+  pill.dataset.val = sel.value;
+  pill.textContent = SKILL_SCOPE[sel.value].name;
+  document.getElementById('mo-skill-scope').classList.remove('on');
 }
 
 /* ── Create partner ── */
@@ -1494,7 +1609,7 @@ function populatePartnerProfile(p) {
 function scrollToSection(id) {
   document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
   document.querySelectorAll('.pd-sb-item').forEach(i => i.classList.remove('on'));
-  const labels = ['sec-projects','sec-phase','sec-tasks','sec-spaces','sec-chat','sec-files','sec-forms'];
+  const labels = ['sec-projects','sec-phase','sec-tasks','sec-spaces','sec-chat','sec-files','sec-forms','sec-skills'];
   const idx = labels.indexOf(id);
   if (idx >= 0) document.querySelectorAll('.pd-sb-item')[idx].classList.add('on');
 }
