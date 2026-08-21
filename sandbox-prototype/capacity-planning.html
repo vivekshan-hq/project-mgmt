@@ -93,6 +93,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .row-supply-child>td{background:#f7fff9;}
 .row-gap>td{background:#fff1f1;font-weight:700;color:#da1e28;}
 .row-gap-pos>td{background:#f0fff4;font-weight:700;color:#24a148;}
+.row-unresolved>td{background:#fff8f0;color:#92400e;}
 
 .cs-i1>td:first-child{padding-left:28px;}
 .cs-i2>td:first-child{padding-left:44px;}
@@ -340,6 +341,7 @@ const ROLES = [
     allocAssignedSoft:   [ 40, 50, 26, 40, 56, 52, 22, 10, 10, 12, 10],
     allocUnassignedHard: [ 18, 20, 10, 17, 23, 21,  9,  4,  4,  5,  4],
     allocUnassignedSoft: [ 10, 12,  7, 11, 14, 13,  8,  4,  4,  4,  4],
+    allocUnresolved:     [ 20, 30, 15, 20, 30, 25, 10,  8,  8, 10,  8],
     capTeamMembers:      [2000,2000,2000,2050,2120,2154,2160,2202,2200,2200,2200],
     capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
     capTimeOff:          [  60,  60,  60,  60,  70,  80,  70,  70,  60,  60,  60],
@@ -351,6 +353,7 @@ const ROLES = [
     allocAssignedSoft:   [ 10, 28, 21, 15, 35, 24, 13, 11,  7,  6, 10],
     allocUnassignedHard: [  5, 12,  9,  7, 13,  9,  5,  4,  3,  3,  4],
     allocUnassignedSoft: [  2,  5,  4,  3,  7,  5,  3,  2,  2,  2,  2],
+    allocUnresolved:     [  8, 15, 12,  8, 18, 12,  8,  5,  4,  4,  6],
     capTeamMembers:      [ 500, 500, 500, 500, 545, 545, 545, 560, 560, 560, 560],
     capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
     capTimeOff:          [  10,  10,  10,  10,  15,  15,  15,  20,  20,  20,  20],
@@ -362,6 +365,7 @@ const ROLES = [
     allocAssignedSoft:   [ 72, 65,103, 53,130,203, 28, 20, 10, 15, 20],
     allocUnassignedHard: [ 32, 29, 46, 24, 57, 89, 12,  9,  5,  7,  9],
     allocUnassignedSoft: [ 16, 15, 22, 11, 26, 43,  6,  4,  2,  3,  4],
+    allocUnresolved:     [ 40, 35, 60, 30, 70,110, 15, 10,  5,  8, 10],
     capTeamMembers:      [ 960, 960, 960, 960,1020,1020,1020,1040,1040,1040,1040],
     capPartners:         [  40,  40,  40,  40,  40,  40,  40,  45,  45,  45,  45],
     capTimeOff:          [  30,  30,  30,  30,  30,  30,  30,  35,  35,  35,  35],
@@ -373,6 +377,7 @@ const ROLES = [
     allocAssignedSoft:   [126, 97,153,117, 87,100, 70, 67, 55, 60, 65],
     allocUnassignedHard: [ 56, 43, 68, 52, 39, 45, 31, 30, 25, 27, 29],
     allocUnassignedSoft: [ 28, 22, 33, 26, 20, 22, 16, 15, 12, 13, 14],
+    allocUnresolved:     [ 60, 45, 80, 55, 40, 50, 35, 30, 25, 28, 32],
     capTeamMembers:      [ 760, 760, 760, 785, 820, 820, 820, 845, 845, 845, 845],
     capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
     capTimeOff:          [  30,  30,  30,  35,  30,  30,  30,  35,  35,  35,  35],
@@ -384,6 +389,7 @@ const ROLES = [
     allocAssignedSoft:   [201,271,170,210,327, 650,153,100, 70, 65, 78],
     allocUnassignedHard: [ 89,120, 76, 93,146, 289, 68, 45, 31, 29, 35],
     allocUnassignedSoft: [ 45, 60, 37, 47, 73, 145, 33, 22, 16, 14, 16],
+    allocUnresolved:     [100,140, 90,110,180, 350, 80, 50, 35, 32, 40],
     capTeamMembers:      [1520,1520,1520,1560,1640,1640,1640,1680,1680,1680,1680],
     capPartners:         [   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
     capTimeOff:          [  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60],
@@ -456,7 +462,7 @@ function rTotalCap(r)        { return r.capTeamMembers.map((_,i) => r.capTeamMem
 
 const rsOpen = {};
 function getRsState(id) {
-  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, assigned:true, unassigned:true, cap:true };
+  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, assigned:true, unassigned:true, unresolved:true, cap:true };
   return rsOpen[id];
 }
 
@@ -470,7 +476,8 @@ function renderRS() {
     const s       = getRsState(r.id);
     const assigned   = settings.ignoreSoft ? r.allocAssignedHard.slice() : rAssignedAlloc(r);
     const unassigned = settings.ignoreSoft ? r.allocUnassignedHard.slice() : rUnassignedAlloc(r);
-    const alloc   = assigned.map((v,i) => v + unassigned[i]);
+    const unresolved = r.allocUnresolved || new Array(WEEKS.length).fill(0);
+    const alloc   = assigned.map((v,i) => v + unassigned[i] + unresolved[i]);
     const cap     = rTotalCap(r);
     const gap     = cap.map((c,i) => c - alloc[i]);
     const pcts    = alloc.map((a,i) => Math.round(a / cap[i] * 100));
@@ -490,9 +497,9 @@ function renderRS() {
 
     if (!s.role) return;
 
-    // ── Allocations ──
+    // ── Demand ──
     html += `<tr class="row-demand cs-i1" onclick="toggleRole('${r.id}','alloc')">
-      <td><button class="collapse-btn">${s.alloc?'▾':'▸'}</button> &nbsp;Allocations</td>
+      <td><button class="collapse-btn">${s.alloc?'▾':'▸'}</button> &nbsp;Demand</td>
       ${alloc.map(v=>`<td>${fmt(v)}</td>`).join('')}
     </tr>`;
 
@@ -500,9 +507,9 @@ function renderRS() {
       const projs = PROJECT_DATA[r.id] || { assigned: [], unassigned: [] };
       const showP = settings.showProjects;
 
-      // Assigned row
+      // Team Member Allocation row
       html += `<tr class="row-demand-child cs-i2" ${showP?`onclick="toggleRole('${r.id}','assigned')" style="cursor:pointer;"`:''}>
-        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.assigned?'▾':'▸'}</button> &nbsp;`:''}Assigned</td>
+        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.assigned?'▾':'▸'}</button> &nbsp;`:''}Team Member Allocation</td>
         ${assigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
       if (showP && s.assigned) {
@@ -519,9 +526,9 @@ function renderRS() {
         });
       }
 
-      // Unassigned row
+      // Placeholder Allocation row
       html += `<tr class="row-forecast cs-i2" ${showP?`onclick="toggleRole('${r.id}','unassigned')" style="cursor:pointer;"`:''}>
-        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> &nbsp;`:''}Unassigned</td>
+        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> &nbsp;`:''}Placeholder Allocation</td>
         ${unassigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
       if (showP && s.unassigned) {
@@ -537,6 +544,12 @@ function renderRS() {
           </tr>`;
         });
       }
+
+      // Unresolved Resource Request row
+      html += `<tr class="row-unresolved cs-i2">
+        <td style="padding-left:44px;">Unresolved Resource Request</td>
+        ${unresolved.map(v=>`<td>${fmt(v)}</td>`).join('')}
+      </tr>`;
     }
 
     // ── Capacity ──
