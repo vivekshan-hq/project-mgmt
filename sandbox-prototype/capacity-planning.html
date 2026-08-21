@@ -560,8 +560,7 @@ function renderRS() {
 
     if (s.cap) {
       html += `<tr class="row-supply-child cs-i2"><td>Team Members</td>${r.capTeamMembers.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
-      if (r.capPartners.some(v=>v>0))
-        html += `<tr class="row-supply-child cs-i2"><td>Partners</td>${r.capPartners.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
+      html += `<tr class="row-supply-child cs-i2"><td>Partners</td>${r.capPartners.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`;
       html += `<tr class="row-supply-child cs-i2"><td style="color:#da1e28;">Time Off</td>${r.capTimeOff.map(v=>`<td style="color:#da1e28;">-${fmt(v)}</td>`).join('')}</tr>`;
       html += `<tr class="row-supply-child cs-i2"><td style="color:#da1e28;">Holidays</td>${r.capHolidays.map(v=>`<td style="color:#da1e28;">-${fmt(v)}</td>`).join('')}</tr>`;
     }
