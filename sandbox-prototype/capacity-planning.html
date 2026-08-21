@@ -574,6 +574,7 @@ function toggleRole(id, section) {
 // ══════════════════════════════════════════════════
 let chartPeriod = 'week';
 let roleChart = null;
+let _tooltipHoverMode = 'line';
 
 const WEEK_LABELS = ['02-06','09-13','16-20','23-27','02-06','09-13','16-20','23-27','30-03','06-10','13-17'];
 const WEEK_MONTH_PREFIX = ['Feb','Feb','Feb','Feb','Mar','Mar','Mar','Mar','Mar','Apr','Apr'];
@@ -585,29 +586,35 @@ const MONTH_GROUPS = [
 
 function getChartData() {
   const n = WEEK_LABELS.length;
-  const tcW = new Array(n).fill(0);
-  const acW = new Array(n).fill(0);
-  const asW = new Array(n).fill(0);
-  const unW = new Array(n).fill(0);
+  const tcW  = new Array(n).fill(0);
+  const acW  = new Array(n).fill(0);
+  const asW  = new Array(n).fill(0);
+  const unW  = new Array(n).fill(0);
+  const holW = new Array(n).fill(0);
+  const toW  = new Array(n).fill(0);
 
   ROLES.forEach(r => {
     for (let i = 0; i < n; i++) {
       const tc = r.capTeamMembers[i] + r.capPartners[i];
-      tcW[i] += tc;
-      acW[i] += tc - r.capTimeOff[i] - r.capHolidays[i];
-      asW[i] += settings.ignoreSoft ? r.allocAssignedHard[i] : r.allocAssignedHard[i] + r.allocAssignedSoft[i];
-      unW[i] += settings.ignoreSoft ? r.allocUnassignedHard[i] : r.allocUnassignedHard[i] + r.allocUnassignedSoft[i];
+      tcW[i]  += tc;
+      acW[i]  += tc - r.capTimeOff[i] - r.capHolidays[i];
+      asW[i]  += settings.ignoreSoft ? r.allocAssignedHard[i] : r.allocAssignedHard[i] + r.allocAssignedSoft[i];
+      unW[i]  += settings.ignoreSoft ? r.allocUnassignedHard[i] : r.allocUnassignedHard[i] + r.allocUnassignedSoft[i];
+      holW[i] += r.capHolidays[i];
+      toW[i]  += r.capTimeOff[i];
     }
   });
 
   if (chartPeriod === 'week') {
     const cv = v => csUnit === 'fte' ? parseFloat((v/40).toFixed(1)) : v;
     return {
-      labels:    WEEK_LABELS.map((w,i) => WEEK_MONTH_PREFIX[i] + ' ' + w),
-      totalCap:  tcW.map(cv),
-      availCap:  acW.map(cv),
-      assigned:  asW.map(cv),
+      labels:     WEEK_LABELS.map((w,i) => WEEK_MONTH_PREFIX[i] + ' ' + w),
+      totalCap:   tcW.map(cv),
+      availCap:   acW.map(cv),
+      assigned:   asW.map(cv),
       unassigned: unW.map(cv),
+      holidays:   holW.map(cv),
+      timeOff:    toW.map(cv),
     };
   }
 
@@ -616,16 +623,18 @@ function getChartData() {
     return csUnit === 'fte' ? parseFloat((sum / g.indices.length / 40).toFixed(1)) : sum;
   });
   return {
-    labels:    MONTH_GROUPS.map(g => g.label),
-    totalCap:  agg(tcW),
-    availCap:  agg(acW),
-    assigned:  agg(asW),
+    labels:     MONTH_GROUPS.map(g => g.label),
+    totalCap:   agg(tcW),
+    availCap:   agg(acW),
+    assigned:   agg(asW),
     unassigned: agg(unW),
+    holidays:   agg(holW),
+    timeOff:    agg(toW),
   };
 }
 
 function renderRoleChart() {
-  const { labels, totalCap, availCap, assigned, unassigned } = getChartData();
+  const { labels, totalCap, availCap, assigned, unassigned, holidays, timeOff } = getChartData();
   const yLabel = csUnit === 'fte' ? 'FTE' : 'Hours';
 
   const ctx = document.getElementById('role-chart').getContext('2d');
@@ -636,12 +645,16 @@ function renderRoleChart() {
     data: {
       labels,
       datasets: [
-        { label:'Unassigned', data:unassigned, backgroundColor:'#f59e0b', stack:'alloc', order:2 },
-        { label:'Assigned',   data:assigned,   backgroundColor:'#0f62fe', stack:'alloc', order:2,
+        { label:'Unassigned Allocation', data:unassigned, backgroundColor:'#f59e0b', stack:'alloc', order:2 },
+        { label:'Assigned Allocation',   data:assigned,   backgroundColor:'#0f62fe', stack:'alloc', order:2,
           borderWidth:{bottom:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false },
-        { label:'Available Capacity', data:availCap,   type:'line', borderColor:'#161616', borderWidth:2,
+        { label:'Holidays', data:holidays, type:'line', borderColor:'#da1e28', borderWidth:0,
+          pointRadius:0, pointHoverRadius:0, fill:false, tension:0, order:1 },
+        { label:'Time Off', data:timeOff,  type:'line', borderColor:'#f59e0b', borderWidth:0,
+          pointRadius:0, pointHoverRadius:0, fill:false, tension:0, order:1 },
+        { label:'Available Capacity', data:availCap, type:'line', borderColor:'#161616', borderWidth:2,
           pointRadius:3, pointBackgroundColor:'#161616', fill:false, tension:0.3, order:1 },
-        { label:'Total Capacity',     data:totalCap,   type:'line', borderColor:'#8d8d8d', borderWidth:2,
+        { label:'Total Capacity',     data:totalCap, type:'line', borderColor:'#8d8d8d', borderWidth:2,
           borderDash:[6,3], pointRadius:2, pointBackgroundColor:'#8d8d8d', fill:false, tension:0.3, order:1 },
       ],
     },
@@ -649,18 +662,45 @@ function renderRoleChart() {
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode:'index', intersect:false },
+      onHover: function(event, elements, chart) {
+        if (!event.native) return;
+        const direct = chart.getElementsAtEventForMode(event.native, 'nearest', { intersect: true }, false);
+        if (direct.length > 0) {
+          const ds = chart.data.datasets[direct[0].datasetIndex];
+          _tooltipHoverMode = (!ds.type || ds.type === 'bar') ? 'bar' : 'line';
+        } else {
+          _tooltipHoverMode = 'line';
+        }
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
+          filter: function(item) {
+            const lbl = item.dataset.label;
+            if (_tooltipHoverMode === 'bar') {
+              return lbl === 'Unassigned Allocation' || lbl === 'Assigned Allocation';
+            }
+            return lbl === 'Total Capacity' || lbl === 'Holidays' || lbl === 'Time Off' || lbl === 'Available Capacity';
+          },
           itemSort: (a, b) => {
-            const order = ['Total Capacity','Available Capacity','Assigned','Unassigned'];
+            if (_tooltipHoverMode === 'bar') {
+              const order = ['Unassigned Allocation', 'Assigned Allocation'];
+              return order.indexOf(a.dataset.label) - order.indexOf(b.dataset.label);
+            }
+            const order = ['Total Capacity', 'Holidays', 'Time Off', 'Available Capacity'];
             return order.indexOf(a.dataset.label) - order.indexOf(b.dataset.label);
           },
           callbacks: {
             label: c => ` ${c.dataset.label}: ${csUnit==='fte' ? c.raw.toFixed(1)+' FTE' : Number(c.raw).toLocaleString()+' hrs'}`,
             footer: items => {
+              if (_tooltipHoverMode === 'bar' || !items.length) return '';
               const get = lbl => items.find(i => i.dataset.label === lbl)?.raw || 0;
-              const surplus = get('Available Capacity') - get('Assigned') - get('Unassigned');
+              const avail = get('Available Capacity');
+              const idx = items[0].dataIndex;
+              const ds = items[0].chart.data.datasets;
+              const asgn   = ds.find(d => d.label === 'Assigned Allocation')?.data[idx]   || 0;
+              const unasgn = ds.find(d => d.label === 'Unassigned Allocation')?.data[idx] || 0;
+              const surplus = avail - asgn - unasgn;
               const fmt = v => csUnit==='fte' ? (v>=0?'+':'')+v.toFixed(1)+' FTE' : (v>=0?'+':'')+Math.round(v).toLocaleString()+' hrs';
               return 'Surplus Capacity: ' + fmt(surplus);
             },
