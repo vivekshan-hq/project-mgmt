@@ -463,14 +463,16 @@ function renderRS() {
   let html = '';
   ROLES.forEach(r => {
     const s       = getRsState(r.id);
-    const assigned   = allocType === 'hard' ? r.allocAssignedHard.slice() :
-                       allocType === 'soft' ? rAssignedSoft(r) : rAssignedAlloc(r);
-    const unassigned = allocType === 'hard' ? r.allocUnassignedHard.slice() :
-                       allocType === 'soft' ? rUnassignedSoft(r) : rUnassignedAlloc(r);
+    // Hard and Both modes both display hard-only numbers so table matches chart bars.
+    // Soft mode displays soft-only numbers.
+    const assigned   = allocType === 'soft' ? rAssignedSoft(r)   : r.allocAssignedHard.slice();
+    const unassigned = allocType === 'soft' ? rUnassignedSoft(r) : r.allocUnassignedHard.slice();
     const unresolved = r.allocUnresolved || new Array(WEEKS.length).fill(0);
     const alloc      = assigned.map((v,i) => v + unassigned[i] + unresolved[i]);
     const cap        = rTotalCap(r);
     const gap        = cap.map((c,i) => c - alloc[i]);
+    // Soft demand used only for Net Gap (incl. Tentative) in Both mode
+    const softDemand = r.allocAssignedSoft.map((_,i) => r.allocAssignedSoft[i] + r.allocUnassignedSoft[i]);
     // Heatmap always colors off hard utilization
     const hardDemand = r.allocAssignedHard.map((_,i) => r.allocAssignedHard[i] + r.allocUnassignedHard[i] + unresolved[i]);
     const pcts       = hardDemand.map((a,i) => Math.round(a / cap[i] * 100));
@@ -560,14 +562,14 @@ function renderRS() {
 
     // ── Net Gap ──
     if (allocType === 'both') {
-      const hardGap = cap.map((c,i) => c - hardDemand[i]);
-      html += `<tr class="${hardGap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
+      const tentativeGap = cap.map((c,i) => c - alloc[i] - softDemand[i]);
+      html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
         <td>Net Gap (Committed)</td>
-        ${hardGap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
+        ${gap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
       </tr>`;
       html += `<tr class="row-gap-secondary cs-i1">
         <td style="padding-left:12px;font-style:italic;">Net Gap (incl. Tentative)</td>
-        ${gap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
+        ${tentativeGap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
       </tr>`;
     } else {
       html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
