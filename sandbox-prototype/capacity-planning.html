@@ -613,6 +613,7 @@ function getChartData() {
   const asSW  = new Array(n).fill(0);
   const unHW  = new Array(n).fill(0);
   const unSW  = new Array(n).fill(0);
+  const urW   = new Array(n).fill(0);
   const holW  = new Array(n).fill(0);
   const toW   = new Array(n).fill(0);
 
@@ -625,6 +626,7 @@ function getChartData() {
       asSW[i] += r.allocAssignedSoft[i];
       unHW[i] += r.allocUnassignedHard[i];
       unSW[i] += r.allocUnassignedSoft[i];
+      urW[i]  += r.allocUnresolved ? r.allocUnresolved[i] : 0;
       holW[i] += r.capHolidays[i];
       toW[i]  += r.capTimeOff[i];
     }
@@ -640,6 +642,7 @@ function getChartData() {
       assignedSoft:    asSW.map(cv),
       unassignedHard:  unHW.map(cv),
       unassignedSoft:  unSW.map(cv),
+      unresolvedReq:   urW.map(cv),
       holidays:        holW.map(cv),
       timeOff:         toW.map(cv),
     };
@@ -657,6 +660,7 @@ function getChartData() {
     assignedSoft:    agg(asSW),
     unassignedHard:  agg(unHW),
     unassignedSoft:  agg(unSW),
+    unresolvedReq:   agg(urW),
     holidays:        agg(holW),
     timeOff:         agg(toW),
   };
@@ -751,6 +755,7 @@ function renderLegend() {
   if (!isSoft) {
     h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span>${isBoth?'Unassigned (Hard)':'Unassigned Allocation'}</span>`;
     h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0f62fe;"></span>${isBoth?'Assigned (Hard)':'Assigned Allocation'}</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#d02670;"></span>Unresolved Resource Request</span>`;
   }
   if (isSoft) {
     h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.5);"></span>Unassigned (Soft)</span>`;
@@ -770,8 +775,8 @@ function renderLegend() {
 }
 
 function renderRoleChart() {
-  const { labels, totalCap, availCap, assignedHard, assignedSoft, unassignedHard, unassignedSoft, holidays, timeOff } = getChartData();
-  const totalDemand = assignedHard.map((v,i) => v + assignedSoft[i] + unassignedHard[i] + unassignedSoft[i]);
+  const { labels, totalCap, availCap, assignedHard, assignedSoft, unassignedHard, unassignedSoft, unresolvedReq, holidays, timeOff } = getChartData();
+  const totalDemand = assignedHard.map((v,i) => v + assignedSoft[i] + unassignedHard[i] + unassignedSoft[i] + unresolvedReq[i]);
   const yLabel = csUnit === 'fte' ? 'FTE' : 'Hours';
 
   // Build bar datasets based on allocType / chartStyle
@@ -783,9 +788,10 @@ function renderRoleChart() {
     ];
   } else {
     barDs = [
-      { label:'Unassigned Allocation', data:unassignedHard, backgroundColor:'#f59e0b', stack:'alloc', order:2 },
-      { label:'Assigned Allocation',   data:assignedHard,   backgroundColor:'#0f62fe', stack:'alloc', order:2,
+      { label:'Unassigned Allocation',        data:unassignedHard,  backgroundColor:'#f59e0b', stack:'alloc', order:2 },
+      { label:'Assigned Allocation',          data:assignedHard,    backgroundColor:'#0f62fe', stack:'alloc', order:2,
         borderWidth:{bottom:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false },
+      { label:'Unresolved Resource Request',  data:unresolvedReq,   backgroundColor:'#d02670', stack:'alloc', order:2 },
     ];
     if (allocType === 'both' && chartStyle === 'B') {
       barDs.push(
@@ -846,7 +852,7 @@ function renderRoleChart() {
           },
           itemSort: (a, b) => {
             if (_tooltipHoverMode === 'bar') {
-              const o = ['Unassigned Allocation','Assigned Allocation','Unassigned (Soft)','Assigned (Soft)'];
+              const o = ['Unassigned Allocation','Assigned Allocation','Unresolved Resource Request','Unassigned (Soft)','Assigned (Soft)'];
               return o.indexOf(a.dataset.label) - o.indexOf(b.dataset.label);
             }
             const o = ['Total Capacity','Holidays','Time Off','Available Capacity','Total Demand (incl. Soft)'];
@@ -859,9 +865,10 @@ function renderRoleChart() {
               const avail = get('Available Capacity');
               const idx = items[0].dataIndex;
               const ds = items[0].chart.data.datasets;
-              const asgn   = ds.find(d => d.label === 'Assigned Allocation')?.data[idx]   || 0;
-              const unasgn = ds.find(d => d.label === 'Unassigned Allocation')?.data[idx] || 0;
-              const surplus = avail - asgn - unasgn;
+              const asgn   = ds.find(d => d.label === 'Assigned Allocation')?.data[idx]          || 0;
+              const unasgn = ds.find(d => d.label === 'Unassigned Allocation')?.data[idx]       || 0;
+              const unres  = ds.find(d => d.label === 'Unresolved Resource Request')?.data[idx] || 0;
+              const surplus = avail - asgn - unasgn - unres;
               const fmt = v => csUnit==='fte' ? (v>=0?'+':'')+v.toFixed(2)+' FTE' : (v>=0?'+':'')+Math.round(v).toLocaleString()+' hrs';
               return 'Surplus Capacity: ' + fmt(surplus);
             },
