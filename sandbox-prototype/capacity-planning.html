@@ -600,7 +600,6 @@ let chartPeriod = 'week';
 let roleChart = null;
 let _tooltipHoverMode = 'line';
 let allocType = 'both'; // 'hard' | 'both' | 'soft'
-let chartStyle = 'A';   // 'A' = dashed demand line | 'B' = stacked soft bars
 
 const WEEK_LABELS = ['02-06','09-13','16-20','23-27','02-06','09-13','16-20','23-27','30-03','06-10','13-17'];
 const WEEK_MONTH_PREFIX = ['Feb','Feb','Feb','Feb','Mar','Mar','Mar','Mar','Mar','Apr','Apr'];
@@ -749,29 +748,17 @@ function renderLegend() {
   const isSoft = allocType === 'soft';
   let h = '';
 
-  if (isBoth) {
-    h += `<span style="color:#8d8d8d;font-size:12px;margin-right:2px;">Style:</span>` +
-      `<div class="toggle-grp" style="padding:1px;gap:1px;margin-right:10px;">` +
-      `<button class="tgl ${chartStyle==='A'?'active':''}" onclick="switchChartStyle('A')" style="height:22px;font-size:11px;padding:0 9px;">A</button>` +
-      `<button class="tgl ${chartStyle==='B'?'active':''}" onclick="switchChartStyle('B')" style="height:22px;font-size:11px;padding:0 9px;">B</button>` +
-      `</div>`;
-  }
-
   if (!isSoft) {
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span>${isBoth?'Unassigned (Hard)':'Unassigned Allocation'}</span>`;
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0f62fe;"></span>${isBoth?'Assigned (Hard)':'Assigned Allocation'}</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span>Unassigned Allocation</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0f62fe;"></span>Assigned Allocation</span>`;
     h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#d02670;"></span>Unresolved Resource Request</span>`;
   }
   if (isSoft) {
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.5);"></span>Unassigned (Soft)</span>`;
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(15,98,254,0.5);"></span>Assigned (Soft)</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.5);"></span>Unassigned Allocation</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(15,98,254,0.5);"></span>Assigned Allocation</span>`;
   }
-  if (isBoth && chartStyle === 'A') {
+  if (isBoth) {
     h += `<span class="cli"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#6929c4" stroke-width="2" stroke-dasharray="5,3"/></svg> Total Demand (incl. Soft)</span>`;
-  }
-  if (isBoth && chartStyle === 'B') {
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.35);border:1px dashed #f59e0b;"></span>Unassigned (Soft)</span>`;
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(15,98,254,0.35);border:1px dashed #0f62fe;"></span>Assigned (Soft)</span>`;
   }
   h += `<span class="cli cli-tip"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#161616" stroke-width="2"/></svg> Available Capacity<span class="cli-tooltip">Total Capacity − Holidays − Time offs</span></span>`;
   h += `<span class="cli"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#8d8d8d" stroke-width="2" stroke-dasharray="4,3"/></svg> Total Capacity</span>`;
@@ -798,16 +785,10 @@ function renderRoleChart() {
         borderWidth:{bottom:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false },
       { label:'Unresolved Resource Request',  data:unresolvedReq,   backgroundColor:'#d02670', stack:'alloc', order:2 },
     ];
-    if (allocType === 'both' && chartStyle === 'B') {
-      barDs.push(
-        { label:'Unassigned (Soft)', data:unassignedSoft, backgroundColor:'rgba(245,158,11,0.35)', stack:'alloc', order:2 },
-        { label:'Assigned (Soft)',   data:assignedSoft,   backgroundColor:'rgba(15,98,254,0.35)',  stack:'alloc', order:2 }
-      );
-    }
   }
 
   const lineDs = [
-    ...(allocType === 'both' && chartStyle === 'A' ? [{
+    ...(allocType === 'both' ? [{
       label:'Total Demand (incl. Soft)', data:totalDemand, type:'line', borderColor:'#6929c4', borderWidth:2,
       borderDash:[5,3], pointRadius:2, pointBackgroundColor:'#6929c4', fill:false, tension:0.3, order:1,
     }] : []),
@@ -852,7 +833,7 @@ function renderRoleChart() {
               return !item.dataset.type || item.dataset.type === 'bar';
             }
             const lineSet = new Set(['Total Capacity','Holidays','Time Off','Available Capacity']);
-            if (allocType === 'both' && chartStyle === 'A') lineSet.add('Total Demand (incl. Soft)');
+            if (allocType === 'both') lineSet.add('Total Demand (incl. Soft)');
             return lineSet.has(lbl);
           },
           itemSort: (a, b) => {
@@ -901,10 +882,6 @@ function switchAllocType(type) {
   renderRoleChart();
 }
 
-function switchChartStyle(style) {
-  chartStyle = style;
-  renderRoleChart();
-}
 
 function toggleChartPeriod() {
   chartPeriod = chartPeriod === 'week' ? 'month' : 'week';
