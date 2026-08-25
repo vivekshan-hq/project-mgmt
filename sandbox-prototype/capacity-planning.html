@@ -233,11 +233,6 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
     </div>
     <div class="tl-right">
       <div class="toggle-grp">
-        <button class="tgl" id="tgl-alloc-hard" onclick="switchAllocType('hard')">Hard</button>
-        <button class="tgl active" id="tgl-alloc-both" onclick="switchAllocType('both')">Both</button>
-        <button class="tgl" id="tgl-alloc-soft" onclick="switchAllocType('soft')">Soft</button>
-      </div>
-      <div class="toggle-grp">
         <button class="tgl active" id="tgl-hours" onclick="switchUnit('hours')">HOURS</button>
         <button class="tgl" id="tgl-fte" onclick="switchUnit('fte')">FTE</button>
       </div>
@@ -599,7 +594,7 @@ function toggleRole(id, section) {
 let chartPeriod = 'week';
 let roleChart = null;
 let _tooltipHoverMode = 'line';
-let allocType = 'both'; // 'hard' | 'both' | 'soft'
+const allocType = 'both';
 
 const WEEK_LABELS = ['02-06','09-13','16-20','23-27','02-06','09-13','16-20','23-27','30-03','06-10','13-17'];
 const WEEK_MONTH_PREFIX = ['Feb','Feb','Feb','Feb','Mar','Mar','Mar','Mar','Mar','Apr','Apr'];
@@ -849,12 +844,18 @@ function renderRoleChart() {
               if (_tooltipHoverMode === 'bar' || !items.length) return '';
               const get = lbl => items.find(i => i.dataset.label === lbl)?.raw || 0;
               const avail = get('Available Capacity');
-              const idx = items[0].dataIndex;
-              const ds = items[0].chart.data.datasets;
-              const asgn   = ds.find(d => d.label === 'Assigned Allocation')?.data[idx]          || 0;
-              const unasgn = ds.find(d => d.label === 'Unassigned Allocation')?.data[idx]       || 0;
-              const unres  = ds.find(d => d.label === 'Unresolved Resource Request')?.data[idx] || 0;
-              const surplus = avail - asgn - unasgn - unres;
+              let surplus;
+              if (allocType === 'both') {
+                // Gap between Available Capacity and Total Demand (incl. Soft) line
+                surplus = avail - get('Total Demand (incl. Soft)');
+              } else {
+                const idx = items[0].dataIndex;
+                const ds = items[0].chart.data.datasets;
+                const asgn   = ds.find(d => d.label === 'Assigned Allocation')?.data[idx]         || 0;
+                const unasgn = ds.find(d => d.label === 'Unassigned Allocation')?.data[idx]      || 0;
+                const unres  = ds.find(d => d.label === 'Unresolved Resource Request')?.data[idx] || 0;
+                surplus = avail - asgn - unasgn - unres;
+              }
               const fmt = v => csUnit==='fte' ? (v>=0?'+':'')+v.toFixed(2)+' FTE' : (v>=0?'+':'')+Math.round(v).toLocaleString()+' hrs';
               return 'Surplus Capacity: ' + fmt(surplus);
             },
@@ -871,15 +872,6 @@ function renderRoleChart() {
   });
 
   renderLegend();
-}
-
-function switchAllocType(type) {
-  allocType = type;
-  ['hard','both','soft'].forEach(t =>
-    document.getElementById('tgl-alloc-' + t).classList.toggle('active', t === type)
-  );
-  renderRS();
-  renderRoleChart();
 }
 
 
