@@ -744,13 +744,13 @@ function renderLegend() {
   let h = '';
 
   if (!isSoft) {
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span>Unassigned Allocation</span>`;
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0f62fe;"></span>Assigned Allocation</span>`;
     h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#d02670;"></span>Unresolved Resource Request</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span>Placeholder Allocation</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0f62fe;"></span>Team Member Allocation</span>`;
   }
   if (isSoft) {
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.5);"></span>Unassigned Allocation</span>`;
-    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(15,98,254,0.5);"></span>Assigned Allocation</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.5);"></span>Placeholder Allocation</span>`;
+    h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(15,98,254,0.5);"></span>Team Member Allocation</span>`;
   }
   h += `<span class="cli cli-tip"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#161616" stroke-width="2"/></svg> Available Capacity<span class="cli-tooltip">Total Capacity − Holidays − Time offs</span></span>`;
   h += `<span class="cli"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#8d8d8d" stroke-width="2" stroke-dasharray="4,3"/></svg> Total Capacity</span>`;
@@ -772,10 +772,10 @@ function renderRoleChart() {
     ];
   } else {
     barDs = [
+      { label:'Unresolved Resource Request',  data:unresolvedReq,   backgroundColor:'#d02670', stack:'alloc', order:2 },
       { label:'Unassigned Allocation',        data:unassignedHard,  backgroundColor:'#f59e0b', stack:'alloc', order:2 },
       { label:'Assigned Allocation',          data:assignedHard,    backgroundColor:'#0f62fe', stack:'alloc', order:2,
         borderWidth:{bottom:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false },
-      { label:'Unresolved Resource Request',  data:unresolvedReq,   backgroundColor:'#d02670', stack:'alloc', order:2 },
     ];
   }
 
@@ -825,7 +825,7 @@ function renderRoleChart() {
           },
           itemSort: (a, b) => {
             if (_tooltipHoverMode === 'bar') {
-              const o = ['Unassigned Allocation','Assigned Allocation','Unresolved Resource Request','Unassigned (Soft)','Assigned (Soft)'];
+              const o = ['Unresolved Resource Request','Unassigned Allocation','Assigned Allocation'];
               return o.indexOf(a.dataset.label) - o.indexOf(b.dataset.label);
             }
             const o = ['Total Capacity','Holidays','Time Off','Available Capacity'];
