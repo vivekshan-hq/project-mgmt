@@ -563,12 +563,8 @@ function renderRS() {
     // ── Net Gap ──
     if (allocType === 'both') {
       const tentativeGap = cap.map((c,i) => c - alloc[i] - softDemand[i]);
-      html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
-        <td>Net Gap (Committed)</td>
-        ${gap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
-      </tr>`;
-      html += `<tr class="row-gap-secondary cs-i1">
-        <td style="padding-left:12px;font-style:italic;">Net Gap (incl. Tentative)</td>
+      html += `<tr class="${tentativeGap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
+        <td>Net Gap (incl. Tentative)</td>
         ${tentativeGap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
       </tr>`;
     } else {
