@@ -752,9 +752,6 @@ function renderLegend() {
     h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.5);"></span>Unassigned Allocation</span>`;
     h += `<span class="cli"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(15,98,254,0.5);"></span>Assigned Allocation</span>`;
   }
-  if (isBoth) {
-    h += `<span class="cli"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#6929c4" stroke-width="2" stroke-dasharray="5,3"/></svg> Total Demand (incl. Soft)</span>`;
-  }
   h += `<span class="cli cli-tip"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#161616" stroke-width="2"/></svg> Available Capacity<span class="cli-tooltip">Total Capacity − Holidays − Time offs</span></span>`;
   h += `<span class="cli"><svg width="18" height="4" viewBox="0 0 18 4"><line x1="0" y1="2" x2="18" y2="2" stroke="#8d8d8d" stroke-width="2" stroke-dasharray="4,3"/></svg> Total Capacity</span>`;
 
@@ -783,10 +780,6 @@ function renderRoleChart() {
   }
 
   const lineDs = [
-    ...(allocType === 'both' ? [{
-      label:'Total Demand (incl. Soft)', data:totalDemand, type:'line', borderColor:'#6929c4', borderWidth:2,
-      borderDash:[5,3], pointRadius:2, pointBackgroundColor:'#6929c4', fill:false, tension:0.3, order:1,
-    }] : []),
     { label:'Holidays', data:holidays, type:'line', borderColor:'#da1e28', borderWidth:0,
       pointRadius:0, pointHoverRadius:0, fill:false, tension:0, order:1 },
     { label:'Time Off', data:timeOff,  type:'line', borderColor:'#f59e0b', borderWidth:0,
@@ -828,7 +821,6 @@ function renderRoleChart() {
               return !item.dataset.type || item.dataset.type === 'bar';
             }
             const lineSet = new Set(['Total Capacity','Holidays','Time Off','Available Capacity']);
-            if (allocType === 'both') lineSet.add('Total Demand (incl. Soft)');
             return lineSet.has(lbl);
           },
           itemSort: (a, b) => {
@@ -836,7 +828,7 @@ function renderRoleChart() {
               const o = ['Unassigned Allocation','Assigned Allocation','Unresolved Resource Request','Unassigned (Soft)','Assigned (Soft)'];
               return o.indexOf(a.dataset.label) - o.indexOf(b.dataset.label);
             }
-            const o = ['Total Capacity','Holidays','Time Off','Available Capacity','Total Demand (incl. Soft)'];
+            const o = ['Total Capacity','Holidays','Time Off','Available Capacity'];
             return o.indexOf(a.dataset.label) - o.indexOf(b.dataset.label);
           },
           callbacks: {
@@ -844,18 +836,12 @@ function renderRoleChart() {
               if (_tooltipHoverMode === 'bar' || !items.length) return '';
               const get = lbl => items.find(i => i.dataset.label === lbl)?.raw || 0;
               const avail = get('Available Capacity');
-              let surplus;
-              if (allocType === 'both') {
-                // Gap between Available Capacity and Total Demand (incl. Soft) line
-                surplus = avail - get('Total Demand (incl. Soft)');
-              } else {
-                const idx = items[0].dataIndex;
-                const ds = items[0].chart.data.datasets;
-                const asgn   = ds.find(d => d.label === 'Assigned Allocation')?.data[idx]         || 0;
-                const unasgn = ds.find(d => d.label === 'Unassigned Allocation')?.data[idx]      || 0;
-                const unres  = ds.find(d => d.label === 'Unresolved Resource Request')?.data[idx] || 0;
-                surplus = avail - asgn - unasgn - unres;
-              }
+              const idx = items[0].dataIndex;
+              const ds = items[0].chart.data.datasets;
+              const asgn   = ds.find(d => d.label === 'Assigned Allocation')?.data[idx]         || 0;
+              const unasgn = ds.find(d => d.label === 'Unassigned Allocation')?.data[idx]      || 0;
+              const unres  = ds.find(d => d.label === 'Unresolved Resource Request')?.data[idx] || 0;
+              const surplus = avail - asgn - unasgn - unres;
               const fmt = v => csUnit==='fte' ? (v>=0?'+':'')+v.toFixed(2)+' FTE' : (v>=0?'+':'')+Math.round(v).toLocaleString()+' hrs';
               return 'Surplus Capacity: ' + fmt(surplus);
             },
