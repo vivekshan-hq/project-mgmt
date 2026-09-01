@@ -1,0 +1,1159 @@
+<style>
+.proto-nav{position:fixed;top:0;left:0;right:0;height:36px;background:#1a1a2e;display:flex;align-items:center;gap:4px;padding:0 16px;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;}
+.proto-nav a{color:#9CA3AF;text-decoration:none;padding:4px 10px;border-radius:5px;transition:background 0.1s,color 0.1s;white-space:nowrap;}
+.proto-nav a:hover{background:#2d2d4e;color:#fff;}
+.proto-nav a.active{background:#3B6FE0;color:#fff;}
+.proto-nav-label{color:#4B5563;margin-right:4px;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;}
+body{padding-top:36px;box-sizing:border-box;}
+</style>
+<div class="proto-nav">
+  <span class="proto-nav-label">Target Utilisation</span>
+  <a href="roles-placeholders.html" id="nav-roles">Roles &amp; Placeholders</a>
+  <a href="team-members-util.html" id="nav-members">Team Members</a>
+  <a href="util-report.html" id="nav-report">Utilisation Report</a>
+</div>
+<script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
+
+<title>Utilisation Report</title>
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────────── */
+:root {
+  --bg:            #FFFFFF;
+  --bg-sidebar:    #F7F8FA;
+  --bg-hover:      #F1F3F7;
+  --text-primary:  #0D1117;
+  --text-secondary:#5C6474;
+  --text-muted:    #9CA3AF;
+  --accent:        #3B6FE0;
+  --border:        #E4E7EC;
+  --cell-below:    #FFFBEB;
+  --cell-on:       #F0FDF4;
+  --rail-bg:       #111827;
+  --rail-icon:     #6B7280;
+  --rail-icon-act: #FFFFFF;
+  --toggle-off:    #D1D5DB;
+  --toggle-on:     #3B6FE0;
+  --bar-track:     #E4E7EC;
+  --bar-red:       #EF4444;
+  --bar-amber:     #F59E0B;
+  --bar-green:     #22C55E;
+  --tip-bg:        #1C2128;
+  --tip-text:      #E6EDF3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:            #0D1117;
+    --bg-sidebar:    #161B22;
+    --bg-hover:      #1C2128;
+    --text-primary:  #E6EDF3;
+    --text-secondary:#8B949E;
+    --text-muted:    #6E7681;
+    --accent:        #79A6FF;
+    --border:        #30363D;
+    --cell-below:    #2A1F06;
+    --cell-on:       #061A0C;
+    --rail-bg:       #010409;
+    --rail-icon:     #6E7681;
+    --rail-icon-act: #E6EDF3;
+    --toggle-off:    #30363D;
+    --toggle-on:     #79A6FF;
+    --bar-track:     #30363D;
+    --tip-bg:        #F0F6FF;
+    --tip-text:      #0D1117;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:            #0D1117;
+  --bg-sidebar:    #161B22;
+  --bg-hover:      #1C2128;
+  --text-primary:  #E6EDF3;
+  --text-secondary:#8B949E;
+  --text-muted:    #6E7681;
+  --accent:        #79A6FF;
+  --border:        #30363D;
+  --cell-below:    #2A1F06;
+  --cell-on:       #061A0C;
+  --rail-bg:       #010409;
+  --rail-icon:     #6E7681;
+  --rail-icon-act: #E6EDF3;
+  --toggle-off:    #30363D;
+  --toggle-on:     #79A6FF;
+  --bar-track:     #30363D;
+  --tip-bg:        #F0F6FF;
+  --tip-text:      #0D1117;
+}
+
+/* ── RESET ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── ICON RAIL ──────────────────────────────────────────── */
+.icon-rail {
+  width: 48px;
+  min-height: 100vh;
+  background: var(--rail-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+.rail-logo {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.rail-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.rail-item {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--rail-icon);
+  transition: background 0.13s, color 0.13s;
+}
+.rail-item:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.75); }
+.rail-item.active { background: rgba(255,255,255,.13); color: var(--rail-icon-act); }
+.rail-item svg { width: 17px; height: 17px; }
+
+.rail-bottom {
+  margin-top: auto;
+  padding-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── MAIN AREA ──────────────────────────────────────────── */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── PAGE HEADER ────────────────────────────────────────── */
+.page-header {
+  padding: 18px 24px 0;
+  flex-shrink: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.breadcrumb-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+}
+.breadcrumb-link:hover { color: var(--accent); }
+.breadcrumb-sep { font-size: 10px; }
+
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.page-icon {
+  width: 26px; height: 26px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.page-icon svg { width: 14px; height: 14px; }
+
+h1.page-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+}
+
+/* ── TOOLBAR ────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 24px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  gap: 6px;
+  flex-shrink: 0;
+  background: var(--bg);
+  min-height: 44px;
+}
+
+.toolbar-left, .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
+
+.tbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 27px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .12s;
+  white-space: nowrap;
+}
+.tbtn:hover { background: var(--bg-hover); }
+.tbtn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+.tbtn-icon {
+  width: 27px; height: 27px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.tbtn-icon:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.tbtn-icon svg { width: 12px; height: 12px; }
+
+.tbtn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 27px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-sidebar);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s;
+}
+.tbtn-pill:hover { background: var(--bg-hover); }
+.tbtn-pill svg { width: 11px; height: 11px; }
+
+.t-divider {
+  width: 1px; height: 16px;
+  background: var(--border);
+  margin: 0 3px;
+  flex-shrink: 0;
+}
+
+.t-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 0 2px;
+  white-space: nowrap;
+}
+
+/* ── TARGET TOGGLE CONTROL ──────────────────────────────── */
+.target-ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 27px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: background .12s;
+  user-select: none;
+}
+.target-ctrl:hover { background: var(--bg-hover); }
+
+.target-ctrl-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* iOS-style toggle */
+.toggle {
+  position: relative;
+  width: 30px; height: 17px;
+  flex-shrink: 0;
+  pointer-events: none;          /* clicks handled by parent label */
+}
+.toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--toggle-off);
+  border-radius: 17px;
+  transition: background .2s;
+}
+.toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 13px; height: 13px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  transition: transform .2s;
+}
+.toggle input:checked ~ .toggle-track { background: var(--toggle-on); }
+.toggle input:checked ~ .toggle-thumb { transform: translateX(13px); }
+
+/* ── TABLE SCROLL AREA ──────────────────────────────────── */
+.table-scroll {
+  flex: 1;
+  overflow: auto;
+}
+.table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.table-scroll::-webkit-scrollbar-track { background: transparent; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.table-wrap {
+  padding: 0 0 32px;
+}
+
+/* ── UTILISATION TABLE ──────────────────────────────────── */
+.util-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 580px;
+}
+
+/* sticky header */
+.util-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.util-table thead th.th-data { text-align: right; }
+.util-table thead th.th-target {
+  text-align: right;
+  width: 72px;
+  min-width: 72px;
+}
+
+/* ── SHOW-TARGETS STATE ─────────────────────────────────── */
+/* Target column: shown only when .show-targets on wrapper */
+.util-table-wrap:not(.show-targets) .target-col { display: none; }
+
+/* Cell tints: apply only when .show-targets */
+.util-table-wrap.show-targets td.tint-below { background: var(--cell-below); }
+.util-table-wrap.show-targets td.tint-on    { background: var(--cell-on);    }
+
+/* Target indicators in cells: shown only when .show-targets */
+.util-table-wrap:not(.show-targets) .cell-indicator { display: none; }
+
+/* ── TABLE BODY ─────────────────────────────────────────── */
+.util-table tbody tr:hover td { background: var(--bg-hover) !important; }
+
+.util-table tbody td {
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-variant-numeric: tabular-nums;
+}
+
+/* TOTAL ROW */
+.util-table .row-total td { background: var(--bg-sidebar); }
+.util-table .row-total:hover td { background: var(--bg-hover) !important; }
+
+/* ── MEMBER CELL ────────────────────────────────────────── */
+.member-cell {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  min-width: 200px;
+}
+
+.avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  position: relative;
+  user-select: none;
+}
+.av-grey  { background: #D1D5DB; color: #4B5563; }
+.av-warm  { background: #D6C9BB; color: #6B4E3D; }  /* Rachel – photo-style warmth */
+.av-blue  { background: #DBEAFE; color: #1D4ED8; }
+.av-deact { opacity: .55; }
+
+.deact-badge {
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 11px; height: 11px;
+  background: var(--bg-sidebar);
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deact-badge svg { width: 6px; height: 6px; color: var(--text-muted); }
+
+.member-name       { font-size: 13px; color: var(--text-primary); }
+.member-name-bold  { font-weight: 700; }
+.member-name-muted { color: var(--text-muted); }
+
+/* ── TARGET COLUMN CELL ─────────────────────────────────── */
+.target-col { width: 72px; min-width: 72px; }
+
+.target-cell-inner {
+  padding: 9px 12px;
+  text-align: right;
+}
+
+.target-pct {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.target-pct-muted { color: var(--text-muted); }
+
+/* Custom asterisk + tooltip */
+.target-custom {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  cursor: help;
+}
+.custom-mark {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  vertical-align: super;
+}
+
+/* Tooltip rendered below */
+.target-custom::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  right: -4px;
+  background: var(--tip-bg);
+  color: var(--tip-text);
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 20;
+  letter-spacing: 0;
+}
+.target-custom::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 3px);
+  right: 6px;
+  border: 4px solid transparent;
+  border-top-color: var(--tip-bg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 20;
+}
+.target-custom:hover::after,
+.target-custom:hover::before { opacity: 1; }
+
+/* ── DATA CELL ──────────────────────────────────────────── */
+.data-inner {
+  padding: 9px 12px 8px;
+  text-align: right;
+}
+
+.cell-dash {
+  padding: 9px 12px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.cell-actual {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.cell-hours {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+
+/* Target indicator (progress bar + label) */
+.cell-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.bar-track {
+  width: 60px;
+  height: 3px;
+  background: var(--bar-track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.bar-label {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── MISCELLANEOUS ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .toggle-track, .toggle-thumb,
+  .target-custom::after, .target-custom::before { transition: none; }
+}
+</style>
+
+<!-- ════════════════════════════════════════════════════════
+     APP SHELL
+     ════════════════════════════════════════════════════════ -->
+<div style="display:flex;height:100vh;overflow:hidden;">
+
+  <!-- ICON RAIL -->
+  <nav class="icon-rail" aria-label="Main navigation">
+    <div class="rail-logo" aria-hidden="true">
+      <!-- Rocketlane-style wordmark shorthand: two overlapping squares -->
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="1" width="10" height="10" rx="2.5" fill="#3B6FE0"/>
+        <rect x="7" y="7" width="10" height="10" rx="2.5" fill="#3B6FE0" fill-opacity=".4"/>
+        <rect x="7" y="1" width="4" height="6" rx="1" fill="#3B6FE0" fill-opacity=".25"/>
+      </svg>
+    </div>
+
+    <div class="rail-nav">
+      <button class="rail-item" title="Projects" aria-label="Projects">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 5a1 1 0 011-1h2.5l1.5 1.5H15a1 1 0 011 1V14a1 1 0 01-1 1H3a1 1 0 01-1-1V5z"/>
+        </svg>
+      </button>
+      <button class="rail-item" title="Resources" aria-label="Resources">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="7" cy="6.5" r="2.5"/>
+          <path d="M2 16c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+          <circle cx="14" cy="6.5" r="1.8"/>
+          <path d="M14 11.5c1.93 0 3.5 1.57 3.5 3.5H12"/>
+        </svg>
+      </button>
+      <!-- Reports — ACTIVE -->
+      <button class="rail-item active" title="Reports" aria-label="Reports" aria-current="page">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="14" height="14" rx="2"/>
+          <path d="M6 13V9M9 13V6.5M12 13V10.5"/>
+        </svg>
+      </button>
+      <button class="rail-item" title="Finances" aria-label="Finances">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="9" r="7"/>
+          <path d="M9 4.5v1M9 12.5v1M6.5 9h4.5a1.5 1.5 0 000-3H8a1.5 1.5 0 010-3H11"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="rail-bottom">
+      <button class="rail-item" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="9" r="2.2"/>
+          <path d="M9 2v1.5M9 14.5V16M3.34 3.34l1.06 1.06M13.6 13.6l1.06 1.06M2 9h1.5M14.5 9H16M3.34 14.66l1.06-1.06M13.6 4.4l1.06-1.06"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a class="breadcrumb-link" href="#" tabindex="0">Reports</a>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <span>Utilisation report</span>
+      </nav>
+      <div class="page-title-row">
+        <div class="page-icon" aria-hidden="true">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="1" width="12" height="12" rx="2"/>
+            <path d="M4.5 10.5V7.5M7 10.5V5M9.5 10.5V8.5"/>
+          </svg>
+        </div>
+        <h1 class="page-title">Utilisation report</h1>
+      </div>
+    </header>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar" role="toolbar" aria-label="Report controls">
+      <div class="toolbar-left">
+
+        <button class="tbtn" type="button">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="1" y="1" width="4.2" height="4.2" rx="1"/>
+            <rect x="6.8" y="1" width="4.2" height="4.2" rx="1"/>
+            <rect x="1" y="6.8" width="4.2" height="4.2" rx="1"/>
+            <rect x="6.8" y="6.8" width="4.2" height="4.2" rx="1"/>
+          </svg>
+          All views
+          <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:8px;height:8px;opacity:.6"><path d="M1 1l4 4 4-4"/></svg>
+        </button>
+
+        <div class="t-divider" role="separator" aria-hidden="true"></div>
+
+        <button class="tbtn" type="button" aria-label="Add filter">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" aria-hidden="true">
+            <path d="M1 2.5h10M3 6h6M5 9.5h2"/>
+          </svg>
+          Filter
+        </button>
+
+        <button class="tbtn-icon" type="button" aria-label="Save view">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 1h6.5l1.5 1.5V11a.5.5 0 01-.5.5H2a.5.5 0 01-.5-.5V1.5A.5.5 0 012 1z"/>
+            <path d="M3.5 1v2.5h4V1M3.5 7h5"/>
+          </svg>
+        </button>
+
+        <button class="tbtn-icon" type="button" aria-label="Close view">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true">
+            <path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/>
+          </svg>
+        </button>
+
+        <div class="t-divider" role="separator" aria-hidden="true"></div>
+
+        <button class="tbtn-pill" type="button" aria-label="Change time range">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="1.5" y="2" width="9" height="9" rx="1.5"/>
+            <path d="M4 1v2M8 1v2M1.5 5h9"/>
+          </svg>
+          Time range: Year to date (01 Jan 26 – 01 Sep 26)
+        </button>
+
+        <button class="tbtn-pill" type="button">Group by: None</button>
+
+      </div>
+
+      <div class="toolbar-right">
+
+        <span class="t-label" aria-hidden="true">Show:</span>
+
+        <button class="tbtn" type="button">
+          Utilisation
+          <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:8px;height:8px;opacity:.6"><path d="M1 1l4 4 4-4"/></svg>
+        </button>
+
+        <button class="tbtn" type="button">
+          Quarterly
+          <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:8px;height:8px;opacity:.6"><path d="M1 1l4 4 4-4"/></svg>
+        </button>
+
+        <div class="t-divider" role="separator" aria-hidden="true"></div>
+
+        <!-- TARGET TOGGLE -->
+        <label class="target-ctrl" for="target-toggle" title="Show target utilisation indicators">
+          <span class="target-ctrl-label">Target utilisation</span>
+          <span class="toggle" aria-hidden="true">
+            <input type="checkbox" id="target-toggle" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </span>
+        </label>
+
+        <div class="t-divider" role="separator" aria-hidden="true"></div>
+
+        <button class="tbtn-icon" type="button" aria-label="Export data">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 1v7M4 6l2 2 2-2"/>
+            <path d="M1.5 9v1.5a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V9"/>
+          </svg>
+        </button>
+
+      </div>
+    </div><!-- /toolbar -->
+
+    <!-- TABLE -->
+    <div class="table-scroll">
+      <div class="table-wrap">
+        <div class="util-table-wrap show-targets" id="tableWrap">
+          <table class="util-table" aria-label="Utilisation by team member and quarter">
+            <thead>
+              <tr>
+                <th scope="col" style="min-width:210px; padding-left:24px;">Team member</th>
+                <th scope="col" class="target-col th-target" aria-label="Target utilisation">Target</th>
+                <th scope="col" class="th-data" style="min-width:130px;">Q1 '26</th>
+                <th scope="col" class="th-data" style="min-width:130px;">Q2 '26</th>
+                <th scope="col" class="th-data" style="min-width:130px; padding-right:24px;">Q3 '26</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- ── TOTAL ROW ──────────────────────────────── -->
+              <tr class="row-total">
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <span class="member-name member-name-bold">Total</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct target-pct-muted">—</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">—</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.85%</div>
+                    <div class="cell-hours">—</div>
+                  </div>
+                </td>
+                <td style="padding-right:12px;">
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">2.16%</div>
+                    <div class="cell-hours">—</div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── PAUL ──────────────────────────────────── -->
+              <!-- Target: 80%. All actuals 0% → 0% of target → far below (<10%) → no tint -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-grey" aria-hidden="true">P</div>
+                    <span class="member-name">Paul</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct">80%</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 80% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 80% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 80% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── RACHEL ─────────────────────────────────── -->
+              <!-- Target: 75%. All actuals 0% → far below → no tint -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-warm" aria-hidden="true">R</div>
+                    <span class="member-name">Rachel</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct">75%</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── VIVEK SHANMUGASUNDARAM ─────────────────── -->
+              <!-- Target: 85% (custom override). Q1 0%, Q2 2.31%, Q3 5.93% -->
+              <!-- Q1: 0/85=0% → far below → no tint -->
+              <!-- Q2: 2.31/85=2.72% → far below → no tint; bar fill 2.72% red -->
+              <!-- Q3: 5.93/85=6.97% → far below → no tint; bar fill 6.97% red -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-blue" aria-hidden="true">VS</div>
+                    <span class="member-name">Vivek Shanmugasundaram</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct">
+                      <span class="target-custom" data-tip="Custom override · Role default: 80%">
+                        85%<span class="custom-mark">*</span>
+                      </span>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 85% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">2.31%</div>
+                    <div class="cell-hours">9h 00m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:2.72%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 85% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">5.93%</div>
+                    <div class="cell-hours">16h 00m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:6.97%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 85% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── VIVEK1 ──────────────────────────────────── -->
+              <!-- Target: 75% (follows role). Q1 —, Q2 0%, Q3 0% → far below → no tint -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-blue" aria-hidden="true">V</div>
+                    <span class="member-name">vivek1</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct">75%</span>
+                  </div>
+                </td>
+                <td class="cell-dash" aria-label="No data for Q1">—</td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── VIVEK1 S ────────────────────────────────── -->
+              <!-- Target: 75% (follows role). Q1 —, Q2 0%, Q3 0% → far below → no tint -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-blue" aria-hidden="true">VS</div>
+                    <span class="member-name">vivek1 S</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct">75%</span>
+                  </div>
+                </td>
+                <td class="cell-dash" aria-label="No data for Q1">—</td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── VIVEK2 ──────────────────────────────────── -->
+              <!-- Target: 75% (follows role). Q1 —, Q2 0%, Q3 0% → far below → no tint -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-blue" aria-hidden="true">V</div>
+                    <span class="member-name">vivek2</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct">75%</span>
+                  </div>
+                </td>
+                <td class="cell-dash" aria-label="No data for Q1">—</td>
+                <td>
+                  <div class="data-inner">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 75% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── VIVEKSUNDARAM S (deactivated, grey) ──────── -->
+              <!-- Target: 70%. Q1 —, Q2 —, Q3 14.04% (16h) -->
+              <!-- Q3: 14.04/70=20.06% → between 10–99% → below target → amber tint; bar fill 20% red (<50%) -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-grey av-deact" aria-hidden="true">
+                      VS
+                      <span class="deact-badge" title="Deactivated">
+                        <svg viewBox="0 0 6 6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true">
+                          <path d="M1 1l4 4M5 1L1 5"/>
+                        </svg>
+                      </span>
+                    </div>
+                    <span class="member-name member-name-muted">viveksundaram S</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct target-pct-muted">70%</span>
+                  </div>
+                </td>
+                <td class="cell-dash" aria-label="No data for Q1">—</td>
+                <td class="cell-dash" aria-label="No data for Q2">—</td>
+                <!-- Q3 — amber tint: 14.04% actual is 20% of 70% target (between 10–99%) -->
+                <td class="tint-below">
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">14.04%</div>
+                    <div class="cell-hours">16h 00m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 70% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ── VIVEKSHAN1 S (deactivated, blue) ─────────── -->
+              <!-- Target: 70%. Q1 —, Q2 —, Q3 0% → far below → no tint -->
+              <tr>
+                <td>
+                  <div class="member-cell" style="padding-left:24px;">
+                    <div class="avatar av-blue av-deact" aria-hidden="true">
+                      VS
+                      <span class="deact-badge" title="Deactivated">
+                        <svg viewBox="0 0 6 6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true">
+                          <path d="M1 1l4 4M5 1L1 5"/>
+                        </svg>
+                      </span>
+                    </div>
+                    <span class="member-name member-name-muted">vivekshan1 S</span>
+                  </div>
+                </td>
+                <td class="target-col">
+                  <div class="target-cell-inner">
+                    <span class="target-pct target-pct-muted">70%</span>
+                  </div>
+                </td>
+                <td class="cell-dash" aria-label="No data for Q1">—</td>
+                <td class="cell-dash" aria-label="No data for Q2">—</td>
+                <td>
+                  <div class="data-inner" style="padding-right:24px;">
+                    <div class="cell-actual">0.00%</div>
+                    <div class="cell-hours">0m</div>
+                    <div class="cell-indicator" aria-hidden="true">
+                      <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--bar-red);"></div></div>
+                      <span class="bar-label">/ 70% target</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div><!-- /util-table-wrap -->
+      </div><!-- /table-wrap -->
+    </div><!-- /table-scroll -->
+
+  </div><!-- /main-area -->
+</div><!-- /app -->
+
+<script>
+  (function () {
+    var toggle   = document.getElementById('target-toggle');
+    var tableWrap = document.getElementById('tableWrap');
+
+    toggle.addEventListener('change', function () {
+      if (this.checked) {
+        tableWrap.classList.add('show-targets');
+      } else {
+        tableWrap.classList.remove('show-targets');
+      }
+    });
+
+    // Keyboard accessibility: allow label-click to toggle (already handled
+    // by the <label for="…"> relationship), but also keep focus visible.
+    toggle.addEventListener('focus', function () {
+      toggle.closest('.toggle').style.outline = '2px solid var(--accent)';
+      toggle.closest('.toggle').style.outlineOffset = '2px';
+      toggle.closest('.toggle').style.borderRadius = '17px';
+    });
+    toggle.addEventListener('blur', function () {
+      toggle.closest('.toggle').style.outline = '';
+    });
+  })();
+</script>

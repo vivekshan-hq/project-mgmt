@@ -1,0 +1,1284 @@
+<style>
+.proto-nav{position:fixed;top:0;left:0;right:0;height:36px;background:#1a1a2e;display:flex;align-items:center;gap:4px;padding:0 16px;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;}
+.proto-nav a{color:#9CA3AF;text-decoration:none;padding:4px 10px;border-radius:5px;transition:background 0.1s,color 0.1s;white-space:nowrap;}
+.proto-nav a:hover{background:#2d2d4e;color:#fff;}
+.proto-nav a.active{background:#3B6FE0;color:#fff;}
+.proto-nav-label{color:#4B5563;margin-right:4px;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;}
+body{padding-top:36px;box-sizing:border-box;}
+</style>
+<div class="proto-nav">
+  <span class="proto-nav-label">Target Utilisation</span>
+  <a href="roles-placeholders.html" id="nav-roles">Roles &amp; Placeholders</a>
+  <a href="team-members-util.html" id="nav-members">Team Members</a>
+  <a href="util-report.html" id="nav-report">Utilisation Report</a>
+</div>
+<script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
+
+<title>Team Member Utilisation</title>
+<style>
+  /* ── Design tokens ─────────────────────────────────────────── */
+  :root {
+    --bg: #FFFFFF;
+    --bg-sidebar: #F7F8FA;
+    --bg-hover: #F1F3F7;
+    --bg-selected: #EEF3FF;
+    --text-primary: #0D1117;
+    --text-secondary: #5C6474;
+    --text-muted: #9CA3AF;
+    --accent: #3B6FE0;
+    --border: #E4E7EC;
+    --current-bg: #FEF3C7;
+    --current-text: #92400E;
+    --rail-bg: #111827;
+    --rail-icon: #9CA3AF;
+    --rail-icon-active: #FFFFFF;
+    --shadow-dropdown: 0 4px 16px rgba(0,0,0,.12), 0 1px 4px rgba(0,0,0,.06);
+    --shadow-drawer: -4px 0 24px rgba(0,0,0,.10), -1px 0 4px rgba(0,0,0,.04);
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-pill: 999px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --transition: 240ms cubic-bezier(.25,.46,.45,.94);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1117;
+      --bg-sidebar: #161B24;
+      --bg-hover: #1E2330;
+      --bg-selected: #1A2545;
+      --text-primary: #F0F2F5;
+      --text-secondary: #9BA3B5;
+      --text-muted: #5C6474;
+      --accent: #5A8DF5;
+      --border: #252D3D;
+      --current-bg: #3D2B00;
+      --current-text: #FCD34D;
+      --rail-bg: #0A0D14;
+      --rail-icon: #5C6474;
+      --rail-icon-active: #F0F2F5;
+      --shadow-dropdown: 0 4px 20px rgba(0,0,0,.40), 0 1px 4px rgba(0,0,0,.20);
+      --shadow-drawer: -4px 0 32px rgba(0,0,0,.40);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1117;
+    --bg-sidebar: #161B24;
+    --bg-hover: #1E2330;
+    --bg-selected: #1A2545;
+    --text-primary: #F0F2F5;
+    --text-secondary: #9BA3B5;
+    --text-muted: #5C6474;
+    --accent: #5A8DF5;
+    --border: #252D3D;
+    --current-bg: #3D2B00;
+    --current-text: #FCD34D;
+    --rail-bg: #0A0D14;
+    --rail-icon: #5C6474;
+    --rail-icon-active: #F0F2F5;
+    --shadow-dropdown: 0 4px 20px rgba(0,0,0,.40), 0 1px 4px rgba(0,0,0,.20);
+    --shadow-drawer: -4px 0 32px rgba(0,0,0,.40);
+  }
+
+  /* ── Reset ─────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: var(--bg);
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Shell ──────────────────────────────────────────────────── */
+  .shell {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Icon rail ──────────────────────────────────────────────── */
+  .rail {
+    width: 48px;
+    background: var(--rail-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 2px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .rail-logo {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .rail-logo svg { color: white; }
+  .rail-item {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--rail-icon);
+    transition: background var(--transition), color var(--transition);
+  }
+  .rail-item:hover { background: rgba(255,255,255,.08); color: var(--rail-icon-active); }
+  .rail-item.active { background: rgba(255,255,255,.12); color: var(--rail-icon-active); }
+  .rail-spacer { flex: 1; }
+
+  /* ── Sidebar ────────────────────────────────────────────────── */
+  .sidebar {
+    width: 232px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 18px 16px 6px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    margin: 1px 8px;
+    transition: background var(--transition), color var(--transition);
+  }
+  .sidebar-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .sidebar-item.active {
+    background: var(--bg-selected);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-item svg { opacity: .7; flex-shrink: 0; }
+  .sidebar-item.active svg { opacity: 1; }
+
+  /* ── Main ───────────────────────────────────────────────────── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* ── Page header ────────────────────────────────────────────── */
+  .page-header {
+    padding: 24px 28px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  .page-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .page-tab {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color var(--transition), border-color var(--transition);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .page-tab:hover { color: var(--text-primary); }
+  .page-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+  .tab-count {
+    font-size: 11px;
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    border-radius: var(--radius-pill);
+    padding: 1px 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .page-tab.active .tab-count { background: var(--bg-selected); color: var(--accent); }
+  .filter-pill {
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .filter-pill:hover { background: var(--border); }
+
+  /* ── Toolbar ────────────────────────────────────────────────── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background var(--transition), color var(--transition);
+  }
+  .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .invite-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 14px;
+    background: var(--text-primary);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: opacity var(--transition);
+  }
+  .invite-btn:hover { opacity: .85; }
+
+  /* ── Table ──────────────────────────────────────────────────── */
+  .table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    text-align: left;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  thead th:first-child { padding-left: 28px; }
+  thead th:last-child { padding-right: 28px; width: 48px; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+    position: relative;
+  }
+  tbody tr:hover { background: var(--bg-hover); }
+  tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+  tbody td:first-child { padding-left: 28px; }
+  tbody td:last-child { padding-right: 28px; }
+
+  /* member cell */
+  .member-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: white;
+  }
+  .avatar-paul   { background: #059669; }
+  .avatar-rachel { background: #7C3AED; }
+  .avatar-vivek  { background: #2563EB; }
+  .avatar-ss     { background: #0891B2; }
+  .avatar-admin  { background: #6B7280; font-size: 9px; }
+
+  .member-name { font-weight: 500; }
+  .email-cell { color: var(--text-secondary); font-size: 12.5px; }
+
+  /* role chips */
+  .role-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .chip-green  { background: #DCFCE7; color: #15803D; }
+  .chip-purple { background: #F3E8FF; color: #7E22CE; }
+  .chip-blue   { background: #DBEAFE; color: #1D4ED8; }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .chip-green  { background: #14532D; color: #4ADE80; }
+    :root:not([data-theme="light"]) .chip-purple { background: #3B0764; color: #C084FC; }
+    :root:not([data-theme="light"]) .chip-blue   { background: #1E3A5F; color: #60A5FA; }
+  }
+  :root[data-theme="dark"] .chip-green  { background: #14532D; color: #4ADE80; }
+  :root[data-theme="dark"] .chip-purple { background: #3B0764; color: #C084FC; }
+  :root[data-theme="dark"] .chip-blue   { background: #1E3A5F; color: #60A5FA; }
+
+  .permission-cell { color: var(--text-secondary); }
+  .approver-cell { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12.5px; }
+
+  /* actions column */
+  .actions-cell { position: relative; }
+  .dots-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: opacity var(--transition), background var(--transition);
+  }
+  tbody tr:hover .dots-btn { opacity: 1; }
+  .dots-btn:hover, .dots-btn.open {
+    opacity: 1;
+    background: var(--bg-hover);
+    border-color: var(--border);
+  }
+
+  /* ── Dropdown menu ──────────────────────────────────────────── */
+  .dropdown {
+    position: fixed;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-dropdown);
+    min-width: 192px;
+    z-index: 100;
+    overflow: hidden;
+    animation: dropIn 140ms ease-out;
+  }
+  @keyframes dropIn {
+    from { opacity: 0; transform: scale(.97) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .dropdown-item:hover { background: var(--bg-hover); }
+  .dropdown-item.danger { color: #DC2626; }
+  .dropdown-item svg { color: var(--text-muted); flex-shrink: 0; }
+  .dropdown-item.danger svg { color: #DC2626; }
+  .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* ── Overlay + Drawer ───────────────────────────────────────── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.28);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition);
+  }
+  .overlay.visible { opacity: 1; pointer-events: all; }
+
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 520px;
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    box-shadow: var(--shadow-drawer);
+    z-index: 210;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform var(--transition);
+    overflow: hidden;
+  }
+  .drawer.open { transform: translateX(0); }
+
+  /* Drawer header */
+  .drawer-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .drawer-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+  .drawer-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .drawer-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .close-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: background var(--transition), color var(--transition);
+  }
+  .close-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  /* Drawer set-value form */
+  .drawer-form {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .form-label {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  .pct-wrap {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    overflow: hidden;
+    transition: border-color var(--transition);
+  }
+  .pct-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,111,224,.15); }
+  .pct-input {
+    width: 80px;
+    border: none;
+    outline: none;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: var(--font);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    background: transparent;
+  }
+  .pct-suffix {
+    padding: 6px 10px 6px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .date-input {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: var(--font);
+    color: var(--text-primary);
+    background: var(--bg);
+    outline: none;
+    transition: border-color var(--transition);
+    font-variant-numeric: tabular-nums;
+  }
+  .date-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,111,224,.15); }
+  .save-btn {
+    height: 32px;
+    padding: 0 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: opacity var(--transition);
+    flex-shrink: 0;
+  }
+  .save-btn:hover { opacity: .88; }
+
+  /* Segmented control */
+  .seg-wrap {
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .seg-control {
+    display: flex;
+    background: #F3F4F6;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .seg-control { background: var(--bg-hover); }
+  }
+  :root[data-theme="dark"] .seg-control { background: var(--bg-hover); }
+
+  .seg-tab {
+    flex: 1;
+    text-align: center;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--text-muted);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+    user-select: none;
+  }
+  .seg-tab.active {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,.10), 0 0 0 .5px rgba(0,0,0,.06);
+  }
+
+  /* Drawer content panels */
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* History / Audit tables */
+  .inner-table-wrap { overflow-x: auto; }
+  .inner-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .inner-table thead th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    text-align: left;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .inner-table thead th:first-child { padding-left: 24px; }
+  .inner-table thead th:last-child  { padding-right: 24px; }
+  .inner-table tbody tr { border-bottom: 1px solid var(--border); }
+  .inner-table tbody td {
+    padding: 11px 16px;
+    vertical-align: middle;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .inner-table tbody td:first-child { padding-left: 24px; }
+  .inner-table tbody td:last-child  { padding-right: 24px; }
+
+  .follows-role-main { font-size: 13px; color: var(--text-muted); }
+  .follows-role-val  { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+  .mode-label { font-size: 12.5px; color: var(--text-secondary); }
+
+  .current-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--current-bg);
+    color: var(--current-text);
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: var(--radius-pill);
+    margin-left: 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+    letter-spacing: .02em;
+  }
+
+  .effective-cell { font-size: 12.5px; color: var(--text-secondary); display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+
+  /* audit log specifics */
+  .changed-by-cell { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+  .changed-date-cell { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .audit-util { font-size: 13px; font-weight: 500; }
+  .audit-util-sub { font-size: 11.5px; color: var(--text-muted); font-weight: 400; }
+</style>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+
+<div class="shell">
+
+  <!-- Icon rail -->
+  <nav class="rail" aria-label="Navigation rail">
+    <div class="rail-logo" title="Rocketlane">
+      <!-- Simple rocket-ish R logotype -->
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 13 L7 7 L10 4 Q13 1 14 2 Q15 3 12 6 L9 9 Z" fill="white" opacity=".9"/>
+        <circle cx="10.5" cy="5.5" r="1.1" fill="white"/>
+        <path d="M6 10 L3 13" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
+      </svg>
+    </div>
+
+    <div class="rail-item" title="Home">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M2 6.5L8 2l6 4.5V14H2V6.5z" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="rail-item" title="Projects">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="2" y="2" width="5" height="5" rx="1"/>
+        <rect x="9" y="2" width="5" height="5" rx="1"/>
+        <rect x="2" y="9" width="5" height="5" rx="1"/>
+        <rect x="9" y="9" width="5" height="5" rx="1"/>
+      </svg>
+    </div>
+    <div class="rail-item" title="Resources">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="8" cy="5" r="2.5"/>
+        <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+      </svg>
+    </div>
+    <div class="rail-item" title="Reports">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="2" y="2" width="12" height="12" rx="1.5"/>
+        <path d="M5 10V8m3 2V6m3 4V4"/>
+      </svg>
+    </div>
+
+    <div class="rail-spacer"></div>
+
+    <div class="rail-item active" title="Settings">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="8" cy="8" r="2.2"/>
+        <path d="M8 1.5v1.3m0 10.4v1.3m4.6-10.1-.9.9m-7.4 7.4-.9.9m11.1-4.4h-1.3M2.8 8H1.5m10.1 4.6-.9-.9M4.3 4.3l-.9-.9" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" aria-label="Settings sidebar">
+    <div class="sidebar-section-label">Settings</div>
+
+    <div class="sidebar-item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="12" height="12" rx="1.5"/><path d="M4 4h6M4 7h6M4 10h4"/></svg>
+      General
+    </div>
+    <div class="sidebar-item active">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="4.5" r="2.2"/><path d="M2 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/></svg>
+      Team members
+    </div>
+    <div class="sidebar-item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5" cy="4.5" r="2"/><path d="M1 12c0-2.21 1.79-4 4-4h.5"/><circle cx="10" cy="8" r="2"/><path d="M7.5 13c.28-2.21 2.07-4 4-3.5"/></svg>
+      Roles &amp; capacity
+    </div>
+    <div class="sidebar-item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 4h10M2 7h8M2 10h6"/></svg>
+      Fields
+    </div>
+    <div class="sidebar-item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="3" width="12" height="9" rx="1.2"/><path d="M4 3V2m6 1V2"/></svg>
+      Project templates
+    </div>
+    <div class="sidebar-item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3l2 1.2"/></svg>
+      Timesheets
+    </div>
+    <div class="sidebar-item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
+      Integrations
+    </div>
+    <div class="sidebar-item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M5 5V4a2 2 0 0 1 4 0v1"/></svg>
+      Security
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <!-- Page header -->
+    <div class="page-header">
+      <h1 class="page-title">Team members</h1>
+      <div class="page-tabs">
+        <button class="page-tab active">
+          Active
+          <span class="tab-count">3</span>
+        </button>
+        <button class="page-tab">
+          Invited
+          <span class="tab-count">3</span>
+        </button>
+        <button class="page-tab">Deactivated</button>
+        <button class="filter-pill">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M1 3h10M3 6h6M5 9h2"/>
+          </svg>
+          Filter
+        </button>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="icon-btn" title="Search">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="6" cy="6" r="4"/>
+          <path d="m10 10 2.5 2.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="icon-btn" title="Export">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M7 1v8m-3-3 3 3 3-3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 10v1.5A1.5 1.5 0 0 0 3.5 13h7a1.5 1.5 0 0 0 1.5-1.5V10"/>
+        </svg>
+      </button>
+      <button class="invite-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M6 2v8M2 6h8" stroke-linecap="round"/>
+        </svg>
+        Invite members
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Team member</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Permission</th>
+            <th>Timesheet approver</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="member-table-body">
+          <!-- Row: Paul -->
+          <tr data-member="Paul" data-role="Engineer" data-chip="chip-green" data-history='[{"util":"85%","mode":"Custom","from":"01 Sep 2026","to":null},{"util_follows":true,"role_pct":"80%","mode":"Follows role","from":"01 Jan 2026","to":"31 Aug 2026"}]' data-audit='[{"util":"85% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:15 AM"},{"util":"Follows role (80%)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:02 AM"}]'>
+            <td>
+              <div class="member-cell">
+                <div class="avatar avatar-paul">P</div>
+                <span class="member-name">Paul</span>
+              </div>
+            </td>
+            <td class="email-cell">sampleuser2@rocketlane.com</td>
+            <td><span class="role-chip chip-green">Engineer</span></td>
+            <td class="permission-cell">Account Admin</td>
+            <td>
+              <div class="approver-cell">
+                <div class="avatar avatar-admin" style="width:22px;height:22px;font-size:8px;">A</div>
+                Admins
+              </div>
+            </td>
+            <td class="actions-cell">
+              <button class="dots-btn" title="More actions">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="3" r="1.1" fill="currentColor"/>
+                  <circle cx="7" cy="7" r="1.1" fill="currentColor"/>
+                  <circle cx="7" cy="11" r="1.1" fill="currentColor"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+
+          <!-- Row: Rachel -->
+          <tr data-member="Rachel" data-role="Customer success" data-chip="chip-purple" data-history='[{"util":"72%","mode":"Custom","from":"01 Sep 2026","to":null},{"util_follows":true,"role_pct":"70%","mode":"Follows role","from":"01 Jan 2026","to":"31 Aug 2026"}]' data-audit='[{"util":"72% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:20 AM"},{"util":"Follows role (70%)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:10 AM"}]'>
+            <td>
+              <div class="member-cell">
+                <div class="avatar avatar-rachel">R</div>
+                <span class="member-name">Rachel</span>
+              </div>
+            </td>
+            <td class="email-cell">sampleuser1@rocketlane.com</td>
+            <td><span class="role-chip chip-purple">Customer success</span></td>
+            <td class="permission-cell">Account Admin</td>
+            <td>
+              <div class="approver-cell">
+                <div class="avatar avatar-admin" style="width:22px;height:22px;font-size:8px;">A</div>
+                Admins
+              </div>
+            </td>
+            <td class="actions-cell">
+              <button class="dots-btn" title="More actions">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="3" r="1.1" fill="currentColor"/>
+                  <circle cx="7" cy="7" r="1.1" fill="currentColor"/>
+                  <circle cx="7" cy="11" r="1.1" fill="currentColor"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+
+          <!-- Row: Vivek -->
+          <tr data-member="Vivek Shanmugasundaram" data-role="Project Manager" data-chip="chip-blue" data-history='[{"util":"90%","mode":"Custom","from":"01 Sep 2026","to":null},{"util_follows":true,"role_pct":"85%","mode":"Follows role","from":"01 Jan 2026","to":"31 Aug 2026"}]' data-audit='[{"util":"90% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:30 AM"},{"util":"Follows role (85%)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:15 AM"}]'>
+            <td>
+              <div class="member-cell">
+                <div class="avatar avatar-vivek">VS</div>
+                <span class="member-name">Vivek Shanmugasundaram</span>
+              </div>
+            </td>
+            <td class="email-cell">vivek@rocketlane.com</td>
+            <td><span class="role-chip chip-blue">Project Manager</span></td>
+            <td class="permission-cell">Account Admin</td>
+            <td>
+              <div class="approver-cell">
+                <div class="avatar avatar-admin" style="width:22px;height:22px;font-size:8px;">A</div>
+                Admins
+              </div>
+            </td>
+            <td class="actions-cell">
+              <button class="dots-btn" title="More actions">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="3" r="1.1" fill="currentColor"/>
+                  <circle cx="7" cy="7" r="1.1" fill="currentColor"/>
+                  <circle cx="7" cy="11" r="1.1" fill="currentColor"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- ── Overlay ─────────────────────────────────────────────────── -->
+<div class="overlay" id="overlay"></div>
+
+<!-- ── Dropdown template (hidden) ─────────────────────────────── -->
+<div class="dropdown" id="dropdown" style="display:none;" role="menu">
+  <div class="dropdown-item" data-action="view">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="4.5"/><circle cx="7" cy="7" r="1.5"/></svg>
+    View Details
+  </div>
+  <div class="dropdown-item" data-action="cost">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 3.5v7m-2-5h3a1 1 0 0 1 0 2H7a1 1 0 0 0 0 2h3" stroke-linecap="round"/></svg>
+    Manage cost rate
+  </div>
+  <div class="dropdown-item" data-action="util">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3l2 1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Manage target utilisation
+  </div>
+  <div class="dropdown-divider"></div>
+  <div class="dropdown-item danger" data-action="deactivate">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="5" r="2.5"/><path d="M2 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/><path d="M5 3l4 4m0-4L5 7"/></svg>
+    Deactivate
+  </div>
+</div>
+
+<!-- ── Drawer ──────────────────────────────────────────────────── -->
+<aside class="drawer" id="drawer" aria-label="Target utilisation" role="complementary">
+  <div class="drawer-header">
+    <div class="drawer-eyebrow" id="drawer-eyebrow">Paul</div>
+    <div class="drawer-title-row">
+      <div class="drawer-title">Target utilisation</div>
+      <button class="close-btn" id="drawer-close" aria-label="Close drawer">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M4 4l8 8M12 4l-8 8"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Set-value form -->
+  <div class="drawer-form">
+    <div class="form-field">
+      <label class="form-label" for="util-input">Target utilisation</label>
+      <div class="pct-wrap">
+        <input class="pct-input" id="util-input" type="number" min="0" max="100" step="1" value="85" placeholder="0">
+        <span class="pct-suffix">%</span>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="date-input">Effective from</label>
+      <input class="date-input" id="date-input" type="date" value="2026-09-01">
+    </div>
+    <button class="save-btn" id="save-btn">Save</button>
+  </div>
+
+  <!-- Segmented tab control -->
+  <div class="seg-wrap">
+    <div class="seg-control" role="tablist" id="seg-control">
+      <div class="seg-tab active" role="tab" data-panel="history" tabindex="0" aria-selected="true">Utilisation history</div>
+      <div class="seg-tab" role="tab" data-panel="audit" tabindex="0" aria-selected="false">Audit log</div>
+    </div>
+  </div>
+
+  <!-- Drawer body -->
+  <div class="drawer-body">
+    <!-- History panel -->
+    <div class="tab-panel active" id="panel-history" role="tabpanel">
+      <div class="inner-table-wrap">
+        <table class="inner-table" id="history-table">
+          <thead>
+            <tr>
+              <th>Target utilisation</th>
+              <th>Mode</th>
+              <th>Effective</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Audit log panel -->
+    <div class="tab-panel" id="panel-audit" role="tabpanel">
+      <div class="inner-table-wrap">
+        <table class="inner-table" id="audit-table">
+          <thead>
+            <tr>
+              <th>Target utilisation</th>
+              <th>Effective date</th>
+              <th>Changed by</th>
+              <th>Changed date</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── State ─────────────────────────────────────────────────── */
+  let activeRow = null;         // TR element currently driving the drawer
+  let memberHistory = {};       // keyed by member name
+  let memberAudit   = {};
+  let openDotsBtn   = null;     // currently open ⋯ button
+
+  /* Pre-seed from data attrs */
+  document.querySelectorAll('#member-table-body tr').forEach(tr => {
+    const name = tr.dataset.member;
+    memberHistory[name] = JSON.parse(tr.dataset.history);
+    memberAudit[name]   = JSON.parse(tr.dataset.audit);
+  });
+
+  /* ── Today's date for date input default ──────────────────── */
+  const todayISO = new Date().toISOString().slice(0, 10);
+  document.getElementById('date-input').value = todayISO;
+
+  /* ── Dropdown ──────────────────────────────────────────────── */
+  const dropdown = document.getElementById('dropdown');
+
+  function openDropdown(btn, tr) {
+    const rect = btn.getBoundingClientRect();
+    dropdown.style.display = 'block';
+    // Position: prefer left-align with the button, push left if off screen
+    let left = rect.left;
+    let top  = rect.bottom + 4;
+    dropdown.style.left = left + 'px';
+    dropdown.style.top  = top  + 'px';
+    // After paint, check right edge
+    requestAnimationFrame(() => {
+      const dr = dropdown.getBoundingClientRect();
+      if (dr.right > window.innerWidth - 8) {
+        dropdown.style.left = (window.innerWidth - dr.width - 8) + 'px';
+      }
+    });
+    btn.classList.add('open');
+    openDotsBtn = btn;
+    activeRow   = tr;
+    dropdown.dataset.member = tr.dataset.member;
+  }
+
+  function closeDropdown() {
+    dropdown.style.display = 'none';
+    if (openDotsBtn) { openDotsBtn.classList.remove('open'); openDotsBtn = null; }
+  }
+
+  document.querySelectorAll('.dots-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const alreadyOpen = dropdown.style.display !== 'none' && openDotsBtn === btn;
+      closeDropdown();
+      if (!alreadyOpen) {
+        openDropdown(btn, btn.closest('tr'));
+      }
+    });
+  });
+
+  document.addEventListener('click', e => {
+    if (dropdown.style.display !== 'none' && !dropdown.contains(e.target)) {
+      closeDropdown();
+    }
+  });
+
+  /* ── Dropdown actions ──────────────────────────────────────── */
+  dropdown.addEventListener('click', e => {
+    const item = e.target.closest('.dropdown-item');
+    if (!item) return;
+    const action = item.dataset.action;
+    const memberName = dropdown.dataset.member;
+    closeDropdown();
+
+    if (action === 'util') {
+      openDrawer(memberName);
+    }
+    // other actions: no-op for prototype
+  });
+
+  /* ── Drawer ────────────────────────────────────────────────── */
+  const drawer  = document.getElementById('drawer');
+  const overlay = document.getElementById('overlay');
+  const eyebrow = document.getElementById('drawer-eyebrow');
+
+  function openDrawer(memberName) {
+    eyebrow.textContent = memberName;
+    renderHistory(memberName);
+    renderAudit(memberName);
+    // Reset seg to history tab
+    switchTab('history');
+    // Set default util from first history row
+    const hist = memberHistory[memberName];
+    if (hist && hist[0] && hist[0].util) {
+      document.getElementById('util-input').value = parseInt(hist[0].util);
+    }
+    document.getElementById('date-input').value = todayISO;
+    overlay.classList.add('visible');
+    drawer.classList.add('open');
+  }
+
+  function closeDrawer() {
+    overlay.classList.remove('visible');
+    drawer.classList.remove('open');
+  }
+
+  document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  /* ── Tab switching ─────────────────────────────────────────── */
+  document.getElementById('seg-control').addEventListener('click', e => {
+    const tab = e.target.closest('.seg-tab');
+    if (!tab) return;
+    switchTab(tab.dataset.panel);
+  });
+  document.getElementById('seg-control').addEventListener('keydown', e => {
+    const tab = e.target.closest('.seg-tab');
+    if (!tab) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      switchTab(tab.dataset.panel);
+    }
+  });
+
+  function switchTab(panelId) {
+    document.querySelectorAll('.seg-tab').forEach(t => {
+      const isActive = t.dataset.panel === panelId;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'panel-' + panelId);
+    });
+  }
+
+  /* ── Render helpers ────────────────────────────────────────── */
+  function fmtEffective(row) {
+    if (row.to) return row.from + ' – ' + row.to;
+    return row.from + ' onwards';
+  }
+
+  function renderHistory(memberName) {
+    const tbody = document.getElementById('history-tbody');
+    const rows  = memberHistory[memberName] || [];
+    tbody.innerHTML = rows.map((row, i) => {
+      const isFirst = i === 0;
+      const utilCell = row.util_follows
+        ? `<div class="follows-role-main">Follows role</div>
+           <div class="follows-role-val">${row.role_pct}</div>`
+        : `<span style="font-weight:500;font-variant-numeric:tabular-nums">${row.util}</span>`;
+
+      const effectiveStr = fmtEffective(row);
+      const badgeHtml = isFirst
+        ? `<span class="current-badge">Current</span>`
+        : '';
+
+      return `<tr>
+        <td>${utilCell}</td>
+        <td><span class="mode-label">${row.mode}</span></td>
+        <td>
+          <div class="effective-cell">
+            <span>${effectiveStr}</span>${badgeHtml}
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderAudit(memberName) {
+    const tbody = document.getElementById('audit-tbody');
+    const rows  = memberAudit[memberName] || [];
+    tbody.innerHTML = rows.map(row => {
+      return `<tr>
+        <td>
+          <div class="audit-util">${row.util.split(' (')[0]}</div>
+          ${row.util.includes('(') ? `<div class="audit-util-sub">${row.util.match(/\(([^)]+)\)/)?.[1] || ''}</div>` : ''}
+        </td>
+        <td style="font-size:12.5px;color:var(--text-secondary)">${row.effective}</td>
+        <td>
+          <div class="changed-by-cell">
+            <div class="avatar" style="width:22px;height:22px;font-size:9px;background:${row.by_color};">${row.by_init}</div>
+            <span style="font-size:12.5px">${row.by}</span>
+          </div>
+        </td>
+        <td class="changed-date-cell">${row.when}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ── Save button ───────────────────────────────────────────── */
+  document.getElementById('save-btn').addEventListener('click', () => {
+    const memberName = eyebrow.textContent;
+    const pct  = parseInt(document.getElementById('util-input').value);
+    const date = document.getElementById('date-input').value;
+    if (isNaN(pct) || pct < 0 || pct > 100 || !date) return;
+
+    // Format date nicely
+    const d = new Date(date + 'T00:00:00');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const fmtDate = String(d.getDate()).padStart(2,'0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+
+    const now = new Date();
+    const fmtNow = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear()
+      + ', ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0') + ' '
+      + (now.getHours() < 12 ? 'AM' : 'PM');
+
+    // Update history: remove Current from previous first, prepend new
+    const hist = memberHistory[memberName];
+    // The previous "current" row stays but now has a to-date: one day before new from
+    if (hist.length > 0 && hist[0].util) {
+      hist[0].to = String(d.getDate() > 1
+        ? String(d.getDate()-1).padStart(2,'0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
+        : '28 ' + months[(d.getMonth() + 11) % 12] + ' ' + (d.getMonth() === 0 ? d.getFullYear()-1 : d.getFullYear()));
+    }
+    hist.unshift({ util: pct + '%', mode: 'Custom', from: fmtDate, to: null });
+
+    // Update audit log
+    const audit = memberAudit[memberName];
+    audit.unshift({
+      util: pct + '% (Custom)',
+      effective: fmtDate + ' onwards',
+      by: 'Vivek Shanmugasundaram',
+      by_init: 'VS',
+      by_color: '#2563EB',
+      when: fmtNow
+    });
+
+    // Re-render
+    renderHistory(memberName);
+    renderAudit(memberName);
+
+    // Visual feedback: briefly highlight save button
+    const btn = document.getElementById('save-btn');
+    btn.textContent = 'Saved';
+    btn.style.background = '#059669';
+    setTimeout(() => {
+      btn.textContent = 'Save';
+      btn.style.background = '';
+    }, 1400);
+  });
+
+  /* ── Keyboard: Escape closes everything ────────────────────── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (drawer.classList.contains('open')) closeDrawer();
+      if (dropdown.style.display !== 'none') closeDropdown();
+    }
+  });
+
+})();
+</script>
