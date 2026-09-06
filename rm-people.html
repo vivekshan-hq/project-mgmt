@@ -113,7 +113,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .util-low .util-pct,.util-low .util-hrs{color:var(--util-low-text);}
 .util-zero .util-block{background:var(--util-zero-bg);}
 .util-zero .util-pct,.util-zero .util-hrs{color:var(--util-zero-text);}
-.util-today .util-block{box-shadow:inset 0 0 0 2px #EA580C;}
 
 /* ── Project sub-rows (>0 alloc) ── */
 .proj-row{display:none;}
@@ -343,9 +342,8 @@ function renderBody(){
     // Member summary row
     const utilCells = m.weeks.map((w,i)=>{
       const uc = utilCls(w.pct);
-      const tc = w.today?' util-today':'';
       const br = i<N-1?'1px solid var(--border)':'none';
-      return`<td class="td-util ${uc}${tc}" style="border-right:${br}"><div class="util-block"><span class="util-pct">${w.pct}%</span><span class="util-hrs">(${w.hrs})</span></div></td>`;
+      return`<td class="td-util ${uc}" style="border-right:${br}"><div class="util-block"><span class="util-pct">${w.pct}%</span><span class="util-hrs">(${w.hrs})</span></div></td>`;
     }).join('');
 
     html+=`
