@@ -76,8 +76,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .tl-tbl thead th{background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text-3);position:sticky;z-index:3;}
 .th-left{text-align:left;width:var(--col-left);padding:6px 14px;position:sticky;left:0;z-index:5!important;background:var(--bg)!important;vertical-align:bottom;}
 .th-alloc{width:var(--col-alloc);text-align:center;padding:6px 8px;border-right:1px solid var(--border);vertical-align:bottom;}
-.th-month{text-align:center;border-bottom:1px solid var(--border);top:0;background:var(--bg)!important;}
-.th-week{min-width:var(--col-week);text-align:center;padding:6px 8px;top:28px;}
+.th-month{text-align:center;padding:6px 12px;border-bottom:1px solid var(--border);top:0;background:var(--bg)!important;}
+.th-week{min-width:var(--col-week);text-align:center;padding:6px 8px;top:29px;}
 .th-week.today-hdr{background:#FFF7ED!important;color:#EA580C!important;border-bottom-color:#EA580C!important;}
 .today-pill{display:inline-flex;align-items:center;justify-content:center;background:#EA580C;color:white;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;}
 
@@ -440,9 +440,20 @@ function toggleZeroGroup(event,id){
   if(zc) zc.style.transform = s.zeroOpen ? 'rotate(90deg)' : '';
 }
 
+// ── Fix sticky week header top offset ──
+// Measure the actual rendered month-row height and apply it as the week-row sticky top,
+// since the CSS top:29px is an approximation that varies across browsers/zoom levels.
+function fixWeekTop() {
+  const thead = document.getElementById('rm-thead');
+  if (!thead || !thead.rows[0]) return;
+  const h = Math.ceil(thead.rows[0].getBoundingClientRect().height);
+  thead.querySelectorAll('.th-week').forEach(th => { th.style.top = h + 'px'; });
+}
+
 // ── Init ──
 renderHeader();
 renderBody();
+requestAnimationFrame(fixWeekTop);
 </script>
 </body>
 </html>
