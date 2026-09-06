@@ -544,27 +544,7 @@ function renderBody(){
         </tr>`;
     });
 
-    // 2 — Everything outside the viewer's scope, as one opaque row.
-    //     Hours and bars only: no project name, no logo, no actions, no drill-in.
-    //     Chips carry no per-week labels and no duration line is drawn, since
-    //     the row stands for several projects rather than one.
-    if(other.length){
-      const otherMins = other.reduce((s,p)=>s+projTotalMins(p),0);
-      html += `
-        <tr class="sub-row other-row" data-member="${m.id}">
-          <td class="td-left">
-            <div class="other-cell">
-              ${iconOther}
-              <span class="other-name">Other projects</span>
-              <span class="other-lock" data-tip="Outside your “Can view projects” access">${iconLock}</span>
-            </div>
-          </td>
-          <td class="td-alloc">${fmtMins(otherMins)}</td>
-          ${barCells({dur:null, covered:coverOf(other), weekLabel:()=>'', muted:true})}
-        </tr>`;
-    }
-
-    // 3 — Visible projects with no allocation, collapsed into one group.
+    // 2 — Visible projects with no allocation, collapsed into one group.
     //     Each still draws its duration line so the project reads as real.
     if(zero.length){
       html += `
@@ -589,6 +569,26 @@ function renderBody(){
             ${barCells({dur:p.dur, covered:noCover, weekLabel:()=>''})}
           </tr>`;
       });
+    }
+
+    // 3 — Everything outside the viewer's scope, as one opaque row, last.
+    //     Hours and bars only: no project name, no logo, no actions, no drill-in.
+    //     Chips carry no per-week labels and no duration line is drawn, since
+    //     the row stands for several projects rather than one.
+    if(other.length){
+      const otherMins = other.reduce((s,p)=>s+projTotalMins(p),0);
+      html += `
+        <tr class="sub-row other-row" data-member="${m.id}">
+          <td class="td-left">
+            <div class="other-cell">
+              ${iconOther}
+              <span class="other-name">Other projects</span>
+              <span class="other-lock" data-tip="Outside your “Can view projects” access">${iconLock}</span>
+            </div>
+          </td>
+          <td class="td-alloc">${fmtMins(otherMins)}</td>
+          ${barCells({dur:null, covered:coverOf(other), weekLabel:()=>'', muted:true})}
+        </tr>`;
     }
   });
 
