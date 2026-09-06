@@ -14,30 +14,39 @@
   --util-mid-bg:#DBEAFE; --util-mid-text:#1E40AF;
   --util-low-bg:#D1FAE5; --util-low-text:#065F46;
   --util-zero-bg:#F3F4F6; --util-zero-text:#9CA3AF;
+  --bar-fill:#A5B4FC;
+  --bar-other-bg:#CBD5E1; --bar-other-stripe:rgba(255,255,255,.72);
+  --tip-bg:#111827; --tip-text:#FFF;
   --col-left:280px; --col-alloc:80px; --col-week:132px;
   --radius:8px; --radius-sm:5px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg:#0F1117; --surface:#1A1D27; --border:#2A2D3E; --border-strong:#3A3D52;
-    --text-1:#F1F5F9; --text-2:#CBD5E1; --text-3:#94A3B8; --text-4:#4B5563;
+    --text-1:#F1F5F9; --text-2:#CBD5E1; --text-3:#94A3B8; --text-4:#6B7280;
     --brand-light:#1E1B4B; --brand-muted:#3730A3;
     --util-over-bg:#450A0A; --util-over-text:#FCA5A5;
     --util-full-bg:#1E3A8A; --util-full-text:#BFDBFE;
     --util-mid-bg:#1E3A5F; --util-mid-text:#93C5FD;
     --util-low-bg:#052E16; --util-low-text:#86EFAC;
     --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
+    --bar-fill:#4F46E5;
+    --bar-other-bg:#475569; --bar-other-stripe:rgba(255,255,255,.18);
+    --tip-bg:#F1F5F9; --tip-text:#111827;
   }
 }
 :root[data-theme="dark"] {
   --bg:#0F1117; --surface:#1A1D27; --border:#2A2D3E; --border-strong:#3A3D52;
-  --text-1:#F1F5F9; --text-2:#CBD5E1; --text-3:#94A3B8; --text-4:#4B5563;
+  --text-1:#F1F5F9; --text-2:#CBD5E1; --text-3:#94A3B8; --text-4:#6B7280;
   --brand-light:#1E1B4B; --brand-muted:#3730A3;
   --util-over-bg:#450A0A; --util-over-text:#FCA5A5;
   --util-full-bg:#1E3A8A; --util-full-text:#BFDBFE;
   --util-mid-bg:#1E3A5F; --util-mid-text:#93C5FD;
   --util-low-bg:#052E16; --util-low-text:#86EFAC;
   --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
+  --bar-fill:#4F46E5;
+  --bar-other-bg:#475569; --bar-other-stripe:rgba(255,255,255,.18);
+  --tip-bg:#F1F5F9; --tip-text:#111827;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -47,7 +56,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .top-header{height:48px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:2px;flex-shrink:0;}
 .header-icon{width:20px;height:20px;color:var(--text-2);margin-right:6px;}
 .header-title{font-size:15px;font-weight:700;color:var(--text-1);margin-right:16px;}
-.nav-tab{display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:13px;font-weight:500;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;border-top:none;border-left:none;border-right:none;background:none;font-family:inherit;transition:color .12s;text-decoration:none;margin-bottom:-1px;}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:13px;font-weight:500;color:var(--text-3);cursor:pointer;border:none;background:none;font-family:inherit;transition:color .12s;text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;}
 .nav-tab:hover{color:var(--text-1);}
 .nav-tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600;}
 .nav-tab svg{width:14px;height:14px;flex-shrink:0;}
@@ -64,7 +73,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .find-avail-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;}
 .find-avail-btn svg{width:13px;height:13px;}
 .sub-toolbar-right{margin-left:auto;display:flex;align-items:center;gap:3px;}
-.week-select{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;outline:none;}
+.week-select,.scope-select{padding:5px 9px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;outline:none;}
+.scope-select{border-style:dashed;border-color:var(--border-strong);color:var(--text-3);}
+.scope-select:focus{border-color:var(--brand);}
+.scope-wrap{display:inline-flex;align-items:center;gap:6px;margin-left:4px;}
+.scope-lbl{font-size:11px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
 .today-btn{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;white-space:nowrap;}
 
 /* ── Layout ── */
@@ -85,18 +98,18 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .tl-tbl tbody td{border-bottom:1px solid var(--border);}
 .td-left{position:sticky;left:0;z-index:1;background:var(--surface);width:var(--col-left);padding:0;border-right:1px solid var(--border);}
 .td-alloc{width:var(--col-alloc);text-align:center;padding:9px 8px;font-size:12px;font-weight:500;color:var(--text-3);border-right:1px solid var(--border);background:var(--surface);font-variant-numeric:tabular-nums;}
-.td-week-cell{border-right:1px solid var(--border);background:var(--surface);}
+.td-week-cell{border-right:1px solid var(--border);background:var(--surface);padding:0;}
 
 /* ── Member row ── */
 .member-row{cursor:pointer;}
-.member-row:hover .td-left{background:var(--bg)!important;}
-.member-row:hover td{background:var(--bg);}
+.member-row:hover .td-left,.member-row:hover .td-alloc{background:var(--bg);}
 .member-cell{display:flex;align-items:center;gap:9px;padding:10px 14px;}
 .m-chevron{width:14px;height:14px;color:var(--text-4);flex-shrink:0;transition:transform .18s ease;}
 .member-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
 .member-info{flex:1;min-width:0;}
 .member-name{font-size:13px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .member-role{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.td-alloc-total{color:var(--text-2);font-weight:600;}
 
 /* ── Utilization cells ── */
 .td-util{padding:0;border-right:1px solid var(--border);}
@@ -114,37 +127,46 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .util-zero .util-block{background:var(--util-zero-bg);}
 .util-zero .util-pct,.util-zero .util-hrs{color:var(--util-zero-text);}
 
-/* ── Project sub-rows (>0 alloc) ── */
-.proj-row{display:none;}
-.proj-row.visible{display:table-row;}
-.proj-row:hover .td-left{background:var(--bg)!important;}
-.proj-row:hover td{background:var(--bg);}
+/* ── Sub-row visibility ── */
+.sub-row,.zero-proj-row{display:none;}
+.sub-row.visible,.zero-proj-row.visible{display:table-row;}
+.sub-row:hover .td-left,.sub-row:hover .td-alloc,
+.zero-proj-row:hover .td-left,.zero-proj-row:hover .td-alloc{background:var(--bg);}
+
+/* ── Timeline allocation bars ── */
+.bar-wrap{display:flex;align-items:center;min-height:33px;height:100%;}
+.pbar{height:6px;flex:1;background:var(--bar-fill);}
+.pbar-other{background:var(--bar-other-bg);background-image:repeating-linear-gradient(45deg,var(--bar-other-stripe) 0 3px,transparent 3px 7px);}
+
+/* ── Project sub-rows ── */
 .proj-cell{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 38px;}
 .proj-name{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+.proj-actions{display:none;align-items:center;gap:1px;flex-shrink:0;}
+.proj-row:hover .proj-actions{display:flex;}
+.proj-action-btn{width:24px;height:24px;border-radius:4px;background:transparent;border:none;cursor:pointer;color:var(--text-3);display:grid;place-items:center;position:relative;}
+.proj-action-btn:hover{background:var(--brand-light);color:var(--brand);}
+.proj-action-btn svg{width:13px;height:13px;}
+.proj-action-btn::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;z-index:20;}
+.proj-action-btn:hover::after{opacity:1;}
+
+/* ── "Other projects" row (out of scope) ── */
+.other-cell{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 38px;}
+.other-icon{width:14px;height:14px;color:var(--text-4);flex-shrink:0;}
+.other-name{font-size:12px;color:var(--text-3);font-style:italic;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.other-lock{position:relative;display:grid;place-items:center;width:16px;height:16px;color:var(--text-4);flex-shrink:0;cursor:default;}
+.other-lock svg{width:11px;height:11px;}
+.other-lock::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:0;background:var(--tip-bg);color:var(--tip-text);font-size:10px;font-weight:500;padding:4px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;z-index:20;}
+.other-lock:hover::after{opacity:1;}
+.other-row .td-alloc{color:var(--text-3);}
 
 /* ── Zero-alloc group row ── */
-.zero-group-row{display:none;cursor:pointer;}
-.zero-group-row.visible{display:table-row;}
-.zero-group-row:hover .td-left{background:var(--bg)!important;}
-.zero-group-row:hover td{background:var(--bg);}
+.zero-group-row{cursor:pointer;}
 .zero-group-cell{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 38px;}
 .z-chevron{width:11px;height:11px;color:var(--text-4);flex-shrink:0;transition:transform .18s ease;}
 .zero-group-label{font-size:11px;font-weight:600;color:var(--text-4);}
 .zero-count-badge{padding:1px 5px;border-radius:3px;background:var(--border);color:var(--text-3);font-size:10px;font-weight:600;}
-
-/* ── Zero project sub-rows ── */
-.zero-proj-row{display:none;}
-.zero-proj-row.visible{display:table-row;}
-.zero-proj-row:hover .td-left{background:var(--bg)!important;}
-.zero-proj-row:hover td{background:var(--bg);}
 .zero-proj-cell{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 54px;}
 .zero-proj-name{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
-
-/* ── Add project row ── */
-.add-proj-row{display:none;}
-.add-proj-row.visible{display:table-row;}
-.add-proj-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--brand);cursor:pointer;background:none;border:none;font-family:inherit;font-weight:500;padding:0;}
-.add-proj-link:hover{opacity:.75;}
 </style>
 </head>
 <body>
@@ -185,11 +207,20 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
     Find availability
   </button>
+
+  <!-- Prototype control: simulates the viewer's "Can view projects" access scope -->
+  <div class="scope-wrap">
+    <span class="scope-lbl">Can view projects</span>
+    <select class="scope-select" id="scope-select" onchange="setScope(this.value)">
+      <option value="all">All projects</option>
+      <option value="group" selected>Group</option>
+      <option value="participant">Participant</option>
+    </select>
+  </div>
+
   <div class="sub-toolbar-right">
     <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
     <select class="week-select"><option>Week</option><option>Month</option></select>
-    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6"/></svg></button>
-    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></button>
     <div class="tb-divider"></div>
     <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
     <button class="today-btn">Today</button>
@@ -210,31 +241,45 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 </div>
 
 <script>
+/* ══════════════════════════════════════════════════════════
+   Access scope
+   A project is visible to the viewer when its `tier` is at or
+   below the viewer's level. Anything above it is out of scope:
+   its allocations roll into a single "Other projects" row.
+     tier 0 — viewer is a participant on the project
+     tier 1 — project belongs to the viewer's group
+     tier 2 — org-wide visibility required
+══════════════════════════════════════════════════════════ */
+const SCOPE_LEVEL = { participant:0, group:1, all:2 };
+let viewerScope = 'group';
+
 const WEEKS = [
-  {label:'10–16th',mIdx:0},{label:'17–23rd',mIdx:0},{label:'24–30th',mIdx:0},
-  {label:'31st–6th',mIdx:1,today:true},
-  {label:'7–13th',mIdx:1},{label:'14–20th',mIdx:1},{label:'21–27th',mIdx:1},{label:'28th–4th',mIdx:1},
+  {label:'10–16th'},{label:'17–23rd'},{label:'24–30th'},
+  {label:'31st–6th',today:true},
+  {label:'7–13th'},{label:'14–20th'},{label:'21–27th'},{label:'28th–4th'},
 ];
 const MONTHS = ["Aug '26","Sep '26"];
 const MONTH_COLS = [3,5];
+const N = WEEKS.length;
 
+/* mins = allocated minutes across the visible range; span = [firstWeek, lastWeek] */
 const MEMBERS = [
   {
     id:'atul', name:'Atul Dhiman', role:'Senior Digital Building Consultant · INDIA',
     initials:'AD', gradient:'linear-gradient(135deg,#4F46E5,#818CF8)',
     weeks:[
       {pct:102,hrs:'40h 59m'},{pct:102,hrs:'40h 59m'},{pct:102,hrs:'40h 59m'},
-      {pct:99,hrs:'39h 30m',today:true},
+      {pct:99,hrs:'39h 30m'},
       {pct:98,hrs:'39h 07m'},{pct:98,hrs:'39h 07m'},{pct:98,hrs:'39h 07m'},{pct:115,hrs:'46h'},
     ],
     projects:[
-      {name:'BOS Deploy NC: US-East',alloc:'25h'},
-      {name:'BOS Deploy MET: IN-Bangalore',alloc:'21h'},
-    ],
-    zeroProjects:[
-      {name:'BOS Deploy NC: EU-West'},
-      {name:'BOS Deploy NC: APAC-Sydney'},
-      {name:'BOS Deploy MET: LATAM'},
+      {name:'BOS Deploy NC: US-East',        tier:0, mins:120*60, span:[0,7]},
+      {name:'BOS Deploy MET: IN-Bangalore',  tier:0, mins:90*60,  span:[2,7]},
+      {name:'Northwind — Grid Modernisation',tier:2, mins:70*60,  span:[0,5]},
+      {name:'Vertex Labs — Site Survey',     tier:2, mins:40*60,  span:[4,7]},
+      {name:'BOS Deploy NC: EU-West',        tier:0, mins:0,      span:null},
+      {name:'BOS Deploy NC: APAC-Sydney',    tier:0, mins:0,      span:null},
+      {name:'BOS Deploy MET: LATAM',         tier:1, mins:0,      span:null},
     ],
   },
   {
@@ -242,31 +287,30 @@ const MEMBERS = [
     initials:'AH', gradient:'linear-gradient(135deg,#0891B2,#22D3EE)',
     weeks:[
       {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
-      {pct:100,hrs:'40h',today:true},
+      {pct:100,hrs:'40h'},
       {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
     ],
     projects:[
-      {name:'Acme Corp — Workday Implementation',alloc:'35h'},
-      {name:'BOS Regional PM — AMER',alloc:'5h'},
+      {name:'Acme Corp — Workday Implementation', tier:0, mins:180*60, span:[0,7]},
+      {name:'BOS Regional PM — AMER',             tier:1, mins:60*60,  span:[0,7]},
+      {name:'Halcyon Health — Phase 2',           tier:2, mins:80*60,  span:[1,6]},
     ],
-    zeroProjects:[],
   },
   {
     id:'austin', name:'Austin King', role:'Digital Building Consultant · AMER',
     initials:'AK', gradient:'linear-gradient(135deg,#059669,#34D399)',
     weeks:[
       {pct:9,hrs:'3h 34m'},{pct:9,hrs:'3h 34m'},{pct:9,hrs:'3h 34m'},
-      {pct:2,hrs:'42m',today:true},
+      {pct:2,hrs:'42m'},
       {pct:0,hrs:'0h'},{pct:0,hrs:'0h'},{pct:0,hrs:'0h'},{pct:52,hrs:'20h 48m'},
     ],
     projects:[
-      {name:'BOS Deploy NC: US-West',alloc:'3h 34m'},
-    ],
-    zeroProjects:[
-      {name:'BOS Deploy NC: EU-Central'},
-      {name:'BOS Deploy MET: APAC-Singapore'},
-      {name:'BOS Deploy NC: LATAM-Brazil'},
-      {name:'BOS Deploy NC: US-South'},
+      {name:'BOS Deploy NC: US-West',            tier:0, mins:11*60+24, span:[0,3]},
+      {name:'Cobalt Energy — Retrofit Pilot',    tier:2, mins:20*60+48, span:[7,7]},
+      {name:'BOS Deploy NC: EU-Central',         tier:0, mins:0, span:null},
+      {name:'BOS Deploy MET: APAC-Singapore',    tier:0, mins:0, span:null},
+      {name:'BOS Deploy NC: LATAM-Brazil',       tier:1, mins:0, span:null},
+      {name:'BOS Deploy NC: US-South',           tier:1, mins:0, span:null},
     ],
   },
   {
@@ -274,52 +318,116 @@ const MEMBERS = [
     initials:'B', gradient:'linear-gradient(135deg,#7C3AED,#C4B5FD)',
     weeks:[
       {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
-      {pct:100,hrs:'40h',today:true},
+      {pct:100,hrs:'40h'},
       {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
     ],
     projects:[
-      {name:'BOS Regional PM — UK/EU',alloc:'40h'},
+      {name:'BOS Regional PM — UK/EU',      tier:0, mins:240*60, span:[0,7]},
+      {name:'Meridian Rail — Depot Fitout', tier:2, mins:80*60,  span:[0,7]},
+      {name:'BOS Deploy NC: US-North',      tier:0, mins:0, span:null},
+      {name:'BOS Deploy NC: US-Central',    tier:0, mins:0, span:null},
+      {name:'BOS Deploy NC: IL-Haifa',      tier:0, mins:0, span:null},
+      {name:'BOS Deploy NC: US-Pacific',    tier:1, mins:0, span:null},
+      {name:'BOS Deploy NC: US-Southeast',  tier:1, mins:0, span:null},
+      {name:'BOS Deploy MET: IN-Mumbai',    tier:1, mins:0, span:null},
+      {name:'BOS Deploy NC: US-Mountain',   tier:1, mins:0, span:null},
+      {name:'BOS Deploy NC: US-Northeast',  tier:2, mins:0, span:null},
     ],
-    zeroProjects:[
-      {name:'BOS Deploy NC: US-North'},{name:'BOS Deploy NC: US-Central'},
-      {name:'BOS Deploy NC: IL-Haifa'},{name:'BOS Deploy NC: US-Pacific'},
-      {name:'BOS Deploy NC: US-Southeast'},{name:'BOS Deploy MET: IN-Mumbai'},
-      {name:'BOS Deploy NC: US-Mountain'},{name:'BOS Deploy NC: US-Northeast'},
+  },
+  {
+    id:'priya', name:'Priya Raghavan', role:'Solution Architect · INDIA',
+    initials:'PR', gradient:'linear-gradient(135deg,#DB2777,#F9A8D4)',
+    weeks:[
+      {pct:75,hrs:'30h'},{pct:75,hrs:'30h'},{pct:88,hrs:'35h'},
+      {pct:88,hrs:'35h'},
+      {pct:88,hrs:'35h'},{pct:60,hrs:'24h'},{pct:60,hrs:'24h'},{pct:0,hrs:'0h'},
+    ],
+    projects:[
+      {name:'Orion Foods — ERP Cutover',  tier:2, mins:130*60, span:[0,4]},
+      {name:'Sable Bank — Data Migration',tier:2, mins:83*60,  span:[2,6]},
     ],
   },
 ];
 
-// ── Helpers ──
+/* ── Formatting ── */
+function fmtMins(m){
+  if(!m || m<=0) return '0h';
+  const h = Math.floor(m/60), mm = m%60;
+  if(mm===0) return h+'h';
+  if(h===0)  return mm+'m';
+  return h+'h '+String(mm).padStart(2,'0')+'m';
+}
+
 function utilCls(pct){
-  if(pct>100)return'util-over';
-  if(pct>=80)return'util-full';
-  if(pct>=40)return'util-mid';
-  if(pct>0)return'util-low';
-  return'util-zero';
+  if(pct>100) return 'util-over';
+  if(pct>=80) return 'util-full';
+  if(pct>=40) return 'util-mid';
+  if(pct>0)   return 'util-low';
+  return 'util-zero';
 }
 
-const N = WEEKS.length;
+const rightBorder = i => i<N-1 ? '1px solid var(--border)' : 'none';
+
+/* ── Cells ── */
 function emptyWeeks(){
-  return WEEKS.map((w,i)=>`<td class="td-week-cell" style="border-right:${i<N-1?'1px solid var(--border)':'none'}"></td>`).join('');
+  return WEEKS.map((w,i)=>`<td class="td-week-cell" style="border-right:${rightBorder(i)}"></td>`).join('');
 }
 
-function activeCircle(){
-  return`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5"/><path d="M7 1 A6 6 0 0 1 13 7" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-}
-function emptyCircle(){
-  return`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="2.5 2"/></svg>`;
-}
+/* Draws a continuous bar across the weeks covered by `spans`.
+   Rounded ends and inset margins only on the outermost covered cells. */
+function barWeeks(spans, extraCls){
+  const covered = new Array(N).fill(false);
+  spans.forEach(([a,b])=>{ for(let i=a;i<=b;i++) if(i>=0 && i<N) covered[i]=true; });
 
-// ── Render header ──
-function renderHeader(){
-  const thead = document.getElementById('rm-thead');
-  const monthRow = MONTHS.map((m,i)=>`<th class="th-month" colspan="${MONTH_COLS[i]}" style="border-right:${i<MONTHS.length-1?'1px solid var(--border)':'none'}">${m}</th>`).join('');
-  const weekRow = WEEKS.map((w,i)=>{
-    const cls = w.today?'th-week today-hdr':'th-week';
-    const inner = w.today?`<span class="today-pill">${w.label}</span>`:w.label;
-    return`<th class="${cls}" style="border-right:${i<N-1?'1px solid var(--border)':'none'}">${inner}</th>`;
+  return WEEKS.map((w,i)=>{
+    const br = rightBorder(i);
+    if(!covered[i]) return `<td class="td-week-cell" style="border-right:${br}"></td>`;
+    const start = !covered[i-1], end = !covered[i+1];
+    const style = [
+      `border-top-left-radius:${start?'3px':'0'}`,
+      `border-bottom-left-radius:${start?'3px':'0'}`,
+      `border-top-right-radius:${end?'3px':'0'}`,
+      `border-bottom-right-radius:${end?'3px':'0'}`,
+      `margin-left:${start?'10px':'0'}`,
+      `margin-right:${end?'10px':'0'}`,
+    ].join(';');
+    return `<td class="td-week-cell" style="border-right:${br}"><div class="bar-wrap"><div class="pbar ${extraCls||''}" style="${style}"></div></div></td>`;
   }).join('');
-  thead.innerHTML=`
+}
+
+/* ── Icons ── */
+const iconActive = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5"/><path d="M7 1 A6 6 0 0 1 13 7" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const iconIdle   = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="2.5 2"/></svg>`;
+/* Generic stand-in for the customer logo on out-of-scope allocations */
+const iconOther  = `<svg class="other-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>`;
+const iconLock   = `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>`;
+
+/* ── Scope partitioning ── */
+function partition(member){
+  const level = SCOPE_LEVEL[viewerScope];
+  const inScope  = member.projects.filter(p => p.tier <= level);
+  const outScope = member.projects.filter(p => p.tier >  level);
+  return {
+    allocated: inScope.filter(p => p.mins > 0),
+    zero:      inScope.filter(p => p.mins === 0),
+    // Out-of-scope projects with no allocation in range contribute nothing and
+    // are never surfaced — not even as a count.
+    other:     outScope.filter(p => p.mins > 0),
+  };
+}
+
+/* ── Render: header ── */
+function renderHeader(){
+  const monthRow = MONTHS.map((m,i)=>
+    `<th class="th-month" colspan="${MONTH_COLS[i]}" style="border-right:${i<MONTHS.length-1?'1px solid var(--border)':'none'}">${m}</th>`
+  ).join('');
+  const weekRow = WEEKS.map((w,i)=>{
+    const cls   = w.today ? 'th-week today-hdr' : 'th-week';
+    const inner = w.today ? `<span class="today-pill">${w.label}</span>` : w.label;
+    return `<th class="${cls}" style="border-right:${rightBorder(i)}">${inner}</th>`;
+  }).join('');
+
+  document.getElementById('rm-thead').innerHTML = `
     <tr>
       <th class="th-left" rowspan="2" style="top:0;z-index:5;">
         <span style="font-size:12px;font-weight:700;color:var(--text-2)">Team members</span>
@@ -327,27 +435,27 @@ function renderHeader(){
       <th class="th-alloc" rowspan="2" style="top:0;">Allocated</th>
       ${monthRow}
     </tr>
-    <tr>${weekRow}</tr>
-  `;
+    <tr>${weekRow}</tr>`;
 }
 
-// ── Render body ──
+/* ── Render: body ── */
 function renderBody(){
-  const tbody = document.getElementById('rm-tbody');
   let html = '';
 
   MEMBERS.forEach(m=>{
-    const hasZero = m.zeroProjects.length > 0;
+    const { allocated, zero, other } = partition(m);
+    const totalMins = allocated.reduce((s,p)=>s+p.mins,0) + other.reduce((s,p)=>s+p.mins,0);
 
-    // Member summary row
-    const utilCells = m.weeks.map((w,i)=>{
-      const uc = utilCls(w.pct);
-      const br = i<N-1?'1px solid var(--border)':'none';
-      return`<td class="td-util ${uc}" style="border-right:${br}"><div class="util-block"><span class="util-pct">${w.pct}%</span><span class="util-hrs">(${w.hrs})</span></div></td>`;
-    }).join('');
+    // Member summary — utilisation always reflects every allocation,
+    // in scope or not, so the person's true load is never understated.
+    const utilCells = m.weeks.map((w,i)=>
+      `<td class="td-util ${utilCls(w.pct)}" style="border-right:${rightBorder(i)}">
+         <div class="util-block"><span class="util-pct">${w.pct}%</span><span class="util-hrs">(${w.hrs})</span></div>
+       </td>`
+    ).join('');
 
-    html+=`
-      <tr id="mr-${m.id}" class="member-row" onclick="toggleMember('${m.id}')">
+    html += `
+      <tr class="member-row" onclick="toggleMember('${m.id}')">
         <td class="td-left">
           <div class="member-cell">
             <svg id="mc-${m.id}" class="m-chevron" style="transform:rotate(-90deg)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
@@ -358,97 +466,125 @@ function renderBody(){
             </div>
           </div>
         </td>
-        <td class="td-alloc" style="color:var(--text-4)">—</td>
+        <td class="td-alloc td-alloc-total">${fmtMins(totalMins)}</td>
         ${utilCells}
-      </tr>
-    `;
+      </tr>`;
 
-    // Non-zero project rows
-    m.projects.forEach(p=>{
-      html+=`
-        <tr class="proj-row" data-member="${m.id}">
-          <td class="td-left"><div class="proj-cell">${activeCircle()}<span class="proj-name">${p.name}</span></div></td>
-          <td class="td-alloc">${p.alloc}</td>
-          ${emptyWeeks()}
-        </tr>
-      `;
+    // 1 — Projects the viewer can see, with allocation
+    allocated.forEach(p=>{
+      html += `
+        <tr class="sub-row proj-row" data-member="${m.id}">
+          <td class="td-left">
+            <div class="proj-cell">
+              ${iconActive}
+              <span class="proj-name">${p.name}</span>
+              <div class="proj-actions">
+                <button class="proj-action-btn" data-tip="Open project plan"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg></button>
+                <button class="proj-action-btn" data-tip="Edit allocation"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="proj-action-btn" data-tip="Remove"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+              </div>
+            </div>
+          </td>
+          <td class="td-alloc">${fmtMins(p.mins)}</td>
+          ${barWeeks([p.span])}
+        </tr>`;
     });
 
-    // Zero-alloc group row
-    if(hasZero){
-      html+=`
-        <tr class="zero-group-row" data-member="${m.id}" onclick="toggleZeroGroup(event,'${m.id}')">
+    // 2 — Everything outside the viewer's scope, as one opaque row.
+    //     Total hours and bars only: no name, no logo, no actions, no drill-in.
+    if(other.length){
+      const otherMins  = other.reduce((s,p)=>s+p.mins,0);
+      const otherSpans = other.map(p=>p.span).filter(Boolean);
+      html += `
+        <tr class="sub-row other-row" data-member="${m.id}">
+          <td class="td-left">
+            <div class="other-cell">
+              ${iconOther}
+              <span class="other-name">Other projects</span>
+              <span class="other-lock" data-tip="Outside your “Can view projects” access">${iconLock}</span>
+            </div>
+          </td>
+          <td class="td-alloc">${fmtMins(otherMins)}</td>
+          ${barWeeks(otherSpans,'pbar-other')}
+        </tr>`;
+    }
+
+    // 3 — Visible projects with no allocation, collapsed into one group
+    if(zero.length){
+      html += `
+        <tr class="sub-row zero-group-row" data-member="${m.id}" onclick="toggleZeroGroup(event,'${m.id}')">
           <td class="td-left">
             <div class="zero-group-cell">
               <svg id="zc-${m.id}" class="z-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
               <span class="zero-group-label">Projects with 0 allocation</span>
-              <span class="zero-count-badge">${m.zeroProjects.length}</span>
+              <span class="zero-count-badge">${zero.length}</span>
             </div>
           </td>
           <td class="td-alloc" style="color:var(--text-4)">—</td>
           ${emptyWeeks()}
-        </tr>
-      `;
+        </tr>`;
 
-      m.zeroProjects.forEach(p=>{
-        html+=`
+      zero.forEach(p=>{
+        html += `
           <tr class="zero-proj-row" data-member="${m.id}">
-            <td class="td-left"><div class="zero-proj-cell">${emptyCircle()}<span class="zero-proj-name">${p.name}</span></div></td>
+            <td class="td-left"><div class="zero-proj-cell">${iconIdle}<span class="zero-proj-name">${p.name}</span></div></td>
             <td class="td-alloc" style="color:var(--text-4)">0h</td>
             ${emptyWeeks()}
-          </tr>
-        `;
+          </tr>`;
       });
     }
   });
 
-  tbody.innerHTML = html;
+  document.getElementById('rm-tbody').innerHTML = html;
+  applyState();
 }
 
-// ── State ──
+/* ── Expand / collapse state ── */
 const state = {};
-MEMBERS.forEach(m=>{ state[m.id]={open:false,zeroOpen:false}; });
+MEMBERS.forEach(m=>{ state[m.id] = { open:false, zeroOpen:false }; });
+
+function applyState(){
+  MEMBERS.forEach(m=>{
+    const s = state[m.id];
+    document.querySelectorAll(`.sub-row[data-member="${m.id}"]`)
+      .forEach(r=>r.classList.toggle('visible', s.open));
+    document.querySelectorAll(`.zero-proj-row[data-member="${m.id}"]`)
+      .forEach(r=>r.classList.toggle('visible', s.open && s.zeroOpen));
+
+    const mc = document.getElementById(`mc-${m.id}`);
+    if(mc) mc.style.transform = s.open ? 'rotate(0deg)' : 'rotate(-90deg)';
+    const zc = document.getElementById(`zc-${m.id}`);
+    if(zc) zc.style.transform = s.zeroOpen ? 'rotate(90deg)' : '';
+  });
+}
 
 function toggleMember(id){
   const s = state[id];
   s.open = !s.open;
-
-  ['proj-row','zero-group-row'].forEach(cls=>{
-    document.querySelectorAll(`.${cls}[data-member="${id}"]`).forEach(r=>r.classList.toggle('visible',s.open));
-  });
-
-  // Collapse zero sub-rows when closing member
-  if(!s.open && s.zeroOpen){
-    s.zeroOpen = false;
-    document.querySelectorAll(`.zero-proj-row[data-member="${id}"]`).forEach(r=>r.classList.remove('visible'));
-    const zc = document.getElementById(`zc-${id}`);
-    if(zc) zc.style.transform='';
-  }
-
-  const mc = document.getElementById(`mc-${id}`);
-  if(mc) mc.style.transform = s.open ? 'rotate(0deg)' : 'rotate(-90deg)';
+  if(!s.open) s.zeroOpen = false;
+  applyState();
 }
 
 function toggleZeroGroup(event,id){
   event.stopPropagation();
-  const s = state[id];
-  s.zeroOpen = !s.zeroOpen;
-  document.querySelectorAll(`.zero-proj-row[data-member="${id}"]`).forEach(r=>r.classList.toggle('visible',s.zeroOpen));
-  const zc = document.getElementById(`zc-${id}`);
-  if(zc) zc.style.transform = s.zeroOpen ? 'rotate(90deg)' : '';
+  state[id].zeroOpen = !state[id].zeroOpen;
+  applyState();
 }
 
-// ── Fix sticky week header top offset ──
-// Measure the actual rendered month-row height and apply it as the week-row sticky top,
-// since the CSS top:29px is an approximation that varies across browsers/zoom levels.
-function fixWeekTop() {
+function setScope(scope){
+  viewerScope = scope;
+  renderBody();
+}
+
+/* Measure the rendered month-row height and pin the week row to it, rather
+   than trusting the CSS approximation across browsers and zoom levels. */
+function fixWeekTop(){
   const thead = document.getElementById('rm-thead');
-  if (!thead || !thead.rows[0]) return;
+  if(!thead || !thead.rows[0]) return;
   const h = Math.ceil(thead.rows[0].getBoundingClientRect().height);
-  thead.querySelectorAll('.th-week').forEach(th => { th.style.top = h + 'px'; });
+  thead.querySelectorAll('.th-week').forEach(th=>{ th.style.top = h+'px'; });
 }
 
-// ── Init ──
 renderHeader();
 renderBody();
 requestAnimationFrame(fixWeekTop);
