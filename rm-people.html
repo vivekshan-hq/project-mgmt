@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM People</title>
+<style>
+:root {
+  --brand:#4F46E5; --brand-dark:#4338CA; --brand-light:#EEF2FF; --brand-muted:#C7D2FE;
+  --bg:#F7F8FB; --surface:#FFF; --border:#E4E6EB; --border-strong:#CDD0D9;
+  --text-1:#111827; --text-2:#374151; --text-3:#6B7280; --text-4:#9CA3AF;
+  --util-over-bg:#FEE2E2; --util-over-text:#B91C1C;
+  --util-full-bg:#1E3A8A; --util-full-text:#FFF;
+  --util-mid-bg:#DBEAFE; --util-mid-text:#1E40AF;
+  --util-low-bg:#D1FAE5; --util-low-text:#065F46;
+  --util-zero-bg:#F3F4F6; --util-zero-text:#9CA3AF;
+  --col-left:280px; --col-alloc:80px; --col-week:132px;
+  --radius:8px; --radius-sm:5px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#0F1117; --surface:#1A1D27; --border:#2A2D3E; --border-strong:#3A3D52;
+    --text-1:#F1F5F9; --text-2:#CBD5E1; --text-3:#94A3B8; --text-4:#4B5563;
+    --brand-light:#1E1B4B; --brand-muted:#3730A3;
+    --util-over-bg:#450A0A; --util-over-text:#FCA5A5;
+    --util-full-bg:#1E3A8A; --util-full-text:#BFDBFE;
+    --util-mid-bg:#1E3A5F; --util-mid-text:#93C5FD;
+    --util-low-bg:#052E16; --util-low-text:#86EFAC;
+    --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#0F1117; --surface:#1A1D27; --border:#2A2D3E; --border-strong:#3A3D52;
+  --text-1:#F1F5F9; --text-2:#CBD5E1; --text-3:#94A3B8; --text-4:#4B5563;
+  --brand-light:#1E1B4B; --brand-muted:#3730A3;
+  --util-over-bg:#450A0A; --util-over-text:#FCA5A5;
+  --util-full-bg:#1E3A8A; --util-full-text:#BFDBFE;
+  --util-mid-bg:#1E3A5F; --util-mid-text:#93C5FD;
+  --util-low-bg:#052E16; --util-low-text:#86EFAC;
+  --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:var(--text-1);background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── Top header ── */
+.top-header{height:48px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:2px;flex-shrink:0;}
+.header-icon{width:20px;height:20px;color:var(--text-2);margin-right:6px;}
+.header-title{font-size:15px;font-weight:700;color:var(--text-1);margin-right:16px;}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:13px;font-weight:500;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;border-top:none;border-left:none;border-right:none;background:none;font-family:inherit;transition:color .12s;text-decoration:none;margin-bottom:-1px;}
+.nav-tab:hover{color:var(--text-1);}
+.nav-tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600;}
+.nav-tab svg{width:14px;height:14px;flex-shrink:0;}
+
+/* ── Sub toolbar ── */
+.sub-toolbar{height:44px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:6px;flex-shrink:0;}
+.filter-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;}
+.filter-chip svg{width:12px;height:12px;}
+.filter-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--brand);background:var(--brand-light);border:1px solid var(--brand-muted);}
+.tb-divider{width:1px;height:20px;background:var(--border);flex-shrink:0;}
+.icon-btn{width:30px;height:30px;border-radius:var(--radius-sm);background:transparent;border:none;cursor:pointer;color:var(--text-3);display:grid;place-items:center;transition:background .12s;flex-shrink:0;}
+.icon-btn:hover{background:var(--bg);color:var(--text-2);}
+.icon-btn svg{width:15px;height:15px;}
+.find-avail-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;}
+.find-avail-btn svg{width:13px;height:13px;}
+.sub-toolbar-right{margin-left:auto;display:flex;align-items:center;gap:3px;}
+.week-select{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;outline:none;}
+.today-btn{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;white-space:nowrap;}
+
+/* ── Layout ── */
+.page-body{flex:1;display:flex;overflow:hidden;}
+.tl-scroll{flex:1;overflow:auto;}
+.tl-tbl{width:100%;border-collapse:collapse;table-layout:fixed;min-width:900px;}
+
+/* ── Table header ── */
+.tl-tbl thead th{background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text-3);position:sticky;z-index:3;}
+.th-left{text-align:left;width:var(--col-left);padding:6px 14px;position:sticky;left:0;z-index:5!important;background:var(--bg)!important;vertical-align:bottom;}
+.th-alloc{width:var(--col-alloc);text-align:center;padding:6px 8px;border-right:1px solid var(--border);vertical-align:bottom;}
+.th-month{text-align:center;border-bottom:1px solid var(--border);top:0;background:var(--bg)!important;}
+.th-week{min-width:var(--col-week);text-align:center;padding:6px 8px;top:28px;}
+.th-week.today-hdr{background:#FFF7ED!important;color:#EA580C!important;border-bottom-color:#EA580C!important;}
+.today-pill{display:inline-flex;align-items:center;justify-content:center;background:#EA580C;color:white;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+
+/* ── Body rows ── */
+.tl-tbl tbody td{border-bottom:1px solid var(--border);}
+.td-left{position:sticky;left:0;z-index:1;background:var(--surface);width:var(--col-left);padding:0;border-right:1px solid var(--border);}
+.td-alloc{width:var(--col-alloc);text-align:center;padding:9px 8px;font-size:12px;font-weight:500;color:var(--text-3);border-right:1px solid var(--border);background:var(--surface);font-variant-numeric:tabular-nums;}
+.td-week-cell{border-right:1px solid var(--border);background:var(--surface);}
+
+/* ── Member row ── */
+.member-row{cursor:pointer;}
+.member-row:hover .td-left{background:var(--bg)!important;}
+.member-row:hover td{background:var(--bg);}
+.member-cell{display:flex;align-items:center;gap:9px;padding:10px 14px;}
+.m-chevron{width:14px;height:14px;color:var(--text-4);flex-shrink:0;transition:transform .18s ease;}
+.member-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
+.member-info{flex:1;min-width:0;}
+.member-name{font-size:13px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.member-role{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+
+/* ── Utilization cells ── */
+.td-util{padding:0;border-right:1px solid var(--border);}
+.util-block{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:54px;padding:8px 6px;}
+.util-pct{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;}
+.util-hrs{font-size:10px;font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums;}
+.util-over .util-block{background:var(--util-over-bg);}
+.util-over .util-pct,.util-over .util-hrs{color:var(--util-over-text);}
+.util-full .util-block{background:var(--util-full-bg);}
+.util-full .util-pct,.util-full .util-hrs{color:var(--util-full-text);}
+.util-mid .util-block{background:var(--util-mid-bg);}
+.util-mid .util-pct,.util-mid .util-hrs{color:var(--util-mid-text);}
+.util-low .util-block{background:var(--util-low-bg);}
+.util-low .util-pct,.util-low .util-hrs{color:var(--util-low-text);}
+.util-zero .util-block{background:var(--util-zero-bg);}
+.util-zero .util-pct,.util-zero .util-hrs{color:var(--util-zero-text);}
+.util-today .util-block{box-shadow:inset 0 0 0 2px #EA580C;}
+
+/* ── Project sub-rows (>0 alloc) ── */
+.proj-row{display:none;}
+.proj-row.visible{display:table-row;}
+.proj-row:hover .td-left{background:var(--bg)!important;}
+.proj-row:hover td{background:var(--bg);}
+.proj-cell{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 38px;}
+.proj-name{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+
+/* ── Zero-alloc group row ── */
+.zero-group-row{display:none;cursor:pointer;}
+.zero-group-row.visible{display:table-row;}
+.zero-group-row:hover .td-left{background:var(--bg)!important;}
+.zero-group-row:hover td{background:var(--bg);}
+.zero-group-cell{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 38px;}
+.z-chevron{width:11px;height:11px;color:var(--text-4);flex-shrink:0;transition:transform .18s ease;}
+.zero-group-label{font-size:11px;font-weight:600;color:var(--text-4);}
+.zero-count-badge{padding:1px 5px;border-radius:3px;background:var(--border);color:var(--text-3);font-size:10px;font-weight:600;}
+
+/* ── Zero project sub-rows ── */
+.zero-proj-row{display:none;}
+.zero-proj-row.visible{display:table-row;}
+.zero-proj-row:hover .td-left{background:var(--bg)!important;}
+.zero-proj-row:hover td{background:var(--bg);}
+.zero-proj-cell{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 54px;}
+.zero-proj-name{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+
+/* ── Add project row ── */
+.add-proj-row{display:none;}
+.add-proj-row.visible{display:table-row;}
+.add-proj-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--brand);cursor:pointer;background:none;border:none;font-family:inherit;font-weight:500;padding:0;}
+.add-proj-link:hover{opacity:.75;}
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <svg class="header-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+  <span class="header-title">Resource management</span>
+  <a class="nav-tab active" href="#">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    People
+  </a>
+  <a class="nav-tab" href="#">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    Projects
+  </a>
+  <a class="nav-tab" href="#">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    Capacity Planning
+  </a>
+  <a class="nav-tab" href="#">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Apps
+  </a>
+</div>
+
+<div class="sub-toolbar">
+  <button class="filter-chip">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+    All users – active projects
+  </button>
+  <div class="filter-badge">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
+    1 filter
+  </div>
+  <button class="icon-btn" title="Save view"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+  <button class="icon-btn" title="Clear"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <button class="find-avail-btn">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+    Find availability
+  </button>
+  <div class="sub-toolbar-right">
+    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+    <select class="week-select"><option>Week</option><option>Month</option></select>
+    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6"/></svg></button>
+    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></button>
+    <div class="tb-divider"></div>
+    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="today-btn">Today</button>
+    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+    <div class="tb-divider"></div>
+    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
+    <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg></button>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="tl-scroll">
+    <table class="tl-tbl">
+      <thead id="rm-thead"></thead>
+      <tbody id="rm-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const WEEKS = [
+  {label:'10–16th',mIdx:0},{label:'17–23rd',mIdx:0},{label:'24–30th',mIdx:0},
+  {label:'31st–6th',mIdx:1,today:true},
+  {label:'7–13th',mIdx:1},{label:'14–20th',mIdx:1},{label:'21–27th',mIdx:1},{label:'28th–4th',mIdx:1},
+];
+const MONTHS = ["Aug '26","Sep '26"];
+const MONTH_COLS = [3,5];
+
+const MEMBERS = [
+  {
+    id:'atul', name:'Atul Dhiman', role:'Senior Digital Building Consultant · INDIA',
+    initials:'AD', gradient:'linear-gradient(135deg,#4F46E5,#818CF8)',
+    weeks:[
+      {pct:102,hrs:'40h 59m'},{pct:102,hrs:'40h 59m'},{pct:102,hrs:'40h 59m'},
+      {pct:99,hrs:'39h 30m',today:true},
+      {pct:98,hrs:'39h 07m'},{pct:98,hrs:'39h 07m'},{pct:98,hrs:'39h 07m'},{pct:115,hrs:'46h'},
+    ],
+    projects:[
+      {name:'BOS Deploy NC: US-East',alloc:'25h'},
+      {name:'BOS Deploy MET: IN-Bangalore',alloc:'21h'},
+    ],
+    zeroProjects:[
+      {name:'BOS Deploy NC: EU-West'},
+      {name:'BOS Deploy NC: APAC-Sydney'},
+      {name:'BOS Deploy MET: LATAM'},
+    ],
+  },
+  {
+    id:'augie', name:'Augie Haro', role:'Project Manager · AMER',
+    initials:'AH', gradient:'linear-gradient(135deg,#0891B2,#22D3EE)',
+    weeks:[
+      {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
+      {pct:100,hrs:'40h',today:true},
+      {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
+    ],
+    projects:[
+      {name:'Acme Corp — Workday Implementation',alloc:'35h'},
+      {name:'BOS Regional PM — AMER',alloc:'5h'},
+    ],
+    zeroProjects:[],
+  },
+  {
+    id:'austin', name:'Austin King', role:'Digital Building Consultant · AMER',
+    initials:'AK', gradient:'linear-gradient(135deg,#059669,#34D399)',
+    weeks:[
+      {pct:9,hrs:'3h 34m'},{pct:9,hrs:'3h 34m'},{pct:9,hrs:'3h 34m'},
+      {pct:2,hrs:'42m',today:true},
+      {pct:0,hrs:'0h'},{pct:0,hrs:'0h'},{pct:0,hrs:'0h'},{pct:52,hrs:'20h 48m'},
+    ],
+    projects:[
+      {name:'BOS Deploy NC: US-West',alloc:'3h 34m'},
+    ],
+    zeroProjects:[
+      {name:'BOS Deploy NC: EU-Central'},
+      {name:'BOS Deploy MET: APAC-Singapore'},
+      {name:'BOS Deploy NC: LATAM-Brazil'},
+      {name:'BOS Deploy NC: US-South'},
+    ],
+  },
+  {
+    id:'becca', name:'beccafranklin', role:'Regional Service Lead (PM) · UK',
+    initials:'B', gradient:'linear-gradient(135deg,#7C3AED,#C4B5FD)',
+    weeks:[
+      {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
+      {pct:100,hrs:'40h',today:true},
+      {pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},{pct:100,hrs:'40h'},
+    ],
+    projects:[
+      {name:'BOS Regional PM — UK/EU',alloc:'40h'},
+    ],
+    zeroProjects:[
+      {name:'BOS Deploy NC: US-North'},{name:'BOS Deploy NC: US-Central'},
+      {name:'BOS Deploy NC: IL-Haifa'},{name:'BOS Deploy NC: US-Pacific'},
+      {name:'BOS Deploy NC: US-Southeast'},{name:'BOS Deploy MET: IN-Mumbai'},
+      {name:'BOS Deploy NC: US-Mountain'},{name:'BOS Deploy NC: US-Northeast'},
+    ],
+  },
+];
+
+// ── Helpers ──
+function utilCls(pct){
+  if(pct>100)return'util-over';
+  if(pct>=80)return'util-full';
+  if(pct>=40)return'util-mid';
+  if(pct>0)return'util-low';
+  return'util-zero';
+}
+
+const N = WEEKS.length;
+function emptyWeeks(){
+  return WEEKS.map((w,i)=>`<td class="td-week-cell" style="border-right:${i<N-1?'1px solid var(--border)':'none'}"></td>`).join('');
+}
+
+function activeCircle(){
+  return`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5"/><path d="M7 1 A6 6 0 0 1 13 7" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+}
+function emptyCircle(){
+  return`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="2.5 2"/></svg>`;
+}
+
+// ── Render header ──
+function renderHeader(){
+  const thead = document.getElementById('rm-thead');
+  const monthRow = MONTHS.map((m,i)=>`<th class="th-month" colspan="${MONTH_COLS[i]}" style="border-right:${i<MONTHS.length-1?'1px solid var(--border)':'none'}">${m}</th>`).join('');
+  const weekRow = WEEKS.map((w,i)=>{
+    const cls = w.today?'th-week today-hdr':'th-week';
+    const inner = w.today?`<span class="today-pill">${w.label}</span>`:w.label;
+    return`<th class="${cls}" style="border-right:${i<N-1?'1px solid var(--border)':'none'}">${inner}</th>`;
+  }).join('');
+  thead.innerHTML=`
+    <tr>
+      <th class="th-left" rowspan="2" style="top:0;z-index:5;">
+        <span style="font-size:12px;font-weight:700;color:var(--text-2)">Team members</span>
+      </th>
+      <th class="th-alloc" rowspan="2" style="top:0;">Allocated</th>
+      ${monthRow}
+    </tr>
+    <tr>${weekRow}</tr>
+  `;
+}
+
+// ── Render body ──
+function renderBody(){
+  const tbody = document.getElementById('rm-tbody');
+  let html = '';
+
+  MEMBERS.forEach(m=>{
+    const hasZero = m.zeroProjects.length > 0;
+
+    // Member summary row
+    const utilCells = m.weeks.map((w,i)=>{
+      const uc = utilCls(w.pct);
+      const tc = w.today?' util-today':'';
+      const br = i<N-1?'1px solid var(--border)':'none';
+      return`<td class="td-util ${uc}${tc}" style="border-right:${br}"><div class="util-block"><span class="util-pct">${w.pct}%</span><span class="util-hrs">(${w.hrs})</span></div></td>`;
+    }).join('');
+
+    html+=`
+      <tr id="mr-${m.id}" class="member-row" onclick="toggleMember('${m.id}')">
+        <td class="td-left">
+          <div class="member-cell">
+            <svg id="mc-${m.id}" class="m-chevron" style="transform:rotate(-90deg)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+            <div class="member-avatar" style="background:${m.gradient}">${m.initials}</div>
+            <div class="member-info">
+              <div class="member-name">${m.name}</div>
+              <div class="member-role">${m.role}</div>
+            </div>
+          </div>
+        </td>
+        <td class="td-alloc" style="color:var(--text-4)">—</td>
+        ${utilCells}
+      </tr>
+    `;
+
+    // Non-zero project rows
+    m.projects.forEach(p=>{
+      html+=`
+        <tr class="proj-row" data-member="${m.id}">
+          <td class="td-left"><div class="proj-cell">${activeCircle()}<span class="proj-name">${p.name}</span></div></td>
+          <td class="td-alloc">${p.alloc}</td>
+          ${emptyWeeks()}
+        </tr>
+      `;
+    });
+
+    // Zero-alloc group row
+    if(hasZero){
+      html+=`
+        <tr class="zero-group-row" data-member="${m.id}" onclick="toggleZeroGroup(event,'${m.id}')">
+          <td class="td-left">
+            <div class="zero-group-cell">
+              <svg id="zc-${m.id}" class="z-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+              <span class="zero-group-label">Projects with 0 allocation</span>
+              <span class="zero-count-badge">${m.zeroProjects.length}</span>
+            </div>
+          </td>
+          <td class="td-alloc" style="color:var(--text-4)">—</td>
+          ${emptyWeeks()}
+        </tr>
+      `;
+
+      m.zeroProjects.forEach(p=>{
+        html+=`
+          <tr class="zero-proj-row" data-member="${m.id}">
+            <td class="td-left"><div class="zero-proj-cell">${emptyCircle()}<span class="zero-proj-name">${p.name}</span></div></td>
+            <td class="td-alloc" style="color:var(--text-4)">0h</td>
+            ${emptyWeeks()}
+          </tr>
+        `;
+      });
+    }
+  });
+
+  tbody.innerHTML = html;
+}
+
+// ── State ──
+const state = {};
+MEMBERS.forEach(m=>{ state[m.id]={open:false,zeroOpen:false}; });
+
+function toggleMember(id){
+  const s = state[id];
+  s.open = !s.open;
+
+  ['proj-row','zero-group-row'].forEach(cls=>{
+    document.querySelectorAll(`.${cls}[data-member="${id}"]`).forEach(r=>r.classList.toggle('visible',s.open));
+  });
+
+  // Collapse zero sub-rows when closing member
+  if(!s.open && s.zeroOpen){
+    s.zeroOpen = false;
+    document.querySelectorAll(`.zero-proj-row[data-member="${id}"]`).forEach(r=>r.classList.remove('visible'));
+    const zc = document.getElementById(`zc-${id}`);
+    if(zc) zc.style.transform='';
+  }
+
+  const mc = document.getElementById(`mc-${id}`);
+  if(mc) mc.style.transform = s.open ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
+
+function toggleZeroGroup(event,id){
+  event.stopPropagation();
+  const s = state[id];
+  s.zeroOpen = !s.zeroOpen;
+  document.querySelectorAll(`.zero-proj-row[data-member="${id}"]`).forEach(r=>r.classList.toggle('visible',s.zeroOpen));
+  const zc = document.getElementById(`zc-${id}`);
+  if(zc) zc.style.transform = s.zeroOpen ? 'rotate(90deg)' : '';
+}
+
+// ── Init ──
+renderHeader();
+renderBody();
+</script>
+</body>
+</html>
