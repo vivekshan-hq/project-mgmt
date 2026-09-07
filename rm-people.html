@@ -548,7 +548,7 @@ function row({anc, cls='', indent, chevKey, body, alloc, cells}){
 }
 
 /* Indent ladder, in px, for each depth of the tree. */
-const IND = [14, 34, 62, 88];
+const IND = [14, 34, 62];
 
 /* ── Render: header ── */
 function renderHeader(){
@@ -631,7 +631,9 @@ function projectSubtree(p, key, anc, depth, {flatBudgets=false} = {}){
       alloc: '0h',
       cells: emptyWeeks(),
     });
-    budgets.zero.forEach(b=>{ html += budgetRow(b, zbKey, IND[depth+2]); });
+    // Same indent as the allocated budgets above: grouping a budget must not
+    // push its name out of line with the budgets it sits alongside.
+    budgets.zero.forEach(b=>{ html += budgetRow(b, zbKey, IND[depth+1]); });
   }
   return html;
 }
