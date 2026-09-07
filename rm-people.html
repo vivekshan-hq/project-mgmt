@@ -16,10 +16,13 @@
   --util-zero-bg:#F3F4F6; --util-zero-text:#9CA3AF;
   --dur-line:#9CC5F0;
   --chip-bg:#74B0F0; --chip-text:#0B2E5E;
+  --chip-roll-bg:#DFE3E9; --chip-roll-text:#374151;
   --hatch-c:#D5DBE3;
   --tip-bg:#111827; --tip-text:#FFF;
   --other-bg:#EFF5FE; --other-bg-hover:#E4EEFC;
-  --col-left:280px; --col-alloc:80px; --col-week:132px;
+  --ok-bg:#DCFCE7; --ok-line:#16A34A;
+  --wip-line:#93C5FD; --wip-fill:#3B82F6;
+  --col-left:340px; --col-alloc:92px; --col-week:132px;
   --radius:8px; --radius-sm:5px;
 }
 @media (prefers-color-scheme: dark) {
@@ -34,9 +37,12 @@
     --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
     --dur-line:#3E6591;
     --chip-bg:#3B6FA8; --chip-text:#E3EEFA;
+    --chip-roll-bg:#333A49; --chip-roll-text:#D1D5DB;
     --hatch-c:#39414F;
     --tip-bg:#F1F5F9; --tip-text:#111827;
     --other-bg:#182234; --other-bg-hover:#1E2A40;
+    --ok-bg:#0B2A18; --ok-line:#4ADE80;
+    --wip-line:#3E6591; --wip-fill:#60A5FA;
   }
 }
 :root[data-theme="dark"] {
@@ -50,9 +56,12 @@
   --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
   --dur-line:#3E6591;
   --chip-bg:#3B6FA8; --chip-text:#E3EEFA;
+  --chip-roll-bg:#333A49; --chip-roll-text:#D1D5DB;
   --hatch-c:#39414F;
   --tip-bg:#F1F5F9; --tip-text:#111827;
   --other-bg:#182234; --other-bg-hover:#1E2A40;
+  --ok-bg:#0B2A18; --ok-line:#4ADE80;
+  --wip-line:#3E6591; --wip-fill:#60A5FA;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -103,19 +112,27 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 /* ── Body rows ── */
 .tl-tbl tbody td{border-bottom:1px solid var(--border);}
 .td-left{position:sticky;left:0;z-index:1;background:var(--surface);width:var(--col-left);padding:0;border-right:1px solid var(--border);}
-.td-alloc{width:var(--col-alloc);text-align:center;padding:9px 8px;font-size:12px;font-weight:500;color:var(--text-3);border-right:1px solid var(--border);background:var(--surface);font-variant-numeric:tabular-nums;}
+.td-alloc{width:var(--col-alloc);text-align:right;padding:9px 14px 9px 8px;font-size:12px;font-weight:500;color:var(--text-2);border-right:1px solid var(--border);background:var(--surface);font-variant-numeric:tabular-nums;white-space:nowrap;}
 .td-week-cell{border-right:1px solid var(--border);background:var(--surface);padding:0;vertical-align:top;}
+
+/* ── Tree rows: hidden until every ancestor is expanded ── */
+.tree-row{display:none;}
+.tree-row.visible{display:table-row;}
+.tree-row:hover .td-left,.tree-row:hover .td-alloc{background:var(--bg);}
+.row-cell{display:flex;align-items:center;gap:8px;}
+.tw-chev{width:12px;height:12px;color:var(--text-4);flex-shrink:0;transition:transform .16s ease;}
+.tw-spacer{width:12px;flex-shrink:0;}
+.clickable{cursor:pointer;}
 
 /* ── Member row ── */
 .member-row{cursor:pointer;}
 .member-row:hover .td-left,.member-row:hover .td-alloc{background:var(--bg);}
 .member-cell{display:flex;align-items:center;gap:9px;padding:10px 14px;}
-.m-chevron{width:14px;height:14px;color:var(--text-4);flex-shrink:0;transition:transform .18s ease;}
 .member-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
 .member-info{flex:1;min-width:0;}
 .member-name{font-size:13px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .member-role{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
-.td-alloc-total{color:var(--text-2);font-weight:600;}
+.td-alloc-total{font-weight:600;}
 
 /* ── Utilization cells ── */
 .td-util{padding:0;border-right:1px solid var(--border);}
@@ -133,16 +150,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .util-zero .util-block{background:var(--util-zero-bg);}
 .util-zero .util-pct,.util-zero .util-hrs{color:var(--util-zero-text);}
 
-/* ── Sub-row visibility ── */
-.sub-row,.zero-proj-row{display:none;}
-.sub-row.visible,.zero-proj-row.visible{display:table-row;}
-.sub-row:hover .td-left,.sub-row:hover .td-alloc,
-.zero-proj-row:hover .td-left,.zero-proj-row:hover .td-alloc{background:var(--bg);}
-
 /* ══ Timeline bars ══
    Each week cell is a 7-day track. The duration line runs along the top
-   for the project's whole date range; below it, allocation chips cover
-   working days and hatched blocks mark the weekend inside that range. */
+   for the row's whole date range; below it, allocation chips cover the
+   allocated working days and hatched blocks mark the weekend inside them. */
 .cell-stack{display:flex;flex-direction:column;padding:5px 0 8px;min-height:46px;}
 .dur-track{display:flex;height:3px;margin-bottom:9px;}
 .dur-seg{border-radius:2px;}
@@ -150,36 +161,35 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .alloc-track{display:flex;align-items:center;gap:2px;height:23px;}
 .seg{min-width:0;border-radius:3px;}
 .seg-chip{background:var(--chip-bg);color:var(--chip-text);display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums;}
+/* Roll-up rows (a project summing its budget lines) read quieter than the
+   budget lines themselves, so the leaf allocations stay the focus. */
+.seg-chip.roll{background:var(--chip-roll-bg);color:var(--chip-roll-text);}
 .seg-hatch{height:100%;background-image:repeating-linear-gradient(45deg,var(--hatch-c) 0 3px,transparent 3px 6px);}
 
-/* ── Project sub-rows ── */
-.proj-cell{display:flex;align-items:center;gap:8px;padding:13px 14px 13px 38px;}
-.proj-name{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
-.proj-actions{display:none;align-items:center;gap:1px;flex-shrink:0;}
-.proj-row:hover .proj-actions{display:flex;}
-.proj-action-btn{width:24px;height:24px;border-radius:4px;background:transparent;border:none;cursor:pointer;color:var(--text-3);display:grid;place-items:center;position:relative;}
-.proj-action-btn:hover{background:var(--brand-light);color:var(--brand);}
-.proj-action-btn svg{width:13px;height:13px;}
-.proj-action-btn::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;z-index:20;}
-.proj-action-btn:hover::after{opacity:1;}
+/* ── Project rows ── */
+.name-1{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;}
+.row-actions{display:none;align-items:center;gap:1px;flex-shrink:0;}
+.tree-row:hover .row-actions{display:flex;}
+.act-btn{width:24px;height:24px;border-radius:4px;background:transparent;border:none;cursor:pointer;color:var(--text-3);display:grid;place-items:center;position:relative;}
+.act-btn:hover{background:var(--brand-light);color:var(--brand);}
+.act-btn svg{width:13px;height:13px;}
+.act-btn::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;z-index:20;}
+.act-btn:hover::after{opacity:1;}
+
+/* ── Budget rows ── */
+.bud-info{flex:1;min-width:0;}
+.bud-name{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bud-billing{font-size:11px;color:var(--text-4);margin-top:1px;white-space:nowrap;}
+
+/* ── Grouping rows (0 allocation) ── */
+.count-badge{padding:1px 5px;border-radius:3px;background:var(--border);color:var(--text-3);font-size:10px;font-weight:600;flex-shrink:0;}
 
 /* ── "Other Projects" row (out of scope) ──
    Icon, label, allocated hours. No bars: the row stands for projects the
    viewer cannot see, so there is nothing to place on the timeline. */
-.other-cell{display:flex;align-items:center;gap:9px;padding:15px 14px 15px 38px;}
 .other-icon{width:15px;height:15px;color:var(--text-3);flex-shrink:0;}
-.other-name{font-size:12px;color:var(--text-2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .other-row .td-left,.other-row .td-alloc,.other-row .td-week-cell{background:var(--other-bg);}
 .other-row:hover .td-left,.other-row:hover .td-alloc{background:var(--other-bg-hover);}
-
-/* ── Zero-alloc group row ── */
-.zero-group-row{cursor:pointer;}
-.zero-group-cell{display:flex;align-items:center;gap:8px;padding:13px 14px 13px 38px;}
-.z-chevron{width:11px;height:11px;color:var(--text-4);flex-shrink:0;transition:transform .18s ease;}
-.zero-group-label{font-size:12px;color:var(--text-2);white-space:nowrap;}
-.zero-count-badge{padding:1px 5px;border-radius:3px;background:var(--border);color:var(--text-3);font-size:10px;font-weight:600;}
-.zero-proj-cell{display:flex;align-items:center;gap:8px;padding:13px 14px 13px 54px;}
-.zero-proj-name{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
 </style>
 </head>
 <body>
@@ -255,13 +265,22 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 
 <script>
 /* ══════════════════════════════════════════════════════════
+   Hierarchy
+     Team member
+       ├─ Projects with allocation          (expand → budgets)
+       │    ├─ Budgets with allocation
+       │    └─ Budgets with 0 allocation    (collapsed group)
+       ├─ Projects with 0 allocation        (collapsed group)
+       │    └─ each project (expand → its budgets, flat)
+       └─ Other Projects                    (out-of-scope roll-up)
+
    Access scope
-   A project is visible to the viewer when its `tier` is at or
-   below the viewer's level. Anything above it is out of scope:
-   its allocations roll into a single "Other projects" row.
-     tier 0 — viewer is a participant on the project
-     tier 1 — project belongs to the viewer's group
-     tier 2 — org-wide visibility required
+     A project is visible when its `tier` is at or below the viewer's
+     level. Anything above it is out of scope and its allocations roll
+     into the single "Other Projects" row.
+       tier 0 — viewer is a participant on the project
+       tier 1 — project belongs to the viewer's group
+       tier 2 — org-wide visibility required
 ══════════════════════════════════════════════════════════ */
 const SCOPE_LEVEL = { participant:0, group:1, all:2 };
 let viewerScope = 'group';
@@ -277,21 +296,32 @@ const N = WEEKS.length;
 const DAYS = N * 7;
 const isWorkday = d => d % 7 < 5;   // day 0 of each week is Monday
 
-/* Projects are described in whole days across the visible range.
-     dur   — [firstDay, lastDay] the project itself runs; drawn as the thin line
-     alloc — [firstDay, lastDay] this person is booked, or null for 0h
-     hpd   — hours per working day inside `alloc`; weekly totals derive from it
-     tier  — access tier required to see the project (see SCOPE_LEVEL) */
+/* Rows are described in whole days across the visible range.
+     dur     — [firstDay, lastDay] the project/budget runs; the thin line
+     alloc   — [firstDay, lastDay] this person is booked, or null for 0h
+     hpd     — hours per working day inside `alloc`
+     tier    — access tier needed to see the project
+     budgets — budget lines; when present the project's hours are their sum
+     billing — budget billing type, shown under the budget name
+     state   — 'done' | 'wip', drives the budget status icon */
 const MEMBERS = [
   {
     id:'atul', name:'Atul Dhiman', role:'Senior Digital Building Consultant · INDIA',
     initials:'AD', gradient:'linear-gradient(135deg,#4F46E5,#818CF8)', capHrs:40,
     projects:[
-      {name:'BOS Deploy NC: US-East',         tier:0, dur:[0,55],  alloc:[0,55],  hpd:3},
+      {name:'BOS Deploy NC: US-East', tier:0, dur:[0,55], budgets:[
+        {name:'Implementation — Core Platform', billing:'Fixed fee',        state:'wip',  dur:[0,55],  alloc:[0,55], hpd:2},
+        {name:'Change Management',              billing:'Time & materials', state:'wip',  dur:[0,55],  alloc:[0,55], hpd:1},
+        {name:'Training Delivery',              billing:'Fixed fee',        state:'done', dur:[35,55], alloc:null},
+        {name:'Post go-live Support',           billing:'Fixed fee',        state:'done', dur:[42,55], alloc:null},
+      ]},
       {name:'BOS Deploy MET: IN-Bangalore',   tier:0, dur:[10,55], alloc:[16,55], hpd:3},
       {name:'Northwind — Grid Modernisation', tier:2, dur:[0,44],  alloc:[0,41],  hpd:2},
       {name:'Vertex Labs — Site Survey',      tier:2, dur:[24,55], alloc:[28,55], hpd:2},
-      {name:'BOS Deploy NC: EU-West',         tier:0, dur:[7,34],  alloc:null},
+      {name:'BOS Deploy NC: EU-West', tier:0, dur:[7,34], alloc:null, budgets:[
+        {name:'Discovery & Scoping',  billing:'Fixed fee',        state:'done', dur:[7,20],  alloc:null},
+        {name:'Network Readiness',    billing:'Time & materials', state:'wip',  dur:[14,34], alloc:null},
+      ]},
       {name:'BOS Deploy NC: APAC-Sydney',     tier:0, dur:[0,48],  alloc:null},
       {name:'BOS Deploy MET: LATAM',          tier:1, dur:[21,55], alloc:null},
     ],
@@ -300,9 +330,15 @@ const MEMBERS = [
     id:'augie', name:'Augie Haro', role:'Project Manager · AMER',
     initials:'AH', gradient:'linear-gradient(135deg,#0891B2,#22D3EE)', capHrs:40,
     projects:[
-      {name:'Acme Corp — Workday Implementation', tier:0, dur:[0,55], alloc:[0,55], hpd:4},
-      {name:'BOS Regional PM — AMER',             tier:1, dur:[0,55], alloc:[0,55], hpd:2},
-      {name:'Halcyon Health — Phase 2',           tier:2, dur:[5,50], alloc:[7,48], hpd:2},
+      {name:'Acme Corp — Workday Implementation', tier:0, dur:[0,55], budgets:[
+        {name:'HCM Module Build',    billing:'Fixed fee',        state:'wip',  dur:[0,55],  alloc:[0,55], hpd:2},
+        {name:'Payroll Integration', billing:'Fixed fee',        state:'wip',  dur:[0,55],  alloc:[0,55], hpd:1},
+        {name:'Data Migration',      billing:'Time & materials', state:'wip',  dur:[0,55],  alloc:[0,55], hpd:1},
+        {name:'UAT Coordination',    billing:'Fixed fee',        state:'done', dur:[28,55], alloc:null},
+        {name:'Hypercare',           billing:'Fixed fee',        state:'done', dur:[45,55], alloc:null},
+      ]},
+      {name:'BOS Regional PM — AMER',   tier:1, dur:[0,55], alloc:[0,55], hpd:2},
+      {name:'Halcyon Health — Phase 2', tier:2, dur:[5,50], alloc:[7,48], hpd:2},
     ],
   },
   {
@@ -321,7 +357,11 @@ const MEMBERS = [
     id:'becca', name:'beccafranklin', role:'Regional Service Lead (PM) · UK',
     initials:'B', gradient:'linear-gradient(135deg,#7C3AED,#C4B5FD)', capHrs:40,
     projects:[
-      {name:'BOS Regional PM — UK/EU',      tier:0, dur:[0,55], alloc:[0,55], hpd:6},
+      {name:'BOS Regional PM — UK/EU', tier:0, dur:[0,55], budgets:[
+        {name:'Regional Programme Management', billing:'Fixed fee',        state:'wip',  dur:[0,55], alloc:[0,55], hpd:4},
+        {name:'Service Transition',            billing:'Fixed fee',        state:'wip',  dur:[0,55], alloc:[0,55], hpd:2},
+        {name:'Vendor Coordination',           billing:'Time & materials', state:'done', dur:[0,27], alloc:null},
+      ]},
       {name:'Meridian Rail — Depot Fitout', tier:2, dur:[0,55], alloc:[0,55], hpd:2},
       {name:'BOS Deploy NC: US-North',      tier:0, dur:[0,20],  alloc:null},
       {name:'BOS Deploy NC: US-Central',    tier:0, dur:[7,41],  alloc:null},
@@ -343,26 +383,41 @@ const MEMBERS = [
   },
 ];
 
-/* ── Allocation maths ── */
-function projWeekMins(p, w){
-  if(!p.alloc) return 0;
+/* ── Allocation maths ──
+   A leaf (budget, or a project with no budget lines) computes its own
+   hours. A project with budget lines is always the sum of them, so a
+   parent row can never disagree with the rows nested under it. */
+function leafWeekMins(n, w){
+  if(!n.alloc) return 0;
   let days = 0;
   for(let d = w*7; d < w*7+7; d++){
-    if(isWorkday(d) && d >= p.alloc[0] && d <= p.alloc[1]) days++;
+    if(isWorkday(d) && d >= n.alloc[0] && d <= n.alloc[1]) days++;
   }
-  return days * p.hpd * 60;
+  return days * n.hpd * 60;
 }
-function projTotalMins(p){
+const hasBudgets = p => Array.isArray(p.budgets) && p.budgets.length > 0;
+
+function projWeekMins(p, w){
+  return hasBudgets(p) ? p.budgets.reduce((s,b)=>s+leafWeekMins(b,w),0) : leafWeekMins(p,w);
+}
+function totalMins(node, weekFn){
   let t = 0;
-  for(let w=0; w<N; w++) t += projWeekMins(p,w);
+  for(let w=0; w<N; w++) t += weekFn(node,w);
   return t;
 }
+const projTotalMins = p => totalMins(p, projWeekMins);
+const budTotalMins  = b => totalMins(b, leafWeekMins);
+
+/* A project counts as allocated when anything under it is booked. */
+const projIsAllocated = p => projTotalMins(p) > 0;
+
 function fmtMins(m){
   if(!m || m<=0) return '0h';
   const h = Math.floor(m/60), mm = Math.round(m%60);
-  if(mm===0) return h+'h';
+  const hs = h.toLocaleString('en-US');
+  if(mm===0) return hs+'h';
   if(h===0)  return mm+'m';
-  return h+'h '+String(mm).padStart(2,'0')+'m';
+  return hs+'h '+String(mm).padStart(2,'0')+'m';
 }
 function utilCls(pct){
   if(pct>100) return 'util-over';
@@ -396,15 +451,14 @@ function durationTrack(w, dur){
   return rle(kinds).map(s=>`<div class="dur-seg ${s.k}" style="flex:${s.n}"></div>`).join('');
 }
 
-/* covered: boolean per absolute day. label: hours text for this week, or ''. */
-function allocTrack(w, covered, label){
+function allocTrack(w, covered, label, roll){
   const kinds = [];
   for(let d=w*7; d<w*7+7; d++){
     kinds.push(!covered[d] ? 'off' : (isWorkday(d) ? 'work' : 'wknd'));
   }
   const segs = rle(kinds);
 
-  // Put the week's hours on the widest working block; skip it if too narrow to read.
+  // Put the week's hours on the widest working block; skip it if too narrow.
   let labelIdx = -1, widest = 0;
   segs.forEach((s,i)=>{ if(s.k==='work' && s.n>widest){ widest=s.n; labelIdx=i; } });
   if(widest < 2) labelIdx = -1;
@@ -413,16 +467,16 @@ function allocTrack(w, covered, label){
     if(s.k==='off')  return `<div class="seg" style="flex:${s.n}"></div>`;
     if(s.k==='wknd') return `<div class="seg seg-hatch" style="flex:${s.n}"></div>`;
     const txt = (i===labelIdx && label) ? label : '';
-    return `<div class="seg seg-chip" style="flex:${s.n}">${txt}</div>`;
+    return `<div class="seg seg-chip${roll?' roll':''}" style="flex:${s.n}">${txt}</div>`;
   }).join('');
 }
 
-function barCells({dur, covered, weekLabel}){
+function barCells({dur, covered, weekLabel, roll}){
   return WEEKS.map((w,i)=>`
     <td class="td-week-cell" style="border-right:${rightBorder(i)}">
       <div class="cell-stack">
         <div class="dur-track">${durationTrack(i, dur)}</div>
-        <div class="alloc-track">${allocTrack(i, covered, weekLabel(i))}</div>
+        <div class="alloc-track">${allocTrack(i, covered, weekLabel(i), roll)}</div>
       </div>
     </td>`).join('');
 }
@@ -431,20 +485,31 @@ function emptyWeeks(){
   return WEEKS.map((w,i)=>`<td class="td-week-cell" style="border-right:${rightBorder(i)}"></td>`).join('');
 }
 
-function coverOf(projects){
+/* Union of allocated days across a set of nodes. */
+function coverOf(nodes){
   const cov = new Array(DAYS).fill(false);
-  projects.forEach(p=>{
-    if(!p.alloc) return;
-    for(let d=p.alloc[0]; d<=p.alloc[1]; d++) if(d>=0 && d<DAYS) cov[d]=true;
+  nodes.forEach(n=>{
+    if(!n.alloc) return;
+    for(let d=n.alloc[0]; d<=n.alloc[1]; d++) if(d>=0 && d<DAYS) cov[d]=true;
   });
   return cov;
 }
+const projCover = p => coverOf(hasBudgets(p) ? p.budgets : [p]);
 
 /* ── Icons ── */
-const iconActive = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5"/><path d="M7 1 A6 6 0 0 1 13 7" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-const iconIdle   = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="2.5 2"/></svg>`;
+const iconProj    = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5"/><path d="M7 1 A6 6 0 0 1 13 7" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const iconProjIdle= `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="2.5 2"/></svg>`;
+const iconBudDone = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="12" cy="12" r="9.5" fill="var(--ok-bg)" stroke="var(--ok-line)" stroke-width="1.6"/><path d="M7.8 12.3l2.9 2.9 5.5-6.2" stroke="var(--ok-line)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const iconBudWip  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="12" cy="12" r="9.5" stroke="var(--wip-line)" stroke-width="1.6"/><path d="M12 2.5 A9.5 9.5 0 0 1 21.5 12 L12 12 Z" fill="var(--wip-fill)"/></svg>`;
 /* Generic stand-in for the customer logo on out-of-scope allocations */
-const iconOther  = `<svg class="other-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`;
+const iconOther   = `<svg class="other-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`;
+
+const ACTIONS = `
+  <div class="row-actions">
+    <button class="act-btn" data-tip="Open project plan"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg></button>
+    <button class="act-btn" data-tip="Edit allocation"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+    <button class="act-btn" data-tip="Remove"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+  </div>`;
 
 /* ── Scope partitioning ── */
 function partition(member){
@@ -452,13 +517,38 @@ function partition(member){
   const inScope  = member.projects.filter(p => p.tier <= level);
   const outScope = member.projects.filter(p => p.tier >  level);
   return {
-    allocated: inScope.filter(p => p.alloc),
-    zero:      inScope.filter(p => !p.alloc),
-    // Out-of-scope projects with no allocation in range contribute nothing and
-    // are never surfaced — not even as a count.
-    other:     outScope.filter(p => p.alloc),
+    allocated: inScope.filter(projIsAllocated),
+    zero:      inScope.filter(p => !projIsAllocated(p)),
+    // Out-of-scope projects with no allocation in range contribute nothing
+    // and are never surfaced — not even as a count.
+    other:     outScope.filter(projIsAllocated),
   };
 }
+function budgetSplit(p){
+  const bs = p.budgets || [];
+  return { allocated: bs.filter(b=>budTotalMins(b)>0), zero: bs.filter(b=>budTotalMins(b)===0) };
+}
+
+/* ── Row builder ──
+   `anc` is the parent's key. A row shows only when that key and every key
+   above it is expanded, so nesting depth needs no special handling. */
+function row({anc, cls='', indent, chevKey, body, alloc, cells}){
+  const chev = chevKey
+    ? `<svg class="tw-chev" data-tog="${chevKey}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>`
+    : `<span class="tw-spacer"></span>`;
+  const click = chevKey ? ` onclick="toggle('${chevKey}')"` : '';
+  return `
+    <tr class="tree-row ${cls}${chevKey?' clickable':''}" data-anc="${anc}"${click}>
+      <td class="td-left">
+        <div class="row-cell" style="padding:12px 14px 12px ${indent}px">${chev}${body}</div>
+      </td>
+      <td class="td-alloc">${alloc}</td>
+      ${cells}
+    </tr>`;
+}
+
+/* Indent ladder, in px, for each depth of the tree. */
+const IND = [14, 34, 62, 88];
 
 /* ── Render: header ── */
 function renderHeader(){
@@ -482,12 +572,77 @@ function renderHeader(){
     <tr>${weekRow}</tr>`;
 }
 
+/* ── Render: a budget leaf row ── */
+function budgetRow(b, anc, indent){
+  const icon = b.state === 'done' ? iconBudDone : iconBudWip;
+  const body = `${icon}
+    <div class="bud-info">
+      <div class="bud-name">${b.name}</div>
+      <div class="bud-billing">${b.billing}</div>
+    </div>${ACTIONS}`;
+  return row({
+    anc, cls:'bud-row', indent, body,
+    alloc: fmtMins(budTotalMins(b)),
+    cells: barCells({
+      dur: b.dur,
+      covered: coverOf([b]),
+      weekLabel: i => { const wm = leafWeekMins(b,i); return wm>0 ? fmtMins(wm) : ''; },
+    }),
+  });
+}
+
+/* ── Render: a project row plus everything under it ── */
+function projectSubtree(p, key, anc, depth, {flatBudgets=false} = {}){
+  const budgets = budgetSplit(p);
+  const expandable = hasBudgets(p);
+  const allocated = projIsAllocated(p);
+
+  let html = row({
+    anc, cls:'proj-row', indent: IND[depth],
+    chevKey: expandable ? key : null,
+    body: `${allocated ? iconProj : iconProjIdle}<span class="name-1">${p.name}</span>${ACTIONS}`,
+    alloc: fmtMins(projTotalMins(p)),
+    cells: barCells({
+      dur: p.dur,
+      covered: projCover(p),
+      weekLabel: i => { const wm = projWeekMins(p,i); return wm>0 ? fmtMins(wm) : ''; },
+      // A project with budget lines is a roll-up of them, so its chips sit back.
+      roll: expandable,
+    }),
+  });
+
+  if(!expandable) return html;
+
+  // Inside a project that is itself under "Projects with 0 allocation",
+  // every budget is necessarily 0h — listing them flat avoids a redundant
+  // "Budgets with 0 allocation" group nested inside a 0-allocation group.
+  if(flatBudgets){
+    p.budgets.forEach(b=>{ html += budgetRow(b, key, IND[depth+1]); });
+    return html;
+  }
+
+  budgets.allocated.forEach(b=>{ html += budgetRow(b, key, IND[depth+1]); });
+
+  if(budgets.zero.length){
+    const zbKey = `${key}|zb`;
+    html += row({
+      anc: key, cls:'zbud-group', indent: IND[depth+1], chevKey: zbKey,
+      body: `<span class="name-1">Budgets with 0 allocation</span><span class="count-badge">${budgets.zero.length}</span>`,
+      alloc: '0h',
+      cells: emptyWeeks(),
+    });
+    budgets.zero.forEach(b=>{ html += budgetRow(b, zbKey, IND[depth+2]); });
+  }
+  return html;
+}
+
 /* ── Render: body ── */
 function renderBody(){
   let html = '';
 
   MEMBERS.forEach(m=>{
     const { allocated, zero, other } = partition(m);
+    const mKey = `m:${m.id}`;
     const capMins = m.capHrs * 60;
 
     // Utilisation always reflects every allocation, in scope or not, so the
@@ -500,13 +655,13 @@ function renderBody(){
               </td>`;
     }).join('');
 
-    const totalMins = m.projects.reduce((s,p)=>s+projTotalMins(p),0);
+    const memberMins = m.projects.reduce((s,p)=>s+projTotalMins(p),0);
 
     html += `
-      <tr class="member-row" onclick="toggleMember('${m.id}')">
+      <tr class="member-row" onclick="toggle('${mKey}')">
         <td class="td-left">
           <div class="member-cell">
-            <svg id="mc-${m.id}" class="m-chevron" style="transform:rotate(-90deg)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+            <svg class="tw-chev" data-tog="${mKey}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
             <div class="member-avatar" style="background:${m.gradient}">${m.initials}</div>
             <div class="member-info">
               <div class="member-name">${m.name}</div>
@@ -514,57 +669,27 @@ function renderBody(){
             </div>
           </div>
         </td>
-        <td class="td-alloc td-alloc-total">${fmtMins(totalMins)}</td>
+        <td class="td-alloc td-alloc-total">${fmtMins(memberMins)}</td>
         ${utilCells}
       </tr>`;
 
     // 1 — Projects the viewer can see, with allocation
-    allocated.forEach(p=>{
-      html += `
-        <tr class="sub-row proj-row" data-member="${m.id}">
-          <td class="td-left">
-            <div class="proj-cell">
-              ${iconActive}
-              <span class="proj-name">${p.name}</span>
-              <div class="proj-actions">
-                <button class="proj-action-btn" data-tip="Open project plan"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg></button>
-                <button class="proj-action-btn" data-tip="Edit allocation"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                <button class="proj-action-btn" data-tip="Remove"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
-              </div>
-            </div>
-          </td>
-          <td class="td-alloc">${fmtMins(projTotalMins(p))}</td>
-          ${barCells({dur:p.dur, covered:coverOf([p]), weekLabel:i=>{
-            const wm = projWeekMins(p,i);
-            return wm > 0 ? fmtMins(wm) : '';
-          }})}
-        </tr>`;
+    allocated.forEach((p,idx)=>{
+      html += projectSubtree(p, `${mKey}|p${idx}`, mKey, 1);
     });
 
     // 2 — Visible projects with no allocation, collapsed into one group.
     //     Each still draws its duration line so the project reads as real.
     if(zero.length){
-      html += `
-        <tr class="sub-row zero-group-row" data-member="${m.id}" onclick="toggleZeroGroup(event,'${m.id}')">
-          <td class="td-left">
-            <div class="zero-group-cell">
-              <svg id="zc-${m.id}" class="z-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-              <span class="zero-group-label">Projects with 0 allocation</span>
-              <span class="zero-count-badge">${zero.length}</span>
-            </div>
-          </td>
-          <td class="td-alloc" style="color:var(--text-4)">—</td>
-          ${emptyWeeks()}
-        </tr>`;
-
-      const noCover = new Array(DAYS).fill(false);
-      zero.forEach(p=>{
-        html += `
-          <tr class="zero-proj-row" data-member="${m.id}">
-            <td class="td-left"><div class="zero-proj-cell">${iconIdle}<span class="zero-proj-name">${p.name}</span></div></td>
-            <td class="td-alloc" style="color:var(--text-4)">0h</td>
-            ${barCells({dur:p.dur, covered:noCover, weekLabel:()=>''})}
-          </tr>`;
+      const zpKey = `${mKey}|zp`;
+      html += row({
+        anc: mKey, cls:'zproj-group', indent: IND[1], chevKey: zpKey,
+        body: `<span class="name-1">Projects with 0 allocation</span><span class="count-badge">${zero.length}</span>`,
+        alloc: '0h',
+        cells: emptyWeeks(),
+      });
+      zero.forEach((p,idx)=>{
+        html += projectSubtree(p, `${zpKey}|p${idx}`, zpKey, 2, {flatBudgets:true});
       });
     }
 
@@ -573,17 +698,12 @@ function renderBody(){
     //     no logo, no timeline bars, no actions, no drill-in.
     if(other.length){
       const otherMins = other.reduce((s,p)=>s+projTotalMins(p),0);
-      html += `
-        <tr class="sub-row other-row" data-member="${m.id}">
-          <td class="td-left">
-            <div class="other-cell">
-              ${iconOther}
-              <span class="other-name">Other Projects</span>
-            </div>
-          </td>
-          <td class="td-alloc">${fmtMins(otherMins)}</td>
-          ${emptyWeeks()}
-        </tr>`;
+      html += row({
+        anc: mKey, cls:'other-row', indent: IND[1],
+        body: `${iconOther}<span class="name-1">Other Projects</span>`,
+        alloc: fmtMins(otherMins),
+        cells: emptyWeeks(),
+      });
     }
   });
 
@@ -591,35 +711,35 @@ function renderBody(){
   applyState();
 }
 
-/* ── Expand / collapse state ── */
-const state = {};
-MEMBERS.forEach(m=>{ state[m.id] = { open:false, zeroOpen:false }; });
+/* ── Expand / collapse ──
+   One flat set of expanded keys. A key encodes its own ancestry, so a row
+   is visible when every prefix of its parent key is expanded. */
+const expanded = new Set();
+
+function prefixesOf(key){
+  const parts = key.split('|'), out = [];
+  for(let i=0; i<parts.length; i++) out.push(parts.slice(0,i+1).join('|'));
+  return out;
+}
 
 function applyState(){
-  MEMBERS.forEach(m=>{
-    const s = state[m.id];
-    document.querySelectorAll(`.sub-row[data-member="${m.id}"]`)
-      .forEach(r=>r.classList.toggle('visible', s.open));
-    document.querySelectorAll(`.zero-proj-row[data-member="${m.id}"]`)
-      .forEach(r=>r.classList.toggle('visible', s.open && s.zeroOpen));
-
-    const mc = document.getElementById(`mc-${m.id}`);
-    if(mc) mc.style.transform = s.open ? 'rotate(0deg)' : 'rotate(-90deg)';
-    const zc = document.getElementById(`zc-${m.id}`);
-    if(zc) zc.style.transform = s.zeroOpen ? 'rotate(90deg)' : '';
+  document.querySelectorAll('tr.tree-row').forEach(r=>{
+    const anc = r.dataset.anc;
+    r.classList.toggle('visible', !anc || prefixesOf(anc).every(k=>expanded.has(k)));
+  });
+  document.querySelectorAll('.tw-chev').forEach(el=>{
+    el.style.transform = expanded.has(el.dataset.tog) ? 'rotate(90deg)' : '';
   });
 }
 
-function toggleMember(id){
-  const s = state[id];
-  s.open = !s.open;
-  if(!s.open) s.zeroOpen = false;
-  applyState();
-}
-
-function toggleZeroGroup(event,id){
-  event.stopPropagation();
-  state[id].zeroOpen = !state[id].zeroOpen;
+function toggle(key){
+  if(expanded.has(key)){
+    // Collapse descendants too, so reopening starts from a clean state.
+    [...expanded].forEach(k=>{ if(k.startsWith(key+'|')) expanded.delete(k); });
+    expanded.delete(key);
+  } else {
+    expanded.add(key);
+  }
   applyState();
 }
 
