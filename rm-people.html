@@ -16,9 +16,9 @@
   --util-zero-bg:#F3F4F6; --util-zero-text:#9CA3AF;
   --dur-line:#9CC5F0;
   --chip-bg:#74B0F0; --chip-text:#0B2E5E;
-  --chip-muted-bg:#B6BECB; --chip-muted-text:#374151;
   --hatch-c:#D5DBE3;
   --tip-bg:#111827; --tip-text:#FFF;
+  --other-bg:#EFF5FE; --other-bg-hover:#E4EEFC;
   --col-left:280px; --col-alloc:80px; --col-week:132px;
   --radius:8px; --radius-sm:5px;
 }
@@ -34,9 +34,9 @@
     --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
     --dur-line:#3E6591;
     --chip-bg:#3B6FA8; --chip-text:#E3EEFA;
-    --chip-muted-bg:#4B5563; --chip-muted-text:#D1D5DB;
     --hatch-c:#39414F;
     --tip-bg:#F1F5F9; --tip-text:#111827;
+    --other-bg:#182234; --other-bg-hover:#1E2A40;
   }
 }
 :root[data-theme="dark"] {
@@ -50,9 +50,9 @@
   --util-zero-bg:#1F2937; --util-zero-text:#4B5563;
   --dur-line:#3E6591;
   --chip-bg:#3B6FA8; --chip-text:#E3EEFA;
-  --chip-muted-bg:#4B5563; --chip-muted-text:#D1D5DB;
   --hatch-c:#39414F;
   --tip-bg:#F1F5F9; --tip-text:#111827;
+  --other-bg:#182234; --other-bg-hover:#1E2A40;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -150,7 +150,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .alloc-track{display:flex;align-items:center;gap:2px;height:23px;}
 .seg{min-width:0;border-radius:3px;}
 .seg-chip{background:var(--chip-bg);color:var(--chip-text);display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums;}
-.seg-chip.muted{background:var(--chip-muted-bg);color:var(--chip-muted-text);}
 .seg-hatch{height:100%;background-image:repeating-linear-gradient(45deg,var(--hatch-c) 0 3px,transparent 3px 6px);}
 
 /* ── Project sub-rows ── */
@@ -164,15 +163,14 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .proj-action-btn::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;z-index:20;}
 .proj-action-btn:hover::after{opacity:1;}
 
-/* ── "Other projects" row (out of scope) ── */
-.other-cell{display:flex;align-items:center;gap:8px;padding:13px 14px 13px 38px;}
-.other-icon{width:14px;height:14px;color:var(--text-4);flex-shrink:0;}
-.other-name{font-size:12px;color:var(--text-3);font-style:italic;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.other-lock{position:relative;display:grid;place-items:center;width:16px;height:16px;color:var(--text-4);flex-shrink:0;cursor:default;}
-.other-lock svg{width:11px;height:11px;}
-.other-lock::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:0;background:var(--tip-bg);color:var(--tip-text);font-size:10px;font-weight:500;padding:4px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;z-index:20;}
-.other-lock:hover::after{opacity:1;}
-.other-row .td-alloc{color:var(--text-3);}
+/* ── "Other Projects" row (out of scope) ──
+   Icon, label, allocated hours. No bars: the row stands for projects the
+   viewer cannot see, so there is nothing to place on the timeline. */
+.other-cell{display:flex;align-items:center;gap:9px;padding:15px 14px 15px 38px;}
+.other-icon{width:15px;height:15px;color:var(--text-3);flex-shrink:0;}
+.other-name{font-size:12px;color:var(--text-2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.other-row .td-left,.other-row .td-alloc,.other-row .td-week-cell{background:var(--other-bg);}
+.other-row:hover .td-left,.other-row:hover .td-alloc{background:var(--other-bg-hover);}
 
 /* ── Zero-alloc group row ── */
 .zero-group-row{cursor:pointer;}
@@ -399,7 +397,7 @@ function durationTrack(w, dur){
 }
 
 /* covered: boolean per absolute day. label: hours text for this week, or ''. */
-function allocTrack(w, covered, label, muted){
+function allocTrack(w, covered, label){
   const kinds = [];
   for(let d=w*7; d<w*7+7; d++){
     kinds.push(!covered[d] ? 'off' : (isWorkday(d) ? 'work' : 'wknd'));
@@ -415,16 +413,16 @@ function allocTrack(w, covered, label, muted){
     if(s.k==='off')  return `<div class="seg" style="flex:${s.n}"></div>`;
     if(s.k==='wknd') return `<div class="seg seg-hatch" style="flex:${s.n}"></div>`;
     const txt = (i===labelIdx && label) ? label : '';
-    return `<div class="seg seg-chip${muted?' muted':''}" style="flex:${s.n}">${txt}</div>`;
+    return `<div class="seg seg-chip" style="flex:${s.n}">${txt}</div>`;
   }).join('');
 }
 
-function barCells({dur, covered, weekLabel, muted}){
+function barCells({dur, covered, weekLabel}){
   return WEEKS.map((w,i)=>`
     <td class="td-week-cell" style="border-right:${rightBorder(i)}">
       <div class="cell-stack">
         <div class="dur-track">${durationTrack(i, dur)}</div>
-        <div class="alloc-track">${allocTrack(i, covered, weekLabel(i), muted)}</div>
+        <div class="alloc-track">${allocTrack(i, covered, weekLabel(i))}</div>
       </div>
     </td>`).join('');
 }
@@ -446,8 +444,7 @@ function coverOf(projects){
 const iconActive = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5"/><path d="M7 1 A6 6 0 0 1 13 7" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 const iconIdle   = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="2.5 2"/></svg>`;
 /* Generic stand-in for the customer logo on out-of-scope allocations */
-const iconOther  = `<svg class="other-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>`;
-const iconLock   = `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>`;
+const iconOther  = `<svg class="other-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`;
 
 /* ── Scope partitioning ── */
 function partition(member){
@@ -572,9 +569,8 @@ function renderBody(){
     }
 
     // 3 — Everything outside the viewer's scope, as one opaque row, last.
-    //     Hours and bars only: no project name, no logo, no actions, no drill-in.
-    //     Chips carry no per-week labels and no duration line is drawn, since
-    //     the row stands for several projects rather than one.
+    //     Generic icon, label, total hours — nothing else. No project names,
+    //     no logo, no timeline bars, no actions, no drill-in.
     if(other.length){
       const otherMins = other.reduce((s,p)=>s+projTotalMins(p),0);
       html += `
@@ -582,12 +578,11 @@ function renderBody(){
           <td class="td-left">
             <div class="other-cell">
               ${iconOther}
-              <span class="other-name">Other projects</span>
-              <span class="other-lock" data-tip="Outside your “Can view projects” access">${iconLock}</span>
+              <span class="other-name">Other Projects</span>
             </div>
           </td>
           <td class="td-alloc">${fmtMins(otherMins)}</td>
-          ${barCells({dur:null, covered:coverOf(other), weekLabel:()=>'', muted:true})}
+          ${emptyWeeks()}
         </tr>`;
     }
   });
