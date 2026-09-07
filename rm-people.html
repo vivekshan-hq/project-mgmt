@@ -688,8 +688,10 @@ function renderBody(){
         alloc: '0h',
         cells: emptyWeeks(),
       });
+      // Depth 1, matching the allocated projects above: grouping them must not
+      // push their names out of line with the projects they sit alongside.
       zero.forEach((p,idx)=>{
-        html += projectSubtree(p, `${zpKey}|p${idx}`, zpKey, 2, {flatBudgets:true});
+        html += projectSubtree(p, `${zpKey}|p${idx}`, zpKey, 1, {flatBudgets:true});
       });
     }
 
