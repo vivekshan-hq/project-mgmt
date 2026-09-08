@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certifications as Skills</title>
+<style>
+:root {
+  --brand:#5B50E8;--brand-dark:#4338CA;--brand-light:#EEF2FF;--brand-muted:#C7D2FE;
+  --sidebar-bg:#12131F;--sidebar-text:rgba(255,255,255,0.55);
+  --sidebar-active-bg:rgba(91,80,232,0.2);--sidebar-hover-bg:rgba(255,255,255,0.05);
+  --bg:#F3F4F8;--surface:#fff;--border:#E5E7EB;--border-strong:#D1D5DB;
+  --text-1:#111827;--text-2:#374151;--text-3:#6B7280;--text-4:#9CA3AF;
+  --success:#059669;--success-bg:#ECFDF5;--success-border:#A7F3D0;
+  --danger:#DC2626;--danger-bg:#FEF2F2;--danger-border:#FECACA;
+  --warn:#D97706;--warn-bg:#FFFBEB;--warn-border:#FDE68A;
+  --cert:#C2410C;--cert-bg:#FFF7ED;--cert-border:#FED7AA;
+  --radius:8px;--radius-sm:5px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg:0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1117;--surface:#1A1D27;--border:#2A2D3E;--border-strong:#3A3D52;
+    --text-1:#F1F5F9;--text-2:#CBD5E1;--text-3:#94A3B8;--text-4:#6B7280;
+    --brand-light:#1E1B4B;--brand-muted:#3730A3;
+    --success-bg:#0B2A18;--success-border:#166534;
+    --danger-bg:#450A0A;--danger-border:#7F1D1D;
+    --warn-bg:#1C1506;--warn-border:#78350F;
+    --cert-bg:#1C0F00;--cert:#FB923C;--cert-border:#7C2D12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1117;--surface:#1A1D27;--border:#2A2D3E;--border-strong:#3A3D52;
+  --text-1:#F1F5F9;--text-2:#CBD5E1;--text-3:#94A3B8;--text-4:#6B7280;
+  --brand-light:#1E1B4B;--brand-muted:#3730A3;
+  --success-bg:#0B2A18;--success-border:#166534;
+  --danger-bg:#450A0A;--danger-border:#7F1D1D;
+  --warn-bg:#1C1506;--warn-border:#78350F;
+  --cert-bg:#1C0F00;--cert:#FB923C;--cert-border:#7C2D12;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:var(--text-1);background:var(--bg);overflow:hidden;height:100vh;}
+
+/* ── Demo bar ── */
+.demo-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:#0f172a;display:flex;align-items:center;gap:12px;padding:7px 16px;height:36px;}
+.demo-label{color:rgba(255,255,255,0.35);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;}
+.demo-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(91,80,232,0.3);color:#a5b4fc;padding:2px 9px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.03em;}
+.screen-tabs{display:flex;gap:3px;margin-left:auto;}
+.screen-tab{padding:4px 12px;border-radius:4px;border:none;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);transition:all .12s;}
+.screen-tab.active{background:var(--brand);color:#fff;}
+.screen-tab:hover:not(.active){background:rgba(255,255,255,0.14);color:#fff;}
+
+/* ── Screens ── */
+.screen{display:none;margin-top:36px;height:calc(100vh - 36px);overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ── Sidebar ── */
+.sidebar{width:216px;flex-shrink:0;background:var(--sidebar-bg);display:flex;flex-direction:column;height:100%;}
+.sidebar-header{padding:15px 14px 12px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.logo-mark{width:26px;height:26px;background:var(--brand);border-radius:6px;display:grid;place-items:center;flex-shrink:0;}
+.logo-text{color:#fff;font-weight:700;font-size:14px;letter-spacing:-.2px;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:10px 8px;}
+.nav-sec-lbl{padding:10px 8px 3px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,0.25);}
+.nav-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;color:var(--sidebar-text);font-size:12px;font-weight:500;text-decoration:none;transition:background .12s,color .12s;margin-bottom:1px;}
+.nav-item:hover{background:var(--sidebar-hover-bg);color:rgba(255,255,255,0.85);}
+.nav-item.active{background:var(--sidebar-active-bg);color:#fff;}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;}
+.nav-indent{padding-left:30px;}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:46px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:8px;flex-shrink:0;}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-3);}
+.bc-sep{color:var(--text-4);font-size:10px;}
+.bc-curr{color:var(--text-1);font-weight:600;}
+.topbar-right{margin-left:auto;}
+.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--brand),#818CF8);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;}
+.content{flex:1;overflow-y:auto;}
+.page-header{padding:20px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+.page-title{font-size:16px;font-weight:700;}
+.page-desc{font-size:12px;color:var(--text-3);margin-top:3px;max-width:520px;line-height:1.55;}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;border:none;white-space:nowrap;}
+.btn svg{width:12px;height:12px;}
+.btn-primary{background:var(--brand);color:#fff;}
+.btn-primary:hover{background:var(--brand-dark);}
+.btn-secondary{background:var(--surface);color:var(--text-2);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--bg);}
+.btn-ghost{background:transparent;color:var(--text-3);border:1px solid transparent;}
+.btn-ghost:hover{background:var(--bg);color:var(--text-2);}
+.btn-sm{padding:3px 8px;font-size:11px;}
+.btn-link{background:none;border:none;color:var(--brand);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;padding:0;display:inline-flex;align-items:center;gap:4px;}
+.btn-link:hover{text-decoration:underline;}
+.btn-link svg{width:12px;height:12px;}
+.btn-icon{width:26px;height:26px;border-radius:var(--radius-sm);background:transparent;border:none;cursor:pointer;color:var(--text-4);display:grid;place-items:center;}
+.btn-icon:hover{background:var(--bg);color:var(--text-2);}
+.btn-icon svg{width:14px;height:14px;}
+
+/* ── Tabs ── */
+.lib-section{display:flex;align-items:center;gap:10px;padding:16px 24px 8px;}
+.lib-section-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);white-space:nowrap;}
+.lib-section-line{flex:1;height:1px;background:var(--border);}
+.tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--text-3);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s;}
+.tab:hover{color:var(--text-1);}
+.tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600;}
+
+/* ── Table ── */
+.tbl-wrap{margin:16px 24px 32px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--bg);}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--brand-light);}
+.tbl .ra{opacity:0;transition:opacity .12s;display:flex;align-items:center;gap:2px;}
+.tbl tr:hover .ra{opacity:1;}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-yes{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);}
+.badge-no{background:var(--bg);color:var(--text-3);border:1px solid var(--border);}
+.badge-cert{background:var(--cert-bg);color:var(--cert);border:1px solid var(--cert-border);border-radius:4px;}
+.badge-valid{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);border-radius:4px;}
+.badge-expired{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border);border-radius:4px;}
+.badge-expiring{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border);border-radius:4px;}
+
+/* ── Modal / Overlay ── */
+.overlay{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:12px;width:520px;max-height:88vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);overflow:hidden;animation:fadeUp .15s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.modal-hdr{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.modal-title{font-size:15px;font-weight:700;}
+.modal-sub{font-size:12px;color:var(--text-3);margin-top:3px;line-height:1.5;}
+.modal-body{flex:1;overflow-y:auto;padding:20px;}
+.modal-ftr{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;}
+.close-btn{width:28px;height:28px;border-radius:6px;background:none;border:none;cursor:pointer;color:var(--text-3);font-size:18px;line-height:1;display:grid;place-items:center;flex-shrink:0;}
+.close-btn:hover{background:var(--bg);color:var(--text-2);}
+
+/* ── Form ── */
+.form-row{margin-bottom:16px;}
+.form-row:last-child{margin-bottom:0;}
+.form-label{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px;display:block;}
+.req{color:var(--danger);}
+.form-input,.form-select,.form-textarea{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;color:var(--text-1);background:var(--surface);outline:none;transition:border-color .12s;width:100%;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--brand);}
+.form-textarea{resize:vertical;min-height:72px;line-height:1.5;}
+.form-hint{font-size:11px;color:var(--text-4);margin-top:4px;line-height:1.4;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.validity-wrap{display:flex;gap:8px;}
+.validity-wrap .form-input{width:80px;flex-shrink:0;}
+.validity-wrap .form-select{flex:1;}
+
+/* Expires toggle */
+.radio-group{display:flex;gap:8px;margin-top:2px;}
+.radio-opt{display:flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:500;color:var(--text-2);transition:all .12s;user-select:none;}
+.radio-opt input{display:none;}
+.radio-opt.sel{border-color:var(--brand-muted);background:var(--brand-light);color:var(--brand);}
+.radio-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border-strong);display:grid;place-items:center;transition:all .12s;flex-shrink:0;}
+.radio-opt.sel .radio-dot{border-color:var(--brand);background:var(--brand);}
+.radio-opt.sel .radio-dot::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff;}
+.cond{display:none;}
+.cond.vis{display:block;}
+
+/* ════════════════ SCREEN 2: TEAM MEMBER ════════════════ */
+.rm-shell{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.rm-topbar{height:46px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:8px;flex-shrink:0;}
+.rm-title{font-size:15px;font-weight:700;}
+.rm-body{flex:1;display:flex;overflow:hidden;}
+.rm-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;}
+.member-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .12s,box-shadow .12s;}
+.member-card:hover{border-color:var(--brand-muted);box-shadow:var(--shadow);}
+.member-card.active{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-light);}
+.m-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.m-info{flex:1;min-width:0;}
+.m-name{font-size:13px;font-weight:600;}
+.m-role{font-size:11px;color:var(--text-3);margin-top:1px;}
+.m-chips{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.m-cert-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;background:var(--cert-bg);color:var(--cert);border:1px solid var(--cert-border);}
+.m-cert-badge svg{width:10px;height:10px;}
+
+/* Profile drawer */
+.drawer{width:0;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s ease;}
+.drawer.open{width:380px;}
+.drawer-hdr{padding:16px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.d-avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.d-name{font-size:14px;font-weight:700;}
+.d-role{font-size:11px;color:var(--text-3);margin-top:2px;}
+.drawer-tabs{display:flex;padding:0 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.dtab{padding:8px 10px;font-size:12px;font-weight:500;color:var(--text-3);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.dtab:hover{color:var(--text-1);}
+.dtab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600;}
+.drawer-body{flex:1;overflow-y:auto;padding:16px;}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-4);}
+.skill-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:20px;}
+.sk-chip{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500;background:var(--brand-light);color:var(--brand);border:1px solid var(--brand-muted);}
+.sk-chip-lvl{opacity:.7;}
+.cert-list{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
+.cert-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:flex-start;gap:9px;}
+.cert-icon{width:28px;height:28px;border-radius:6px;background:var(--cert-bg);border:1px solid var(--cert-border);display:grid;place-items:center;flex-shrink:0;color:var(--cert);}
+.cert-info{flex:1;min-width:0;}
+.cert-name{font-size:12px;font-weight:600;}
+.cert-vendor{font-size:11px;color:var(--text-3);margin-top:1px;}
+.cert-meta{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.cert-exp{font-size:11px;color:var(--text-3);}
+.cert-link-btn{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--brand);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;}
+.cert-link-btn svg{width:10px;height:10px;}
+.cert-link-btn:hover{text-decoration:underline;}
+
+/* ════════════════ SCREEN 3: RESOURCE REQUEST ════════════════ */
+.rr-shell{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.rr-topbar{height:46px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:8px;flex-shrink:0;}
+.rr-title{font-size:15px;font-weight:700;flex:1;}
+.rr-toolbar{display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.tb-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;}
+.tb-chip svg{width:11px;height:11px;}
+.tb-chip:hover{background:var(--bg);}
+.rr-table-wrap{flex:1;overflow:auto;}
+.rr-tbl{width:100%;border-collapse:collapse;}
+.rr-tbl th{padding:8px 14px;font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:2;text-align:left;white-space:nowrap;}
+.rr-tbl td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;background:var(--surface);white-space:nowrap;}
+.rr-tbl tr:hover td{background:var(--bg);}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;}
+.s-todo{background:var(--bg);color:var(--text-3);border:1px solid var(--border);}
+.s-approved{background:var(--success-bg);color:var(--success);}
+.s-blocked{background:var(--danger-bg);color:var(--danger);}
+.role-dot{width:20px;height:20px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0;margin-right:5px;}
+
+/* ── Request form modal ── */
+.rr-overlay{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+.rr-overlay.open{display:flex;}
+.rr-modal{background:var(--surface);border-radius:12px;width:580px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);overflow:hidden;animation:fadeUp .15s ease;}
+.rr-modal-hd{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.rr-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px;}
+.rr-modal-title{font-size:16px;font-weight:700;}
+.rr-modal-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px;}
+.rr-modal-ft{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;}
+.section-label{font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:10px;}
+.applied-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.ap-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:500;background:var(--brand-light);color:var(--brand);border:1px solid var(--brand-muted);}
+.ap-chip-cert{background:var(--cert-bg);color:var(--cert);border-color:var(--cert-border);}
+.ap-chip-anchor{font-size:10px;font-weight:600;background:rgba(0,0,0,0.08);padding:1px 5px;border-radius:3px;margin-left:2px;}
+.ap-chip-rm{background:none;border:none;cursor:pointer;color:inherit;font-size:14px;line-height:1;padding:0;margin-left:3px;}
+
+/* ── Skills 3-panel modal ── */
+.sk-overlay{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+.sk-overlay.open{display:flex;}
+.sk-modal{background:var(--surface);border-radius:12px;width:940px;height:580px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);overflow:hidden;animation:fadeUp .15s ease;}
+.sk-modal-hd{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);gap:12px;flex-shrink:0;}
+.sk-modal-title{font-size:15px;font-weight:700;flex-shrink:0;}
+.sk-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;}
+.sk-search svg{width:13px;height:13px;color:var(--text-4);flex-shrink:0;}
+.sk-search input{border:none;background:none;outline:none;font-family:inherit;font-size:13px;color:var(--text-1);width:100%;}
+.sk-search input::placeholder{color:var(--text-4);}
+.sk-modal-body{display:flex;flex:1;overflow:hidden;}
+.sk-modal-ft{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0;}
+.sk-modal-ft-left{font-size:12px;color:var(--text-3);}
+.sk-modal-ft-left b{color:var(--text-1);}
+
+/* Groups panel */
+.sk-groups{width:188px;flex-shrink:0;border-right:1px solid var(--border);padding:10px 0;overflow-y:auto;}
+.sg-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-4);padding:10px 14px 4px;}
+.sg-lbl:first-child{padding-top:0;}
+.sg-item{display:flex;align-items:center;gap:7px;padding:6px 14px;font-size:12px;color:var(--text-2);cursor:pointer;transition:background .1s;}
+.sg-item:hover{background:var(--bg);}
+.sg-item.active{background:var(--brand-light);color:var(--brand);font-weight:600;}
+.sg-item.child{padding-left:26px;color:var(--text-3);font-size:12px;}
+.sg-item.child.active{color:var(--brand);}
+.sg-item svg{width:13px;height:13px;flex-shrink:0;}
+.sg-count{margin-left:auto;font-size:10px;font-weight:600;color:var(--text-4);}
+.sg-item.active .sg-count{color:var(--brand-muted);}
+
+/* Skills panel */
+.sk-skills-panel{flex:1;overflow-y:auto;}
+.sk-panel-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);padding:12px 16px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:2;}
+.sk-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);cursor:pointer;min-height:44px;}
+.sk-row:hover{background:var(--bg);}
+.sk-row.sel{background:var(--brand-light);}
+.sk-cb{width:16px;height:16px;border:1.5px solid var(--border-strong);border-radius:3px;display:grid;place-items:center;flex-shrink:0;transition:all .1s;}
+.sk-row.sel .sk-cb{background:var(--brand);border-color:var(--brand);}
+.sk-row.sel .sk-cb::after{content:'';width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translate(1px,-1px);}
+.sk-name-col{display:flex;flex-direction:column;gap:3px;flex:1;}
+.sk-name{font-size:13px;color:var(--text-1);}
+.sk-vendor{font-size:11px;color:var(--text-3);}
+.sk-type-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;flex-shrink:0;}
+.sk-type-level{background:#f6f2ff;color:#6929c4;}
+.sk-type-cert{background:var(--cert-bg);color:var(--cert);}
+.sk-type-multi{background:#e5f6ff;color:#006ea6;}
+.sk-validity-info{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:3px;flex-shrink:0;}
+
+/* Selected panel */
+.sk-sel{width:248px;flex-shrink:0;border-left:1px solid var(--border);padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;}
+.sk-sel-title{font-size:12px;font-weight:700;color:var(--text-1);}
+.sk-sel-meta{font-size:12px;color:var(--text-3);}
+.sk-sel-empty{font-size:12px;color:var(--text-4);font-style:italic;}
+.sk-sel-list{display:flex;flex-direction:column;gap:8px;}
+.sk-sel-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;}
+.sk-sel-item.cert-item{border-color:var(--cert-border);}
+.sk-sel-item-hd{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;}
+.sk-sel-name{font-size:12px;font-weight:600;color:var(--text-1);flex:1;line-height:1.4;}
+.sk-sel-item.cert-item .sk-sel-name{color:var(--cert);}
+.sk-sel-rm{background:none;border:none;cursor:pointer;color:var(--text-4);font-size:16px;line-height:1;padding:0;flex-shrink:0;}
+.sk-sel-rm:hover{color:var(--danger);}
+.sk-sel-ctrl{display:flex;flex-direction:column;gap:4px;}
+.sk-sel-ctrl-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+.sk-sel-select{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;color:var(--text-2);background:var(--surface);outline:none;cursor:pointer;}
+.sk-sel-select:focus{border-color:var(--brand);}
+.sk-sel-hint{font-size:10px;color:var(--text-4);line-height:1.4;margin-top:2px;}
+.sk-sel-anchor-hint{
+  display:flex;align-items:flex-start;gap:5px;margin-top:5px;
+  padding:5px 7px;background:var(--cert-bg);border-radius:4px;
+  font-size:10px;color:var(--cert);line-height:1.4;border:1px solid var(--cert-border);
+}
+.sk-sel-anchor-hint svg{width:11px;height:11px;flex-shrink:0;margin-top:1px;}
+
+/* cert assignment modal */
+.cert-assign-modal{width:480px;}
+.autofill-row{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.autofill-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);}
+
+/* ════ New Skill Modal ════ */
+.ns-overlay{display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+.ns-overlay.open{display:flex;}
+.ns-modal{background:var(--surface);border-radius:12px;width:500px;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);overflow:hidden;animation:fadeUp .15s ease;}
+.ns-hdr{padding:18px 20px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);}
+.ns-title{font-size:17px;font-weight:700;color:var(--text-1);}
+.ns-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+.ns-ftr{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;}
+.ns-form-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* Custom skill-type dropdown */
+.skt-wrap{position:relative;}
+.skt-btn{
+  width:100%;display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--surface);cursor:pointer;font-family:inherit;font-size:13px;color:var(--text-1);
+  transition:border-color .12s;
+}
+.skt-btn:hover,.skt-btn.open{border-color:var(--brand);}
+.skt-btn-icon{width:18px;height:18px;display:grid;place-items:center;color:var(--text-3);flex-shrink:0;}
+.skt-btn-label{flex:1;text-align:left;font-size:13px;}
+.skt-btn-chev{color:var(--text-4);margin-left:auto;}
+.skt-menu{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:200;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-lg);overflow:hidden;display:none;
+}
+.skt-menu.open{display:block;}
+.skt-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:background .1s;position:relative;}
+.skt-opt:hover{background:var(--bg);}
+.skt-opt.sel{background:var(--brand-light);}
+.skt-opt-ico{
+  width:30px;height:30px;border-radius:7px;background:var(--bg);
+  border:1px solid var(--border);display:grid;place-items:center;
+  color:var(--text-2);flex-shrink:0;font-size:13px;font-weight:700;
+}
+.skt-opt.sel .skt-opt-ico{background:var(--brand-light);border-color:var(--brand-muted);color:var(--brand);}
+.skt-opt-cert-ico{background:var(--cert-bg)!important;border-color:var(--cert-border)!important;color:var(--cert)!important;}
+.skt-opt.sel .skt-opt-cert-ico{background:var(--cert-bg)!important;border-color:var(--cert-border)!important;color:var(--cert)!important;}
+.skt-opt-info{flex:1;}
+.skt-opt-name{font-size:13px;font-weight:600;color:var(--text-1);}
+.skt-opt.sel .skt-opt-name{color:var(--brand);}
+.skt-opt-cert.sel .skt-opt-name{color:var(--cert)!important;}
+.skt-opt-desc{font-size:11px;color:var(--text-3);margin-top:2px;line-height:1.4;}
+.skt-opt-check{color:var(--brand);flex-shrink:0;display:none;}
+.skt-opt.sel .skt-opt-check{display:block;}
+.skt-opt-cert-check{color:var(--cert)!important;}
+
+/* Choices section */
+.choices-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.choice-row{display:flex;align-items:center;gap:8px;}
+.choice-drag{color:var(--text-4);cursor:grab;user-select:none;font-size:15px;letter-spacing:-2px;line-height:1;}
+.choice-num{
+  width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  font-size:11px;font-weight:700;flex-shrink:0;
+}
+.cn1{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;}
+.cn2{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;}
+.cn3{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;}
+.cnn{background:var(--bg);border:1px solid var(--border);color:var(--text-3);}
+.choice-input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;color:var(--text-1);background:var(--surface);outline:none;}
+.choice-input:focus{border-color:var(--brand);}
+.choice-rm{background:none;border:none;cursor:pointer;color:var(--text-4);font-size:17px;line-height:1;padding:0;flex-shrink:0;}
+.choice-rm:hover{color:var(--danger);}
+.add-opt-btn{
+  display:flex;align-items:center;gap:7px;width:100%;
+  padding:9px 12px;border:1px dashed var(--border);border-radius:var(--radius-sm);
+  background:none;cursor:pointer;font-family:inherit;font-size:13px;color:var(--text-3);
+  transition:all .12s;
+}
+.add-opt-btn:hover{border-color:var(--brand-muted);color:var(--brand);background:var(--brand-light);}
+
+/* Cert metadata section inside skill modal */
+.cert-meta-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;background:var(--cert-bg);border:1px solid var(--cert-border);
+  border-radius:var(--radius-sm);margin-bottom:14px;
+}
+.cert-meta-header svg{color:var(--cert);flex-shrink:0;}
+.cert-meta-header-text{font-size:12px;font-weight:600;color:var(--cert);}
+.cert-meta-header-sub{font-size:11px;color:var(--cert);opacity:.7;margin-top:1px;}
+</style>
+</head>
+<body>
+
+<!-- ─── Demo bar ─── -->
+<div class="demo-bar">
+  <span class="demo-label">Prototype</span>
+  <span class="demo-badge">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Certifications as Skills
+  </span>
+  <div class="screen-tabs">
+    <button class="screen-tab active" onclick="switchScreen('library',this)">① Certification Library</button>
+    <button class="screen-tab" onclick="switchScreen('member',this)">② Team Member Assignment</button>
+    <button class="screen-tab" onclick="switchScreen('request',this)">③ Resource Request</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 1: CERTIFICATION LIBRARY (Settings › Skills)
+════════════════════════════════════════════════════════ -->
+<div id="screen-library" class="screen active">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo-text">Rocketlane</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-sec-lbl">Settings</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        General
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Resource Planning</div>
+      <a class="nav-item active" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Skills
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Fields</div>
+      <a class="nav-item nav-indent" href="#">Project fields</a>
+      <a class="nav-item nav-indent" href="#">Team member fields</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb">
+        <span style="color:var(--text-3)">Settings</span>
+        <span class="bc-sep">›</span>
+        <span class="bc-curr">Skills</span>
+      </div>
+      <div class="topbar-right"><div class="avatar">VS</div></div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Skills</div>
+          <div class="page-desc">Manage your organization's skill and certification library. Certifications track validity and expiry per team member.</div>
+        </div>
+        <button class="btn btn-primary" onclick="openNewSkillModal('level')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          New skill
+        </button>
+      </div>
+
+      <!-- Skills section -->
+      <div class="lib-section">
+        <span class="lib-section-lbl">Skills</span>
+        <span class="lib-section-line"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Skill name</th><th>Group</th><th>Type</th><th>Team members</th><th style="width:80px"></th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600">React</td><td style="color:var(--text-3)">Front-end</td><td><span class="badge-cert" style="background:var(--brand-light);color:var(--brand);border-color:var(--brand-muted);padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;">Level</span></td><td style="color:var(--text-3)">12</td><td><div class="ra"><button class="btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div></td></tr>
+            <tr><td style="font-weight:600">Node.js</td><td style="color:var(--text-3)">Back-end</td><td><span style="background:var(--brand-light);color:var(--brand);border:1px solid var(--brand-muted);padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;">Level</span></td><td style="color:var(--text-3)">8</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Certifications section -->
+      <div class="lib-section" style="margin-top:8px">
+        <span class="lib-section-lbl">Certifications</span>
+        <span class="lib-section-line"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="cert-lib-table">
+          <thead>
+            <tr>
+              <th>Certificate name</th>
+              <th>Vendor</th>
+              <th>Expires</th>
+              <th>Official URL</th>
+              <th>Team members</th>
+              <th style="width:72px"></th>
+            </tr>
+          </thead>
+          <tbody id="cert-lib-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ New Skill Modal (unified — Certification is one of the skill types) ══ -->
+<div class="ns-overlay" id="ns-overlay" onclick="if(event.target===this)closeNewSkillModal()">
+  <div class="ns-modal">
+    <div class="ns-hdr">
+      <span class="ns-title">New skill</span>
+      <button class="close-btn" onclick="closeNewSkillModal()">×</button>
+    </div>
+    <div class="ns-body">
+
+      <!-- Row 1: name + type -->
+      <div class="ns-form-2">
+        <div>
+          <label class="form-label" style="display:block;margin-bottom:5px;">Skill name <span class="req">*</span></label>
+          <input type="text" class="form-input" id="ns-name" placeholder="eg. Time management">
+        </div>
+        <div>
+          <label class="form-label" style="display:block;margin-bottom:5px;">Skill type <span class="req">*</span></label>
+          <div class="skt-wrap" id="skt-wrap">
+            <button class="skt-btn" id="skt-btn" onclick="toggleSkTypeMenu(event)">
+              <span class="skt-btn-icon" id="skt-btn-icon"></span>
+              <span class="skt-btn-label" id="skt-btn-label">Level</span>
+              <svg class="skt-btn-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="skt-menu" id="skt-menu">
+              <!-- populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section name -->
+      <div>
+        <label class="form-label" style="display:block;margin-bottom:5px;">Section name</label>
+        <select class="form-select">
+          <option>Technical Skills</option>
+          <option>Soft Skills</option>
+          <option>Certifications</option>
+          <option>Languages</option>
+        </select>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label class="form-label" style="display:block;margin-bottom:5px;">Description</label>
+        <textarea class="form-textarea" style="min-height:78px;" placeholder="Describe what this skill or certification validates…"></textarea>
+        <div class="form-hint">Description will show as a tooltip to the team</div>
+      </div>
+
+      <!-- Role (hidden for cert type) -->
+      <div id="ns-role-row">
+        <label class="form-label" style="display:block;margin-bottom:5px;">Role <span class="req">*</span></label>
+        <select class="form-select">
+          <option value="">Select...</option>
+          <option>Cloud Solutions Architect</option>
+          <option>Project Manager</option>
+          <option>Senior Developer</option>
+          <option>Business Analyst</option>
+          <option>All roles</option>
+        </select>
+      </div>
+
+      <!-- ─── Conditional: Choices (Level / Single / Multiple) ─── -->
+      <div id="ns-choices-section">
+        <label class="form-label" style="display:block;margin-bottom:8px;">Choices</label>
+        <div class="choices-list" id="ns-choices-list"></div>
+        <button class="add-opt-btn" onclick="addChoice()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add option
+        </button>
+      </div>
+
+      <!-- ─── Conditional: Certification metadata ─── -->
+      <div id="ns-cert-section" style="display:none;">
+        <div class="cert-meta-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div>
+            <div class="cert-meta-header-text">Certification details</div>
+            <div class="cert-meta-header-sub">These fields are unique to the Certification skill type.</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label class="form-label" style="display:block;margin-bottom:5px;">Vendor name</label>
+            <input type="text" class="form-input" id="ns-vendor" placeholder="eg. Amazon Web Services">
+            <div class="form-hint">Free text — used for display alongside the certificate name.</div>
+          </div>
+          <div>
+            <label class="form-label" style="display:block;margin-bottom:6px;">Expires <span class="req">*</span></label>
+            <div class="radio-group">
+              <label class="radio-opt sel" id="ns-opt-yes" onclick="nsSetExpires('yes')">
+                <div class="radio-dot"></div> Yes — has a validity period
+              </label>
+              <label class="radio-opt" id="ns-opt-no" onclick="nsSetExpires('no')">
+                <div class="radio-dot"></div> No — valid forever
+              </label>
+            </div>
+          </div>
+          <div id="ns-validity-row" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+            <div style="font-size:12px;color:var(--text-2);line-height:1.5;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;color:var(--text-3);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              When this certificate is added to a team member, they will be required to enter an expiry date.
+            </div>
+          </div>
+          <div>
+            <label class="form-label" style="display:block;margin-bottom:5px;">Official verification URL</label>
+            <input type="url" class="form-input" id="ns-url" placeholder="https://vendor.com/certifications/credential-name">
+            <div class="form-hint">Link to the vendor's credential description page — not the individual's credential link.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="ns-ftr">
+      <button class="btn btn-ghost" onclick="closeNewSkillModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewSkill()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 2: TEAM MEMBER PROFILE — CERT ASSIGNMENT
+════════════════════════════════════════════════════════ -->
+<div id="screen-member" class="screen">
+  <div class="rm-shell">
+    <div class="rm-topbar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="rm-title">People</span>
+      <div style="display:flex;gap:6px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);margin-left:8px;">
+        <button class="tab" style="padding:4px 10px;font-size:12px;border-bottom:none;" onclick="this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active'));this.classList.add('active')">People</button>
+        <button class="tab active" style="padding:4px 10px;font-size:12px;border-bottom:none;" onclick="this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Resource view</button>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+        <button class="btn btn-secondary btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter
+        </button>
+        <div class="avatar">VS</div>
+      </div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-list" id="member-list"></div>
+      <!-- Profile Drawer -->
+      <div class="drawer" id="profile-drawer">
+        <div class="drawer-hdr">
+          <div class="d-avatar" id="drawer-avatar"></div>
+          <div>
+            <div class="d-name" id="drawer-name"></div>
+            <div class="d-role" id="drawer-role"></div>
+          </div>
+          <button class="close-btn" onclick="closeDrawer()" style="margin-left:auto">×</button>
+        </div>
+        <div class="drawer-tabs">
+          <button class="dtab" onclick="switchDTab('overview',this)">Overview</button>
+          <button class="dtab active" onclick="switchDTab('skills',this)">Skills &amp; Certs</button>
+          <button class="dtab" onclick="switchDTab('projects',this)">Projects</button>
+        </div>
+        <div class="drawer-body" id="drawer-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Assign Certificate Modal ══ -->
+<div class="overlay" id="assign-cert-overlay" onclick="if(event.target===this)closeAssignModal()">
+  <div class="modal cert-assign-modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">Add certification</div>
+        <div class="modal-sub" id="assign-modal-sub">Assign a certificate from the library. The expiry date auto-fills from the library default and can be overridden.</div>
+      </div>
+      <button class="close-btn" onclick="closeAssignModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Certificate <span class="req">*</span></label>
+        <select class="form-select" id="assign-cert-select" onchange="onCertSelectChange()">
+          <option value="">Select a certificate…</option>
+          <option value="aws-saa">AWS Solutions Architect Professional — Amazon Web Services</option>
+          <option value="sf-admin">Salesforce Certified Administrator — Salesforce</option>
+          <option value="pmp">Project Management Professional (PMP) — PMI</option>
+          <option value="az-900">Azure Fundamentals (AZ-900) — Microsoft</option>
+          <option value="ccna">Cisco CCNA — Cisco</option>
+        </select>
+      </div>
+
+      <!-- Expiry date — required when cert expires, hidden when forever -->
+      <div class="form-row" id="assign-expiry-row" style="display:none;">
+        <label class="form-label">Expiry date <span class="req">*</span></label>
+        <input type="date" class="form-input" id="assign-expiry-date">
+        <div class="form-hint">Enter the date this certificate expires for this person.</div>
+      </div>
+
+      <!-- Forever note — shown when cert never expires -->
+      <div class="form-row" id="forever-note" style="display:none;">
+        <div style="padding:9px 12px;background:var(--success-bg);border:1px solid var(--success-border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:7px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--success);flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span style="font-size:12px;color:var(--success);font-weight:500;">This certificate never expires — no expiry date needed.</span>
+        </div>
+      </div>
+
+      <!-- Issue date — optional, informational only -->
+      <div class="form-row" id="assign-issue-row" style="display:none;">
+        <label class="form-label">Issue date <span style="font-size:10px;font-weight:400;color:var(--text-4);margin-left:4px;">Optional</span></label>
+        <input type="date" class="form-input" id="assign-issue-date">
+        <div class="form-hint">Informational only — not used for matching or expiry calculation.</div>
+      </div>
+
+      <div class="form-row" id="assign-url-row" style="display:none;">
+        <label class="form-label">Certificate URL <span style="font-size:10px;font-weight:400;color:var(--text-4);margin-left:4px;">Optional</span></label>
+        <input type="url" class="form-input" id="assign-url" placeholder="https://your-credential-link.com">
+        <div class="form-hint">This person's own credential link — distinct from the library's verification URL.</div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="closeAssignModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAssignment()">Add certification</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 3: RESOURCE REQUEST — CERT FILTER IN SKILLS MODAL
+════════════════════════════════════════════════════════ -->
+<div id="screen-request" class="screen">
+  <div class="rr-shell">
+    <div class="rr-topbar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span class="rr-title">Resource requests</span>
+      <button class="btn btn-primary" onclick="openRRModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        New request
+      </button>
+    </div>
+    <div class="rr-toolbar">
+      <div class="tb-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filter</div>
+      <div class="tb-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Columns</div>
+      <span style="margin-left:auto;font-size:12px;color:var(--text-3)">7 requests</span>
+    </div>
+    <div class="rr-table-wrap">
+      <table class="rr-tbl">
+        <thead>
+          <tr>
+            <th>ID</th><th>Role requested</th><th>Duration</th>
+            <th>Status</th><th>Project</th><th>Skills / Certs</th><th>Requested by</th>
+          </tr>
+        </thead>
+        <tbody id="rr-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ New Request Modal ══ -->
+<div class="rr-overlay" id="rr-modal-overlay" onclick="if(event.target===this)closeRRModal()">
+  <div class="rr-modal">
+    <div class="rr-modal-hd">
+      <div>
+        <div class="rr-eyebrow">Resource request</div>
+        <div class="rr-modal-title">New team member</div>
+      </div>
+      <button class="close-btn" onclick="closeRRModal()">×</button>
+    </div>
+    <div class="rr-modal-body">
+      <div class="form-row-2" style="margin-bottom:0;">
+        <div class="form-row" style="margin-bottom:0;">
+          <label class="form-label">Project <span class="req">*</span></label>
+          <select class="form-select"><option>Exclusive Networks — Q3 Rollout</option></select>
+          <div class="form-hint">Budget: Implementation · Jul 7 – Sep 30, 2026</div>
+        </div>
+        <div class="form-row" style="margin-bottom:0;">
+          <label class="form-label">Role <span class="req">*</span></label>
+          <select class="form-select"><option>Cloud Solutions Architect</option></select>
+        </div>
+      </div>
+      <div class="form-row-2" style="margin-bottom:0;">
+        <div class="form-row" style="margin-bottom:0;">
+          <label class="form-label">Allocation method <span class="req">*</span></label>
+          <select class="form-select"><option>Total hours</option></select>
+        </div>
+        <div class="form-row" style="margin-bottom:0;">
+          <label class="form-label">Allocation type</label>
+          <select class="form-select"><option>Hard</option><option>Soft</option></select>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Skills &amp; certifications</div>
+        <div class="applied-chips" id="rr-applied-chips"></div>
+        <button class="btn-link" onclick="openSkModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add skills or certifications
+        </button>
+      </div>
+      <div>
+        <div class="section-label">Allocation</div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;">
+          <div class="form-row-2" style="margin-bottom:0;">
+            <div class="form-row" style="margin-bottom:0;">
+              <label class="form-label">Dates <span class="req">*</span></label>
+              <input type="text" class="form-input" value="7 Jul – 30 Sep 2026">
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <label class="form-label">Time requested <span class="req">*</span></label>
+              <input type="text" class="form-input" value="40h 00m">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rr-modal-ft">
+      <button class="btn btn-ghost" onclick="closeRRModal()">Cancel</button>
+      <button class="btn btn-primary">Submit request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Skills + Certifications 3-panel Modal ══ -->
+<div class="sk-overlay" id="sk-overlay" onclick="if(event.target===this)closeSkModal()">
+  <div class="sk-modal">
+    <div class="sk-modal-hd">
+      <span class="sk-modal-title">Add skills &amp; certifications</span>
+      <div class="sk-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search skills and certifications…" oninput="filterSkRows(this.value)">
+      </div>
+      <button class="close-btn" onclick="closeSkModal()">×</button>
+    </div>
+    <div class="sk-modal-body">
+      <!-- Groups -->
+      <div class="sk-groups" id="sk-groups-panel"></div>
+      <!-- Skills list -->
+      <div class="sk-skills-panel" id="sk-skills-panel"></div>
+      <!-- Selected -->
+      <div class="sk-sel" id="sk-sel-panel">
+        <div class="sk-sel-title" id="sk-sel-count">Selected (0)</div>
+        <div class="sk-sel-meta">
+          Candidates matching <b>all</b> conditions will be shown.
+        </div>
+        <div class="sk-sel-list" id="sk-sel-list">
+          <div class="sk-sel-empty">No filters added yet.</div>
+        </div>
+      </div>
+    </div>
+    <div class="sk-modal-ft">
+      <div class="sk-modal-ft-left" id="sk-match-count">
+        Showing <b>all</b> candidates · add filters to narrow
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeSkModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applySkFilters()">Apply filters</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   SHARED
+══════════════════════════════════════════════════════ */
+function switchScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('.screen-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════
+   SCREEN 1: CERTIFICATION LIBRARY
+══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   NEW SKILL MODAL
+══════════════════════════════════════════════════════ */
+const SKILL_TYPES = [
+  {
+    id:'yesno', label:'Yes/No', desc:'Choose one from Binary options',
+    icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="12" r="5"/><circle cx="17" cy="12" r="5"/><circle cx="17" cy="12" r="2.5" fill="currentColor"/></svg>`,
+  },
+  {
+    id:'single', label:'Single choice', desc:'Select one out of a list of values',
+    icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>`,
+  },
+  {
+    id:'multi', label:'Multiple choice', desc:'Select one or more out of list of values',
+    icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
+  },
+  {
+    id:'number', label:'Number', desc:'Numerical value to attach a specific rating',
+    icon:`<span style="font-size:12px;font-weight:800;letter-spacing:-1px;">#</span>`,
+    iconIsHtml:true,
+  },
+  {
+    id:'level', label:'Level', desc:'List of categories ranked according to importance',
+    icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6" stroke-width="3"/><line x1="3" y1="12" x2="3.01" y2="12" stroke-width="3"/><line x1="3" y1="18" x2="3.01" y2="18" stroke-width="3"/></svg>`,
+  },
+  {
+    id:'cert', label:'Certification', desc:'Certificate with validity period and expiry tracking',
+    icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`,
+    isCert:true,
+  },
+];
+
+const NS_DEFAULT_CHOICES = ['Beginner','Intermediate','Advanced'];
+let nsChoices = [];
+let nsType = 'level';
+let nsExpiresType = 'yes';
+let skTypeMenuOpen = false;
+
+function openNewSkillModal(preselect) {
+  nsType = preselect || 'level';
+  nsExpiresType = 'yes';
+  nsChoices = preselect === 'cert' ? [] : [...NS_DEFAULT_CHOICES];
+  document.getElementById('ns-name').value = '';
+  document.getElementById('ns-overlay').classList.add('open');
+  renderSkTypeBtn();
+  renderSkTypeMenu();
+  renderChoices();
+  nsUpdateSections();
+  nsSetExpires('yes');
+  document.getElementById('ns-name').focus();
+}
+function closeNewSkillModal() {
+  document.getElementById('ns-overlay').classList.remove('open');
+  skTypeMenuOpen = false;
+  document.getElementById('skt-menu').classList.remove('open');
+  document.getElementById('skt-btn').classList.remove('open');
+}
+function toggleSkTypeMenu(e) {
+  e.stopPropagation();
+  skTypeMenuOpen = !skTypeMenuOpen;
+  document.getElementById('skt-menu').classList.toggle('open', skTypeMenuOpen);
+  document.getElementById('skt-btn').classList.toggle('open', skTypeMenuOpen);
+}
+document.addEventListener('click', () => {
+  if (skTypeMenuOpen) {
+    skTypeMenuOpen = false;
+    document.getElementById('skt-menu')?.classList.remove('open');
+    document.getElementById('skt-btn')?.classList.remove('open');
+  }
+});
+function selectSkType(id) {
+  nsType = id;
+  skTypeMenuOpen = false;
+  document.getElementById('skt-menu').classList.remove('open');
+  document.getElementById('skt-btn').classList.remove('open');
+  renderSkTypeBtn();
+  renderSkTypeMenu();
+  if (nsType !== 'cert' && nsChoices.length === 0) nsChoices = [...NS_DEFAULT_CHOICES];
+  renderChoices();
+  nsUpdateSections();
+}
+function renderSkTypeBtn() {
+  const t = SKILL_TYPES.find(x => x.id === nsType);
+  const isCert = t.isCert;
+  document.getElementById('skt-btn-icon').innerHTML = t.icon;
+  document.getElementById('skt-btn-icon').style.color = isCert ? 'var(--cert)' : 'var(--text-3)';
+  document.getElementById('skt-btn-label').textContent = t.label;
+  document.getElementById('skt-btn-label').style.color = isCert ? 'var(--cert)' : 'var(--text-1)';
+}
+function renderSkTypeMenu() {
+  document.getElementById('skt-menu').innerHTML = SKILL_TYPES.map(t => `
+    <div class="skt-opt ${t.id===nsType?'sel':''}" onclick="event.stopPropagation();selectSkType('${t.id}')">
+      <div class="skt-opt-ico ${t.isCert?'skt-opt-cert-ico':''}" style="color:${t.isCert?'var(--cert)':''};">${t.icon}</div>
+      <div class="skt-opt-info">
+        <div class="skt-opt-name" style="${t.isCert&&t.id===nsType?'color:var(--cert)':''}">${t.label}</div>
+        <div class="skt-opt-desc">${t.desc}</div>
+      </div>
+      <svg class="skt-opt-check ${t.isCert?'skt-opt-cert-check':''}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="${t.isCert?'color:var(--cert)':''};${t.id===nsType?'display:block':'display:none'}"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+  `).join('');
+}
+function nsUpdateSections() {
+  const showChoices = ['level','single','multi'].includes(nsType);
+  const showCert = nsType === 'cert';
+  document.getElementById('ns-choices-section').style.display = showChoices ? '' : 'none';
+  document.getElementById('ns-cert-section').style.display = showCert ? '' : 'none';
+  document.getElementById('ns-role-row').style.display = showCert ? 'none' : '';
+}
+function renderChoices() {
+  const numClasses = ['cn1','cn2','cn3'];
+  document.getElementById('ns-choices-list').innerHTML = nsChoices.map((c,i) => `
+    <div class="choice-row">
+      <span class="choice-drag">⋮⋮</span>
+      <div class="choice-num ${numClasses[i] || 'cnn'}">${i+1}</div>
+      <input class="choice-input" value="${c}" oninput="nsChoices[${i}]=this.value" placeholder="Option ${i+1}">
+      <button class="choice-rm" onclick="removeChoice(${i})">×</button>
+    </div>
+  `).join('');
+}
+function addChoice() {
+  nsChoices.push('');
+  renderChoices();
+  const inputs = document.querySelectorAll('.choice-input');
+  inputs[inputs.length-1]?.focus();
+}
+function removeChoice(i) {
+  nsChoices.splice(i,1);
+  renderChoices();
+}
+function nsSetExpires(val) {
+  nsExpiresType = val;
+  document.getElementById('ns-opt-yes').classList.toggle('sel', val==='yes');
+  document.getElementById('ns-opt-no').classList.toggle('sel', val==='no');
+  document.getElementById('ns-validity-row').style.display = val==='yes' ? '' : 'none';
+}
+function saveNewSkill() {
+  const name = document.getElementById('ns-name').value.trim();
+  if (!name) { document.getElementById('ns-name').focus(); return; }
+  // Skill type is mandatory — already set (defaults to 'level'), so always valid
+  if (nsType === 'cert') {
+    const vendor = document.getElementById('ns-vendor').value.trim() || '—';
+    CERT_LIBRARY.unshift({ id:'new-'+Date.now(), name, vendor, expires:nsExpiresType==='yes', url:document.getElementById('ns-url').value.trim(), members:0 });
+    renderLibrary();
+  }
+  closeNewSkillModal();
+}
+
+const CERT_LIBRARY = [
+  { id:'aws-saa', name:'AWS Solutions Architect Professional', vendor:'Amazon Web Services', expires:true, url:'aws.amazon.com/certification', members:3 },
+  { id:'sf-admin', name:'Salesforce Certified Administrator', vendor:'Salesforce', expires:true, url:'salesforce.com/credentials', members:4 },
+  { id:'pmp', name:'Project Management Professional (PMP)', vendor:'Project Management Institute', expires:true, url:'pmi.org/certifications/pmp', members:2 },
+  { id:'az-900', name:'Azure Fundamentals (AZ-900)', vendor:'Microsoft', expires:false, url:'microsoft.com/learning', members:5 },
+  { id:'ccna', name:'Cisco CCNA', vendor:'Cisco', expires:true, url:'cisco.com/certifications', members:1 },
+];
+
+function renderLibrary() {
+  const tbody = document.getElementById('cert-lib-tbody');
+  tbody.innerHTML = CERT_LIBRARY.map(c => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:24px;height:24px;border-radius:5px;background:var(--cert-bg);border:1px solid var(--cert-border);display:grid;place-items:center;color:var(--cert);flex-shrink:0;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+          </div>
+          <span style="font-weight:600;font-size:13px;">${c.name}</span>
+        </div>
+      </td>
+      <td style="color:var(--text-3);font-size:12px;">${c.vendor}</td>
+      <td>${c.expires
+        ? '<span class="badge badge-yes"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Yes — expiry required on assignment</span>'
+        : '<span class="badge badge-no">Never expires</span>'}</td>
+      <td>
+        <a style="font-size:11px;color:var(--brand);display:inline-flex;align-items:center;gap:3px;text-decoration:none;" href="#">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ${c.url}
+        </a>
+      </td>
+      <td style="color:var(--text-3);font-size:12px;text-align:center;">${c.members}</td>
+      <td>
+        <div class="ra">
+          <button class="btn-icon" title="Edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon" title="Delete" style="color:var(--text-4);" onmouseenter="this.style.color='var(--danger)'" onmouseleave="this.style.color='var(--text-4)'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+renderLibrary();
+
+
+
+/* ══════════════════════════════════════════════════════
+   SCREEN 2: TEAM MEMBER PROFILE
+══════════════════════════════════════════════════════ */
+const MEMBERS = [
+  {
+    id:'sarah', name:'Sarah Chen', role:'Cloud Solutions Architect', color:'#6366F1',
+    skills:[{name:'AWS',level:'Advanced'},{name:'Azure',level:'Intermediate'},{name:'Terraform',level:'Advanced'}],
+    certs:[
+      { certId:'aws-saa', name:'AWS Solutions Architect Professional', vendor:'Amazon Web Services', issueDate:'2024-03-12', expiryDate:'2027-03-12', url:'https://aws.amazon.com/verify/SAA-C12345' },
+      { certId:'az-900', name:'Azure Fundamentals (AZ-900)', vendor:'Microsoft', issueDate:'2023-08-01', expiryDate:null, url:'' },
+    ]
+  },
+  {
+    id:'marcus', name:'Marcus Rodriguez', role:'Senior Full-Stack Developer', color:'#10B981',
+    skills:[{name:'React',level:'Advanced'},{name:'Node.js',level:'Advanced'},{name:'PostgreSQL',level:'Intermediate'}],
+    certs:[
+      { certId:'sf-admin', name:'Salesforce Certified Administrator', vendor:'Salesforce', issueDate:'2024-07-15', expiryDate:'2026-07-15', url:'' },
+    ]
+  },
+  {
+    id:'priya', name:'Priya Nair', role:'Project Manager', color:'#F59E0B',
+    skills:[{name:'Project Management',level:'Advanced'},{name:'Agile',level:'Fluent'}],
+    certs:[
+      { certId:'pmp', name:'Project Management Professional (PMP)', vendor:'Project Management Institute', issueDate:'2023-01-10', expiryDate:'2026-01-10', url:'https://pmi.org/verify/PMP-N-98765' },
+      { certId:'sf-admin', name:'Salesforce Certified Administrator', vendor:'Salesforce', issueDate:'2022-06-01', expiryDate:'2024-06-01', url:'' },
+    ]
+  },
+  {
+    id:'james', name:'James Okonkwo', role:'Security Engineer', color:'#8B5CF6',
+    skills:[{name:'Penetration Testing',level:'Advanced'},{name:'SIEM',level:'Intermediate'}],
+    certs:[]
+  },
+  {
+    id:'emma', name:'Emma Sullivan', role:'Business Analyst', color:'#EC4899',
+    skills:[{name:'Salesforce',level:'Intermediate'},{name:'Jira',level:'Advanced'}],
+    certs:[
+      { certId:'sf-admin', name:'Salesforce Certified Administrator', vendor:'Salesforce', issueDate:'2025-02-20', expiryDate:'2027-02-20', url:'' },
+    ]
+  },
+];
+
+const TODAY = new Date('2026-09-08');
+function certStatus(expiryDate) {
+  if (!expiryDate) return { label:'Permanent', cls:'badge-valid', icon:'∞' };
+  const exp = new Date(expiryDate);
+  const diff = (exp - TODAY) / (1000*60*60*24);
+  if (diff < 0) return { label:'Expired', cls:'badge-expired', icon:'✗' };
+  if (diff < 90) return { label:'Expiring soon', cls:'badge-expiring', icon:'⚠' };
+  return { label:'Valid', cls:'badge-valid', icon:'✓' };
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function renderMemberList() {
+  const list = document.getElementById('member-list');
+  list.innerHTML = MEMBERS.map(m => {
+    const validCerts = m.certs.filter(c => c.expiryDate === null || new Date(c.expiryDate) >= TODAY);
+    return `
+    <div class="member-card" id="card-${m.id}" onclick="openDrawer('${m.id}')">
+      <div class="m-avatar" style="background:${m.color}">${m.name.split(' ').map(w=>w[0]).join('')}</div>
+      <div class="m-info">
+        <div class="m-name">${m.name}</div>
+        <div class="m-role">${m.role}</div>
+      </div>
+      <div class="m-chips">
+        ${m.certs.length > 0 ? `<div class="m-cert-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>${m.certs.length} cert${m.certs.length>1?'s':''}</div>` : '<span style="font-size:11px;color:var(--text-4);">No certs</span>'}
+      </div>
+    </div>
+  `}).join('');
+}
+renderMemberList();
+
+let activeDrawerMemberId = null;
+function openDrawer(id) {
+  activeDrawerMemberId = id;
+  document.querySelectorAll('.member-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-'+id)?.classList.add('active');
+  const m = MEMBERS.find(x => x.id === id);
+  const initials = m.name.split(' ').map(w=>w[0]).join('');
+  document.getElementById('drawer-avatar').style.background = m.color;
+  document.getElementById('drawer-avatar').textContent = initials;
+  document.getElementById('drawer-name').textContent = m.name;
+  document.getElementById('drawer-role').textContent = m.role;
+  document.getElementById('profile-drawer').classList.add('open');
+  renderDrawerSkills(m);
+}
+function closeDrawer() {
+  document.getElementById('profile-drawer').classList.remove('open');
+  document.querySelectorAll('.member-card').forEach(c => c.classList.remove('active'));
+  activeDrawerMemberId = null;
+}
+function switchDTab(id, btn) {
+  document.querySelectorAll('.dtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const m = MEMBERS.find(x => x.id === activeDrawerMemberId);
+  if (!m) return;
+  if (id === 'skills') renderDrawerSkills(m);
+  else if (id === 'overview') renderDrawerOverview(m);
+  else document.getElementById('drawer-body').innerHTML = '<div style="padding:16px 0;font-size:12px;color:var(--text-3)">Project assignments coming soon.</div>';
+}
+function renderDrawerOverview(m) {
+  document.getElementById('drawer-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4);margin-bottom:4px;">Department</div>
+        <div style="font-size:12px;font-weight:600;">Engineering</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4);margin-bottom:4px;">Location</div>
+        <div style="font-size:12px;font-weight:600;">San Francisco, CA</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4);margin-bottom:4px;">Utilization</div>
+        <div style="font-size:12px;font-weight:600;">72%</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4);margin-bottom:4px;">Active projects</div>
+        <div style="font-size:12px;font-weight:600;">2</div>
+      </div>
+    </div>
+  `;
+}
+function renderDrawerSkills(m) {
+  const skillsHtml = m.skills.map(s => `
+    <span class="sk-chip">${s.name}<span class="sk-chip-lvl"> · ${s.level}</span></span>
+  `).join('');
+
+  const certsHtml = m.certs.length === 0
+    ? `<div style="font-size:12px;color:var(--text-4);font-style:italic;padding:4px 0 12px;">No certifications recorded.</div>`
+    : m.certs.map(c => {
+        const st = certStatus(c.expiryDate);
+        const expLine = c.expiryDate
+          ? `Expires ${fmtDate(c.expiryDate)}`
+          : 'Never expires';
+        return `
+        <div class="cert-card">
+          <div class="cert-icon">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">${c.name}</div>
+            <div class="cert-vendor">${c.vendor}</div>
+            <div class="cert-meta">
+              <span class="badge ${st.cls}" style="border-radius:4px;padding:1px 7px;font-size:10px;">${st.icon} ${st.label}</span>
+              <span class="cert-exp">${expLine}</span>
+              ${c.url ? `<button class="cert-link-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Credential</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+
+  document.getElementById('drawer-body').innerHTML = `
+    <div class="sec-head"><span class="sec-lbl">Skills</span></div>
+    <div class="skill-chips">${skillsHtml}</div>
+    <div class="sec-head" style="margin-bottom:8px;">
+      <span class="sec-lbl">Certifications</span>
+      <button class="btn-link btn-sm" onclick="openAssignModal('${m.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add
+      </button>
+    </div>
+    <div class="cert-list">${certsHtml}</div>
+  `;
+}
+
+/* Assign cert modal */
+function openAssignModal(memberId) {
+  const m = MEMBERS.find(x => x.id === memberId);
+  document.getElementById('assign-modal-sub').textContent = `Assigning to ${m.name}`;
+  document.getElementById('assign-cert-select').value = '';
+  document.getElementById('assign-issue-date').value = '';
+  document.getElementById('assign-expiry-date').value = '';
+  document.getElementById('assign-expiry-row').style.display = 'none';
+  document.getElementById('assign-issue-row').style.display = 'none';
+  document.getElementById('assign-url-row').style.display = 'none';
+  document.getElementById('forever-note').style.display = 'none';
+  document.getElementById('assign-cert-overlay').classList.add('open');
+  document.getElementById('assign-cert-overlay').dataset.memberId = memberId;
+}
+function closeAssignModal() { document.getElementById('assign-cert-overlay').classList.remove('open'); }
+function onCertSelectChange() {
+  const certId = document.getElementById('assign-cert-select').value;
+  if (!certId) {
+    document.getElementById('assign-expiry-row').style.display = 'none';
+    document.getElementById('forever-note').style.display = 'none';
+    document.getElementById('assign-issue-row').style.display = 'none';
+    document.getElementById('assign-url-row').style.display = 'none';
+    return;
+  }
+  const lib = CERT_LIBRARY.find(c => c.id === certId);
+  const expires = lib ? lib.expires : true;
+  document.getElementById('assign-expiry-row').style.display = expires ? '' : 'none';
+  document.getElementById('forever-note').style.display = expires ? 'none' : '';
+  document.getElementById('assign-issue-row').style.display = '';
+  document.getElementById('assign-url-row').style.display = '';
+  // Clear any stale expiry value when switching certs
+  if (!expires) document.getElementById('assign-expiry-date').value = '';
+}
+function saveAssignment() {
+  const certId = document.getElementById('assign-cert-select').value;
+  if (!certId) return;
+  const lib = CERT_LIBRARY.find(c => c.id === certId);
+  const expiryVal = document.getElementById('assign-expiry-date').value;
+  // Expiry is required when cert expires
+  if (lib && lib.expires && !expiryVal) {
+    document.getElementById('assign-expiry-date').style.borderColor = 'var(--danger)';
+    document.getElementById('assign-expiry-date').focus();
+    return;
+  }
+  document.getElementById('assign-expiry-date').style.borderColor = '';
+  const memberId = document.getElementById('assign-cert-overlay').dataset.memberId;
+  const m = MEMBERS.find(x => x.id === memberId);
+  m.certs.push({
+    certId, name: lib.name, vendor: lib.vendor,
+    issueDate: document.getElementById('assign-issue-date').value || null,
+    expiryDate: expiryVal || null,
+    url: document.getElementById('assign-url')?.value || '',
+  });
+  closeAssignModal();
+  renderMemberList();
+  renderDrawerSkills(m);
+}
+
+/* ══════════════════════════════════════════════════════
+   SCREEN 3: RESOURCE REQUEST
+══════════════════════════════════════════════════════ */
+const RR_ROWS = [
+  { id:'5000880', role:'Product Manager', roleColor:'#0e6027', duration:'07 Jul – 14 Jul', status:'blocked', project:'Exclusive Networks Q3', skills:['PMP','AWS SAA'], hasCert:true },
+  { id:'5000879', role:'Cloud Architect', roleColor:'#6366F1', duration:'06 Jul – 30 Sep', status:'approved', project:'Exclusive Networks Q3', skills:['AWS SAA'], hasCert:true },
+  { id:'5000833', role:'Project Manager', roleColor:'#005d5d', duration:'01 Jul – 08 Jul', status:'todo', project:'Test Project 30 Jun', skills:['Agile'], hasCert:false },
+  { id:'5000780', role:'Senior Developer', roleColor:'#10B981', duration:'29 Jun – 13 Jul', status:'approved', project:'Test Project 23 Jun', skills:['React · Advanced'], hasCert:false },
+  { id:'5000642', role:'Business Analyst', roleColor:'#EC4899', duration:'01 Jun – 21 Jun', status:'blocked', project:'Nov20 Project', skills:['Salesforce Admin'], hasCert:true },
+];
+function renderRRTable() {
+  document.getElementById('rr-tbody').innerHTML = RR_ROWS.map(r => {
+    const statusCls = {blocked:'s-blocked',approved:'s-approved',todo:'s-todo'}[r.status];
+    const statusLabel = {blocked:'Blocked',approved:'Approved',todo:'To do'}[r.status];
+    const skillsHtml = r.skills.map((s,i) => `
+      <span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;${i===0&&r.hasCert?'background:var(--cert-bg);color:var(--cert);border:1px solid var(--cert-border);':'background:var(--brand-light);color:var(--brand);border:1px solid var(--brand-muted);'}">
+        ${i===0&&r.hasCert?'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>':''}
+        ${s}
+      </span>
+    `).join('');
+    return `<tr>
+      <td style="color:var(--text-3);font-size:11px;">#${r.id}</td>
+      <td><div style="display:flex;align-items:center;"><div class="role-dot" style="background:${r.roleColor}">${r.role.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>${r.role}</div></td>
+      <td style="color:var(--text-3);font-size:12px;">${r.duration}</td>
+      <td><span class="status-pill ${statusCls}">${statusLabel}</span></td>
+      <td style="color:var(--text-2);font-size:12px;">${r.project}</td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:4px;">${skillsHtml}</div></td>
+      <td style="color:var(--text-3);font-size:12px;">Vivek S</td>
+    </tr>`;
+  }).join('');
+}
+renderRRTable();
+
+function openRRModal() { document.getElementById('rr-modal-overlay').classList.add('open'); renderAppliedChips(); }
+function closeRRModal() { document.getElementById('rr-modal-overlay').classList.remove('open'); }
+
+/* Skills 3-panel */
+const SK_GROUPS = [
+  {
+    id:'skills', label:'Skills', icon:'⚡', children:[
+      { id:'languages', label:'Languages' },
+      { id:'certifications', label:'Certifications', isCert:true },
+      { id:'misc', label:'Miscellaneous' },
+    ]
+  },
+  {
+    id:'tm-fields', label:'Team member fields', icon:'👤', children:[
+      { id:'general', label:'General information' },
+    ]
+  },
+];
+const SK_ITEMS = {
+  languages:[
+    { id:'react', label:'React', type:'level', typeLabel:'Level' },
+    { id:'nodejs', label:'Node.js', type:'level', typeLabel:'Level' },
+    { id:'python', label:'Python', type:'level', typeLabel:'Level' },
+    { id:'java', label:'Java', type:'level', typeLabel:'Level' },
+  ],
+  certifications:[
+    { id:'cert-aws-saa', label:'AWS Solutions Architect Professional', vendor:'Amazon Web Services', type:'cert', typeLabel:'Certificate', validity:'36 months' },
+    { id:'cert-sf-admin', label:'Salesforce Certified Administrator', vendor:'Salesforce', type:'cert', typeLabel:'Certificate', validity:'24 months' },
+    { id:'cert-pmp', label:'Project Management Professional (PMP)', vendor:'Project Management Institute', type:'cert', typeLabel:'Certificate', validity:'36 months' },
+    { id:'cert-az-900', label:'Azure Fundamentals (AZ-900)', vendor:'Microsoft', type:'cert', typeLabel:'Certificate', validity:'Permanent' },
+    { id:'cert-ccna', label:'Cisco CCNA', vendor:'Cisco', type:'cert', typeLabel:'Certificate', validity:'36 months' },
+  ],
+  misc:[
+    { id:'region', label:'Region', type:'multi', typeLabel:'Multi-select' },
+    { id:'tools', label:'Tools', type:'multi', typeLabel:'Multi-select' },
+  ],
+  general:[
+    { id:'dept', label:'Department', type:'text', typeLabel:'Text' },
+    { id:'location', label:'Location', type:'text', typeLabel:'Text' },
+  ],
+};
+
+let activeSkGroup = 'certifications';
+let skSelected = {}; // id -> { label, type, vendor?, anchor? }
+
+function openSkModal() {
+  document.getElementById('sk-overlay').classList.add('open');
+  // Clone current applied state into selection
+  skSelected = Object.assign({}, window._appliedSk || {});
+  renderSkGroups();
+  switchSkGroup('certifications');
+  renderSkSelected();
+}
+function closeSkModal() { document.getElementById('sk-overlay').classList.remove('open'); }
+
+function renderSkGroups() {
+  const panel = document.getElementById('sk-groups-panel');
+  panel.innerHTML = SK_GROUPS.map(g => {
+    const children = g.children.map(c => `
+      <div class="sg-item child ${c.id===activeSkGroup?'active':''}" onclick="switchSkGroup('${c.id}')">
+        ${c.isCert?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="2"/></svg>`}
+        ${c.label}
+        ${(SK_ITEMS[c.id]||[]).length ? `<span class="sg-count">${(SK_ITEMS[c.id]||[]).length}</span>` : ''}
+      </div>
+    `).join('');
+    return `
+      <div class="sg-lbl">${g.label}</div>
+      ${children}
+    `;
+  }).join('');
+}
+
+function switchSkGroup(id) {
+  activeSkGroup = id;
+  renderSkGroups();
+  renderSkSkills(id);
+}
+
+let skSearch = '';
+function filterSkRows(q) {
+  skSearch = q.toLowerCase();
+  renderSkSkills(activeSkGroup);
+}
+
+function renderSkSkills(groupId) {
+  const items = (SK_ITEMS[groupId] || []).filter(i =>
+    !skSearch || i.label.toLowerCase().includes(skSearch) || (i.vendor||'').toLowerCase().includes(skSearch)
+  );
+  const isCertGroup = groupId === 'certifications';
+  const panel = document.getElementById('sk-skills-panel');
+  const groupLabel = SK_GROUPS.flatMap(g=>g.children).find(c=>c.id===groupId)?.label || groupId;
+  panel.innerHTML = `
+    <div class="sk-panel-hdr">${groupLabel}</div>
+    ${items.length === 0 ? '<div style="padding:20px 16px;font-size:12px;color:var(--text-4);">No results.</div>' : ''}
+    ${items.map(item => {
+      const sel = !!skSelected[item.id];
+      const typeCls = { level:'sk-type-level', cert:'sk-type-cert', multi:'sk-type-multi', text:'sk-type-cert' }[item.type] || '';
+      return `
+        <div class="sk-row ${sel?'sel':''}" onclick="toggleSk('${item.id}', ${JSON.stringify(item).replace(/'/g,'\\x27')})">
+          <div class="sk-cb"></div>
+          <div class="sk-name-col">
+            <span class="sk-name">${item.label}</span>
+            ${item.vendor ? `<span class="sk-vendor">${item.vendor}</span>` : ''}
+          </div>
+          <span class="sk-type-badge ${typeCls}">${item.typeLabel}</span>
+          ${isCertGroup && item.validity ? `<span class="sk-validity-info"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${item.validity}</span>` : ''}
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function toggleSk(id, item) {
+  if (skSelected[id]) {
+    delete skSelected[id];
+  } else {
+    skSelected[id] = { ...item, anchor: 'budget-end' };
+  }
+  renderSkSkills(activeSkGroup);
+  renderSkSelected();
+}
+
+function renderSkSelected() {
+  const ids = Object.keys(skSelected);
+  document.getElementById('sk-sel-count').textContent = `Selected (${ids.length})`;
+  const list = document.getElementById('sk-sel-list');
+  if (ids.length === 0) {
+    list.innerHTML = '<div class="sk-sel-empty">No filters added yet.</div>';
+    document.getElementById('sk-match-count').innerHTML = 'Showing <b>all</b> candidates · add filters to narrow';
+    return;
+  }
+  document.getElementById('sk-match-count').innerHTML = `<b>${ids.length}</b> filter${ids.length>1?'s':''} active · candidates must match all`;
+  list.innerHTML = ids.map(id => {
+    const item = skSelected[id];
+    const isCert = item.type === 'cert';
+    const isPermanent = item.validity === 'Permanent';
+    return `
+      <div class="sk-sel-item ${isCert?'cert-item':''}">
+        <div class="sk-sel-item-hd">
+          ${isCert?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--cert);flex-shrink:0;margin-top:1px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`:''}
+          <span class="sk-sel-name">${item.label}</span>
+          <button class="sk-sel-rm" onclick="removeSkSel('${id}')">×</button>
+        </div>
+        ${isCert && !isPermanent ? `
+          <div class="sk-sel-ctrl">
+            <div class="sk-sel-ctrl-label">Valid through</div>
+            <select class="sk-sel-select" onchange="skSelected['${id}'].anchor=this.value;renderSkSelected()">
+              <option value="budget-end" ${item.anchor==='budget-end'?'selected':''}>Budget end date (recommended)</option>
+              <option value="project-end" ${item.anchor==='project-end'?'selected':''}>Project end date</option>
+              <option value="project-start" ${item.anchor==='project-start'?'selected':''}>Project start date</option>
+              <option value="manual" ${item.anchor==='manual'?'selected':''}>Manual date…</option>
+            </select>
+            <div class="sk-sel-hint">Candidates whose certificate expires before this date will be excluded. A "never expires" certificate always passes.</div>
+            ${item.anchor==='budget-end'?`
+            <div class="sk-sel-anchor-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Anchor resolves to Sep 30, 2026 — the end of the selected Implementation budget.
+            </div>` : ''}
+          </div>
+        ` : isCert && isPermanent ? `
+          <div class="sk-sel-hint" style="margin-top:4px;padding:4px 6px;background:var(--success-bg);border-radius:3px;color:var(--success);font-size:10px;border:1px solid var(--success-border);">∞ This certificate never expires — no date check needed.</div>
+        ` : `
+          <div class="sk-sel-ctrl">
+            <div class="sk-sel-ctrl-label">Proficiency</div>
+            <select class="sk-sel-select">
+              <option>is at least Basic</option>
+              <option>is at least Intermediate</option>
+              <option selected>is at least Advanced</option>
+              <option>is exactly Expert</option>
+            </select>
+          </div>
+        `}
+      </div>
+    `;
+  }).join('');
+}
+
+function removeSkSel(id) {
+  delete skSelected[id];
+  renderSkSkills(activeSkGroup);
+  renderSkSelected();
+}
+
+function applySkFilters() {
+  window._appliedSk = Object.assign({}, skSelected);
+  renderAppliedChips();
+  closeSkModal();
+}
+
+function renderAppliedChips() {
+  const applied = window._appliedSk || {};
+  const ids = Object.keys(applied);
+  const container = document.getElementById('rr-applied-chips');
+  if (ids.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = ids.map(id => {
+    const item = applied[id];
+    const isCert = item.type === 'cert';
+    const anchorLabel = { 'budget-end':'Budget end', 'project-end':'Project end', 'project-start':'Project start', 'manual':'Custom date' }[item.anchor] || '';
+    return `
+      <span class="ap-chip ${isCert?'ap-chip-cert':''}">
+        ${isCert?`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`:''}
+        ${item.label}
+        ${isCert && item.validity !== 'Permanent' && anchorLabel ? `<span class="ap-chip-anchor">→ ${anchorLabel}</span>` : ''}
+        <button class="ap-chip-rm" onclick="removeApplied('${id}')">×</button>
+      </span>
+    `;
+  }).join('');
+}
+function removeApplied(id) {
+  if (window._appliedSk) delete window._appliedSk[id];
+  renderAppliedChips();
+}
+</script>
+</body>
+</html>
