@@ -496,7 +496,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
               <th>Certificate name</th>
               <th>Vendor</th>
               <th>Expires</th>
-              <th>Official URL</th>
               <th>Team members</th>
               <th style="width:72px"></th>
             </tr>
@@ -610,11 +609,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;color:var(--text-3);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               When this certificate is added to a team member, they will be required to enter an expiry date.
             </div>
-          </div>
-          <div>
-            <label class="form-label" style="display:block;margin-bottom:5px;">Official verification URL</label>
-            <input type="url" class="form-input" id="ns-url" placeholder="https://vendor.com/certifications/credential-name">
-            <div class="form-hint">Link to the vendor's credential description page — not the individual's credential link.</div>
           </div>
         </div>
       </div>
@@ -1020,7 +1014,7 @@ function saveNewSkill() {
   // Skill type is mandatory — already set (defaults to 'level'), so always valid
   if (nsType === 'cert') {
     const vendor = document.getElementById('ns-vendor').value.trim() || '—';
-    CERT_LIBRARY.unshift({ id:'new-'+Date.now(), name, vendor, expires:nsExpiresType==='yes', url:document.getElementById('ns-url').value.trim(), members:0 });
+    CERT_LIBRARY.unshift({ id:'new-'+Date.now(), name, vendor, expires:nsExpiresType==='yes', members:0 });
     renderLibrary();
   }
   closeNewSkillModal();
@@ -1047,15 +1041,7 @@ function renderLibrary() {
         </div>
       </td>
       <td style="color:var(--text-3);font-size:12px;">${c.vendor}</td>
-      <td>${c.expires
-        ? '<span class="badge badge-yes"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Yes — expiry required on assignment</span>'
-        : '<span class="badge badge-no">Never expires</span>'}</td>
-      <td>
-        <a style="font-size:11px;color:var(--brand);display:inline-flex;align-items:center;gap:3px;text-decoration:none;" href="#">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          ${c.url}
-        </a>
-      </td>
+      <td style="color:var(--text-3);font-size:12px;">${c.expires ? 'Yes' : 'No'}</td>
       <td style="color:var(--text-3);font-size:12px;text-align:center;">${c.members}</td>
       <td>
         <div class="ra">
