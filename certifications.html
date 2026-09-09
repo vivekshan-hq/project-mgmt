@@ -401,6 +401,57 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .cert-meta-header svg{color:var(--cert);flex-shrink:0;}
 .cert-meta-header-text{font-size:12px;font-weight:600;color:var(--cert);}
 .cert-meta-header-sub{font-size:11px;color:var(--cert);opacity:.7;margin-top:1px;}
+
+/* ── Team Members screen ── */
+.tm-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid var(--border);border-radius:var(--radius);margin:0 24px 0;overflow:hidden;}
+.tm-stat-cell{padding:14px 20px;}
+.tm-stat-cell+.tm-stat-cell{border-left:1px solid var(--border);}
+.tm-stat-label{font-size:11px;color:var(--text-3);margin-bottom:6px;}
+.tm-stat-value{font-size:20px;font-weight:700;line-height:1;}
+.tm-stat-sub{font-size:11px;color:var(--text-3);margin-top:3px;}
+.tm-stat-right{display:flex;flex-direction:column;gap:6px;}
+.tm-stat-right-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text-2);}
+.tm-stat-right-row strong{font-weight:700;color:var(--text-1);}
+.tm-tabs{display:flex;align-items:center;gap:2px;padding:12px 24px 0;border-bottom:1px solid var(--border);margin-top:16px;}
+.tm-tab{font-size:13px;padding:6px 14px;border-radius:6px 6px 0 0;color:var(--text-3);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tm-tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600;}
+.tm-tab-spacer{flex:1;}
+.tm-invite-btn{padding:6px 14px;background:var(--text-1);color:var(--surface);font-size:12px;font-weight:600;border:none;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.tm-filter-btn{padding:5px 12px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--text-2);cursor:pointer;}
+.role-pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+
+/* ── Three-dot menu in TM table ── */
+.tm-menu-wrap{position:relative;display:inline-block;}
+.tm-kdot{padding:4px 6px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text-3);font-size:15px;line-height:1;}
+.tm-kdot:hover{background:var(--bg);}
+.tm-menu{position:absolute;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);min-width:200px;z-index:300;display:none;padding:4px;text-align:left;}
+.tm-menu.open{display:block;}
+.tm-mi{width:100%;text-align:left;padding:8px 12px;font-size:13px;border-radius:5px;cursor:pointer;color:var(--text-1);background:none;border:none;display:block;}
+.tm-mi:hover{background:var(--bg);}
+.tm-mi.danger{color:var(--danger);}
+.tm-mi.cert-action{color:var(--cert);font-weight:600;}
+.tm-mi.cert-action:hover{background:var(--cert-bg);}
+
+/* ── Certs slide-over panel ── */
+.tm-co-overlay{display:none;position:fixed;inset:0;z-index:600;}
+.tm-co-overlay.open{display:block;}
+.tm-co-back{position:absolute;inset:0;background:rgba(0,0,0,.25);}
+.tm-co-panel{position:absolute;top:0;right:0;bottom:0;width:500px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.1);}
+.tm-co-overlay.open .tm-co-panel{transform:translateX(0);}
+.tm-co-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px;}
+.tm-co-name{font-size:14px;font-weight:700;color:var(--text-1);}
+.tm-co-sub{font-size:12px;color:var(--text-3);margin-top:1px;}
+.tm-co-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;}
+.tm-co-empty{text-align:center;padding:56px 24px;color:var(--text-3);}
+.tm-co-empty svg{opacity:.35;margin-bottom:10px;}
+.tm-cert-card{border:1px solid var(--border);border-radius:8px;padding:12px 14px;background:var(--bg);}
+.tm-cert-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.tm-cert-name{font-size:13px;font-weight:600;color:var(--text-1);}
+.tm-cert-vendor{font-size:11px;color:var(--text-3);margin-top:2px;}
+.tm-cert-dates{display:flex;gap:16px;margin-top:10px;}
+.tm-cert-date-item{display:flex;flex-direction:column;gap:2px;}
+.tm-cert-date-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-4);font-weight:600;}
+.tm-cert-date-val{font-size:12px;color:var(--text-2);}
 </style>
 </head>
 <body>
@@ -414,8 +465,9 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
   </span>
   <div class="screen-tabs">
     <button class="screen-tab active" onclick="switchScreen('library',this)">① Certification Library</button>
-    <button class="screen-tab" onclick="switchScreen('member',this)">② Team Member Assignment</button>
-    <button class="screen-tab" onclick="switchScreen('request',this)">③ Resource Request</button>
+    <button class="screen-tab" onclick="switchScreen('tmlist',this)">② Team Members</button>
+    <button class="screen-tab" onclick="switchScreen('member',this)">③ TM Profile &amp; Assignment</button>
+    <button class="screen-tab" onclick="switchScreen('request',this)">④ Resource Request</button>
   </div>
 </div>
 
@@ -625,7 +677,115 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 </div>
 
 <!-- ════════════════════════════════════════════════════════
-     SCREEN 2: TEAM MEMBER PROFILE — CERT ASSIGNMENT
+     SCREEN 2: TEAM MEMBERS — SETTINGS LIST
+════════════════════════════════════════════════════════ -->
+<div id="screen-tmlist" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+      <span class="logo-text">Rocketlane</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Home</a>
+      <div class="nav-section-label">Account</div>
+      <a class="nav-item" href="#"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>Preferences</a>
+      <a class="nav-item active" href="#"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Team members</a>
+      <a class="nav-item" href="#"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>Skills matrix</a>
+      <a class="nav-item" href="#"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Groups</a>
+      <a class="nav-item" href="#"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Roles &amp; Placeholders</a>
+      <a class="nav-item" href="#"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Permissions</a>
+    </nav>
+  </aside>
+
+  <div class="main" style="overflow:hidden;display:flex;flex-direction:column;">
+    <div class="topbar">
+      <div class="breadcrumb"><span style="color:var(--text-3)">Settings</span><span class="bc-sep">›</span><span class="bc-curr">Team members</span></div>
+      <div class="topbar-right"><div class="avatar">VS</div></div>
+    </div>
+
+    <div class="content" style="flex:1;overflow-y:auto;">
+      <div class="page-header" style="margin-bottom:16px;">
+        <div>
+          <div class="page-title">Team members</div>
+        </div>
+      </div>
+
+      <!-- License stats -->
+      <div class="tm-stats">
+        <div class="tm-stat-cell">
+          <div class="tm-stat-label">Total licenses</div>
+          <div class="tm-stat-value">300</div>
+          <div class="tm-stat-sub">Including add-ons</div>
+        </div>
+        <div class="tm-stat-cell">
+          <div class="tm-stat-label">Available user licenses</div>
+          <div class="tm-stat-value">211</div>
+          <div class="tm-stat-sub">New licenses purchased only when exceeded</div>
+        </div>
+        <div class="tm-stat-cell">
+          <div class="tm-stat-right">
+            <div class="tm-stat-right-row"><span>Used by Acme</span><strong>46</strong></div>
+            <div class="tm-stat-right-row"><span>Used by Partners</span><strong>30</strong></div>
+            <div class="tm-stat-right-row"><span>Used by client partners</span><strong>13</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs + actions -->
+      <div class="tm-tabs">
+        <button class="tm-tab active">Active (433)</button>
+        <button class="tm-tab">Invited (87)</button>
+        <button class="tm-tab">Deactivated (80)</button>
+        <button class="tm-filter-btn" style="margin-left:8px;">Filter</button>
+        <div class="tm-tab-spacer"></div>
+        <button class="tm-invite-btn">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Invite members
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="tbl-wrap" style="margin-top:0;border-radius:0;border-top:none;border-left:none;border-right:none;">
+        <table class="tbl" id="tm-list-table">
+          <thead>
+            <tr>
+              <th>Team member</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Permission</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="tm-list-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Certs slide-over -->
+<div class="tm-co-overlay" id="tm-co-overlay">
+  <div class="tm-co-back" onclick="closeTmCertsPanel()"></div>
+  <div class="tm-co-panel">
+    <div class="tm-co-hdr">
+      <div>
+        <div class="tm-co-name" id="tm-co-name"></div>
+        <div class="tm-co-sub" id="tm-co-sub"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button class="btn btn-primary" style="font-size:12px;padding:5px 12px;" onclick="openAssignFromPanel()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add certificate
+        </button>
+        <button class="close-btn" onclick="closeTmCertsPanel()">×</button>
+      </div>
+    </div>
+    <div class="tm-co-body" id="tm-co-body"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCREEN 3: TEAM MEMBER PROFILE — CERT ASSIGNMENT
 ════════════════════════════════════════════════════════ -->
 <div id="screen-member" class="screen">
   <div class="rm-shell">
@@ -1061,7 +1221,132 @@ renderLibrary();
 
 
 /* ══════════════════════════════════════════════════════
-   SCREEN 2: TEAM MEMBER PROFILE
+   SCREEN 2: TEAM MEMBERS LIST
+══════════════════════════════════════════════════════ */
+
+const TM_ROWS = [
+  { id:'sarah',  name:'Sarah Chen',        email:'sarah@acme.com',     role:'Cloud Solutions Architect', roleColor:'#6366F1', perm:'Account Admin' },
+  { id:'jordan', name:'Jordan Patel',       email:'jordan@acme.com',    role:'Senior Engineer',           roleColor:'#D97706', perm:'Account Admin' },
+  { id:'marcus', name:'Marcus Rodriguez',   email:'marcus@acme.com',    role:'Implementation Consultant', roleColor:'#059669', perm:'Account Admin' },
+  { id:'maya',   name:'Maya Thompson',      email:'maya@acme.com',      role:'Account Executive',         roleColor:'#7C3AED', perm:'Standard' },
+  { id:'arun',   name:'Arun Kumar',         email:'arun@acme.com',      role:'Engineer',                  roleColor:'#DC2626', perm:'Account Admin' },
+  { id:'priya',  name:'Priya Sharma',       email:'priya@acme.com',     role:'Finance Team',              roleColor:'#0891B2', perm:'Account Admin' },
+  { id:'tom',    name:'Tom Nakamura',       email:'tom@acme.com',       role:'Consultant',                roleColor:'#9333EA', perm:'Standard' },
+];
+
+function renderTmList() {
+  document.getElementById('tm-list-tbody').innerHTML = TM_ROWS.map((r,i) => {
+    const initials = r.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const colors = ['#6366F1','#D97706','#059669','#7C3AED','#DC2626','#0891B2','#9333EA'];
+    const bg = colors[i % colors.length];
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:${bg};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${initials}</div>
+          <span style="font-weight:500;">${r.name}</span>
+        </div>
+      </td>
+      <td style="color:var(--text-3);font-size:12px;">${r.email}</td>
+      <td><span class="role-pill" style="background:${bg}22;color:${bg};">${r.role}</span></td>
+      <td style="font-size:12px;color:var(--text-2);">${r.perm}</td>
+      <td>
+        <div class="tm-menu-wrap" id="tmwrap-${r.id}">
+          <button class="tm-kdot" onclick="toggleTmMenu('${r.id}',event)">⋮</button>
+          <div class="tm-menu" id="tmmenu-${r.id}">
+            <button class="tm-mi" onclick="closeTmMenus()">View Details</button>
+            <button class="tm-mi" onclick="closeTmMenus()">Manage cost rate</button>
+            <button class="tm-mi cert-action" onclick="openTmCertsPanel('${r.id}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:5px;"><circle cx="12" cy="8" r="6"/><path d="M9.09 14.14L8 22l4-2.5L16 22l-1.09-7.86"/></svg>Manage certificates
+            </button>
+            <hr style="border:none;border-top:1px solid var(--border);margin:3px 0;">
+            <button class="tm-mi danger" onclick="closeTmMenus()">Deactivate</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleTmMenu(id, e) {
+  e.stopPropagation();
+  const isOpen = document.getElementById('tmmenu-'+id).classList.contains('open');
+  closeTmMenus();
+  if (!isOpen) document.getElementById('tmmenu-'+id).classList.add('open');
+}
+function closeTmMenus() {
+  document.querySelectorAll('.tm-menu.open').forEach(m => m.classList.remove('open'));
+}
+document.addEventListener('click', closeTmMenus);
+
+let _tmPanelMemberId = null;
+
+function openTmCertsPanel(memberId) {
+  closeTmMenus();
+  _tmPanelMemberId = memberId;
+  const row = TM_ROWS.find(r => r.id === memberId);
+  document.getElementById('tm-co-name').textContent = row ? row.name : memberId;
+  document.getElementById('tm-co-sub').textContent = row ? row.role : '';
+  renderTmCertCards(memberId);
+  document.getElementById('tm-co-overlay').classList.add('open');
+}
+
+function closeTmCertsPanel() {
+  document.getElementById('tm-co-overlay').classList.remove('open');
+  _tmPanelMemberId = null;
+}
+
+function openAssignFromPanel() {
+  if (!_tmPanelMemberId) return;
+  const member = MEMBERS.find(m => m.id === _tmPanelMemberId);
+  if (!member) return;
+  closeTmCertsPanel();
+  openAssignModal(_tmPanelMemberId);
+}
+
+function renderTmCertCards(memberId) {
+  const body = document.getElementById('tm-co-body');
+  const member = MEMBERS.find(m => m.id === memberId);
+  const certs = member ? member.certs : [];
+  if (!certs.length) {
+    body.innerHTML = `<div class="tm-co-empty">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 10px;"><circle cx="12" cy="8" r="6"/><path d="M9.09 14.14L8 22l4-2.5L16 22l-1.09-7.86"/></svg>
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px;">No certificates yet</div>
+      <div style="font-size:12px;">Add a certificate from the library to track qualifications for this member.</div>
+    </div>`;
+    return;
+  }
+  body.innerHTML = certs.map(c => {
+    const st = certStatus(c.expiryDate);
+    const badgeCls = st.cls === 'badge-valid' ? 'background:#D1FAE5;color:#065F46;' :
+                     st.cls === 'badge-expiring' ? 'background:#FEF3C7;color:#92400E;' : 'background:#FEE2E2;color:#991B1B;';
+    const issueFmt = c.issueDate ? new Date(c.issueDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    const expiryFmt = c.expiryDate ? new Date(c.expiryDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'Does not expire';
+    return `<div class="tm-cert-card">
+      <div class="tm-cert-card-top">
+        <div>
+          <div class="tm-cert-name">${c.name}</div>
+          <div class="tm-cert-vendor">${c.vendor}</div>
+        </div>
+        <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;flex-shrink:0;${badgeCls}">${st.icon} ${st.label}</span>
+      </div>
+      <div class="tm-cert-dates">
+        <div class="tm-cert-date-item">
+          <span class="tm-cert-date-lbl">Issued</span>
+          <span class="tm-cert-date-val">${issueFmt}</span>
+        </div>
+        <div class="tm-cert-date-item">
+          <span class="tm-cert-date-lbl">Expires</span>
+          <span class="tm-cert-date-val">${expiryFmt}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+renderTmList();
+
+/* ══════════════════════════════════════════════════════
+   SCREEN 3: TEAM MEMBER PROFILE
 ══════════════════════════════════════════════════════ */
 const MEMBERS = [
   {
