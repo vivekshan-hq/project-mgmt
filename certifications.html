@@ -402,6 +402,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .sk-inline-sel{font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text-1);cursor:pointer;}
 .sk-inline-num{font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text-1);width:46px;text-align:center;}
 .sk-inline-lbl{font-size:11px;color:var(--text-3);}
+.sk-add-filter-btn{font-size:11px;color:var(--brand);background:none;border:none;cursor:pointer;padding:0;font-weight:500;}
+.sk-add-filter-btn:hover{text-decoration:underline;}
+.sk-rm-filter-btn{font-size:13px;color:var(--text-4);background:none;border:none;cursor:pointer;padding:0 2px;line-height:1;}
+.sk-rm-filter-btn:hover{color:var(--danger);}
 .sk-row-expanded{align-items:flex-start!important;}
 .cert-meta-header svg{color:var(--cert);flex-shrink:0;}
 .cert-meta-header-text{font-size:12px;font-weight:600;color:var(--cert);}
@@ -1822,14 +1826,21 @@ function buildCertConds(id) {
   if (s.validity === 'Permanent') {
     return '<div class="sk-inline-conds" onclick="event.stopPropagation()" style="color:var(--success);font-size:11px;">&#x221E; Does not expire &#8212; no date check needed</div>';
   }
-  var anchorSel = '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'anchor\',this.value)">'
-    + '<option value="none"'        + (s.anchor === 'none'        ? ' selected' : '') + '>No date filter</option>'
-    + '<option value="budget-end"'  + (s.anchor === 'budget-end'  ? ' selected' : '') + '>Expires after budget end</option>'
-    + '<option value="project-end"' + (s.anchor === 'project-end' ? ' selected' : '') + '>Expires after project end</option>'
-    + '<option value="alloc-end"'   + (s.anchor === 'alloc-end'   ? ' selected' : '') + '>Expires after allocation end</option>'
-    + '<option value="specific"'    + (s.anchor === 'specific'    ? ' selected' : '') + '>Expires after specific date&#x2026;</option>'
+  if (s.anchor === 'none') {
+    return '<div class="sk-inline-conds" onclick="event.stopPropagation()">'
+      + '<button class="sk-add-filter-btn" onclick="setSkCond(\'' + id + '\',\'anchor\',\'budget-end\')">'
+      + '+ Add expiry filter</button>'
+      + '</div>';
+  }
+  var anchorSel = '<span class="sk-inline-lbl">Expires after</span>'
+    + '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'anchor\',this.value)">'
+    + '<option value="budget-end"'  + (s.anchor === 'budget-end'  ? ' selected' : '') + '>Budget end date</option>'
+    + '<option value="project-end"' + (s.anchor === 'project-end' ? ' selected' : '') + '>Project end date</option>'
+    + '<option value="alloc-end"'   + (s.anchor === 'alloc-end'   ? ' selected' : '') + '>Allocation end date</option>'
+    + '<option value="specific"'    + (s.anchor === 'specific'    ? ' selected' : '') + '>Specific date&#x2026;</option>'
     + '</select>'
-    + (s.anchor === 'specific' ? '<input type="date" class="sk-inline-sel" value="' + (s.specificDate || '') + '" onchange="setSkCond(\'' + id + '\',\'specificDate\',this.value)">' : '');
+    + (s.anchor === 'specific' ? '<input type="date" class="sk-inline-sel" value="' + (s.specificDate || '') + '" onchange="setSkCond(\'' + id + '\',\'specificDate\',this.value)">' : '')
+    + '<button class="sk-rm-filter-btn" onclick="setSkCond(\'' + id + '\',\'anchor\',\'none\')" title="Remove filter">&#x00D7;</button>';
   return '<div class="sk-inline-conds" onclick="event.stopPropagation()">' + anchorSel + '</div>';
 }
 
