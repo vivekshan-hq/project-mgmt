@@ -1844,10 +1844,22 @@ function toggleSk(id) {
     delete skSelected[id];
   } else {
     const item = Object.values(SK_ITEMS).flat().find(i => i.id === id);
-    if (item) skSelected[id] = { ...item, anchor: 'budget-end' };
+    if (item) skSelected[id] = {
+      ...item,
+      condition: 'expires-after',   // 'expires-after' | 'valid-for'
+      anchor: 'budget-end',          // reference date for expires-after
+      specificDate: '',
+      duration: 1,
+      unit: 'years',
+      beforeAnchor: 'alloc-start',   // reference date for valid-for
+    };
   }
   renderSkSkills(activeSkGroup);
   renderSkSelected();
+}
+
+function setSkCond(id, field, val) {
+  if (skSelected[id]) { skSelected[id][field] = val; renderSkSelected(); }
 }
 
 function renderSkSelected() {
@@ -1873,20 +1885,47 @@ function renderSkSelected() {
         </div>
         ${isCert && !isPermanent ? `
           <div class="sk-sel-ctrl">
-            <div class="sk-sel-ctrl-label">Valid through</div>
-            <select class="sk-sel-select" onchange="skSelected['${id}'].anchor=this.value;renderSkSelected()">
-              <option value="budget-end" ${item.anchor==='budget-end'?'selected':''}>Budget end date (recommended)</option>
-              <option value="project-end" ${item.anchor==='project-end'?'selected':''}>Project end date</option>
-              <option value="project-start" ${item.anchor==='project-start'?'selected':''}>Project start date</option>
-              <option value="manual" ${item.anchor==='manual'?'selected':''}>Manual date…</option>
+            <div class="sk-sel-ctrl-label">Condition</div>
+            <select class="sk-sel-select" onchange="setSkCond('${id}','condition',this.value)">
+              <option value="expires-after" ${item.condition!=='valid-for'?'selected':''}>Expires after</option>
+              <option value="valid-for" ${item.condition==='valid-for'?'selected':''}>Valid for at least</option>
             </select>
-            <div class="sk-sel-hint">Candidates whose certificate expires before this date will be excluded. A "never expires" certificate always passes.</div>
-            ${item.anchor==='budget-end'?`
-            <div class="sk-sel-anchor-hint">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Anchor resolves to Sep 30, 2026 — the end of the selected Implementation budget.
-            </div>` : ''}
           </div>
+          ${item.condition==='valid-for' ? `
+            <div class="sk-sel-ctrl">
+              <div class="sk-sel-ctrl-label">Duration</div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="number" min="1" value="${item.duration||1}" class="sk-sel-select" style="width:54px;text-align:center;" onchange="setSkCond('${id}','duration',+this.value)">
+                <select class="sk-sel-select" style="flex:1;" onchange="setSkCond('${id}','unit',this.value)">
+                  <option value="years" ${item.unit==='years'?'selected':''}>year(s)</option>
+                  <option value="months" ${item.unit==='months'?'selected':''}>month(s)</option>
+                </select>
+              </div>
+              <div class="sk-sel-ctrl-label" style="margin-top:8px;">Before</div>
+              <select class="sk-sel-select" onchange="setSkCond('${id}','beforeAnchor',this.value)">
+                <option value="alloc-start"  ${item.beforeAnchor==='alloc-start'?'selected':''}>Allocation start date</option>
+                <option value="project-start"${item.beforeAnchor==='project-start'?'selected':''}>Project start date</option>
+                <option value="budget-start" ${item.beforeAnchor==='budget-start'?'selected':''}>Budget start date</option>
+              </select>
+              <div class="sk-sel-hint">TM must hold this certificate at least ${item.duration||1} ${item.unit||'years'} before the chosen start date.</div>
+              <div class="sk-sel-anchor-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Anchor resolves to Jul 7, 2026 — the allocation start date.</div>
+            </div>
+          ` : `
+            <div class="sk-sel-ctrl">
+              <div class="sk-sel-ctrl-label">Must remain valid through</div>
+              <select class="sk-sel-select" onchange="setSkCond('${id}','anchor',this.value)">
+                <option value="budget-end"  ${item.anchor==='budget-end'?'selected':''}>Budget end date</option>
+                <option value="project-end" ${item.anchor==='project-end'?'selected':''}>Project end date</option>
+                <option value="alloc-end"   ${item.anchor==='alloc-end'?'selected':''}>Allocation end date</option>
+                <option value="specific"    ${item.anchor==='specific'?'selected':''}>Specific date…</option>
+              </select>
+              ${item.anchor==='specific' ? `<input type="date" class="sk-sel-select" style="margin-top:5px;" value="${item.specificDate||''}" onchange="setSkCond('${id}','specificDate',this.value)">` : ''}
+              <div class="sk-sel-hint">Candidates whose certificate expires before this date will be excluded.</div>
+              ${item.anchor==='budget-end'?`<div class="sk-sel-anchor-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Anchor resolves to Sep 30, 2026 — the end of the selected Implementation budget.</div>`:''}
+              ${item.anchor==='project-end'?`<div class="sk-sel-anchor-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Anchor resolves to Dec 31, 2026 — the project end date.</div>`:''}
+              ${item.anchor==='alloc-end'?`<div class="sk-sel-anchor-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Anchor resolves to Sep 30, 2026 — the allocation end date.</div>`:''}
+            </div>
+          `}
         ` : isCert && isPermanent ? `
           <div class="sk-sel-hint" style="margin-top:4px;padding:4px 6px;background:var(--success-bg);border-radius:3px;color:var(--success);font-size:10px;border:1px solid var(--success-border);">∞ This certificate never expires — no date check needed.</div>
         ` : `
@@ -1925,12 +1964,17 @@ function renderAppliedChips() {
   container.innerHTML = ids.map(id => {
     const item = applied[id];
     const isCert = item.type === 'cert';
-    const anchorLabel = { 'budget-end':'Budget end', 'project-end':'Project end', 'project-start':'Project start', 'manual':'Custom date' }[item.anchor] || '';
+    const anchorLabels = { 'budget-end':'budget end', 'project-end':'project end', 'alloc-end':'alloc end', 'specific': item.specificDate||'date', 'alloc-start':'alloc start', 'project-start':'project start', 'budget-start':'budget start' };
+    const condLabel = isCert && item.validity !== 'Permanent'
+      ? (item.condition === 'valid-for'
+          ? `valid ≥${item.duration||1}${item.unit==='months'?'mo':'yr'} before ${anchorLabels[item.beforeAnchor]||''}`
+          : `expires after ${anchorLabels[item.anchor]||''}`)
+      : '';
     return `
       <span class="ap-chip ${isCert?'ap-chip-cert':''}">
         ${isCert?`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`:''}
         ${item.label}
-        ${isCert && item.validity !== 'Permanent' && anchorLabel ? `<span class="ap-chip-anchor">→ ${anchorLabel}</span>` : ''}
+        ${condLabel ? `<span class="ap-chip-anchor">· ${condLabel}</span>` : ''}
         <button class="ap-chip-rm" onclick="removeApplied('${id}')">×</button>
       </span>
     `;
