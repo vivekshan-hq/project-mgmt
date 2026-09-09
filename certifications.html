@@ -1825,7 +1825,7 @@ function renderSkSkills(groupId) {
       const sel = !!skSelected[item.id];
       const typeCls = { level:'sk-type-level', cert:'sk-type-cert', multi:'sk-type-multi', text:'sk-type-cert' }[item.type] || '';
       return `
-        <div class="sk-row ${sel?'sel':''}" onclick="toggleSk('${item.id}', ${JSON.stringify(item).replace(/'/g,'\\x27')})">
+        <div class="sk-row ${sel?'sel':''}" onclick="toggleSk('${item.id}')"
           <div class="sk-cb"></div>
           <div class="sk-name-col">
             <span class="sk-name">${item.label}</span>
@@ -1839,11 +1839,12 @@ function renderSkSkills(groupId) {
   `;
 }
 
-function toggleSk(id, item) {
+function toggleSk(id) {
   if (skSelected[id]) {
     delete skSelected[id];
   } else {
-    skSelected[id] = { ...item, anchor: 'budget-end' };
+    const item = Object.values(SK_ITEMS).flat().find(i => i.id === id);
+    if (item) skSelected[id] = { ...item, anchor: 'budget-end' };
   }
   renderSkSkills(activeSkGroup);
   renderSkSelected();
