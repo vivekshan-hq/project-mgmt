@@ -767,20 +767,62 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 <div class="tm-co-overlay" id="tm-co-overlay">
   <div class="tm-co-back" onclick="closeTmCertsPanel()"></div>
   <div class="tm-co-panel">
-    <div class="tm-co-hdr">
+
+    <!-- Header: list mode -->
+    <div class="tm-co-hdr" id="tm-co-hdr-list">
       <div>
         <div class="tm-co-name" id="tm-co-name"></div>
         <div class="tm-co-sub" id="tm-co-sub"></div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <button class="btn btn-primary" style="font-size:12px;padding:5px 12px;" onclick="openAssignFromPanel()">
+        <button class="btn btn-primary" style="font-size:12px;padding:5px 12px;" onclick="showAddCertForm()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
           Add certificate
         </button>
         <button class="close-btn" onclick="closeTmCertsPanel()">×</button>
       </div>
     </div>
+
+    <!-- Header: add form mode -->
+    <div class="tm-co-hdr" id="tm-co-hdr-add" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn-icon" onclick="showCertsList()" title="Back" style="color:var(--text-3);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="tm-co-name">Add certificate</div>
+      </div>
+      <button class="close-btn" onclick="closeTmCertsPanel()">×</button>
+    </div>
+
+    <!-- Certs list -->
     <div class="tm-co-body" id="tm-co-body"></div>
+
+    <!-- Add form (hidden until Add certificate clicked) -->
+    <div id="tm-co-form" style="display:none;flex:1;overflow-y:auto;padding:20px;flex-direction:column;gap:0;">
+      <div class="form-row">
+        <label class="form-label">Certificate <span class="req">*</span></label>
+        <select class="form-input" id="panel-cert-select" onchange="onPanelCertChange()">
+          <option value="">Select a certificate…</option>
+        </select>
+      </div>
+      <div class="form-row" id="panel-issue-row" style="display:none;">
+        <label class="form-label">Issue date <span style="font-size:10px;font-weight:400;color:var(--text-4);margin-left:4px;">Optional</span></label>
+        <input type="date" class="form-input" id="panel-issue-date">
+      </div>
+      <div class="form-row" id="panel-expiry-row" style="display:none;">
+        <label class="form-label">Expiry date <span class="req">*</span></label>
+        <input type="date" class="form-input" id="panel-expiry-date">
+        <div class="form-hint">Required — this certificate expires.</div>
+      </div>
+      <div id="panel-forever-note" style="display:none;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text-3);margin-bottom:14px;">
+        This certificate does not expire — no expiry date needed.
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="savePanelCert()">Save</button>
+        <button class="btn btn-ghost" onclick="showCertsList()">Cancel</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1295,12 +1337,70 @@ function closeTmCertsPanel() {
   _tmPanelMemberId = null;
 }
 
-function openAssignFromPanel() {
-  if (!_tmPanelMemberId) return;
+function showAddCertForm() {
+  // Populate cert dropdown from library
+  const sel = document.getElementById('panel-cert-select');
+  const member = MEMBERS.find(m => m.id === _tmPanelMemberId);
+  const existingIds = member ? member.certs.map(c => c.certId) : [];
+  sel.innerHTML = '<option value="">Select a certificate…</option>' +
+    CERT_LIBRARY.map(c => `<option value="${c.id}"${existingIds.includes(c.id) ? ' disabled' : ''}>${c.name}${existingIds.includes(c.id) ? ' (already added)' : ''}</option>`).join('');
+  sel.value = '';
+  document.getElementById('panel-issue-date').value = '';
+  document.getElementById('panel-expiry-date').value = '';
+  document.getElementById('panel-expiry-date').style.borderColor = '';
+  document.getElementById('panel-issue-row').style.display = 'none';
+  document.getElementById('panel-expiry-row').style.display = 'none';
+  document.getElementById('panel-forever-note').style.display = 'none';
+  // Switch to form mode
+  document.getElementById('tm-co-hdr-list').style.display = 'none';
+  document.getElementById('tm-co-hdr-add').style.display = 'flex';
+  document.getElementById('tm-co-body').style.display = 'none';
+  document.getElementById('tm-co-form').style.display = 'flex';
+}
+
+function showCertsList() {
+  document.getElementById('tm-co-hdr-list').style.display = 'flex';
+  document.getElementById('tm-co-hdr-add').style.display = 'none';
+  document.getElementById('tm-co-body').style.display = 'flex';
+  document.getElementById('tm-co-form').style.display = 'none';
+}
+
+function onPanelCertChange() {
+  const certId = document.getElementById('panel-cert-select').value;
+  if (!certId) {
+    document.getElementById('panel-issue-row').style.display = 'none';
+    document.getElementById('panel-expiry-row').style.display = 'none';
+    document.getElementById('panel-forever-note').style.display = 'none';
+    return;
+  }
+  const lib = CERT_LIBRARY.find(c => c.id === certId);
+  document.getElementById('panel-issue-row').style.display = '';
+  document.getElementById('panel-expiry-row').style.display = lib && lib.expires ? '' : 'none';
+  document.getElementById('panel-forever-note').style.display = lib && !lib.expires ? '' : 'none';
+}
+
+function savePanelCert() {
+  const certId = document.getElementById('panel-cert-select').value;
+  if (!certId) { document.getElementById('panel-cert-select').focus(); return; }
+  const lib = CERT_LIBRARY.find(c => c.id === certId);
+  const expiryVal = document.getElementById('panel-expiry-date').value;
+  if (lib && lib.expires && !expiryVal) {
+    document.getElementById('panel-expiry-date').style.borderColor = 'var(--danger)';
+    document.getElementById('panel-expiry-date').focus();
+    return;
+  }
   const member = MEMBERS.find(m => m.id === _tmPanelMemberId);
   if (!member) return;
-  closeTmCertsPanel();
-  openAssignModal(_tmPanelMemberId);
+  member.certs.push({
+    certId,
+    name: lib ? lib.name : certId,
+    vendor: lib ? lib.vendor : '',
+    issueDate: document.getElementById('panel-issue-date').value || null,
+    expiryDate: expiryVal || null,
+    url: ''
+  });
+  renderTmCertCards(_tmPanelMemberId);
+  showCertsList();
 }
 
 function renderTmCertCards(memberId) {
@@ -1371,6 +1471,28 @@ const MEMBERS = [
       { certId:'pmp', name:'Project Management Professional (PMP)', vendor:'Project Management Institute', issueDate:'2023-01-10', expiryDate:'2026-01-10', url:'https://pmi.org/verify/PMP-N-98765' },
       { certId:'sf-admin', name:'Salesforce Certified Administrator', vendor:'Salesforce', issueDate:'2022-06-01', expiryDate:'2024-06-01', url:'' },
     ]
+  },
+  {
+    id:'jordan', name:'Jordan Patel', role:'Senior Engineer', color:'#D97706',
+    skills:[{name:'Python',level:'Advanced'},{name:'Kubernetes',level:'Intermediate'}],
+    certs:[
+      { certId:'ccna', name:'Cisco CCNA', vendor:'Cisco', issueDate:'2025-04-10', expiryDate:'2028-04-10', url:'' },
+    ]
+  },
+  {
+    id:'maya', name:'Maya Thompson', role:'Account Executive', color:'#7C3AED',
+    skills:[{name:'Salesforce',level:'Advanced'}],
+    certs:[]
+  },
+  {
+    id:'arun', name:'Arun Kumar', role:'Engineer', color:'#DC2626',
+    skills:[{name:'Java',level:'Advanced'},{name:'Spring Boot',level:'Intermediate'}],
+    certs:[]
+  },
+  {
+    id:'tom', name:'Tom Nakamura', role:'Consultant', color:'#9333EA',
+    skills:[{name:'SQL',level:'Intermediate'}],
+    certs:[]
   },
   {
     id:'james', name:'James Okonkwo', role:'Security Engineer', color:'#8B5CF6',
