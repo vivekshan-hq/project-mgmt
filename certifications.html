@@ -1822,33 +1822,15 @@ function buildCertConds(id) {
   if (s.validity === 'Permanent') {
     return '<div class="sk-inline-conds" onclick="event.stopPropagation()" style="color:var(--success);font-size:11px;">&#x221E; Does not expire &#8212; no date check needed</div>';
   }
-  var condSel = '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'condition\',this.value)">'
-    + '<option value="expires-after"' + (s.condition !== 'valid-for' ? ' selected' : '') + '>Expires after</option>'
-    + '<option value="valid-for"' + (s.condition === 'valid-for' ? ' selected' : '') + '>Valid for at least</option>'
-    + '</select>';
-  var valueSel = '';
-  if (s.condition === 'valid-for') {
-    valueSel = '<input type="number" min="1" value="' + (s.duration || 1) + '" class="sk-inline-num" onchange="setSkCond(\'' + id + '\',\'duration\',+this.value)">'
-      + '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'unit\',this.value)">'
-      + '<option value="years"'  + (s.unit === 'years'  ? ' selected' : '') + '>year(s)</option>'
-      + '<option value="months"' + (s.unit === 'months' ? ' selected' : '') + '>month(s)</option>'
-      + '</select>'
-      + '<span class="sk-inline-lbl">before</span>'
-      + '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'beforeAnchor\',this.value)">'
-      + '<option value="alloc-start"'   + (s.beforeAnchor === 'alloc-start'   ? ' selected' : '') + '>Allocation start</option>'
-      + '<option value="project-start"' + (s.beforeAnchor === 'project-start' ? ' selected' : '') + '>Project start</option>'
-      + '<option value="budget-start"'  + (s.beforeAnchor === 'budget-start'  ? ' selected' : '') + '>Budget start</option>'
-      + '</select>';
-  } else {
-    valueSel = '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'anchor\',this.value)">'
-      + '<option value="budget-end"'  + (s.anchor === 'budget-end'  ? ' selected' : '') + '>Budget end date</option>'
-      + '<option value="project-end"' + (s.anchor === 'project-end' ? ' selected' : '') + '>Project end date</option>'
-      + '<option value="alloc-end"'   + (s.anchor === 'alloc-end'   ? ' selected' : '') + '>Allocation end date</option>'
-      + '<option value="specific"'    + (s.anchor === 'specific'    ? ' selected' : '') + '>Specific date&#x2026;</option>'
-      + '</select>'
-      + (s.anchor === 'specific' ? '<input type="date" class="sk-inline-sel" value="' + (s.specificDate || '') + '" onchange="setSkCond(\'' + id + '\',\'specificDate\',this.value)">' : '');
-  }
-  return '<div class="sk-inline-conds" onclick="event.stopPropagation()">' + condSel + valueSel + '</div>';
+  var anchorSel = '<span class="sk-inline-lbl">Expires after</span>'
+    + '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'anchor\',this.value)">'
+    + '<option value="budget-end"'  + (s.anchor === 'budget-end'  ? ' selected' : '') + '>Budget end date</option>'
+    + '<option value="project-end"' + (s.anchor === 'project-end' ? ' selected' : '') + '>Project end date</option>'
+    + '<option value="alloc-end"'   + (s.anchor === 'alloc-end'   ? ' selected' : '') + '>Allocation end date</option>'
+    + '<option value="specific"'    + (s.anchor === 'specific'    ? ' selected' : '') + '>Specific date&#x2026;</option>'
+    + '</select>'
+    + (s.anchor === 'specific' ? '<input type="date" class="sk-inline-sel" value="' + (s.specificDate || '') + '" onchange="setSkCond(\'' + id + '\',\'specificDate\',this.value)">' : '');
+  return '<div class="sk-inline-conds" onclick="event.stopPropagation()">' + anchorSel + '</div>';
 }
 
 function renderSkSkills(groupId) {
@@ -1884,12 +1866,8 @@ function toggleSk(id) {
     const item = Object.values(SK_ITEMS).flat().find(i => i.id === id);
     if (item) skSelected[id] = {
       ...item,
-      condition: 'expires-after',   // 'expires-after' | 'valid-for'
-      anchor: 'budget-end',          // reference date for expires-after
+      anchor: 'budget-end',
       specificDate: '',
-      duration: 1,
-      unit: 'years',
-      beforeAnchor: 'alloc-start',   // reference date for valid-for
     };
   }
   renderSkSkills(activeSkGroup);
@@ -1958,9 +1936,7 @@ function renderAppliedChips() {
     const isCert = item.type === 'cert';
     const anchorLabels = { 'budget-end':'budget end', 'project-end':'project end', 'alloc-end':'alloc end', 'specific': item.specificDate||'date', 'alloc-start':'alloc start', 'project-start':'project start', 'budget-start':'budget start' };
     const condLabel = isCert && item.validity !== 'Permanent'
-      ? (item.condition === 'valid-for'
-          ? `valid ≥${item.duration||1}${item.unit==='months'?'mo':'yr'} before ${anchorLabels[item.beforeAnchor]||''}`
-          : `expires after ${anchorLabels[item.anchor]||''}`)
+      ? 'expires after ' + (anchorLabels[item.anchor] || '')
       : '';
     return `
       <span class="ap-chip ${isCert?'ap-chip-cert':''}">
