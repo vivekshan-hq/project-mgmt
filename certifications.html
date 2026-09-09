@@ -1825,7 +1825,7 @@ function renderSkSkills(groupId) {
       const sel = !!skSelected[item.id];
       const typeCls = { level:'sk-type-level', cert:'sk-type-cert', multi:'sk-type-multi', text:'sk-type-cert' }[item.type] || '';
       return `
-        <div class="sk-row ${sel?'sel':''}" onclick="toggleSk('${item.id}')"
+        <div class="sk-row ${sel?'sel':''}" onclick="toggleSk('${item.id}')">
           <div class="sk-cb"></div>
           <div class="sk-name-col">
             <span class="sk-name">${item.label}</span>
