@@ -1822,12 +1822,12 @@ function buildCertConds(id) {
   if (s.validity === 'Permanent') {
     return '<div class="sk-inline-conds" onclick="event.stopPropagation()" style="color:var(--success);font-size:11px;">&#x221E; Does not expire &#8212; no date check needed</div>';
   }
-  var anchorSel = '<span class="sk-inline-lbl">Expires after</span>'
-    + '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'anchor\',this.value)">'
-    + '<option value="budget-end"'  + (s.anchor === 'budget-end'  ? ' selected' : '') + '>Budget end date</option>'
-    + '<option value="project-end"' + (s.anchor === 'project-end' ? ' selected' : '') + '>Project end date</option>'
-    + '<option value="alloc-end"'   + (s.anchor === 'alloc-end'   ? ' selected' : '') + '>Allocation end date</option>'
-    + '<option value="specific"'    + (s.anchor === 'specific'    ? ' selected' : '') + '>Specific date&#x2026;</option>'
+  var anchorSel = '<select class="sk-inline-sel" onchange="setSkCond(\'' + id + '\',\'anchor\',this.value)">'
+    + '<option value="none"'        + (s.anchor === 'none'        ? ' selected' : '') + '>No date filter</option>'
+    + '<option value="budget-end"'  + (s.anchor === 'budget-end'  ? ' selected' : '') + '>Expires after budget end</option>'
+    + '<option value="project-end"' + (s.anchor === 'project-end' ? ' selected' : '') + '>Expires after project end</option>'
+    + '<option value="alloc-end"'   + (s.anchor === 'alloc-end'   ? ' selected' : '') + '>Expires after allocation end</option>'
+    + '<option value="specific"'    + (s.anchor === 'specific'    ? ' selected' : '') + '>Expires after specific date&#x2026;</option>'
     + '</select>'
     + (s.anchor === 'specific' ? '<input type="date" class="sk-inline-sel" value="' + (s.specificDate || '') + '" onchange="setSkCond(\'' + id + '\',\'specificDate\',this.value)">' : '');
   return '<div class="sk-inline-conds" onclick="event.stopPropagation()">' + anchorSel + '</div>';
@@ -1866,7 +1866,7 @@ function toggleSk(id) {
     const item = Object.values(SK_ITEMS).flat().find(i => i.id === id);
     if (item) skSelected[id] = {
       ...item,
-      anchor: 'budget-end',
+      anchor: 'none',
       specificDate: '',
     };
   }
@@ -1935,7 +1935,7 @@ function renderAppliedChips() {
     const item = applied[id];
     const isCert = item.type === 'cert';
     const anchorLabels = { 'budget-end':'budget end', 'project-end':'project end', 'alloc-end':'alloc end', 'specific': item.specificDate||'date', 'alloc-start':'alloc start', 'project-start':'project start', 'budget-start':'budget start' };
-    const condLabel = isCert && item.validity !== 'Permanent'
+    const condLabel = isCert && item.anchor && item.anchor !== 'none'
       ? 'expires after ' + (anchorLabels[item.anchor] || '')
       : '';
     return `
