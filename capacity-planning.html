@@ -794,10 +794,10 @@ function renderRoleChart() {
     ];
   } else {
     barDs = [
-      { label:'Unresolved Resource Request',  data:unresolvedReq,   backgroundColor:'#d02670', stack:'alloc', order:2 },
-      { label:'Unassigned Allocation',        data:unassignedHard,  backgroundColor:'#f59e0b', stack:'alloc', order:2 },
+      { label:'Unresolved Resource Request',  data:unresolvedReq,   backgroundColor:'#d02670', stack:'alloc', order:2, barPercentage:0.4, categoryPercentage:0.6 },
+      { label:'Unassigned Allocation',        data:unassignedHard,  backgroundColor:'#f59e0b', stack:'alloc', order:2, barPercentage:0.4, categoryPercentage:0.6 },
       { label:'Assigned Allocation',          data:assignedHard,    backgroundColor:'#0f62fe', stack:'alloc', order:2,
-        borderWidth:{bottom:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false },
+        borderWidth:{bottom:2}, borderColor:'rgba(255,255,255,0.9)', borderSkipped:false, barPercentage:0.4, categoryPercentage:0.6 },
     ];
   }
 
