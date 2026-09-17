@@ -467,7 +467,7 @@ function rTotalCap(r)          { return r.capTeamMembers.map((_,i) => r.capTeamM
 
 const rsOpen = {};
 function getRsState(id) {
-  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, assigned:true, unassigned:true, unresolved:true, cap:true };
+  if (!rsOpen[id]) rsOpen[id] = { role:false, alloc:true, assigned:false, unassigned:false, unresolved:false, cap:true };
   return rsOpen[id];
 }
 
@@ -519,11 +519,11 @@ function renderRS() {
       const showP = settings.showProjects;
 
       // Team Member Allocation row
-      html += `<tr class="row-demand-child cs-i2" ${showP?`onclick="toggleRole('${r.id}','assigned')" style="cursor:pointer;"`:''}>
-        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.assigned?'▾':'▸'}</button> &nbsp;`:''}Team Member Allocation</td>
+      html += `<tr class="row-demand-child cs-i2" onclick="toggleRole('${r.id}','assigned')" style="cursor:pointer;">
+        <td style="padding-left:44px;"><button class="collapse-btn">${s.assigned?'▾':'▸'}</button> &nbsp;Team Member Allocation</td>
         ${assigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
-      if (showP && s.assigned) {
+      if (s.assigned) {
         projs.assigned.forEach(p => {
           html += `<tr class="proj-row">
             <td>
@@ -538,11 +538,11 @@ function renderRS() {
       }
 
       // Placeholder Allocation row
-      html += `<tr class="row-forecast cs-i2" ${showP?`onclick="toggleRole('${r.id}','unassigned')" style="cursor:pointer;"`:''}>
-        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> &nbsp;`:''}Placeholder Allocation</td>
+      html += `<tr class="row-forecast cs-i2" onclick="toggleRole('${r.id}','unassigned')" style="cursor:pointer;">
+        <td style="padding-left:44px;"><button class="collapse-btn">${s.unassigned?'▾':'▸'}</button> &nbsp;Placeholder Allocation</td>
         ${unassigned.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
-      if (showP && s.unassigned) {
+      if (s.unassigned) {
         projs.unassigned.forEach(p => {
           html += `<tr class="proj-row">
             <td>
@@ -557,11 +557,11 @@ function renderRS() {
       }
 
       // Unresolved Resource Request row
-      html += `<tr class="row-unresolved cs-i2" ${showP?`onclick="toggleRole('${r.id}','unresolved')" style="cursor:pointer;"`:''}>
-        <td style="padding-left:44px;">${showP?`<button class="collapse-btn">${s.unresolved?'▾':'▸'}</button> &nbsp;`:''}Unresolved Resource Request</td>
+      html += `<tr class="row-unresolved cs-i2" onclick="toggleRole('${r.id}','unresolved')" style="cursor:pointer;">
+        <td style="padding-left:44px;"><button class="collapse-btn">${s.unresolved?'▾':'▸'}</button> &nbsp;Unresolved Resource Request</td>
         ${unresolved.map(v=>`<td>${fmt(v)}</td>`).join('')}
       </tr>`;
-      if (showP && s.unresolved) {
+      if (s.unresolved) {
         (projs.unresolved || []).forEach(p => {
           html += `<tr class="proj-row">
             <td><div style="display:flex;align-items:center;gap:8px;">
@@ -819,7 +819,6 @@ function renderRoleChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      datasets: { bar: { barPercentage: 0.45, categoryPercentage: 0.65 } },
       interaction: { mode:'index', intersect:false },
       onHover: function(event, elements, chart) {
         if (!event.native) return;
@@ -912,6 +911,13 @@ function toggleSetting(key) {
     document.querySelector('.chart-area').style.display = settings.hideGraph ? 'none' : '';
   }
   if (key === 'showProjects') {
+    const expand = settings.showProjects;
+    ROLES.forEach(r => {
+      const s = getRsState(r.id);
+      s.assigned = expand;
+      s.unassigned = expand;
+      s.unresolved = expand;
+    });
     renderRS();
   }
 }
