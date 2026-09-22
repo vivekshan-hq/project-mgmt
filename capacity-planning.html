@@ -526,17 +526,25 @@ function renderRS() {
     const hardDemand = r.allocAssignedHard.map((_,i) => r.allocAssignedHard[i] + r.allocUnassignedHard[i] + unresolved[i]);
     const pcts       = hardDemand.map((a,i) => Math.round(a / cap[i] * 100));
 
-    // Role header row — always shows utilisation %
+    // Role header row — hours: % utilisation · FTE: surplus/short
     html += `<tr class="role-row" onclick="toggleRole('${r.id}','role')">
       <td style="display:flex;align-items:center;gap:8px;">
         <svg class="exp-icon ${s.role?'open':''}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         <div class="role-avatar" style="background:${r.color};">${r.initials}</div>
         <span>${r.label}</span>
       </td>
-      ${pcts.map(p => {
-        const cls = p > 100 ? 'pct-over' : p > 85 ? 'pct-red' : p > 50 ? 'pct-yellow' : 'pct-green';
-        return `<td><span class="pct ${cls}">${p}%</span></td>`;
-      }).join('')}
+      ${isHrs
+        ? pcts.map(p => {
+            const cls = p > 100 ? 'pct-over' : p > 85 ? 'pct-red' : p > 50 ? 'pct-yellow' : 'pct-green';
+            return `<td><span class="pct ${cls}">${p}%</span></td>`;
+          }).join('')
+        : gap.map(v => {
+            const color = v >= 0 ? '#24a148' : '#da1e28';
+            const abs = Math.abs(v/40).toFixed(1);
+            const label = v >= 0 ? `${abs} surplus` : `${abs} short`;
+            return `<td style="color:${color};font-weight:590;">${label}</td>`;
+          }).join('')
+      }
     </tr>`;
 
     if (!s.role) return;
@@ -616,20 +624,21 @@ function renderRS() {
       html += `<tr class="row-supply-child cs-i2"><td style="color:#da1e28;">Holidays</td>${r.capHolidays.map(v=>`<td style="color:#da1e28;">-${fmt(v)}</td>`).join('')}</tr>`;
     }
 
-    // ── Net Gap ──
+    // ── Net Gap / % Utilisation ── (FTE shows % util here; hours shows net gap)
     html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
-      <td>Net Gap</td>
-      ${gap.map(v => {
-        const color = v >= 0 ? '#24a148' : '#da1e28';
-        if (!isHrs) {
-          const abs = Math.abs(v/40).toFixed(1);
-          const label = v >= 0 ? `${abs} surplus` : `${abs} short`;
-          return `<td style="color:${color};font-weight:590;">${label}</td>`;
-        }
-        const abs = Math.round(Math.abs(v)).toLocaleString();
-        const label = v >= 0 ? `${abs} left` : `${abs} over`;
-        return `<td style="color:${color};font-weight:590;">${label}</td>`;
-      }).join('')}
+      <td>${isHrs ? 'Net Gap' : '% Utilisation'}</td>
+      ${isHrs
+        ? gap.map(v => {
+            const color = v >= 0 ? '#24a148' : '#da1e28';
+            const abs = Math.round(Math.abs(v)).toLocaleString();
+            const label = v >= 0 ? `${abs} left` : `${abs} over`;
+            return `<td style="color:${color};font-weight:590;">${label}</td>`;
+          }).join('')
+        : pcts.map(p => {
+            const cls = p > 100 ? 'pct-over' : p > 85 ? 'pct-red' : p > 50 ? 'pct-yellow' : 'pct-green';
+            return `<td><span class="pct ${cls}">${p}%</span></td>`;
+          }).join('')
+      }
     </tr>`;
   });
 
