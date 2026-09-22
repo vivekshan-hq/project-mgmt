@@ -616,10 +616,18 @@ function renderRS() {
       html += `<tr class="row-supply-child cs-i2"><td style="color:#da1e28;">Holidays</td>${r.capHolidays.map(v=>`<td style="color:#da1e28;">-${fmt(v)}</td>`).join('')}</tr>`;
     }
 
-    // ── Net Gap ── (cap minus what the Demand row shows, so it's always verifiable)
+    // ── Net Gap ──
     html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
       <td>Net Gap</td>
-      ${gap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
+      ${gap.map(v => {
+        if (!isHrs) {
+          const abs = Math.abs(v/40).toFixed(1);
+          const label = v >= 0 ? `${abs} surplus` : `${abs} short`;
+          const color = v >= 0 ? '#24a148' : '#da1e28';
+          return `<td style="color:${color};font-weight:590;">${label}</td>`;
+        }
+        return `<td>${v>=0?'+':''}${fmt(v)}</td>`;
+      }).join('')}
     </tr>`;
   });
 
