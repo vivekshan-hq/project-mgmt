@@ -526,24 +526,17 @@ function renderRS() {
     const hardDemand = r.allocAssignedHard.map((_,i) => r.allocAssignedHard[i] + r.allocUnassignedHard[i] + unresolved[i]);
     const pcts       = hardDemand.map((a,i) => Math.round(a / cap[i] * 100));
 
-    // Role header row — shows utilization % in hours, Net Gap in FTE
-    const roleCells = isHrs
-      ? pcts.map(p => {
-          const cls = p > 100 ? 'pct-over' : p > 85 ? 'pct-red' : p > 50 ? 'pct-yellow' : 'pct-green';
-          return `<td><span class="pct ${cls}">${p}%</span></td>`;
-        })
-      : gap.map(v => {
-          const fteVal = (v / 40).toFixed(1);
-          const color = v >= 0 ? '#24a148' : '#da1e28';
-          return `<td style="color:${color};font-weight:590;">${v >= 0 ? '+' : ''}${fteVal}</td>`;
-        });
+    // Role header row — always shows utilisation %
     html += `<tr class="role-row" onclick="toggleRole('${r.id}','role')">
       <td style="display:flex;align-items:center;gap:8px;">
         <svg class="exp-icon ${s.role?'open':''}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         <div class="role-avatar" style="background:${r.color};">${r.initials}</div>
         <span>${r.label}</span>
       </td>
-      ${roleCells.join('')}
+      ${pcts.map(p => {
+        const cls = p > 100 ? 'pct-over' : p > 85 ? 'pct-red' : p > 50 ? 'pct-yellow' : 'pct-green';
+        return `<td><span class="pct ${cls}">${p}%</span></td>`;
+      }).join('')}
     </tr>`;
 
     if (!s.role) return;
