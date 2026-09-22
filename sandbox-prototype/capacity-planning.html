@@ -540,7 +540,7 @@ function renderRS() {
           }).join('')
         : gap.map(v => {
             const color = v >= 0 ? '#24a148' : '#da1e28';
-            const abs = Math.abs(v/40).toFixed(1);
+            const abs = parseFloat((Math.abs(v)/40).toFixed(1));
             const label = v >= 0 ? `${abs} surplus` : `${abs} short`;
             return `<td style="color:${color};font-weight:590;">${label}</td>`;
           }).join('')
