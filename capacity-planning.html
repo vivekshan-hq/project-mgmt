@@ -616,19 +616,11 @@ function renderRS() {
       html += `<tr class="row-supply-child cs-i2"><td style="color:#da1e28;">Holidays</td>${r.capHolidays.map(v=>`<td style="color:#da1e28;">-${fmt(v)}</td>`).join('')}</tr>`;
     }
 
-    // ── Net Gap ──
-    if (allocType === 'both') {
-      const tentativeGap = cap.map((c,i) => c - alloc[i] - softDemand[i]);
-      html += `<tr class="${tentativeGap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
-        <td>Net Gap (incl. Tentative)</td>
-        ${tentativeGap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
-      </tr>`;
-    } else {
-      html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
-        <td>Net Gap</td>
-        ${gap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
-      </tr>`;
-    }
+    // ── Net Gap ── (cap minus what the Demand row shows, so it's always verifiable)
+    html += `<tr class="${gap.every(v=>v>=0)?'row-gap-pos':'row-gap'} cs-i1">
+      <td>Net Gap</td>
+      ${gap.map(v=>`<td>${v>=0?'+':''}${fmt(v)}</td>`).join('')}
+    </tr>`;
   });
 
   document.getElementById('rs-tbody').innerHTML = html;
