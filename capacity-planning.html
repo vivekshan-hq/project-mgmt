@@ -630,8 +630,11 @@ function renderRS() {
       ${isHrs
         ? gap.map(v => {
             const color = v >= 0 ? '#24a148' : '#da1e28';
-            const abs = Math.round(Math.abs(v)).toLocaleString();
-            const label = v >= 0 ? `${abs} left` : `${abs} over`;
+            const totalMins = Math.round(Math.abs(v) * 60);
+            const h = Math.floor(totalMins / 60);
+            const m = totalMins % 60;
+            const hLabel = m > 0 ? `${h.toLocaleString()}h ${m}m` : `${h.toLocaleString()}h`;
+            const label = v >= 0 ? `${hLabel} left` : `${hLabel} over`;
             return `<td style="color:${color};font-weight:590;">${label}</td>`;
           }).join('')
         : pcts.map(p => {
