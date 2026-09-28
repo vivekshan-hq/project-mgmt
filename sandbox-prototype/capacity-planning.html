@@ -148,13 +148,9 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .wp-modal-header{padding:16px 20px 14px;border-bottom:1px solid #e0e0e0;}
 .wp-modal-header h3{font-size:14px;font-weight:640;color:#161616;margin:0 0 4px;}
 .wp-modal-header p{font-size:12px;color:#525252;margin:0;line-height:1.5;}
-.wp-modal-body{padding:6px 0;}
-.wp-field-row{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;transition:background .12s;}
-.wp-field-row:hover{background:#f4f4f4;}
-.wp-field-row.selected{background:#f3e8ff;}
-.wp-field-row input[type=radio]{accent-color:#6929c4;width:14px;height:14px;flex-shrink:0;cursor:pointer;}
-.wp-field-name{flex:1;font-size:13px;color:#161616;font-weight:500;}
-.wp-field-dtype{font-size:11px;color:#6f6f6f;background:#f4f4f4;padding:2px 8px;border-radius:120px;font-weight:500;}
+.wp-modal-body{padding:16px 20px;}
+.wp-field-select{width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:4px;font-size:13px;color:#161616;background:#fff;outline:none;cursor:pointer;font-family:inherit;}
+.wp-field-select:focus{border-color:#6929c4;}
 .wp-modal-footer{padding:12px 20px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;gap:8px;}
 .wp-modal-footer button{padding:6px 16px;border-radius:4px;font-size:13px;font-weight:590;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#161616;}
 .wp-modal-footer .btn-apply{background:#6929c4;color:#fff;border-color:#6929c4;}
@@ -218,7 +214,9 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       <h3>Select probability field</h3>
       <p>Choose a Number field from your project fields. Its value should be a percentage (0–100) applied as a multiplier on demand.</p>
     </div>
-    <div class="wp-modal-body" id="wp-field-list"></div>
+    <div class="wp-modal-body">
+      <select id="wp-field-select" class="wp-field-select"></select>
+    </div>
     <div class="wp-modal-footer">
       <button onclick="cancelWinProb()">Cancel</button>
       <button class="btn-apply" onclick="applyWinProb()">Apply</button>
@@ -540,25 +538,16 @@ function toggleWinProb() {
 
 function showWinProbModal() {
   const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
-  document.getElementById('wp-field-list').innerHTML = fields.map(f => `
-    <label class="wp-field-row ${f.id === winProbField ? 'selected' : ''}" onclick="selectWpField(this,'${f.id}')">
-      <input type="radio" name="wp-field" value="${f.id}" ${f.id === winProbField ? 'checked' : ''}>
-      <span class="wp-field-name">${f.label}</span>
-      <span class="wp-field-dtype">Number</span>
-    </label>
-  `).join('');
+  const sel = document.getElementById('wp-field-select');
+  sel.innerHTML = fields.map(f =>
+    `<option value="${f.id}" ${f.id === winProbField ? 'selected' : ''}>${f.label}</option>`
+  ).join('');
   document.getElementById('wp-modal').style.display = 'flex';
 }
 
-function selectWpField(el, id) {
-  document.querySelectorAll('.wp-field-row').forEach(r => r.classList.remove('selected'));
-  el.classList.add('selected');
-  el.querySelector('input[type=radio]').checked = true;
-}
-
 function applyWinProb() {
-  const sel = document.querySelector('input[name="wp-field"]:checked');
-  if (!sel) return;
+  const sel = document.getElementById('wp-field-select');
+  if (!sel.value) return;
   winProbField = sel.value;
   useWinProb = true;
   document.getElementById('wp-switch').classList.add('on');
