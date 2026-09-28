@@ -300,12 +300,12 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         <span>Pipeline demand:</span>
         <div style="display:flex;border:1px solid #e0e0e0;border-radius:4px;">
           <button id="v2-full-btn" class="v2-seg-btn active" style="border-radius:3px 0 0 3px;" onclick="v2SelectFull()">Full (100%)</button>
-          <button id="v2-weighted-btn" class="v2-seg-btn" style="border-radius:0 3px 3px 0;" onclick="v2SelectWeighted(event)">
+          <button id="v2-weighted-btn" class="v2-seg-btn" style="border-radius:0 3px 3px 0;" onclick="v2SelectWeighted()">
             Weighted by win probability
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:4px;"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
         </div>
-        <div id="v2-popover" class="v2-popover" style="display:none;left:auto;right:0;" onclick="event.stopPropagation()">
+        <div id="v2-popover" class="v2-popover" style="display:none;left:auto;right:0;">
           <div class="v2-pop-title">Weight demand by</div>
           <div id="v2-pop-fields"></div>
           <div class="v2-pop-desc">A project at 40% contributes 40% of its hours. Committed projects always count at 100%.</div>
@@ -628,17 +628,16 @@ function v2SelectFull() {
   document.getElementById('v2-popover').style.display = 'none';
 }
 
-function v2SelectWeighted(e) {
-  e.stopPropagation();
+function v2SelectWeighted() {
   const pop = document.getElementById('v2-popover');
-  if (pop.style.display !== 'none') { pop.style.display = 'none'; return; }
+  if (pop.style.display === 'block') { pop.style.display = 'none'; return; }
   const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
   document.getElementById('v2-pop-fields').innerHTML = fields.map(f => `
     <div class="v2-pop-field ${f.id === v2Field ? 'selected' : ''}" onclick="v2SelectField('${f.id}')">
       <span>${f.label}</span>
       ${f.id === v2Field ? `<svg class="v2-pop-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
     </div>`).join('');
-  pop.style.display = '';
+  pop.style.display = 'block';
 }
 
 function v2SelectField(id) {
@@ -650,8 +649,12 @@ function v2SelectField(id) {
   document.getElementById('v2-popover').style.display = 'none';
 }
 
-document.addEventListener('click', () => {
-  document.getElementById('v2-popover').style.display = 'none';
+document.addEventListener('click', (e) => {
+  const pop = document.getElementById('v2-popover');
+  const btn = document.getElementById('v2-weighted-btn');
+  if (pop && btn && !pop.contains(e.target) && !btn.contains(e.target)) {
+    pop.style.display = 'none';
+  }
 });
 
 function winProbUnassigned(projsUnassigned) {
