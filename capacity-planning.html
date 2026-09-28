@@ -157,10 +157,10 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .wp-modal-footer button:hover{background:#f4f4f4;}
 
 /* ── V2: Segmented control + popover ── */
-.v2-seg-btn{padding:0 12px;height:28px;border:none;background:#fff;font-size:13px;color:#525252;cursor:pointer;font-family:inherit;display:flex;align-items:center;white-space:nowrap;}
-.v2-seg-btn:hover{background:#f4f4f4;}
-.v2-seg-btn.active{background:#161616;color:#fff;font-weight:590;}
-.v2-seg-btn.active:hover{background:#393939;}
+.v2-seg-btn{padding:0 12px;height:28px;border:none;border-right:1px solid #e0e0e0;background:#fff;font-size:13px;color:#6f6f6f;cursor:pointer;font-family:inherit;display:flex;align-items:center;white-space:nowrap;}
+.v2-seg-btn:last-child{border-right:none;}
+.v2-seg-btn:hover{background:#f4f4f4;color:#161616;}
+.v2-seg-btn.active{background:#fff;color:#161616;font-weight:640;}
 .v2-popover{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid #e0e0e0;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.13);z-index:200;min-width:260px;overflow:hidden;}
 .v2-pop-title{padding:10px 16px 6px;font-size:12px;font-weight:590;color:#8d8d8d;letter-spacing:0.24px;}
 .v2-pop-field{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;font-size:14px;color:#161616;cursor:pointer;}
@@ -349,8 +349,12 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
   <!-- Content -->
   <!-- V2 info banner -->
   <div id="v2-banner" style="display:none;align-items:center;gap:8px;padding:8px 24px;background:#edf5ff;border-bottom:1px solid #d0e2ff;font-size:13px;color:#0043ce;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     Pipeline demand weighted by win probability. Included in exports.
+  </div>
+  <!-- V2 hint text -->
+  <div id="v2-hint" style="display:none;padding:6px 24px;font-size:12px;color:#8d8d8d;border-bottom:1px solid #f4f4f4;">
+    Click either segment. Click the active right segment again to change the field.
   </div>
 
   <div class="content">
@@ -622,16 +626,14 @@ function v2SelectFull() {
   document.getElementById('v2-full-btn').classList.add('active');
   document.getElementById('v2-weighted-btn').classList.remove('active');
   document.getElementById('v2-banner').style.display = 'none';
+  document.getElementById('v2-hint').style.display = 'none';
   document.getElementById('v2-popover').style.display = 'none';
 }
 
 function v2SelectWeighted(e) {
   e.stopPropagation();
   const pop = document.getElementById('v2-popover');
-  const isOpen = pop.style.display !== 'none';
-  if (isOpen && document.getElementById('v2-weighted-btn').classList.contains('active')) {
-    pop.style.display = 'none'; return;
-  }
+  if (pop.style.display !== 'none') { pop.style.display = 'none'; return; }
   const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
   document.getElementById('v2-pop-fields').innerHTML = fields.map(f => `
     <div class="v2-pop-field ${f.id === v2Field ? 'selected' : ''}" onclick="v2SelectField('${f.id}')">
@@ -646,6 +648,7 @@ function v2SelectField(id) {
   document.getElementById('v2-full-btn').classList.remove('active');
   document.getElementById('v2-weighted-btn').classList.add('active');
   document.getElementById('v2-banner').style.display = 'flex';
+  document.getElementById('v2-hint').style.display = 'block';
   document.getElementById('v2-popover').style.display = 'none';
 }
 
