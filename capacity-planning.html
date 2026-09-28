@@ -141,7 +141,18 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .wp-thumb{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left 0.18s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
 .wp-switch.on .wp-thumb{left:18px;}
 .wp-badge{display:inline-flex;align-items:center;padding:1px 6px;border-radius:120px;font-size:11px;font-weight:590;background:#f3e8ff;color:#6929c4;margin-left:6px;flex-shrink:0;}
-.wp-inline-select{padding:3px 8px;border:1px solid #d4b8f0;border-radius:4px;font-size:12px;font-weight:590;color:#6929c4;background:#f3e8ff;outline:none;cursor:pointer;font-family:inherit;height:26px;}
+.wp-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.wp-modal{background:#fff;border-radius:8px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden;}
+.wp-modal-header{padding:16px 20px 14px;border-bottom:1px solid #e0e0e0;}
+.wp-modal-header h3{font-size:14px;font-weight:640;color:#161616;margin:0 0 4px;}
+.wp-modal-header p{font-size:12px;color:#525252;margin:0;line-height:1.5;}
+.wp-modal-body{padding:16px 20px;}
+.wp-field-select{width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:4px;font-size:13px;color:#161616;background:#fff;outline:none;cursor:pointer;font-family:inherit;}
+.wp-field-select:focus{border-color:#6929c4;}
+.wp-modal-footer{padding:12px 20px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;gap:8px;}
+.wp-modal-footer button{padding:6px 16px;border-radius:4px;font-size:13px;font-weight:590;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#161616;}
+.wp-modal-footer .btn-apply{background:#6929c4;color:#fff;border-color:#6929c4;}
+.wp-modal-footer .btn-apply:hover{background:#491d8b;}
 
 /* ── Skills Gap specifics ── */
 .sg-filters{display:flex;align-items:center;gap:8px;padding:12px 24px;border-bottom:1px solid #f4f4f4;}
@@ -195,6 +206,23 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 <body>
 
 
+<!-- Win probability field picker modal -->
+<div id="wp-modal" class="wp-modal-overlay" style="display:none" onclick="if(event.target===this)cancelWinProb()">
+  <div class="wp-modal">
+    <div class="wp-modal-header">
+      <h3>Select win probability field</h3>
+      <p>Choose a Number field from your project fields. Its value should be a percentage (0–100) applied as a multiplier on demand.</p>
+    </div>
+    <div class="wp-modal-body">
+      <select id="wp-field-select" class="wp-field-select"></select>
+    </div>
+    <div class="wp-modal-footer">
+      <button onclick="cancelWinProb()">Cancel</button>
+      <button class="btn-apply" onclick="applyWinProb()">Apply</button>
+    </div>
+  </div>
+</div>
+
 <!-- Nav rail -->
 <nav class="nav-rail">
   <div class="nav-logo"></div>
@@ -244,7 +272,10 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         <div class="wp-switch" id="wp-switch"><div class="wp-thumb"></div></div>
         Use win probability
       </div>
-      <select id="wp-inline-select" class="wp-inline-select" style="display:none" onchange="changeWinProbField(this.value)" onclick="event.stopPropagation()"></select>
+      <div id="wp-field-display" style="display:none;align-items:center;gap:6px;font-size:13px;">
+        <span id="wp-field-label" style="color:#6929c4;font-weight:590;"></span>
+        <span onclick="showWinProbModal()" style="color:#0f62fe;cursor:pointer;text-decoration:underline;">Edit</span>
+      </div>
     </div>
     <div class="tl-right">
       <div class="toggle-grp">
@@ -500,24 +531,42 @@ let winProbField = null;
 function toggleWinProb() {
   useWinProb = !useWinProb;
   document.getElementById('wp-switch').classList.toggle('on', useWinProb);
-  const inlineSel = document.getElementById('wp-inline-select');
   if (useWinProb) {
-    const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
-    inlineSel.innerHTML = `<option value="" disabled ${!winProbField ? 'selected' : ''}>Select a field…</option>` +
-      fields.map(f => `<option value="${f.id}" ${f.id === winProbField ? 'selected' : ''}>${f.label}</option>`).join('');
-    inlineSel.style.display = '';
+    showWinProbModal();
   } else {
     winProbField = null;
-    inlineSel.style.display = 'none';
+    document.getElementById('wp-field-display').style.display = 'none';
+    renderRS();
+    renderRoleChart();
   }
+}
+
+function showWinProbModal() {
+  const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
+  const sel = document.getElementById('wp-field-select');
+  sel.innerHTML = `<option value="" disabled ${!winProbField ? 'selected' : ''}>Select a field…</option>` +
+    fields.map(f => `<option value="${f.id}" ${f.id === winProbField ? 'selected' : ''}>${f.label}</option>`).join('');
+  document.getElementById('wp-modal').style.display = 'flex';
+}
+
+function applyWinProb() {
+  const sel = document.getElementById('wp-field-select');
+  if (!sel.value) return;
+  winProbField = sel.value;
+  const label = PROJECT_FIELDS.find(f => f.id === winProbField)?.label || winProbField;
+  document.getElementById('wp-field-label').textContent = label;
+  document.getElementById('wp-field-display').style.display = 'flex';
+  document.getElementById('wp-modal').style.display = 'none';
   renderRS();
   renderRoleChart();
 }
 
-function changeWinProbField(val) {
-  winProbField = val || null;
-  renderRS();
-  renderRoleChart();
+function cancelWinProb() {
+  document.getElementById('wp-modal').style.display = 'none';
+  if (!winProbField) {
+    useWinProb = false;
+    document.getElementById('wp-switch').classList.remove('on');
+  }
 }
 
 function winProbUnassigned(projsUnassigned) {
