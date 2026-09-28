@@ -523,11 +523,12 @@ function getRsState(id) {
 }
 
 let useWinProb = false;
-let winProbField = 'winProb';
+let winProbField = null;
 
 function toggleWinProb() {
   if (useWinProb) {
     useWinProb = false;
+    winProbField = null;
     document.getElementById('wp-switch').classList.remove('on');
     renderRS();
     renderRoleChart();
@@ -539,9 +540,8 @@ function toggleWinProb() {
 function showWinProbModal() {
   const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
   const sel = document.getElementById('wp-field-select');
-  sel.innerHTML = fields.map(f =>
-    `<option value="${f.id}" ${f.id === winProbField ? 'selected' : ''}>${f.label}</option>`
-  ).join('');
+  sel.innerHTML = `<option value="" disabled selected>Select a field…</option>` +
+    fields.map(f => `<option value="${f.id}" ${f.id === winProbField ? 'selected' : ''}>${f.label}</option>`).join('');
   document.getElementById('wp-modal').style.display = 'flex';
 }
 
