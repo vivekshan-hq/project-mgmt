@@ -296,21 +296,19 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       <div style="width:1px;height:20px;background:#e0e0e0;margin:0 4px;"></div>
 
       <!-- V2: Segmented control -->
-      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#525252;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#525252;position:relative;">
         <span>Pipeline demand:</span>
-        <div style="display:flex;border:1px solid #e0e0e0;border-radius:4px;overflow:hidden;">
-          <button id="v2-full-btn" class="v2-seg-btn active" onclick="v2SelectFull()">Full (100%)</button>
-          <div style="position:relative;">
-            <button id="v2-weighted-btn" class="v2-seg-btn" onclick="v2SelectWeighted(event)">
-              Weighted by win probability
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:4px;"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div id="v2-popover" class="v2-popover" style="display:none;" onclick="event.stopPropagation()">
-              <div class="v2-pop-title">Weight demand by</div>
-              <div id="v2-pop-fields"></div>
-              <div class="v2-pop-desc">A project at 40% contributes 40% of its hours. Committed projects always count at 100%.</div>
-            </div>
-          </div>
+        <div style="display:flex;border:1px solid #e0e0e0;border-radius:4px;">
+          <button id="v2-full-btn" class="v2-seg-btn active" style="border-radius:3px 0 0 3px;" onclick="v2SelectFull()">Full (100%)</button>
+          <button id="v2-weighted-btn" class="v2-seg-btn" style="border-radius:0 3px 3px 0;" onclick="v2SelectWeighted(event)">
+            Weighted by win probability
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:4px;"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div id="v2-popover" class="v2-popover" style="display:none;left:auto;right:0;" onclick="event.stopPropagation()">
+          <div class="v2-pop-title">Weight demand by</div>
+          <div id="v2-pop-fields"></div>
+          <div class="v2-pop-desc">A project at 40% contributes 40% of its hours. Committed projects always count at 100%.</div>
         </div>
       </div>
     </div>
