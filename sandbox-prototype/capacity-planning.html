@@ -218,6 +218,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
       <select id="wp-field-select" class="wp-field-select"></select>
     </div>
     <div class="wp-modal-footer">
+      <button id="wp-turnoff-btn" onclick="turnOffWinProb()" style="margin-right:auto;color:#da1e28;border-color:transparent;background:none;">Turn off</button>
       <button onclick="cancelWinProb()">Cancel</button>
       <button class="btn-apply" onclick="applyWinProb()">Apply</button>
     </div>
@@ -526,22 +527,24 @@ let useWinProb = false;
 let winProbField = null;
 
 function toggleWinProb() {
-  if (useWinProb) {
-    useWinProb = false;
-    winProbField = null;
-    document.getElementById('wp-switch').classList.remove('on');
-    renderRS();
-    renderRoleChart();
-  } else {
-    showWinProbModal();
-  }
+  showWinProbModal();
+}
+
+function turnOffWinProb() {
+  useWinProb = false;
+  winProbField = null;
+  document.getElementById('wp-switch').classList.remove('on');
+  document.getElementById('wp-modal').style.display = 'none';
+  renderRS();
+  renderRoleChart();
 }
 
 function showWinProbModal() {
   const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
   const sel = document.getElementById('wp-field-select');
-  sel.innerHTML = `<option value="" disabled selected>Select a field…</option>` +
+  sel.innerHTML = `<option value="" disabled ${!winProbField ? 'selected' : ''}>Select a field…</option>` +
     fields.map(f => `<option value="${f.id}" ${f.id === winProbField ? 'selected' : ''}>${f.label}</option>`).join('');
+  document.getElementById('wp-turnoff-btn').style.display = useWinProb ? '' : 'none';
   document.getElementById('wp-modal').style.display = 'flex';
 }
 
