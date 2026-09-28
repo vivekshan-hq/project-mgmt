@@ -156,6 +156,19 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .wp-modal-footer button{padding:6px 16px;border-radius:4px;font-size:13px;font-weight:590;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#161616;}
 .wp-modal-footer button:hover{background:#f4f4f4;}
 
+/* ── V2: Segmented control + popover ── */
+.v2-seg-btn{padding:0 12px;height:28px;border:none;background:#fff;font-size:13px;color:#525252;cursor:pointer;font-family:inherit;display:flex;align-items:center;white-space:nowrap;}
+.v2-seg-btn:hover{background:#f4f4f4;}
+.v2-seg-btn.active{background:#161616;color:#fff;font-weight:590;}
+.v2-seg-btn.active:hover{background:#393939;}
+.v2-popover{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid #e0e0e0;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.13);z-index:200;min-width:260px;overflow:hidden;}
+.v2-pop-title{padding:10px 16px 6px;font-size:12px;font-weight:590;color:#8d8d8d;letter-spacing:0.24px;}
+.v2-pop-field{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;font-size:14px;color:#161616;cursor:pointer;}
+.v2-pop-field:hover{background:#f4f4f4;}
+.v2-pop-field.selected{font-weight:590;}
+.v2-pop-check{color:#0f62fe;flex-shrink:0;}
+.v2-pop-desc{padding:10px 16px;margin:4px 8px 8px;background:#f4f4f4;border-radius:6px;font-size:12px;color:#525252;line-height:1.5;}
+
 /* ── Skills Gap specifics ── */
 .sg-filters{display:flex;align-items:center;gap:8px;padding:12px 24px;border-bottom:1px solid #f4f4f4;}
 .sg-chip{padding:4px 12px;border-radius:120px;font-size:12px;font-weight:590;border:1px solid #e0e0e0;background:#fff;cursor:pointer;color:#525252;}
@@ -267,6 +280,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Time range: &nbsp;<strong>This quarter</strong>
       </button>
+      <!-- V1: Toggle + Edit -->
       <div class="wp-wrap">
         <div class="wp-switch" id="wp-switch" onclick="toggleWinProb()"><div class="wp-thumb"></div></div>
         <span style="cursor:pointer;font-size:13px;" onclick="toggleWinProb()">Use win probability</span>
@@ -275,6 +289,28 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
           <span id="wp-field-name" style="color:#6929c4;font-weight:590;"></span>
           <span style="color:#8d8d8d;">·</span>
           <span onclick="showWinProbModal()" style="color:#0f62fe;cursor:pointer;">Edit</span>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div style="width:1px;height:20px;background:#e0e0e0;margin:0 4px;"></div>
+
+      <!-- V2: Segmented control -->
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#525252;">
+        <span>Pipeline demand:</span>
+        <div style="display:flex;border:1px solid #e0e0e0;border-radius:4px;overflow:hidden;">
+          <button id="v2-full-btn" class="v2-seg-btn active" onclick="v2SelectFull()">Full (100%)</button>
+          <div style="position:relative;">
+            <button id="v2-weighted-btn" class="v2-seg-btn" onclick="v2SelectWeighted(event)">
+              Weighted by win probability
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:4px;"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div id="v2-popover" class="v2-popover" style="display:none;" onclick="event.stopPropagation()">
+              <div class="v2-pop-title">Weight demand by</div>
+              <div id="v2-pop-fields"></div>
+              <div class="v2-pop-desc">A project at 40% contributes 40% of its hours. Committed projects always count at 100%.</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -311,6 +347,12 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
 
   <!-- Content -->
+  <!-- V2 info banner -->
+  <div id="v2-banner" style="display:none;align-items:center;gap:8px;padding:8px 24px;background:#edf5ff;border-bottom:1px solid #d0e2ff;font-size:13px;color:#0043ce;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Pipeline demand weighted by win probability. Included in exports.
+  </div>
+
   <div class="content">
 
     <!-- ── Role tab ── -->
@@ -571,6 +613,45 @@ function closeWinProbModal() {
     document.getElementById('wp-switch').classList.remove('on');
   }
 }
+
+// ── V2: Segmented control functions ──
+let v2Field = null;
+
+function v2SelectFull() {
+  v2Field = null;
+  document.getElementById('v2-full-btn').classList.add('active');
+  document.getElementById('v2-weighted-btn').classList.remove('active');
+  document.getElementById('v2-banner').style.display = 'none';
+  document.getElementById('v2-popover').style.display = 'none';
+}
+
+function v2SelectWeighted(e) {
+  e.stopPropagation();
+  const pop = document.getElementById('v2-popover');
+  const isOpen = pop.style.display !== 'none';
+  if (isOpen && document.getElementById('v2-weighted-btn').classList.contains('active')) {
+    pop.style.display = 'none'; return;
+  }
+  const fields = PROJECT_FIELDS.filter(f => f.type === 'number');
+  document.getElementById('v2-pop-fields').innerHTML = fields.map(f => `
+    <div class="v2-pop-field ${f.id === v2Field ? 'selected' : ''}" onclick="v2SelectField('${f.id}')">
+      <span>${f.label}</span>
+      ${f.id === v2Field ? `<svg class="v2-pop-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+    </div>`).join('');
+  pop.style.display = '';
+}
+
+function v2SelectField(id) {
+  v2Field = id;
+  document.getElementById('v2-full-btn').classList.remove('active');
+  document.getElementById('v2-weighted-btn').classList.add('active');
+  document.getElementById('v2-banner').style.display = 'flex';
+  document.getElementById('v2-popover').style.display = 'none';
+}
+
+document.addEventListener('click', () => {
+  document.getElementById('v2-popover').style.display = 'none';
+});
 
 function winProbUnassigned(projsUnassigned) {
   const n = WEEKS.length;
