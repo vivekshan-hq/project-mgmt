@@ -670,7 +670,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <input type="checkbox" checked id="rm-view-alloc" disabled>
                 <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                   <label for="rm-view-alloc" style="cursor:default;white-space:nowrap">Can view allocations</label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
                 </div>
               </div>
 
@@ -678,7 +678,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <input type="checkbox" checked id="rm-manage-alloc" disabled>
                 <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                   <label for="rm-manage-alloc" style="cursor:default;white-space:nowrap">Can manage allocations</label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
                 </div>
               </div>
 
@@ -689,7 +689,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                     Can access Capacity Planning
                     <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
                   </label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
                 </div>
               </div>
 
@@ -702,7 +702,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <input type="checkbox" checked id="rm-raise-req" disabled>
                 <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                   <label for="rm-raise-req" style="cursor:default;white-space:nowrap">Can raise resource request</label>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects · Only projects where the partner company is added</span>
+                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
                 </div>
               </div>
 
@@ -713,7 +713,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                     Can approve resource requests
                     <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
                   </label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
                 </div>
               </div>
 
@@ -721,7 +721,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <input type="checkbox" checked id="rm-alloc-totals" disabled>
                 <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                   <label for="rm-alloc-totals" style="cursor:default;white-space:nowrap">Can view allocation totals for projects</label>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects · Only projects where the partner company is added</span>
+                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
                 </div>
               </div>
 
@@ -742,7 +742,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <input type="checkbox" checked id="rm-view-fields" disabled>
                 <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                   <label for="rm-view-fields" style="cursor:default;white-space:nowrap">Can view custom allocation field values</label>
-                  <span class="scope-pill" data-scope-type="field" data-value="global" onclick="openScopeModal(this)">Global access · Can see values of all fields in the projects they have access to</span>
+                  <span class="scope-pill" data-scope-type="field" data-value="global" onclick="openScopeModal(this)">Global access</span>
                 </div>
               </div>
 
@@ -1734,7 +1734,7 @@ function saveScopeModal() {
   const opt = (SCOPE_OPTS[type] || []).find(o => o.value === sel.value);
   if (opt) {
     _scopePillTarget.dataset.value = opt.value;
-    _scopePillTarget.textContent = opt.label + ' · ' + opt.desc;
+    _scopePillTarget.textContent = opt.label;
   }
   closeScopeModal();
 }
