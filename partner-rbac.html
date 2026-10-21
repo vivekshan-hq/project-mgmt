@@ -665,39 +665,19 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 <label for="rm-people-views">Can access People and Project views</label>
               </div>
 
-              <!-- View allocations -->
+              <!-- View allocations — scope is fixed (Permitted projects + Only partner team members), no selector -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-view-alloc" disabled>
                 <label for="rm-view-alloc">Can view allocations</label>
               </div>
-              <div class="cb-child" id="rm-view-alloc-scope">
-                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
-                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
-                  <div>
-                    <span class="scope-pill" style="cursor:default">Permitted projects</span>
-                  </div>
-                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
-                  <div>
-                    <span class="scope-pill" style="cursor:default">Only partner team members</span>
-                  </div>
-                </div>
-              </div>
 
-              <!-- Manage allocations -->
+              <!-- Manage allocations — same fixed scope, no selector -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-manage-alloc" disabled>
                 <label for="rm-manage-alloc">Can manage allocations</label>
               </div>
-              <div class="cb-child" id="rm-manage-alloc-scope">
-                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
-                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
-                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
-                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
-                  <div><span class="scope-pill" style="cursor:default">Only partner team members</span></div>
-                </div>
-              </div>
 
-              <!-- Capacity Planning (Partner Admin only) -->
+              <!-- Capacity Planning (Partner Admin only) — fixed scope -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-capacity" disabled>
                 <label for="rm-capacity" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
@@ -705,34 +685,20 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                   <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
                 </label>
               </div>
-              <div class="cb-child" id="rm-capacity-scope">
-                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
-                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
-                  <div><span class="scope-pill" style="cursor:default">Only partner team members</span></div>
-                </div>
-              </div>
 
-              <!-- Revenue, cost, profit (off) -->
+              <!-- Revenue, cost, profit (off) — no scope (None) -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-revenue" disabled>
                 <label for="rm-revenue">Can view revenue, cost, profit and margins</label>
               </div>
 
-              <!-- Raise resource request -->
+              <!-- Raise resource request — fixed scope -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-raise-req" disabled>
                 <label for="rm-raise-req">Can raise resource request</label>
               </div>
-              <div class="cb-child" id="rm-raise-req-scope">
-                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
-                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
-                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
-                  <span style="font-size:12.5px;color:var(--t3)">Skills</span>
-                  <div><span class="scope-pill" style="cursor:default">All skills</span></div>
-                </div>
-              </div>
 
-              <!-- Approve resource requests (Partner Admin only) -->
+              <!-- Approve resource requests (Partner Admin only) — fixed scope -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-approve-req" disabled>
                 <label for="rm-approve-req" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
@@ -740,34 +706,20 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                   <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
                 </label>
               </div>
-              <div class="cb-child" id="rm-approve-req-scope">
-                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
-                  <span style="font-size:12.5px;color:var(--t3)">Requests</span>
-                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
-                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
-                  <div><span class="scope-pill" style="cursor:default">Only partner team members</span></div>
-                </div>
-              </div>
 
-              <!-- Allocation totals -->
+              <!-- Allocation totals — fixed scope -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-alloc-totals" disabled>
                 <label for="rm-alloc-totals">Can view allocation totals for projects</label>
               </div>
-              <div class="cb-child" id="rm-alloc-totals-scope">
-                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
-                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
-                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
-                </div>
-              </div>
 
-              <!-- Auto-allocations (off) -->
+              <!-- Auto-allocations (off) — fixed scope -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-auto-alloc" disabled>
                 <label for="rm-auto-alloc">Can turn auto-allocations on or off</label>
               </div>
 
-              <!-- Level of effort planning (open / indeterminate) -->
+              <!-- Level of effort planning (open / indeterminate) — fixed scope -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-loe" disabled>
                 <label for="rm-loe" style="display:flex;align-items:center;gap:8px;flex:1">
@@ -776,37 +728,58 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                 </label>
               </div>
 
-              <!-- View custom allocation field values -->
+              <!-- View custom allocation field values — 2 scope options: interactive -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-view-fields" disabled>
                 <label for="rm-view-fields">Can view custom allocation field values</label>
               </div>
               <div class="cb-child" id="rm-view-fields-scope">
-                <div style="padding:4px 0 2px">
-                  <div style="font-size:12.5px;color:var(--t3);margin-bottom:8px">Field access</div>
-                  <div style="display:flex;flex-direction:column;gap:5px">
-                    <label style="display:flex;align-items:flex-start;gap:8px;cursor:default">
-                      <input type="radio" name="rm-field-access" value="global" checked disabled style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+                <div style="padding:2px 0 4px">
+                  <div style="font-size:12px;font-weight:500;color:var(--t3);margin-bottom:8px;letter-spacing:.2px">Field access</div>
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <label class="radio-opt" style="padding:8px 12px">
+                      <input type="radio" name="rm-field-access" value="global" checked style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
                       <div>
-                        <div style="font-size:13.5px;font-weight:500;color:var(--t1)">Global access</div>
-                        <div style="font-size:12px;color:var(--t3);margin-top:1px">Can see values of all fields in the projects they have access to</div>
+                        <div class="radio-opt-label">Global access</div>
+                        <div class="radio-opt-desc">Can see values of all fields in the projects they have access to</div>
                       </div>
                     </label>
-                    <label style="display:flex;align-items:flex-start;gap:8px;cursor:default">
-                      <input type="radio" name="rm-field-access" value="restricted" disabled style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+                    <label class="radio-opt" style="padding:8px 12px">
+                      <input type="radio" name="rm-field-access" value="restricted" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
                       <div>
-                        <div style="font-size:13.5px;font-weight:500;color:var(--t1)">Restricted</div>
-                        <div style="font-size:12px;color:var(--t3);margin-top:1px">Can see values only in field sections visible to all</div>
+                        <div class="radio-opt-label">Restricted</div>
+                        <div class="radio-opt-desc">Can see values only in field sections visible to all</div>
                       </div>
                     </label>
                   </div>
                 </div>
               </div>
 
-              <!-- Edit custom allocation field values (off) -->
+              <!-- Edit custom allocation field values (off) — 2 scope options: interactive when enabled -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-edit-fields" disabled>
                 <label for="rm-edit-fields">Can edit custom allocation field values</label>
+              </div>
+              <div class="cb-child" id="rm-edit-fields-scope" style="display:none">
+                <div style="padding:2px 0 4px">
+                  <div style="font-size:12px;font-weight:500;color:var(--t3);margin-bottom:8px;letter-spacing:.2px">Field access</div>
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <label class="radio-opt" style="padding:8px 12px">
+                      <input type="radio" name="rm-edit-field-access" value="global" checked style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+                      <div>
+                        <div class="radio-opt-label">Global access</div>
+                        <div class="radio-opt-desc">Can edit values of all fields in the projects they have access to</div>
+                      </div>
+                    </label>
+                    <label class="radio-opt" style="padding:8px 12px">
+                      <input type="radio" name="rm-edit-field-access" value="restricted" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+                      <div>
+                        <div class="radio-opt-label">Restricted</div>
+                        <div class="radio-opt-desc">Can edit values only in field sections visible to all</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
               </div>
 
             </div><!-- /rm-children -->
@@ -1822,6 +1795,19 @@ function populatePartnerProfile(p) {
   document.getElementById('s4-track').checked = p.track;
   document.getElementById('s4-psets').innerHTML = p.psets.map(ps => `<span class="chip ${chipClass(ps.val)}">${ps.label}</span>`).join('');
 }
+
+/* ── RM: show/hide edit-fields scope when its checkbox is toggled ── */
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'rm-edit-fields') {
+    const scope = document.getElementById('rm-edit-fields-scope');
+    if (scope) scope.style.display = e.target.checked ? '' : 'none';
+  }
+  // Also show/hide view-fields scope based on the view-fields checkbox
+  if (e.target.id === 'rm-view-fields') {
+    const scope = document.getElementById('rm-view-fields-scope');
+    if (scope) scope.style.display = e.target.checked ? '' : 'none';
+  }
+});
 
 /* ── Sidebar section scroll ── */
 function scrollToSection(id) {
