@@ -488,37 +488,40 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           <a id="s2-bc-label" onclick="goBackToPermTab()">Partner</a><span class="sep">/</span>
           <span id="s2-bc-name">Permissive Admin</span>
         </div>
-        <div class="ph-row">
-          <div id="s2-title" class="ph-title">Permissive Admin</div>
-          <span id="s2-badge" class="bdg bdg-def">Default</span>
-          <div class="spacer"></div>
-          <button id="s2-cta-btn" class="btn btn-s btn-sm" onclick="openMo('mo-new-pset')" style="display:none"></button>
-        </div>
-      </div>
-
-
-      <!-- Access scope card -->
-      <div class="scope-card">
-        <div class="scope-card-title">Access scope</div>
-
-        <div class="scope-row" style="flex-direction:column;align-items:flex-start;gap:10px">
-          <div class="scope-label">Visibility</div>
-          <div class="radio-group">
-            <label class="radio-opt">
-              <input type="radio" name="s2-res" value="private" checked onchange="setResScope('private')">
-              <div><div class="radio-opt-label">Shared + Private</div><div class="radio-opt-desc">Partners can view all shared and private project resources, including tasks.</div></div>
-            </label>
-            <label class="radio-opt">
-              <input type="radio" name="s2-res" value="shared" onchange="setResScope('shared')">
-              <div><div class="radio-opt-label">Shared only</div><div class="radio-opt-desc">Partners can view shared resources only. Private resources and tasks are not visible.</div></div>
-            </label>
+        <div class="ph-row" style="align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+              <div id="s2-title" class="ph-title">Permissive Admin</div>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--t3);cursor:pointer;flex-shrink:0"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <span id="s2-badge" class="bdg bdg-def">Default</span>
+            </div>
+            <div id="s2-desc" style="font-size:13px;color:var(--t3)">Default permission set for partners</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:4px">
+            <button id="s2-cta-btn" class="btn btn-s btn-sm" onclick="openMo('mo-new-pset')" style="display:none"></button>
+            <!-- Visibility scope dropdown -->
+            <div style="position:relative" id="vis-scope-wrap">
+              <button onclick="toggleVisScope(event)" style="display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg);color:var(--t2);font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap" id="vis-scope-btn">
+                Visibility scope: <strong id="vis-scope-label" style="color:var(--t1);font-weight:500">Shared + Private</strong>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div id="vis-scope-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;min-width:280px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;box-shadow:var(--sh4);z-index:100;overflow:hidden">
+                <div onclick="setVisScopeOpt('private',this)" data-val="private" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--div)" class="vis-opt">
+                  <svg width="14" height="14" viewBox="0 0 14 14" id="vis-chk-private" style="flex-shrink:0;margin-top:2px"><path d="M2 7L5.5 10.5 12 3.5" stroke="var(--accent)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <div><div style="font-size:13.5px;font-weight:500;color:var(--t1)">Shared + Private</div><div style="font-size:12px;color:var(--t3);margin-top:2px">Partners see all shared and private resources</div></div>
+                </div>
+                <div onclick="setVisScopeOpt('shared',this)" data-val="shared" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;cursor:pointer" class="vis-opt">
+                  <svg width="14" height="14" viewBox="0 0 14 14" id="vis-chk-shared" style="flex-shrink:0;margin-top:2px;opacity:0"><path d="M2 7L5.5 10.5 12 3.5" stroke="var(--accent)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <div><div style="font-size:13.5px;font-weight:500;color:var(--t1)">Shared only</div><div style="font-size:12px;color:var(--t3);margin-top:2px">Private resources and tasks are hidden</div></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
       </div>
 
       <!-- Detail layout -->
-      <div class="pd-layout" style="flex:1;margin-top:12px">
+      <div class="pd-layout" style="flex:1;margin-top:0">
         <div class="pd-sidebar">
           <div class="pd-sb-item on" onclick="scrollToSection('sec-projects')" data-sec="sec-projects">Projects</div>
           <div class="pd-sb-item" onclick="scrollToSection('sec-phase')" data-sec="sec-phase">Phase</div>
@@ -1450,6 +1453,22 @@ function openPsetPP(key) {
   badge.textContent = 'Default'; badge.className = 'bdg bdg-def';
   document.getElementById('s2-cta-btn').style.display = 'none';
 
+  // Visibility scope — partner project always defaults to Shared + Private
+  document.getElementById('vis-scope-label').textContent = 'Shared + Private';
+  document.getElementById('vis-chk-private').style.opacity = '1';
+  document.getElementById('vis-chk-shared').style.opacity  = '0';
+  currentVisScope = 'private';
+  applyVisScope('private');
+
+  // Description
+  const ppDescMap = {
+    ppo: 'Project Owner — manages allocations and resource requests for permitted projects',
+    padl: 'Admin / Delivery Lead — full RM access including capacity planning and approvals',
+    pcol: 'Collaborator — view own allocations only'
+  };
+  const descEl = document.getElementById('s2-desc');
+  if (descEl) descEl.textContent = ppDescMap[key] || '';
+
   // Set RM checkboxes
   const rmMap = {
     'rm-access': ps.rm.access, 'rm-people-views': ps.rm.peopleViews,
@@ -1472,28 +1491,48 @@ function openPsetPP(key) {
   requestAnimationFrame(() => scrollToSection('sec-rm'));
 }
 
-/* ── Resource visibility radio (Screen 2) ── */
-function setResScope(val) {
+/* ── Visibility scope dropdown (Screen 2 top-right) ── */
+let currentVisScope = 'private';
+
+function toggleVisScope(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('vis-scope-menu');
+  menu.style.display = menu.style.display === 'none' ? '' : 'none';
+}
+
+function setVisScopeOpt(val, el) {
+  currentVisScope = val;
+  document.getElementById('vis-scope-label').textContent = val === 'private' ? 'Shared + Private' : 'Shared only';
+  document.getElementById('vis-chk-private').style.opacity = val === 'private' ? '1' : '0';
+  document.getElementById('vis-chk-shared').style.opacity  = val === 'shared'  ? '1' : '0';
+  document.getElementById('vis-scope-menu').style.display = 'none';
+  applyVisScope(val);
+}
+
+function applyVisScope(val) {
   const notice = document.getElementById('task-private-notice');
   const tPrivate = document.getElementById('t-private-row');
   if (val === 'shared') {
-    notice.style.display = 'flex';
-    tPrivate.style.display = 'none';
+    if (notice) notice.style.display = 'flex';
+    if (tPrivate) tPrivate.style.display = 'none';
   } else {
-    notice.style.display = 'none';
-    tPrivate.style.display = 'flex';
+    if (notice) notice.style.display = 'none';
+    if (tPrivate) tPrivate.style.display = 'flex';
   }
   const scopeVal = val === 'shared' ? 'shared' : 'both';
-  // Phase visibility radio mirrors access scope
   const phRadio = document.querySelector('input[name="ph-vis-scope"][value="' + scopeVal + '"]');
   if (phRadio) phRadio.checked = true;
-  // Task create visibility mirrors access scope
   const tCvisRadio = document.querySelector('input[name="t-cvis"][value="' + scopeVal + '"]');
   if (tCvisRadio) tCvisRadio.checked = true;
-  // File upload visibility mirrors access scope
   const fUvisRadio = document.querySelector('input[name="f-uvis"][value="' + scopeVal + '"]');
   if (fUvisRadio) fUvisRadio.checked = true;
 }
+
+// Close dropdown on outside click
+document.addEventListener('click', function() {
+  const menu = document.getElementById('vis-scope-menu');
+  if (menu) menu.style.display = 'none';
+});
 
 /* ── Multi-select dropdown ── */
 function toggleMsd(id) {
@@ -1627,9 +1666,25 @@ function openPset(key) {
     ctaBtn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit';
   }
 
-  // Visibility radio
-  document.querySelector('input[name="s2-res"][value="' + ps.vis + '"]').checked = true;
-  setResScope(ps.vis);
+  // Visibility scope dropdown
+  document.getElementById('vis-scope-label').textContent = ps.vis === 'private' ? 'Shared + Private' : 'Shared only';
+  document.getElementById('vis-chk-private').style.opacity = ps.vis === 'private' ? '1' : '0';
+  document.getElementById('vis-chk-shared').style.opacity  = ps.vis === 'shared'  ? '1' : '0';
+  currentVisScope = ps.vis;
+  applyVisScope(ps.vis);
+
+  // Description
+  const descMap = {
+    pa: 'Full access — shared and private resources, all project scopes',
+    pc: 'Collaborative access — shared and private, strict participant scope',
+    ma: 'Moderate access — shared resources only, all project scopes',
+    mc: 'Moderate access — shared resources only, strict participant scope',
+    ra: 'Restricted — view and comment only, shared resources',
+    rc: 'Restricted — view and comment only, strict participant scope',
+    prl: 'Read-only — view shared resources only'
+  };
+  const descEl = document.getElementById('s2-desc');
+  if (descEl) descEl.textContent = descMap[key] || '';
 
   // Project scope pill
   const pill = document.getElementById('proj-scope-pill');
