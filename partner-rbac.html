@@ -333,8 +333,8 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 .ps-desc{font-size:12.5px;color:var(--t3)}
 .ps-stats{font-size:12px;color:var(--t3);flex-shrink:0;margin-right:16px}
 .ps-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.scope-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:12px;font-weight:500;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);cursor:pointer;white-space:nowrap;vertical-align:middle}
-.scope-pill:hover{filter:brightness(.96)}
+.scope-pill{display:inline;padding:3px 8px;border-radius:5px;font-size:12px;font-weight:400;background:var(--accent-bg);color:var(--accent);cursor:pointer;line-height:1.5;vertical-align:middle}
+.scope-pill:hover{filter:brightness(.95)}
 .rm-scope-grid{display:grid;grid-template-columns:max-content auto;align-items:center;gap:4px 10px;padding:4px 0}
 .rm-scope-label{font-size:12px;font-weight:500;color:var(--t3);white-space:nowrap}
 </style>
@@ -661,115 +661,78 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
 
             <div class="cb-child" id="rm-children">
 
-              <!-- People and Project views — no scope -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-people-views" disabled>
                 <label for="rm-people-views">Can access People and Project views</label>
               </div>
 
-              <!-- View allocations — Projects (2 opts) + Team members (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-view-alloc" disabled>
-                <label for="rm-view-alloc">Can view allocations</label>
-              </div>
-              <div class="cb-child">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Projects</span>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
-                  <span class="rm-scope-label">Team members</span>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <label for="rm-view-alloc" style="cursor:default;white-space:nowrap">Can view allocations</label>
+                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects · Only projects where the partner company is added</span>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
                 </div>
               </div>
 
-              <!-- Manage allocations — Projects (2 opts) + Team members (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-manage-alloc" disabled>
-                <label for="rm-manage-alloc">Can manage allocations</label>
-              </div>
-              <div class="cb-child">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Projects</span>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
-                  <span class="rm-scope-label">Team members</span>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <label for="rm-manage-alloc" style="cursor:default;white-space:nowrap">Can manage allocations</label>
+                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects · Only projects where the partner company is added</span>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
                 </div>
               </div>
 
-              <!-- Capacity Planning (Partner Admin only) — Team members (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-capacity" disabled>
-                <label for="rm-capacity" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
-                  Can access Capacity Planning
-                  <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
-                </label>
-              </div>
-              <div class="cb-child">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Team members</span>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <label for="rm-capacity" style="cursor:default;display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
+                    Can access Capacity Planning
+                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                  </label>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
                 </div>
               </div>
 
-              <!-- Revenue, cost, profit (off) — no scope -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-revenue" disabled>
                 <label for="rm-revenue">Can view revenue, cost, profit and margins</label>
               </div>
 
-              <!-- Raise resource request — Projects (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-raise-req" disabled>
-                <label for="rm-raise-req">Can raise resource request</label>
-              </div>
-              <div class="cb-child">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Projects</span>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
+                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <label for="rm-raise-req" style="cursor:default;white-space:nowrap">Can raise resource request</label>
+                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects · Only projects where the partner company is added</span>
                 </div>
               </div>
 
-              <!-- Approve resource requests (Partner Admin only) — Requests (2 opts) + Team members (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-approve-req" disabled>
-                <label for="rm-approve-req" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
-                  Can approve resource requests
-                  <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
-                </label>
-              </div>
-              <div class="cb-child">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Requests</span>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
-                  <span class="rm-scope-label">Team members</span>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <label for="rm-approve-req" style="cursor:default;display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
+                    Can approve resource requests
+                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                  </label>
+                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects · Only projects where the partner company is added</span>
+                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members · Only team members who belong to the partner company</span>
                 </div>
               </div>
 
-              <!-- Allocation totals — Projects (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-alloc-totals" disabled>
-                <label for="rm-alloc-totals">Can view allocation totals for projects</label>
-              </div>
-              <div class="cb-child">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Projects</span>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
+                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <label for="rm-alloc-totals" style="cursor:default;white-space:nowrap">Can view allocation totals for projects</label>
+                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects · Only projects where the partner company is added</span>
                 </div>
               </div>
 
-              <!-- Auto-allocations (off) — Projects (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-auto-alloc" disabled>
                 <label for="rm-auto-alloc">Can turn auto-allocations on or off</label>
               </div>
-              <div class="cb-child" id="rm-auto-alloc-scope" style="display:none">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Projects</span>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
-                </div>
-              </div>
 
-              <!-- Level of effort planning (open) — Projects (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-loe" disabled>
                 <label for="rm-loe" style="display:flex;align-items:center;gap:8px;flex:1">
@@ -777,35 +740,18 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
                   <span style="font-size:11px;color:var(--t3);font-style:italic">Open</span>
                 </label>
               </div>
-              <div class="cb-child" id="rm-loe-scope" style="display:none">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Projects</span>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
-                </div>
-              </div>
 
-              <!-- View custom allocation field values — Field access (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" checked id="rm-view-fields" disabled>
-                <label for="rm-view-fields">Can view custom allocation field values</label>
-              </div>
-              <div class="cb-child" id="rm-view-fields-scope">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Field access</span>
-                  <span class="scope-pill" data-scope-type="field" data-value="global" onclick="openScopeModal(this)">Global access</span>
+                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <label for="rm-view-fields" style="cursor:default;white-space:nowrap">Can view custom allocation field values</label>
+                  <span class="scope-pill" data-scope-type="field" data-value="global" onclick="openScopeModal(this)">Global access · Can see values of all fields in the projects they have access to</span>
                 </div>
               </div>
 
-              <!-- Edit custom allocation field values (off) — Field access (2 opts) -->
               <div class="cb-row">
                 <input type="checkbox" id="rm-edit-fields" disabled>
                 <label for="rm-edit-fields">Can edit custom allocation field values</label>
-              </div>
-              <div class="cb-child" id="rm-edit-fields-scope" style="display:none">
-                <div class="rm-scope-grid">
-                  <span class="rm-scope-label">Field access</span>
-                  <span class="scope-pill" data-scope-type="field" data-value="global" onclick="openScopeModal(this)">Global access</span>
-                </div>
               </div>
 
             </div><!-- /rm-children -->
@@ -1791,7 +1737,7 @@ function saveScopeModal() {
   const opt = (SCOPE_OPTS[type] || []).find(o => o.value === sel.value);
   if (opt) {
     _scopePillTarget.dataset.value = opt.value;
-    _scopePillTarget.textContent = opt.label;
+    _scopePillTarget.textContent = opt.label + ' · ' + opt.desc;
   }
   closeScopeModal();
 }
