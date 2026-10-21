@@ -346,6 +346,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
   <button class="pb" id="pb2" onclick="go('s4','pb2')">2 · Partner company page</button>
   <button class="pb" id="pb3" onclick="go('s1','pb3')">3 · Permissions → Partner tab</button>
   <button class="pb" id="pb4" onclick="go('s2','pb4')">4 · Permission set detail</button>
+  <button class="pb" id="pb5" onclick="goToPartnerProjectTab()">5 · Partner project tab</button>
 </div>
 
 <!-- ── App shell ── -->
@@ -399,6 +400,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
             <div class="tab" onclick="switchPermTab('project')">Project</div>
             <div class="tab" onclick="switchPermTab('customer')">Customer</div>
             <div class="tab on" onclick="switchPermTab('partner')">Partner <span class="new-badge" style="margin-left:4px">New</span></div>
+            <div class="tab" onclick="switchPermTab('partner-project')">Partner project</div>
           </div>
           <div style="padding:0 24px 0 16px;border-bottom:1px solid var(--bdr);align-self:stretch;display:flex;align-items:flex-end;padding-bottom:9px">
             <button class="btn btn-p btn-sm" onclick="openMo('mo-new-pset')">
@@ -446,6 +448,33 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           </div>
         </div>
       </div>
+
+      <!-- Partner project tab content -->
+      <div id="partner-project-tab-content" style="flex:1;overflow-y:auto;display:none">
+        <div style="padding:10px 20px;font-size:11.5px;font-weight:600;color:var(--t3);letter-spacing:.32px;border-bottom:1px solid var(--div)">Permissions</div>
+
+        <div class="ps-row" onclick="openPsetPP('ppo')">
+          <div style="flex:1;display:flex;align-items:center;gap:8px">
+            <span class="ps-name">Partner Project Owner</span>
+            <span class="bdg bdg-def">Default</span>
+          </div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+        <div class="ps-row" onclick="openPsetPP('padl')">
+          <div style="flex:1;display:flex;align-items:center;gap:8px">
+            <span class="ps-name">Partner Admin / Delivery Lead</span>
+            <span class="bdg bdg-def">Default</span>
+          </div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+        <div class="ps-row" onclick="openPsetPP('pcol')">
+          <div style="flex:1;display:flex;align-items:center;gap:8px">
+            <span class="ps-name">Partner Collaborator</span>
+            <span class="bdg bdg-def">Default</span>
+          </div>
+          <button class="more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+      </div>
     </div><!-- /s1 -->
 
 
@@ -456,7 +485,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       <div class="ph">
         <div class="ph-bc">
           <a onclick="go('s1','pb3')">Permissions</a><span class="sep">/</span>
-          <a onclick="go('s1','pb3')">Partner</a><span class="sep">/</span>
+          <a id="s2-bc-label" onclick="goBackToPermTab()">Partner</a><span class="sep">/</span>
           <span id="s2-bc-name">Permissive Admin</span>
         </div>
         <div class="ph-row">
@@ -491,13 +520,14 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
       <!-- Detail layout -->
       <div class="pd-layout" style="flex:1;margin-top:12px">
         <div class="pd-sidebar">
-          <div class="pd-sb-item on" onclick="scrollToSection('sec-projects')">Projects</div>
-          <div class="pd-sb-item" onclick="scrollToSection('sec-phase')">Phase</div>
-          <div class="pd-sb-item" onclick="scrollToSection('sec-tasks')">Tasks</div>
-          <div class="pd-sb-item" onclick="scrollToSection('sec-spaces')">Spaces</div>
-          <div class="pd-sb-item" onclick="scrollToSection('sec-chat')">Chat</div>
-          <div class="pd-sb-item" onclick="scrollToSection('sec-files')">Files and Folders</div>
-          <div class="pd-sb-item" onclick="scrollToSection('sec-forms')">Form responses</div>
+          <div class="pd-sb-item on" onclick="scrollToSection('sec-projects')" data-sec="sec-projects">Projects</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-phase')" data-sec="sec-phase">Phase</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-tasks')" data-sec="sec-tasks">Tasks</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-spaces')" data-sec="sec-spaces">Spaces</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-chat')" data-sec="sec-chat">Chat</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-files')" data-sec="sec-files">Files and Folders</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-forms')" data-sec="sec-forms">Form responses</div>
+          <div class="pd-sb-item" onclick="scrollToSection('sec-rm')" data-sec="sec-rm" style="display:flex;align-items:center;gap:6px">Resource Management <span class="new-badge">New</span></div>
         </div>
 
         <div class="pd-main" id="pd-main">
@@ -603,11 +633,182 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
           </div>
 
           <!-- Form responses -->
-          <div class="ps-block" id="sec-forms" style="border-bottom:none">
+          <div class="ps-block" id="sec-forms">
             <div class="ps-block-hd"><span class="ps-block-title">Form responses</span></div>
             <div class="cb-row"><input type="checkbox" checked id="fr-view" disabled><label for="fr-view">Can view form responses</label></div>
             <div class="cb-row"><input type="checkbox" checked id="fr-submit" disabled><label for="fr-submit">Can submit form responses</label></div>
           </div>
+
+          <!-- Resource Management -->
+          <div class="ps-block" id="sec-rm" style="border-bottom:none">
+            <div class="ps-block-hd">
+              <span class="ps-block-title" style="display:flex;align-items:center;gap:8px">
+                Resource Management
+                <span class="new-badge">New</span>
+              </span>
+            </div>
+
+            <!-- Base access toggle -->
+            <div class="cb-row">
+              <input type="checkbox" checked id="rm-access" disabled>
+              <label for="rm-access" style="font-weight:500">Can access Resource Management</label>
+            </div>
+
+            <div class="cb-child" id="rm-children">
+
+              <!-- People and Project views -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-people-views" disabled>
+                <label for="rm-people-views">Can access People and Project views</label>
+              </div>
+
+              <!-- View allocations -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-view-alloc" disabled>
+                <label for="rm-view-alloc">Can view allocations</label>
+              </div>
+              <div class="cb-child" id="rm-view-alloc-scope">
+                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
+                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
+                  <div>
+                    <span class="scope-pill" style="cursor:default">Permitted projects</span>
+                  </div>
+                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
+                  <div>
+                    <span class="scope-pill" style="cursor:default">Only partner team members</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Manage allocations -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-manage-alloc" disabled>
+                <label for="rm-manage-alloc">Can manage allocations</label>
+              </div>
+              <div class="cb-child" id="rm-manage-alloc-scope">
+                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
+                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
+                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
+                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
+                  <div><span class="scope-pill" style="cursor:default">Only partner team members</span></div>
+                </div>
+              </div>
+
+              <!-- Capacity Planning (Partner Admin only) -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-capacity" disabled>
+                <label for="rm-capacity" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+                  Can access Capacity Planning
+                  <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                </label>
+              </div>
+              <div class="cb-child" id="rm-capacity-scope">
+                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
+                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
+                  <div><span class="scope-pill" style="cursor:default">Only partner team members</span></div>
+                </div>
+              </div>
+
+              <!-- Revenue, cost, profit (off) -->
+              <div class="cb-row">
+                <input type="checkbox" id="rm-revenue" disabled>
+                <label for="rm-revenue">Can view revenue, cost, profit and margins</label>
+              </div>
+
+              <!-- Raise resource request -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-raise-req" disabled>
+                <label for="rm-raise-req">Can raise resource request</label>
+              </div>
+              <div class="cb-child" id="rm-raise-req-scope">
+                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
+                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
+                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
+                  <span style="font-size:12.5px;color:var(--t3)">Skills</span>
+                  <div><span class="scope-pill" style="cursor:default">All skills</span></div>
+                </div>
+              </div>
+
+              <!-- Approve resource requests (Partner Admin only) -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-approve-req" disabled>
+                <label for="rm-approve-req" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+                  Can approve resource requests
+                  <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                </label>
+              </div>
+              <div class="cb-child" id="rm-approve-req-scope">
+                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
+                  <span style="font-size:12.5px;color:var(--t3)">Requests</span>
+                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
+                  <span style="font-size:12.5px;color:var(--t3)">Team members</span>
+                  <div><span class="scope-pill" style="cursor:default">Only partner team members</span></div>
+                </div>
+              </div>
+
+              <!-- Allocation totals -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-alloc-totals" disabled>
+                <label for="rm-alloc-totals">Can view allocation totals for projects</label>
+              </div>
+              <div class="cb-child" id="rm-alloc-totals-scope">
+                <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 8px;align-items:center;padding:4px 0 2px">
+                  <span style="font-size:12.5px;color:var(--t3)">Projects</span>
+                  <div><span class="scope-pill" style="cursor:default">Permitted projects</span></div>
+                </div>
+              </div>
+
+              <!-- Auto-allocations (off) -->
+              <div class="cb-row">
+                <input type="checkbox" id="rm-auto-alloc" disabled>
+                <label for="rm-auto-alloc">Can turn auto-allocations on or off</label>
+              </div>
+
+              <!-- Level of effort planning (open / indeterminate) -->
+              <div class="cb-row">
+                <input type="checkbox" id="rm-loe" disabled>
+                <label for="rm-loe" style="display:flex;align-items:center;gap:8px;flex:1">
+                  Can manage level of effort planning
+                  <span style="font-size:11px;color:var(--t3);font-style:italic">Open</span>
+                </label>
+              </div>
+
+              <!-- View custom allocation field values -->
+              <div class="cb-row">
+                <input type="checkbox" checked id="rm-view-fields" disabled>
+                <label for="rm-view-fields">Can view custom allocation field values</label>
+              </div>
+              <div class="cb-child" id="rm-view-fields-scope">
+                <div style="padding:4px 0 2px">
+                  <div style="font-size:12.5px;color:var(--t3);margin-bottom:8px">Field access</div>
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <label style="display:flex;align-items:flex-start;gap:8px;cursor:default">
+                      <input type="radio" name="rm-field-access" value="global" checked disabled style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+                      <div>
+                        <div style="font-size:13.5px;font-weight:500;color:var(--t1)">Global access</div>
+                        <div style="font-size:12px;color:var(--t3);margin-top:1px">Can see values of all fields in the projects they have access to</div>
+                      </div>
+                    </label>
+                    <label style="display:flex;align-items:flex-start;gap:8px;cursor:default">
+                      <input type="radio" name="rm-field-access" value="restricted" disabled style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+                      <div>
+                        <div style="font-size:13.5px;font-weight:500;color:var(--t1)">Restricted</div>
+                        <div style="font-size:12px;color:var(--t3);margin-top:1px">Can see values only in field sections visible to all</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Edit custom allocation field values (off) -->
+              <div class="cb-row">
+                <input type="checkbox" id="rm-edit-fields" disabled>
+                <label for="rm-edit-fields">Can edit custom allocation field values</label>
+              </div>
+
+            </div><!-- /rm-children -->
+          </div><!-- /sec-rm -->
+
         </div><!-- /pd-main -->
       </div>
     </div><!-- /s2 -->
@@ -1187,13 +1388,88 @@ function openMo(id) { document.getElementById(id).classList.add('on'); }
 function closeMo(id) { document.getElementById(id).classList.remove('on'); }
 function closeMoOverlay(e, id) { if (e.target === document.getElementById(id)) closeMo(id); }
 
-/* ── Permissions page tab switch (placeholder) ── */
+/* ── Permissions page tab switch ── */
 function switchPermTab(tab) {
-  document.querySelectorAll('#perms-tabs .tab').forEach(t => t.classList.remove('on'));
-  if (tab === 'account') document.querySelectorAll('#perms-tabs .tab')[0].classList.add('on');
-  if (tab === 'project') document.querySelectorAll('#perms-tabs .tab')[1].classList.add('on');
-  if (tab === 'customer') document.querySelectorAll('#perms-tabs .tab')[2].classList.add('on');
-  if (tab === 'partner') document.querySelectorAll('#perms-tabs .tab')[3].classList.add('on');
+  const tabs = document.querySelectorAll('#perms-tabs .tab');
+  tabs.forEach(t => t.classList.remove('on'));
+  const TAB_IDX = { account: 0, project: 1, customer: 2, partner: 3, 'partner-project': 4 };
+  if (TAB_IDX[tab] !== undefined) tabs[TAB_IDX[tab]].classList.add('on');
+
+  const partnerContent = document.getElementById('partner-tab-content');
+  const ppContent = document.getElementById('partner-project-tab-content');
+  if (tab === 'partner-project') {
+    partnerContent.style.display = 'none';
+    ppContent.style.display = '';
+  } else {
+    partnerContent.style.display = '';
+    ppContent.style.display = 'none';
+  }
+}
+
+/* ── Context for s2 (partner vs partner-project) ── */
+let s2Context = 'partner';
+
+function goBackToPermTab() {
+  go('s1', 'pb3');
+  switchPermTab(s2Context === 'partner-project' ? 'partner-project' : 'partner');
+}
+
+function goToPartnerProjectTab() {
+  go('s1', 'pb5');
+  switchPermTab('partner-project');
+}
+
+/* ── Partner Project permission data ── */
+const PP_PSETS = {
+  ppo: {
+    name: 'Partner Project Owner', type: 'default',
+    rm: { access:1, peopleViews:1, viewAlloc:1, manageAlloc:1, capacity:0, revenue:0,
+          raiseReq:1, approveReq:0, allocTotals:1, autoAlloc:0, loe:0, viewFields:1, editFields:0 }
+  },
+  padl: {
+    name: 'Partner Admin / Delivery Lead', type: 'default',
+    rm: { access:1, peopleViews:1, viewAlloc:1, manageAlloc:1, capacity:1, revenue:0,
+          raiseReq:1, approveReq:1, allocTotals:1, autoAlloc:0, loe:0, viewFields:1, editFields:0 }
+  },
+  pcol: {
+    name: 'Partner Collaborator', type: 'default',
+    rm: { access:1, peopleViews:1, viewAlloc:1, manageAlloc:0, capacity:0, revenue:0,
+          raiseReq:0, approveReq:0, allocTotals:0, autoAlloc:0, loe:0, viewFields:0, editFields:0 }
+  }
+};
+
+function openPsetPP(key) {
+  const ps = PP_PSETS[key];
+  if (!ps) return;
+  s2Context = 'partner-project';
+
+  document.getElementById('s2-bc-label').textContent = 'Partner project';
+  document.getElementById('s2-bc-name').textContent = ps.name;
+  document.getElementById('s2-title').textContent = ps.name;
+  const badge = document.getElementById('s2-badge');
+  badge.textContent = 'Default'; badge.className = 'bdg bdg-def';
+  document.getElementById('s2-cta-btn').style.display = 'none';
+
+  // Set RM checkboxes
+  const rmMap = {
+    'rm-access': ps.rm.access, 'rm-people-views': ps.rm.peopleViews,
+    'rm-view-alloc': ps.rm.viewAlloc, 'rm-manage-alloc': ps.rm.manageAlloc,
+    'rm-capacity': ps.rm.capacity, 'rm-revenue': ps.rm.revenue,
+    'rm-raise-req': ps.rm.raiseReq, 'rm-approve-req': ps.rm.approveReq,
+    'rm-alloc-totals': ps.rm.allocTotals, 'rm-auto-alloc': ps.rm.autoAlloc,
+    'rm-view-fields': ps.rm.viewFields, 'rm-edit-fields': ps.rm.editFields
+  };
+  Object.entries(rmMap).forEach(([id, val]) => {
+    const cb = document.getElementById(id);
+    if (cb) { cb.checked = !!val; cb.indeterminate = false; }
+  });
+  // LOE is always indeterminate (open decision)
+  const loe = document.getElementById('rm-loe');
+  if (loe) { loe.checked = false; loe.indeterminate = true; }
+
+  // Scroll to RM section automatically
+  go('s2', 'pb5');
+  requestAnimationFrame(() => scrollToSection('sec-rm'));
 }
 
 /* ── Resource visibility radio (Screen 2) ── */
@@ -1332,6 +1608,8 @@ function openPset(key) {
   const ps = PSETS[key];
   if (!ps) return;
   const isDefault = ps.type === 'default';
+  s2Context = 'partner';
+  document.getElementById('s2-bc-label').textContent = 'Partner';
 
   // Header
   document.getElementById('s2-bc-name').textContent = ps.name;
@@ -1492,11 +1770,11 @@ function populatePartnerProfile(p) {
 
 /* ── Sidebar section scroll ── */
 function scrollToSection(id) {
-  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   document.querySelectorAll('.pd-sb-item').forEach(i => i.classList.remove('on'));
-  const labels = ['sec-projects','sec-phase','sec-tasks','sec-spaces','sec-chat','sec-files','sec-forms'];
-  const idx = labels.indexOf(id);
-  if (idx >= 0) document.querySelectorAll('.pd-sb-item')[idx].classList.add('on');
+  const active = document.querySelector('.pd-sb-item[data-sec="' + id + '"]');
+  if (active) active.classList.add('on');
 }
 </script>
 </body>
