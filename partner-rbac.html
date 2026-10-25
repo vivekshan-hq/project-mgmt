@@ -653,105 +653,216 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-s
               </span>
             </div>
 
-            <!-- Base access toggle -->
             <div class="cb-row">
               <input type="checkbox" checked id="rm-access" disabled>
               <label for="rm-access" style="font-weight:500">Can access Resource Management</label>
             </div>
 
-            <div class="cb-child" id="rm-children">
+            <!-- ── Partner tab (account-level) RM ── -->
+            <div id="rm-body-partner">
+              <div class="cb-child">
 
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-people-views" disabled>
-                <label for="rm-people-views">Can access People and Project views</label>
-              </div>
-
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-view-alloc" disabled>
-                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                  <label for="rm-view-alloc" style="cursor:default;white-space:nowrap">Can view allocations</label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <label>Can access People and Project views</label>
                 </div>
-              </div>
 
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-manage-alloc" disabled>
-                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                  <label for="rm-manage-alloc" style="cursor:default;white-space:nowrap">Can manage allocations</label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can view allocations</label>
+                    <span class="scope-pill" data-scope-type="tm-acct" data-value="global" onclick="openScopeModal(this)">Team members: Global</span>
+                  </div>
                 </div>
-              </div>
 
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-capacity" disabled>
-                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                  <label for="rm-capacity" style="cursor:default;display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
-                    Can access Capacity Planning
-                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can manage allocations</label>
+                    <span class="scope-pill" data-scope-type="tm-acct" data-value="global" onclick="openScopeModal(this)">Team members: Global</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can access Capacity Planning</label>
+                    <span class="scope-pill" data-scope-type="proj-acct" data-value="company" onclick="openScopeModal(this)">Company Restricted</span>
+                  </div>
+                </div>
+
+                <div class="cb-row" style="opacity:.45;pointer-events:none">
+                  <input type="checkbox" disabled>
+                  <label style="display:flex;align-items:center;gap:8px;flex:1">
+                    Can access Resource AI
+                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg3);color:var(--t3);letter-spacing:.2px">Not available for partners</span>
                   </label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
                 </div>
-              </div>
 
-              <div class="cb-row">
-                <input type="checkbox" id="rm-revenue" disabled>
-                <label for="rm-revenue">Can view revenue, cost, profit and margins</label>
-              </div>
-
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-raise-req" disabled>
-                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                  <label for="rm-raise-req" style="cursor:default;white-space:nowrap">Can raise resource request</label>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
-                </div>
-              </div>
-
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-approve-req" disabled>
-                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                  <label for="rm-approve-req" style="cursor:default;display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
-                    Can approve resource requests
-                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                <div class="cb-row" style="opacity:.45;pointer-events:none">
+                  <input type="checkbox" disabled>
+                  <label style="display:flex;align-items:center;gap:8px;flex:1">
+                    Can view revenue, cost, profit and margins
+                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg3);color:var(--t3);letter-spacing:.2px">Not available for partners</span>
                   </label>
-                  <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
                 </div>
-              </div>
 
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-alloc-totals" disabled>
-                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                  <label for="rm-alloc-totals" style="cursor:default;white-space:nowrap">Can view allocation totals for projects</label>
-                  <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can raise resource request</label>
+                    <span class="scope-pill" data-scope-type="proj-acct" data-value="company" onclick="openScopeModal(this)">Company Restricted</span>
+                  </div>
                 </div>
-              </div>
 
-              <div class="cb-row">
-                <input type="checkbox" id="rm-auto-alloc" disabled>
-                <label for="rm-auto-alloc">Can turn auto-allocations on or off</label>
-              </div>
-
-              <div class="cb-row">
-                <input type="checkbox" id="rm-loe" disabled>
-                <label for="rm-loe" style="display:flex;align-items:center;gap:8px;flex:1">
-                  Can manage level of effort planning
-                  <span style="font-size:11px;color:var(--t3);font-style:italic">Open</span>
-                </label>
-              </div>
-
-              <div class="cb-row">
-                <input type="checkbox" checked id="rm-view-fields" disabled>
-                <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                  <label for="rm-view-fields" style="cursor:default;white-space:nowrap">Can view custom allocation field values</label>
-                  <span class="scope-pill" data-scope-type="field" data-value="global" onclick="openScopeModal(this)">Global access</span>
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can approve resource requests</label>
+                    <span class="scope-pill" data-scope-type="req-acct" data-value="owned-assigned" onclick="openScopeModal(this)">Owned and assigned</span>
+                  </div>
                 </div>
-              </div>
 
-              <div class="cb-row">
-                <input type="checkbox" id="rm-edit-fields" disabled>
-                <label for="rm-edit-fields">Can edit custom allocation field values</label>
-              </div>
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can view custom allocation field values</label>
+                    <span class="scope-pill" data-scope-type="field-acct" data-value="company" onclick="openScopeModal(this)">Company Restricted</span>
+                  </div>
+                </div>
 
-            </div><!-- /rm-children -->
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can edit custom allocation field values</label>
+                    <span class="scope-pill" data-scope-type="field-acct" data-value="company" onclick="openScopeModal(this)">Company Restricted</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label style="cursor:default;white-space:nowrap">Can view allocation totals for projects</label>
+                    <span class="scope-pill" data-scope-type="proj-acct" data-value="company" onclick="openScopeModal(this)">Company Restricted</span>
+                  </div>
+                </div>
+
+                <div class="cb-row" style="opacity:.45;pointer-events:none">
+                  <input type="checkbox" disabled>
+                  <label style="display:flex;align-items:center;gap:8px;flex:1">
+                    Can turn auto-allocations on or off
+                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg3);color:var(--t3);letter-spacing:.2px">Not available for partners</span>
+                  </label>
+                </div>
+
+                <div class="cb-row" style="opacity:.45;pointer-events:none">
+                  <input type="checkbox" disabled>
+                  <label style="display:flex;align-items:center;gap:8px;flex:1">
+                    Can manage level of effort planning
+                    <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg3);color:var(--t3);letter-spacing:.2px">Not available for partners</span>
+                  </label>
+                </div>
+
+              </div>
+            </div><!-- /rm-body-partner -->
+
+            <!-- ── Partner project tab RM ── -->
+            <div id="rm-body-pp" style="display:none">
+              <div class="cb-child" id="rm-children">
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-people-views" disabled>
+                  <label for="rm-people-views">Can access People and Project views</label>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-view-alloc" disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label for="rm-view-alloc" style="cursor:default;white-space:nowrap">Can view allocations</label>
+                    <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-manage-alloc" disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label for="rm-manage-alloc" style="cursor:default;white-space:nowrap">Can manage allocations</label>
+                    <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-capacity" disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label for="rm-capacity" style="cursor:default;display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
+                      Can access Capacity Planning
+                      <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                    </label>
+                    <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" id="rm-revenue" disabled>
+                  <label for="rm-revenue">Can view revenue, cost, profit and margins</label>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-raise-req" disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label for="rm-raise-req" style="cursor:default;white-space:nowrap">Can raise resource request</label>
+                    <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-approve-req" disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label for="rm-approve-req" style="cursor:default;display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
+                      Can approve resource requests
+                      <span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;letter-spacing:.2px">Partner Admin only</span>
+                    </label>
+                    <span class="scope-pill" data-scope-type="tm" data-value="partner" onclick="openScopeModal(this)">Only partner team members</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-alloc-totals" disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label for="rm-alloc-totals" style="cursor:default;white-space:nowrap">Can view allocation totals for projects</label>
+                    <span class="scope-pill" data-scope-type="proj" data-value="permitted" onclick="openScopeModal(this)">Permitted projects</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" id="rm-auto-alloc" disabled>
+                  <label for="rm-auto-alloc">Can turn auto-allocations on or off</label>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" id="rm-loe" disabled>
+                  <label for="rm-loe" style="display:flex;align-items:center;gap:8px;flex:1">
+                    Can manage level of effort planning
+                    <span style="font-size:11px;color:var(--t3);font-style:italic">Open</span>
+                  </label>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" checked id="rm-view-fields" disabled>
+                  <div style="flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                    <label for="rm-view-fields" style="cursor:default;white-space:nowrap">Can view custom allocation field values</label>
+                    <span class="scope-pill" data-scope-type="field" data-value="global" onclick="openScopeModal(this)">Global access</span>
+                  </div>
+                </div>
+
+                <div class="cb-row">
+                  <input type="checkbox" id="rm-edit-fields" disabled>
+                  <label for="rm-edit-fields">Can edit custom allocation field values</label>
+                </div>
+
+              </div><!-- /rm-children -->
+            </div><!-- /rm-body-pp -->
+
           </div><!-- /sec-rm -->
 
         </div><!-- /pd-main -->
@@ -1448,7 +1559,7 @@ function openPsetPP(key) {
   const loe = document.getElementById('rm-loe');
   if (loe) { loe.checked = false; loe.indeterminate = true; }
 
-  // Scroll to RM section automatically
+  applyRmContext();
   go('s2', 'pb5');
   requestAnimationFrame(() => scrollToSection('sec-rm'));
 }
@@ -1662,6 +1773,7 @@ function openPset(key) {
     if (cb) cb.checked = !!ps.p[key];
   });
 
+  applyRmContext();
   go('s2', 'pb4');
 }
 
@@ -1690,17 +1802,38 @@ function saveProjScope() {
 
 /* ── Scope picker modal (shared) ── */
 const SCOPE_OPTS = {
+  // Partner project tab scopes
   proj: [
-    { value: 'global',    label: 'Global: For all projects',       desc: 'Every project in the workspace' },
-    { value: 'permitted', label: 'Permitted projects',              desc: 'Only projects where the partner company is added' }
+    { value: 'global',    label: 'Global: For all projects',  desc: 'Every project in the workspace' },
+    { value: 'permitted', label: 'Permitted projects',         desc: 'Only projects where the partner company is added' }
   ],
   tm: [
-    { value: 'global',  label: 'Global: For all team members',   desc: 'Every team member in the workspace' },
-    { value: 'partner', label: 'Only partner team members',       desc: 'Only team members who belong to the partner company' }
+    { value: 'global',  label: 'Global: For all team members',  desc: 'Every team member in the workspace' },
+    { value: 'partner', label: 'Only partner team members',      desc: 'Only team members who belong to the partner company' }
   ],
   field: [
     { value: 'global',      label: 'Global access',  desc: 'Can see values of all fields in the projects they have access to' },
     { value: 'restricted',  label: 'Restricted',     desc: 'Can see values only in field sections visible to all' }
+  ],
+  // Partner tab (account-level) scopes
+  'proj-acct': [
+    { value: 'company',     label: 'Company Restricted',   desc: 'Projects the partner company is part of' },
+    { value: 'participant', label: 'Participant',           desc: 'Only projects where the partner team member is a participant' },
+    { value: 'own',         label: 'Projects they own',    desc: 'Only projects the partner team member owns' }
+  ],
+  'tm-acct': [
+    { value: 'global', label: 'Team members: Global',  desc: 'All partner team members who are part of their partner company' },
+    { value: 'me',     label: 'Only me',               desc: 'Only the partner team member themselves' }
+  ],
+  'field-acct': [
+    { value: 'company',     label: 'Company Restricted',       desc: 'Projects the partner company is part of' },
+    { value: 'participant', label: 'Participant',               desc: 'Only projects where the partner team member is a participant' },
+    { value: 'own',         label: 'Projects they own',        desc: 'Only projects the partner team member owns' },
+    { value: 'own-alloc',   label: 'Only their allocations',   desc: 'Only allocations added against the partner team member in a project' }
+  ],
+  'req-acct': [
+    { value: 'owned-assigned', label: 'Owned and assigned',  desc: 'Requests on projects they own, and requests assigned to them' },
+    { value: 'assigned',       label: 'Assigned to me',      desc: 'All requests assigned to them' }
   ]
 };
 
@@ -1742,6 +1875,12 @@ function saveScopeModal() {
 function closeScopeModal() {
   document.getElementById('mo-scope-picker').classList.remove('on');
   _scopePillTarget = null;
+}
+
+function applyRmContext() {
+  const isPartner = s2Context === 'partner';
+  document.getElementById('rm-body-partner').style.display = isPartner ? '' : 'none';
+  document.getElementById('rm-body-pp').style.display      = isPartner ? 'none' : '';
 }
 
 /* ── Create partner ── */
