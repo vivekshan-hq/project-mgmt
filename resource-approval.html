@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resource Approval</title>
+<style>
+:root{
+  --nav-bg:#1d1d1f;
+  --bg:#f0f0f0;--surface:#fff;--surface-2:#fafafa;--surface-3:#f4f4f4;
+  --border:#e3e3e3;--border-s:#f4f4f4;
+  --t1:#161616;--t2:#525252;--t3:#6f6f6f;--t-ph:#a8a8a8;--t-dis:#c6c6c6;
+  --blue:#0f62fe;--blue-bg:#edf5ff;--blue-m:#d0e2ff;
+  --green:#24a148;--green-bg:#defbe6;--green-dk:#0e6027;
+  --red:#da1e28;--red-bg:#fff1f1;
+  --orange:#C2410C;--orange-bg:#FFF7ED;--orange-b:#FED7AA;
+  --sh1:0px .4px .9px rgba(0,0,0,.13),0px .075px .225px rgba(0,0,0,.11);
+  --sh2:0px .8px 1.8px rgba(0,0,0,.13),0px .15px .45px rgba(0,0,0,.11);
+  --sh4:0px 3.2px 7.2px rgba(0,0,0,.13),0px .6px 1.8px rgba(0,0,0,.11);
+  --sh6:0px 12.8px 28.8px rgba(0,0,0,.22),0px 2.4px 7.2px rgba(0,0,0,.18);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111;--surface:#1e1e1e;--surface-2:#181818;--surface-3:#161616;
+  --border:#333;--border-s:#222;
+  --t1:#f4f4f4;--t2:#c6c6c6;--t3:#8d8d8d;--t-ph:#525252;--t-dis:#3a3a3a;
+  --blue-bg:#001141;--blue-m:#003082;
+  --green-bg:#071a08;--green-dk:#6fdc8c;
+  --red-bg:#2d0709;--orange-bg:#1c0f00;--orange-b:#7c2d12;
+}}
+:root[data-theme="dark"]{
+  --bg:#111;--surface:#1e1e1e;--surface-2:#181818;--surface-3:#161616;
+  --border:#333;--border-s:#222;
+  --t1:#f4f4f4;--t2:#c6c6c6;--t3:#8d8d8d;--t-ph:#525252;--t-dis:#3a3a3a;
+  --blue-bg:#001141;--blue-m:#003082;
+  --green-bg:#071a08;--green-dk:#6fdc8c;
+  --red-bg:#2d0709;--orange-bg:#1c0f00;--orange-b:#7c2d12;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:18px;letter-spacing:.16px;background:var(--bg);color:var(--t1);height:100vh;overflow:hidden}
+
+/* ── App shell ── */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── Nav rail ── */
+.nav-rail{width:48px;background:var(--nav-bg);display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;flex-shrink:0}
+.nav-logo{width:28px;height:28px;border-radius:5px;background:linear-gradient(145deg,#4a90d9,#0f62fe);display:flex;align-items:center;justify-content:center;margin-bottom:20px;flex-shrink:0}
+.nav-logo svg{width:14px;height:14px;color:#fff}
+.nav-item{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:2px;transition:background .12s,color .12s;border:none;background:none}
+.nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8)}
+.nav-item.active{background:rgba(255,255,255,.14);color:#fff}
+.nav-item svg{width:16px;height:16px}
+.nav-spacer{flex:1}
+.nav-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#be95ff,#6929c4);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:4px}
+
+/* ── Split view ── */
+.split-view{flex:1;display:flex;overflow:hidden}
+
+/* ════ DETAIL PANEL ════ */
+.dp{width:382px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.dp-topbar{padding:12px 40px 10px 16px;border-bottom:1px solid var(--border-s);flex-shrink:0}
+.dp-from{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);margin-bottom:5px;line-height:16px}
+.dp-from-av{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#FF7043,#E53935);color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dp-title{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:590;color:var(--t1)}
+.dp-circle{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--t3);flex-shrink:0}
+.dp-close{position:absolute;top:10px;right:10px;width:24px;height:24px;border:none;background:none;color:var(--t3);font-size:18px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.dp-close:hover{background:var(--surface-3);color:var(--t1)}
+
+/* Info fields */
+.dp-info{padding:10px 16px;border-bottom:1px solid var(--border-s);display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.dp-row{display:flex;align-items:center;min-height:22px}
+.dp-lbl{width:116px;flex-shrink:0;font-size:12px;color:var(--t2);line-height:16px}
+.dp-val{flex:1;font-size:13px;color:var(--t1);display:flex;align-items:center;gap:5px}
+.dp-val.ph{color:var(--t-ph);font-size:13px}
+.tag-g{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:9px;background:var(--green-bg);color:var(--green-dk);font-size:11px;font-weight:590}
+.ico-btn{width:16px;height:16px;border:none;background:none;color:var(--t3);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.ico-btn:hover{color:var(--blue)}
+.ico-btn svg{width:11px;height:11px}
+.pbar-wrap{flex:1;height:11px;background:var(--surface-3);border-radius:2px;position:relative;overflow:visible}
+.pbar-fill{height:100%;background:#e53935;border-radius:2px 0 0 2px;width:68%}
+.pbar-pin{position:absolute;top:-2px;left:68%;width:1.5px;height:15px;background:#e53935;transform:translateX(-50%)}
+
+/* Tabs */
+.dp-tabs{display:flex;border-bottom:1px solid var(--border-s);flex-shrink:0;padding:0 16px}
+.dp-tab{height:36px;padding:0 2px;margin-right:18px;font-size:13px;color:var(--t2);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;letter-spacing:.16px;transition:color .12s}
+.dp-tab:hover{color:var(--t1)}
+.dp-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* Requirement rows */
+.req-body{flex:1;overflow-y:auto}
+.rq-row{display:flex;align-items:flex-start;padding:8px 16px;border-bottom:1px solid var(--border-s);min-height:36px}
+.rq-lbl{width:140px;flex-shrink:0;font-size:12px;color:var(--t2);line-height:16px;padding-top:3px}
+.rq-val{flex:1;font-size:13px;color:var(--t1);display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:22px}
+.pm-ico{width:20px;height:20px;border-radius:4px;background:var(--green-dk);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:10px;font-size:12px;font-weight:500}
+.chip-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-m)}
+.chip-green{background:var(--green-bg);color:var(--green-dk);border:1px solid #a7f3d0}
+.chip-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b)}
+.chip-x{width:13px;height:13px;border:none;background:none;color:inherit;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0;opacity:.65;border-radius:50%}
+.chip-x:hover{opacity:1;background:rgba(0,0,0,.1)}
+.add-link{display:inline-flex;align-items:center;gap:3px;color:var(--blue);font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;letter-spacing:.16px}
+.add-link:hover{text-decoration:underline}
+.sel-inline{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--t1);cursor:default}
+.sel-inline svg{width:12px;height:12px;color:var(--t3)}
+
+/* Allocations */
+.alloc-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px}
+.alloc-ttl{font-size:12px;font-weight:590;color:var(--t1)}
+.alloc-acts{display:flex;align-items:center;gap:0}
+.alloc-act{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;font-family:inherit}
+.alloc-act:hover{text-decoration:underline}
+.alloc-dot-sep{font-size:12px;color:var(--t3);margin:0 5px}
+.alloc-row{display:flex;align-items:center;gap:8px;padding:6px 16px;cursor:pointer;border-bottom:1px solid var(--border-s)}
+.alloc-row:hover{background:var(--surface-2)}
+.alloc-chev{color:var(--t3)}
+.alloc-chev svg{width:11px;height:11px}
+.alloc-range{font-size:13px;color:var(--t2)}
+.alloc-dur{font-size:13px;color:var(--t1);font-weight:500}
+
+/* Footer */
+.dp-footer{padding:11px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--surface)}
+.fp-spacer{flex:1}
+.btn-block{height:32px;padding:0 16px;border:1px solid var(--red);border-radius:4px;color:var(--red);background:transparent;font-size:14px;font-weight:590;letter-spacing:.16px;cursor:pointer;font-family:inherit;transition:background .12s}
+.btn-block:hover{background:var(--red-bg)}
+.btn-approve{height:32px;padding:0 20px;border:none;border-radius:4px;font-size:14px;font-weight:590;letter-spacing:.16px;cursor:not-allowed;font-family:inherit;background:var(--t-dis);color:#fff;opacity:.55;transition:background .12s,opacity .12s}
+.btn-approve.on{background:#1d1d1f;opacity:1;cursor:pointer}
+.btn-approve.on:hover{background:#3d3d3d}
+
+/* ════ MATCHES PANEL ════ */
+.matches{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
+.matches-top{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border-s);flex-shrink:0}
+.matches-count{font-size:13px;font-weight:500;color:var(--t1)}
+.view-tog{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-left:2px}
+.vt{width:30px;height:26px;border:none;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;background:var(--surface);transition:background .1s,color .1s}
+.vt:hover{background:var(--surface-2)}
+.vt.on{background:var(--t1);color:#fff}
+.vt svg{width:13px;height:13px}
+.sort-btn{width:30px;height:26px;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center}
+.sort-btn svg{width:13px;height:13px}
+.soft-wrap{display:flex;align-items:center;gap:5px;margin-left:auto;font-size:12px;color:var(--t2)}
+.soft-ico{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--t-ph);display:flex;align-items:center;justify-content:center;color:var(--t-ph);font-size:8px;cursor:default}
+.tog{width:32px;height:17px;border-radius:9px;background:var(--surface-3);border:1px solid var(--border);position:relative;flex-shrink:0}
+.tog-k{width:11px;height:11px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;box-shadow:var(--sh1);transition:transform .15s}
+
+/* Matches table */
+.mtw{flex:1;overflow-y:auto}
+.mt{width:100%;border-collapse:collapse}
+.mt th{padding:8px 14px;font-size:12px;line-height:16px;letter-spacing:.32px;color:var(--t2);font-weight:400;border-bottom:1px solid var(--border-s);text-align:left;white-space:nowrap;position:sticky;top:0;background:var(--surface);z-index:2}
+.mt td{padding:10px 14px;border-bottom:1px solid var(--border-s);font-size:13px;color:var(--t1);white-space:nowrap;font-variant-numeric:tabular-nums}
+.mt tr{cursor:pointer}
+.mt tr:hover td{background:var(--surface-2)}
+.mt tr.sel td{background:var(--blue-bg)}
+.mt tr.filtered-out td{opacity:.3;pointer-events:none}
+.tm-cell{display:flex;align-items:center;gap:8px}
+.tm-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.role-cell{display:flex;align-items:center;gap:5px;color:var(--t2)}
+.rdot{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
+.util-c{color:var(--t2)}
+.oa-c{color:var(--green)}
+.cert-tag{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px;border-radius:3px;font-size:10px;font-weight:590}
+.cert-yes{background:var(--green-bg);color:var(--green-dk)}
+.cert-no{background:var(--surface-3);color:var(--t-ph)}
+
+/* ════ ADD FIELDS MODAL ════ */
+.af-back{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
+.af-back.open{display:flex}
+.af-modal{background:var(--surface);border-radius:8px;width:960px;max-width:96vw;height:620px;display:flex;flex-direction:column;box-shadow:var(--sh6);overflow:hidden}
+.af-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.af-title{font-size:16px;font-weight:590;color:var(--t1)}
+.af-x{width:28px;height:28px;border:none;background:none;color:var(--t3);font-size:20px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.af-x:hover{background:var(--surface-3);color:var(--t1)}
+.af-search-bar{display:flex;align-items:center;gap:8px;padding:9px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.af-search-bar svg{width:14px;height:14px;color:var(--t-ph);flex-shrink:0}
+.af-search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;color:var(--t1);width:100%}
+.af-search-bar input::placeholder{color:var(--t-ph)}
+.af-body{display:flex;flex:1;overflow:hidden}
+
+/* Groups */
+.af-groups{width:196px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:10px 0}
+.afg-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);padding:8px 16px 3px}
+.afg-parent{display:flex;align-items:center;gap:5px;padding:5px 16px;font-size:13px;color:var(--t1);font-weight:590;cursor:default;user-select:none}
+.afg-parent svg{width:10px;height:10px;color:var(--t3)}
+.afg-child{display:flex;align-items:center;height:29px;padding:0 16px 0 32px;font-size:13px;color:var(--t2);cursor:pointer;transition:background .1s,color .1s;border-left:2px solid transparent}
+.afg-child:hover{background:var(--surface-2);color:var(--t1)}
+.afg-child.on{background:var(--blue-bg);color:var(--blue);font-weight:500;border-left-color:var(--blue)}
+.afg-sep{height:1px;background:var(--border-s);margin:8px 0}
+
+/* Fields list */
+.af-fields{flex:1;overflow-y:auto;border-right:1px solid var(--border)}
+.af-f-hdr{font-size:14px;font-weight:590;color:var(--t1);padding:12px 16px 0}
+.af-f-sub{font-size:12px;color:var(--t3);padding:3px 16px 8px;border-bottom:1px solid var(--border-s)}
+.af-frow{display:flex;align-items:center;gap:8px;padding:7px 16px;border-bottom:1px solid var(--border-s);min-height:42px}
+.af-frow:hover{background:var(--surface-2)}
+.af-frow.cert-row{background:rgba(194,65,12,.02)}
+.af-frow.cert-row:hover{background:rgba(194,65,12,.05)}
+.af-cb{width:16px;height:16px;border:1.5px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .1s;position:relative}
+.af-cb.on{background:var(--blue);border-color:var(--blue)}
+.af-cb.on::after{content:'';width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translate(1px,-1px);display:block}
+.af-cb.cert-on{background:var(--orange);border-color:var(--orange)}
+.af-cb.cert-on::after{content:'';width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translate(1px,-1px);display:block}
+.af-fname{flex:1;font-size:13px;color:var(--t1);display:flex;align-items:center;gap:5px}
+.cert-badge-ico{width:16px;height:16px;border-radius:3px;background:var(--orange-bg);border:1px solid var(--orange-b);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cert-badge-ico svg{width:8px;height:8px;color:var(--orange)}
+.af-cond{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--t2);font-size:12px;font-family:inherit;cursor:default;display:flex;align-items:center;gap:4px;white-space:nowrap;min-width:96px}
+.af-cond svg{width:10px;height:10px;color:var(--t3)}
+.af-val{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--t-ph);font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:4px;min-width:76px;position:relative;white-space:nowrap}
+.af-val.has{color:var(--t1)}
+.af-val.cert-pick{border-color:var(--orange-b);color:var(--orange);background:var(--orange-bg);font-weight:500}
+.af-val svg{width:10px;height:10px;color:var(--t3);margin-left:auto;flex-shrink:0}
+.af-num{width:52px;height:26px;padding:0 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--t1);font-size:12px;font-family:inherit;text-align:center}
+
+/* Cert value dropdown */
+.cert-dd-wrap{position:relative}
+.cert-dd{position:absolute;top:calc(100%+4px);left:0;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--sh4);min-width:220px;display:none;padding:4px 0}
+.cert-dd.open{display:block}
+.cert-dd-opt{padding:7px 12px;font-size:13px;color:var(--t1);cursor:pointer}
+.cert-dd-opt:hover{background:var(--surface-2)}
+.cert-dd-opt.active{background:var(--orange-bg);color:var(--orange);font-weight:500}
+
+/* Selected panel */
+.af-sel{width:220px;flex-shrink:0;padding:12px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.af-sel-hdr{font-size:13px;font-weight:590;color:var(--t1)}
+.af-match-row{display:flex;align-items:center;gap:5px}
+.af-match-lbl{font-size:12px;color:var(--t2)}
+.af-match-val{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--t1);font-weight:590;cursor:default}
+.af-match-val svg{width:10px;height:10px;color:var(--t3)}
+.af-empty{font-size:12px;color:var(--t-ph);font-style:italic}
+.af-sel-list{display:flex;flex-direction:column;gap:5px}
+.af-sel-item{display:flex;align-items:flex-start;gap:6px;padding:7px 9px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;font-size:12px}
+.af-sel-item.c-item{background:var(--orange-bg);border-color:var(--orange-b)}
+.af-sel-item svg{width:12px;height:12px;flex-shrink:0;margin-top:1px;color:var(--t3)}
+.af-sel-item.c-item svg{color:var(--orange)}
+.af-sel-item-body{flex:1;line-height:1.45}
+.af-sel-item-name{font-weight:590;color:var(--t1)}
+.af-sel-item.c-item .af-sel-item-name{color:var(--orange)}
+.af-sel-item-cond{font-size:11px;color:var(--t3);margin-top:1px}
+.af-sel-rm{background:none;border:none;cursor:pointer;color:var(--t3);font-size:14px;padding:0;line-height:1;flex-shrink:0}
+.af-sel-rm:hover{color:var(--red)}
+
+/* Modal footer */
+.af-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 24px;border-top:1px solid var(--border);flex-shrink:0}
+.btn-cancel{height:32px;padding:0 16px;border:1px solid var(--border);border-radius:4px;background:none;color:var(--t1);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s}
+.btn-cancel:hover{background:var(--surface-3)}
+.btn-done{height:32px;padding:0 18px;background:var(--t1);color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:590;cursor:pointer;font-family:inherit;transition:background .12s}
+.btn-done:hover{background:#3a3a3a}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:#1d1d1f;color:#fff;padding:10px 18px;border-radius:6px;font-size:13px;font-weight:500;box-shadow:var(--sh6);opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:9999;display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-ico{width:18px;height:18px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast-ico svg{width:10px;height:10px;color:#fff}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Nav rail -->
+  <nav class="nav-rail">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <button class="nav-item" title="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    </button>
+    <button class="nav-item" title="Tasks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    </button>
+    <button class="nav-item" title="Calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </button>
+    <button class="nav-item active" title="Resource Planning">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    </button>
+    <button class="nav-item" title="Reports">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </button>
+    <button class="nav-item" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+    </button>
+    <div class="nav-spacer"></div>
+    <div class="nav-avatar">VS</div>
+  </nav>
+
+  <!-- Split view -->
+  <div class="split-view">
+
+    <!-- ════ DETAIL PANEL ════ -->
+    <div class="dp">
+      <button class="dp-close">×</button>
+
+      <div class="dp-topbar">
+        <div class="dp-from">
+          Assign placeholder request from
+          <div class="dp-from-av">S</div>
+          <span style="font-weight:590;color:var(--t1)">shreeda</span>
+        </div>
+        <div class="dp-title">
+          <div class="dp-circle"></div>
+          <span>Project Manager for 5h 47m</span>
+        </div>
+      </div>
+
+      <div class="dp-info">
+        <div class="dp-row">
+          <span class="dp-lbl">Approver</span>
+          <span class="dp-val ph">Select...</span>
+        </div>
+        <div class="dp-row">
+          <span class="dp-lbl">Project name</span>
+          <span class="dp-val">
+            <span class="tag-g">Fixed fee</span>
+            <button class="ico-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </button>
+          </span>
+        </div>
+        <div class="dp-row">
+          <span class="dp-lbl">Project hours</span>
+          <div class="pbar-wrap">
+            <div class="pbar-fill"></div>
+            <div class="pbar-pin"></div>
+          </div>
+        </div>
+        <div class="dp-row">
+          <span class="dp-lbl">Fixed fee</span>
+          <span class="dp-val">USD 200</span>
+        </div>
+      </div>
+
+      <div class="dp-tabs">
+        <button class="dp-tab active">Requirement</button>
+        <button class="dp-tab">Project info</button>
+      </div>
+
+      <div class="req-body">
+        <div class="rq-row">
+          <span class="rq-lbl">Placeholder</span>
+          <span class="rq-val">
+            <span class="pm-ico">PM</span>
+            Project Manager
+          </span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Role/Team member</span>
+          <span class="rq-val">
+            <span class="chip chip-green">Project Manager <button class="chip-x">×</button></span>
+          </span>
+        </div>
+        <div class="rq-row" id="skills-row">
+          <span class="rq-lbl">Fields &amp; Skills</span>
+          <span class="rq-val" id="skills-chips">
+            <button class="add-link" onclick="openAF()">+ Add skills</button>
+          </span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Allocation method</span>
+          <span class="rq-val">
+            <span class="sel-inline">Total hours <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Allocation type</span>
+          <span class="rq-val">
+            <span class="sel-inline">Hard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </span>
+        </div>
+
+        <div class="alloc-hdr">
+          <span class="alloc-ttl">Allocations</span>
+          <div class="alloc-acts">
+            <button class="alloc-act">Expand all</button>
+            <span class="alloc-dot-sep">·</span>
+            <button class="alloc-act">Collapse all</button>
+          </div>
+        </div>
+        <div class="alloc-row">
+          <span class="alloc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <span class="alloc-range">13 Mar – 13 Mar</span>
+          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
+          <span class="alloc-dur">1h 40m</span>
+        </div>
+        <div class="alloc-row">
+          <span class="alloc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <span class="alloc-range">16 Mar – 19 Mar</span>
+          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
+          <span class="alloc-dur">2h 30m</span>
+        </div>
+        <div class="alloc-row">
+          <span class="alloc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <span class="alloc-range">16 Mar – 22 Mar</span>
+          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
+          <span class="alloc-dur">38m</span>
+        </div>
+        <div class="alloc-row">
+          <span class="alloc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <span class="alloc-range">18 Mar – 18 Mar</span>
+          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
+          <span class="alloc-dur">1h 00m</span>
+        </div>
+      </div>
+
+      <div class="dp-footer">
+        <button class="btn-block">Block</button>
+        <div class="fp-spacer"></div>
+        <button class="btn-approve" id="approve-btn" onclick="doApprove()">Approve</button>
+      </div>
+    </div><!-- /dp -->
+
+    <!-- ════ MATCHES PANEL ════ -->
+    <div class="matches">
+      <div class="matches-top">
+        <span class="matches-count" id="matches-count">Showing 6 relevant matches</span>
+        <div class="view-tog" style="margin-left:6px">
+          <button class="vt on" title="List view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+          <button class="vt" title="Timeline view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <button class="sort-btn" title="Sort &amp; filter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="9" x2="21" y2="9"/><line x1="6" y1="14" x2="18" y2="14"/><line x1="9" y1="19" x2="15" y2="19"/></svg>
+        </button>
+        <div class="soft-wrap">
+          <div class="tog"><div class="tog-k"></div></div>
+          Ignore soft allocations
+          <div class="soft-ico">i</div>
+        </div>
+      </div>
+
+      <div class="mtw">
+        <table class="mt" id="matches-table">
+          <thead>
+            <tr>
+              <th>Team member</th>
+              <th>Role</th>
+              <th>Forecasted ut...</th>
+              <th>Forecasted bi...</th>
+              <th>Overallocations</th>
+              <th>Cost rate</th>
+              <th id="cert-col-hdr" style="display:none">Certification</th>
+            </tr>
+          </thead>
+          <tbody id="matches-tbody"></tbody>
+        </table>
+      </div>
+    </div><!-- /matches -->
+
+  </div><!-- /split-view -->
+</div><!-- /app -->
+
+<!-- ════ ADD FIELDS MODAL ════ -->
+<div class="af-back" id="af-back" onclick="if(event.target===this)closeAF()">
+  <div class="af-modal">
+    <div class="af-hdr">
+      <span class="af-title">Add fields</span>
+      <button class="af-x" onclick="closeAF()">×</button>
+    </div>
+    <div class="af-search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search">
+    </div>
+
+    <div class="af-body">
+
+      <!-- Groups -->
+      <div class="af-groups">
+        <div class="afg-lbl">Groups</div>
+        <div class="afg-parent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="19 9 12 16 5 9"/></svg>
+          Skills
+        </div>
+        <div class="afg-child on" onclick="switchGroup('skills', this)">Technical Skills</div>
+        <div class="afg-child" onclick="switchGroup('generic', this)">Generic Skills</div>
+        <div class="afg-child" onclick="switchGroup('integrations', this)">Integrations</div>
+        <div class="afg-child" onclick="switchGroup('sae', this)">SAE tech skills</div>
+        <div class="afg-child" onclick="switchGroup('section6', this)">Section 6</div>
+        <div class="afg-sep"></div>
+        <div class="afg-parent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="19 9 12 16 5 9"/></svg>
+          Team member fields
+        </div>
+        <div class="afg-child" onclick="switchGroup('info', this)">Info</div>
+        <div class="afg-child" onclick="switchGroup('contact', this)">Contact Info</div>
+        <div class="afg-child" onclick="switchGroup('utilization', this)">Utilization</div>
+        <div class="afg-child" onclick="switchGroup('default', this)">Default</div>
+      </div>
+
+      <!-- Fields list -->
+      <div class="af-fields">
+        <div class="af-f-hdr" id="af-f-hdr">Skills</div>
+        <div class="af-f-sub" id="af-f-sub">Technical Skills</div>
+        <div id="af-field-list"></div>
+      </div>
+
+      <!-- Selected panel -->
+      <div class="af-sel">
+        <div class="af-sel-hdr">Selected filters (<span id="sel-count">0</span>)</div>
+        <div class="af-match-row">
+          <span class="af-match-lbl">Matches:</span>
+          <span class="af-match-val">All <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+        <div id="af-empty" class="af-empty">No filters selected</div>
+        <div class="af-sel-list" id="af-sel-list"></div>
+      </div>
+
+    </div><!-- /af-body -->
+
+    <div class="af-footer">
+      <button class="btn-cancel" onclick="closeAF()">Cancel</button>
+      <button class="btn-done" onclick="applyFilters()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-ico">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <span id="toast-text"></span>
+</div>
+
+<script>
+/* ─── DATA ─── */
+const MEMBERS = [
+  { name:'esswarapandian',  initials:'E',  color:'#6366F1', certs:['AWS Solutions Architect Professional','Azure Fundamentals (AZ-900)'] },
+  { name:'heather Pertel',  initials:'HP', color:'#F59E0B', certs:['Project Management Professional (PMP)','Salesforce Certified Administrator'] },
+  { name:'Jhonty Rhodes',   initials:'JR', color:'#EF4444', certs:['Project Management Professional (PMP)'] },
+  { name:'Pav Michalak',    initials:'PM', color:'#10B981', certs:['AWS Solutions Architect Professional','Cisco CCNA'] },
+  { name:'vivekananth1 nm', initials:'VN', color:'#0f62fe', certs:[] },
+  { name:'V K',             initials:'VK', color:'#8B5CF6', certs:['Project Management Professional (PMP)','Salesforce Certified Administrator'] },
+];
+
+const CERT_OPTIONS = [
+  'AWS Solutions Architect Professional',
+  'Project Management Professional (PMP)',
+  'Salesforce Certified Administrator',
+  'Azure Fundamentals (AZ-900)',
+  'Cisco CCNA',
+];
+
+const FIELDS_BY_GROUP = {
+  skills: [
+    { id:'javascript',  name:'Javascript',             type:'level',   label:'is at least...' },
+    { id:'datamig',     name:'Data Migration',          type:'level',   label:'is at least...' },
+    { id:'sfint',       name:'Salesforce Integration',  type:'bool',    label:'is true' },
+    { id:'timemgmt',    name:'Time management',         type:'number',  label:'is greater than...' },
+    { id:'budget',      name:'Budget',                  type:'number',  label:'is greater than...' },
+    { id:'progmgmt',    name:'Program management',      type:'level',   label:'is at least...' },
+    { id:'softtesting', name:'Software Testing',        type:'level',   label:'is at least...' },
+    { id:'cert',        name:'Certification',           type:'cert',    label:'is exactly...' },
+    { id:'java',        name:'Java',                    type:'level',   label:'is at least...' },
+    { id:'typing',      name:'Typing Skill',            type:'level',   label:'is at least...' },
+    { id:'yesno',       name:'Yes or No Skills',        type:'bool',    label:'is true' },
+    { id:'single',      name:'Single Choice Field',     type:'choice',  label:'is exactly...' },
+    { id:'multi',       name:'Multi Choice Field',      type:'choice',  label:'is exactly...' },
+    { id:'numfield',    name:'Number Field Skill',      type:'number',  label:'is greater than...' },
+  ],
+  generic:      [{ id:'comm',   name:'Communication',   type:'level',  label:'is at least...' }, { id:'collab', name:'Collaboration', type:'level', label:'is at least...' }],
+  integrations: [{ id:'zapier', name:'Zapier',          type:'bool',   label:'is true' }, { id:'make', name:'Make / Integromat', type:'bool', label:'is true' }],
+  sae:          [{ id:'sae1',   name:'SAE Skill 1',     type:'level',  label:'is at least...' }],
+  section6:     [{ id:'s6f1',   name:'Section 6 Field', type:'bool',   label:'is true' }],
+  info:         [{ id:'dept',   name:'Department',      type:'choice', label:'is exactly...' }, { id:'loc', name:'Location', type:'choice', label:'is exactly...' }],
+  contact:      [{ id:'phone',  name:'Phone',           type:'bool',   label:'is true' }],
+  utilization:  [{ id:'target', name:'Target utilization', type:'number', label:'is greater than...' }],
+  default:      [{ id:'empid',  name:'Employee ID',     type:'choice', label:'is exactly...' }],
+};
+
+const GROUP_LABELS = {
+  skills:'Skills', generic:'Skills', integrations:'Skills', sae:'Skills', section6:'Skills',
+  info:'Team member fields', contact:'Team member fields', utilization:'Team member fields', default:'Team member fields',
+};
+const GROUP_SUBS = {
+  skills:'Technical Skills', generic:'Generic Skills', integrations:'Integrations', sae:'SAE tech skills', section6:'Section 6',
+  info:'Info', contact:'Contact Info', utilization:'Utilization', default:'Default',
+};
+
+/* ─── STATE ─── */
+let currentGroup = 'skills';
+let checkedFields = {};   // fieldId → true
+let certValue = '';       // currently selected cert value in modal
+let appliedFilters = [];  // [{id, name, condition, value, isCert}]
+let selectedMember = -1;
+let ddOpen = false;
+
+/* ─── RENDER MATCHES TABLE ─── */
+function renderMatches() {
+  const certFilter = appliedFilters.find(f => f.isCert);
+  const tbody = document.getElementById('matches-tbody');
+  const certColHdr = document.getElementById('cert-col-hdr');
+  certColHdr.style.display = certFilter ? '' : 'none';
+
+  let shown = 0;
+  tbody.innerHTML = MEMBERS.map((m, i) => {
+    const hasCert = certFilter ? m.certs.includes(certFilter.value) : null;
+    const hide = certFilter && !hasCert;
+    if (!hide) shown++;
+    const selCls = selectedMember === i ? ' sel' : '';
+    const hideCls = hide ? ' filtered-out' : '';
+    const certCell = certFilter
+      ? `<td>${hasCert
+          ? `<span class="cert-tag cert-yes">✓ Has cert</span>`
+          : `<span class="cert-tag cert-no">— Missing</span>`}</td>`
+      : '';
+    return `<tr class="${selCls}${hideCls}" onclick="selectMember(${i})">
+      <td><div class="tm-cell"><div class="tm-av" style="background:${m.color}">${m.initials}</div>${m.name}</div></td>
+      <td><div class="role-cell"><div class="rdot" style="background:var(--green-dk)">PM</div>Project Manager</div></td>
+      <td class="util-c">15.36%</td>
+      <td class="util-c">15.36%</td>
+      <td class="oa-c">0h</td>
+      <td>USD 275</td>
+      ${certCell}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('matches-count').textContent = `Showing ${shown} relevant match${shown === 1 ? '' : 'es'}`;
+}
+
+function selectMember(i) {
+  selectedMember = i;
+  renderMatches();
+  document.getElementById('approve-btn').classList.add('on');
+}
+
+function doApprove() {
+  if (!document.getElementById('approve-btn').classList.contains('on')) return;
+  const name = MEMBERS[selectedMember].name;
+  showToast(`${name} approved for Project Manager · 5h 47m`);
+}
+
+/* ─── SKILLS CHIPS in left panel ─── */
+function renderSkillsChips() {
+  const wrap = document.getElementById('skills-chips');
+  const chips = appliedFilters.map(f =>
+    `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">
+      ${f.isCert ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>` : ''}
+      ${f.name}${f.value ? ': ' + (f.value.length > 20 ? f.value.slice(0,18)+'…' : f.value) : ''}
+      <button class="chip-x" onclick="removeFilter('${f.id}')">×</button>
+    </span>`
+  ).join('');
+  wrap.innerHTML = chips + `<button class="add-link" onclick="openAF()">+ Add skills</button>`;
+}
+
+function removeFilter(id) {
+  appliedFilters = appliedFilters.filter(f => f.id !== id);
+  if (id === 'cert') certValue = '';
+  renderSkillsChips();
+  renderMatches();
+}
+
+/* ─── MODAL ─── */
+function openAF() {
+  document.getElementById('af-back').classList.add('open');
+  // re-sync checked state from applied filters
+  checkedFields = {};
+  appliedFilters.forEach(f => { checkedFields[f.id] = true; });
+  renderFieldList();
+  renderSelPanel();
+}
+function closeAF() { document.getElementById('af-back').classList.remove('open'); closeCertDD(); }
+
+function switchGroup(g, el) {
+  currentGroup = g;
+  document.querySelectorAll('.afg-child').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('af-f-hdr').textContent = GROUP_LABELS[g] || 'Skills';
+  document.getElementById('af-f-sub').textContent = GROUP_SUBS[g] || g;
+  renderFieldList();
+}
+
+function renderFieldList() {
+  const fields = FIELDS_BY_GROUP[currentGroup] || [];
+  const html = fields.map(f => {
+    const isCert = f.type === 'cert';
+    const checked = !!checkedFields[f.id];
+    const cbCls = isCert && checked ? 'cert-on' : checked ? 'on' : '';
+    const rowCls = isCert ? ' cert-row' : '';
+
+    let valHtml = '';
+    if (f.type === 'level' || f.type === 'choice') {
+      valHtml = `<div class="af-val${checked ? ' has' : ''}" title="Select level">Select... <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>`;
+    } else if (f.type === 'number') {
+      valHtml = `<input class="af-num" type="number" value="0">`;
+    } else if (f.type === 'bool') {
+      valHtml = '';
+    } else if (f.type === 'cert') {
+      const hasVal = certValue && checkedFields['cert'];
+      const shortVal = hasVal && certValue.length > 18 ? certValue.slice(0,16)+'…' : certValue;
+      valHtml = `<div class="cert-dd-wrap">
+        <div class="af-val${hasVal ? ' cert-pick' : ''}" id="cert-val-btn" onclick="toggleCertDD(event)">
+          ${hasVal ? shortVal : 'Select...'}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="cert-dd" id="cert-dd">
+          ${CERT_OPTIONS.map(c => `<div class="cert-dd-opt${certValue===c?' active':''}" onclick="pickCert('${c.replace(/'/g,"\\'")}',event)">${c}</div>`).join('')}
+        </div>
+      </div>`;
+    }
+
+    const certIco = isCert ? `<span class="cert-badge-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>` : '';
+    return `<div class="af-frow${rowCls}" onclick="toggleField('${f.id}', event)">
+      <div class="af-cb ${cbCls}" id="cb-${f.id}"></div>
+      <div class="af-fname">${certIco}${f.name}</div>
+      <div class="af-cond">${f.label} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+      ${valHtml}
+    </div>`;
+  }).join('');
+  document.getElementById('af-field-list').innerHTML = html;
+}
+
+function toggleField(id, e) {
+  if (e.target.closest('.cert-dd-wrap')) return;
+  checkedFields[id] = !checkedFields[id];
+  if (!checkedFields[id] && id === 'cert') certValue = '';
+  renderFieldList();
+  renderSelPanel();
+}
+
+function toggleCertDD(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('cert-dd');
+  if (!dd) return;
+  ddOpen = !ddOpen;
+  dd.classList.toggle('open', ddOpen);
+}
+
+function closeCertDD() {
+  ddOpen = false;
+  const dd = document.getElementById('cert-dd');
+  if (dd) dd.classList.remove('open');
+}
+
+function pickCert(val, e) {
+  e.stopPropagation();
+  certValue = val;
+  checkedFields['cert'] = true;
+  closeCertDD();
+  renderFieldList();
+  renderSelPanel();
+}
+
+function renderSelPanel() {
+  const allFields = Object.values(FIELDS_BY_GROUP).flat();
+  const items = Object.keys(checkedFields).filter(id => checkedFields[id]).map(id => {
+    const f = allFields.find(x => x.id === id);
+    if (!f) return null;
+    const isCert = f.type === 'cert';
+    const valText = isCert && certValue ? certValue : '';
+    return { id, name: f.name, condition: f.label, value: valText, isCert };
+  }).filter(Boolean);
+
+  document.getElementById('sel-count').textContent = items.length;
+  document.getElementById('af-empty').style.display = items.length ? 'none' : '';
+
+  const certIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+  const skillIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>`;
+
+  document.getElementById('af-sel-list').innerHTML = items.map(item =>
+    `<div class="af-sel-item${item.isCert ? ' c-item' : ''}">
+      ${item.isCert ? certIcoSvg : skillIcoSvg}
+      <div class="af-sel-item-body">
+        <div class="af-sel-item-name">${item.name}</div>
+        <div class="af-sel-item-cond">${item.condition}${item.value ? ' ' + (item.value.length > 22 ? item.value.slice(0,20)+'…' : item.value) : ''}</div>
+      </div>
+      <button class="af-sel-rm" onclick="deselect('${item.id}')">×</button>
+    </div>`
+  ).join('');
+}
+
+function deselect(id) {
+  checkedFields[id] = false;
+  if (id === 'cert') certValue = '';
+  renderFieldList();
+  renderSelPanel();
+}
+
+function applyFilters() {
+  const allFields = Object.values(FIELDS_BY_GROUP).flat();
+  appliedFilters = Object.keys(checkedFields)
+    .filter(id => checkedFields[id])
+    .map(id => {
+      const f = allFields.find(x => x.id === id);
+      if (!f) return null;
+      const isCert = f.type === 'cert';
+      return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', isCert };
+    }).filter(Boolean);
+  closeAF();
+  renderSkillsChips();
+  renderMatches();
+}
+
+/* ─── TOAST ─── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ─── CLOSE CERT DD ON OUTSIDE CLICK ─── */
+document.addEventListener('click', () => closeCertDD());
+
+/* ─── INIT ─── */
+renderMatches();
+renderFieldList();
+</script>
+</body>
+</html>
