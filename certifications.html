@@ -826,8 +826,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
       <div id="panel-forever-note" style="display:none;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text-3);margin-bottom:14px;">
         This certificate does not expire — no expiry date needed.
       </div>
-      <div style="display:flex;gap:8px;margin-top:4px;">
-        <button class="btn btn-primary" style="flex:1;" onclick="savePanelCert()">Save</button>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" onclick="savePanelCert()">Save</button>
         <button class="btn btn-ghost" onclick="showCertsList()">Cancel</button>
       </div>
     </div>
@@ -952,7 +952,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
     <div class="rr-toolbar">
       <div class="tb-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filter</div>
       <div class="tb-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Columns</div>
-      <span style="margin-left:auto;font-size:12px;color:var(--text-3)">7 requests</span>
+      <span id="rr-count" style="margin-left:auto;font-size:12px;color:var(--text-3)">5 requests</span>
     </div>
     <div class="rr-table-wrap">
       <table class="rr-tbl">
@@ -1026,7 +1026,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
     </div>
     <div class="rr-modal-ft">
       <button class="btn btn-ghost" onclick="closeRRModal()">Cancel</button>
-      <button class="btn btn-primary">Submit request</button>
+      <button class="btn btn-primary" onclick="submitRR()">Submit request</button>
     </div>
   </div>
 </div>
@@ -1426,8 +1426,7 @@ function renderTmCertCards(memberId) {
   }
   body.innerHTML = certs.map(c => {
     const st = certStatus(c.expiryDate);
-    const badgeCls = st.cls === 'badge-valid' ? 'background:#D1FAE5;color:#065F46;' :
-                     st.cls === 'badge-expiring' ? 'background:#FEF3C7;color:#92400E;' : 'background:#FEE2E2;color:#991B1B;';
+    const badgeCls = st?.cls === 'badge-expiring' ? 'background:#FEF3C7;color:#92400E;' : 'background:#FEE2E2;color:#991B1B;';
     const issueFmt = c.issueDate ? new Date(c.issueDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
     const expiryFmt = c.expiryDate ? new Date(c.expiryDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'Does not expire';
     return `<div class="tm-cert-card">
@@ -1436,7 +1435,7 @@ function renderTmCertCards(memberId) {
           <div class="tm-cert-name">${c.name}</div>
           <div class="tm-cert-vendor">${c.vendor}</div>
         </div>
-        <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;flex-shrink:0;${badgeCls}">${st.icon} ${st.label}</span>
+        ${st ? `<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;flex-shrink:0;${badgeCls}">${st.icon} ${st.label}</span>` : ''}
       </div>
       <div class="tm-cert-dates">
         <div class="tm-cert-date-item">
@@ -1519,12 +1518,12 @@ const MEMBERS = [
 
 const TODAY = new Date('2026-09-08');
 function certStatus(expiryDate) {
-  if (!expiryDate) return { label:'Permanent', cls:'badge-valid', icon:'∞' };
+  if (!expiryDate) return null;
   const exp = new Date(expiryDate);
   const diff = (exp - TODAY) / (1000*60*60*24);
   if (diff < 0) return { label:'Expired', cls:'badge-expired', icon:'✗' };
   if (diff < 90) return { label:'Expiring soon', cls:'badge-expiring', icon:'⚠' };
-  return { label:'Valid', cls:'badge-valid', icon:'✓' };
+  return null;
 }
 function fmtDate(d) {
   if (!d) return '—';
@@ -1622,7 +1621,7 @@ function renderDrawerSkills(m) {
             <div class="cert-name">${c.name}</div>
             <div class="cert-vendor">${c.vendor}</div>
             <div class="cert-meta">
-              <span class="badge ${st.cls}" style="border-radius:4px;padding:1px 7px;font-size:10px;">${st.icon} ${st.label}</span>
+              ${st ? `<span class="badge ${st.cls}" style="border-radius:4px;padding:1px 7px;font-size:10px;">${st.icon} ${st.label}</span>` : ''}
               <span class="cert-exp">${expLine}</span>
               ${c.url ? `<button class="cert-link-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Credential</button>` : ''}
             </div>
@@ -1738,6 +1737,16 @@ renderRRTable();
 
 function openRRModal() { document.getElementById('rr-modal-overlay').classList.add('open'); renderAppliedChips(); }
 function closeRRModal() { document.getElementById('rr-modal-overlay').classList.remove('open'); }
+function submitRR() {
+  const chips = SK_SELECTED;
+  const skills = chips.length ? chips.map(s => s.label) : ['—'];
+  const hasCert = chips.some(s => s.type === 'cert');
+  const newId = String(Number(RR_ROWS[0].id) + 1);
+  RR_ROWS.unshift({ id: newId, role:'Cloud Solutions Architect', roleColor:'#6366F1', duration:'7 Jul – 30 Sep 2026', status:'todo', project:'Exclusive Networks Q3', skills, hasCert });
+  renderRRTable();
+  document.getElementById('rr-count').textContent = RR_ROWS.length + ' requests';
+  closeRRModal();
+}
 
 /* Skills 3-panel */
 const SK_GROUPS = [
