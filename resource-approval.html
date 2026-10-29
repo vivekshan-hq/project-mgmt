@@ -220,7 +220,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
 /* Cert value dropdown */
 .cert-dd-wrap{position:relative}
-.cert-dd{position:absolute;top:calc(100%+4px);left:0;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--sh4);min-width:220px;display:none;padding:4px 0}
+.cert-dd{position:fixed;z-index:1200;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--sh4);min-width:260px;display:none;padding:4px 0}
 .cert-dd.open{display:block}
 .cert-dd-opt{padding:7px 12px;font-size:13px;color:var(--t1);cursor:pointer}
 .cert-dd-opt:hover{background:var(--surface-2)}
@@ -803,6 +803,13 @@ function toggleCertDD(e) {
   const dd = document.getElementById('cert-dd');
   if (!dd) return;
   ddOpen = !ddOpen;
+  if (ddOpen) {
+    const btn = e.currentTarget;
+    const r = btn.getBoundingClientRect();
+    dd.style.top = (r.bottom + 4) + 'px';
+    dd.style.left = r.left + 'px';
+    dd.style.width = Math.max(r.width, 260) + 'px';
+  }
   dd.classList.toggle('open', ddOpen);
 }
 
