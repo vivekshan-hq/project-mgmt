@@ -477,6 +477,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
     <button class="screen-tab" onclick="switchScreen('tmlist',this)">② Team Members</button>
     <button class="screen-tab" onclick="switchScreen('member',this)">③ TM Profile &amp; Assignment</button>
     <button class="screen-tab" onclick="switchScreen('request',this)">④ Resource Request</button>
+    <button class="screen-tab" onclick="switchScreen('approval',this)">⑤ Resource Approval</button>
   </div>
 </div>
 
@@ -1068,6 +1069,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
       </div>
     </div>
   </div>
+</div>
+
+<div id="screen-approval" class="screen" style="flex-direction:column;">
+  <iframe src="resource-approval.html" style="width:100%;flex:1;border:none;display:block;"></iframe>
 </div>
 
 <script>
