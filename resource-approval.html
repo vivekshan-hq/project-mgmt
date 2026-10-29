@@ -159,7 +159,16 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .oa-c{color:var(--green)}
 .cert-tag{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px;border-radius:3px;font-size:10px;font-weight:590}
 .cert-yes{background:var(--green-bg);color:var(--green-dk)}
+.cert-warn{background:#FEF3C7;color:#92400E}
 .cert-no{background:var(--surface-3);color:var(--t-ph)}
+
+/* Expiry sub-row inside modal */
+.cert-exp-sub{display:flex;align-items:center;gap:8px;padding:7px 16px 8px 42px;border-bottom:1px solid var(--border-s);background:rgba(194,65,12,.025)}
+.cert-exp-lbl{font-size:12px;color:var(--t2);white-space:nowrap}
+.cert-exp-opt{font-size:11px;color:var(--t-ph)}
+.cert-exp-input{height:26px;padding:0 8px;border:1px solid var(--orange-b);border-radius:4px;background:var(--surface);color:var(--orange);font-size:12px;font-family:inherit;outline:none;cursor:pointer}
+.cert-exp-input:focus{border-color:var(--orange)}
+.cert-exp-input::-webkit-calendar-picker-indicator{opacity:.45;cursor:pointer}
 
 /* ════ ADD FIELDS MODAL ════ */
 .af-back{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
@@ -523,13 +532,28 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
 <script>
 /* ─── DATA ─── */
+// Each cert record has a name and expiry date (null = permanent/no expiry)
 const MEMBERS = [
-  { name:'esswarapandian',  initials:'E',  color:'#6366F1', certs:['AWS Solutions Architect Professional','Azure Fundamentals (AZ-900)'] },
-  { name:'heather Pertel',  initials:'HP', color:'#F59E0B', certs:['Project Management Professional (PMP)','Salesforce Certified Administrator'] },
-  { name:'Jhonty Rhodes',   initials:'JR', color:'#EF4444', certs:['Project Management Professional (PMP)'] },
-  { name:'Pav Michalak',    initials:'PM', color:'#10B981', certs:['AWS Solutions Architect Professional','Cisco CCNA'] },
-  { name:'vivekananth1 nm', initials:'VN', color:'#0f62fe', certs:[] },
-  { name:'V K',             initials:'VK', color:'#8B5CF6', certs:['Project Management Professional (PMP)','Salesforce Certified Administrator'] },
+  { name:'esswarapandian',  initials:'E',  color:'#6366F1', certRecords:[
+    { name:'AWS Solutions Architect Professional', expiry:'2027-03-12' },
+    { name:'Azure Fundamentals (AZ-900)',          expiry: null },
+  ]},
+  { name:'heather Pertel',  initials:'HP', color:'#F59E0B', certRecords:[
+    { name:'Project Management Professional (PMP)',  expiry:'2026-11-12' }, // expiring soon
+    { name:'Salesforce Certified Administrator',     expiry:'2027-06-01' },
+  ]},
+  { name:'Jhonty Rhodes',   initials:'JR', color:'#EF4444', certRecords:[
+    { name:'Project Management Professional (PMP)',  expiry:'2027-05-01' },
+  ]},
+  { name:'Pav Michalak',    initials:'PM', color:'#10B981', certRecords:[
+    { name:'AWS Solutions Architect Professional',   expiry:'2027-01-15' },
+    { name:'Cisco CCNA',                            expiry:'2026-12-01' },
+  ]},
+  { name:'vivekananth1 nm', initials:'VN', color:'#0f62fe', certRecords:[] },
+  { name:'V K',             initials:'VK', color:'#8B5CF6', certRecords:[
+    { name:'Project Management Professional (PMP)',  expiry:'2027-02-20' },
+    { name:'Salesforce Certified Administrator',     expiry:'2028-01-01' },
+  ]},
 ];
 
 const CERT_OPTIONS = [
@@ -542,47 +566,73 @@ const CERT_OPTIONS = [
 
 const FIELDS_BY_GROUP = {
   skills: [
-    { id:'javascript',  name:'Javascript',             type:'level',   label:'is at least...' },
-    { id:'datamig',     name:'Data Migration',          type:'level',   label:'is at least...' },
-    { id:'sfint',       name:'Salesforce Integration',  type:'bool',    label:'is true' },
-    { id:'timemgmt',    name:'Time management',         type:'number',  label:'is greater than...' },
-    { id:'budget',      name:'Budget',                  type:'number',  label:'is greater than...' },
-    { id:'progmgmt',    name:'Program management',      type:'level',   label:'is at least...' },
-    { id:'softtesting', name:'Software Testing',        type:'level',   label:'is at least...' },
-    { id:'cert',        name:'Certification',           type:'cert',    label:'is exactly...' },
-    { id:'java',        name:'Java',                    type:'level',   label:'is at least...' },
-    { id:'typing',      name:'Typing Skill',            type:'level',   label:'is at least...' },
-    { id:'yesno',       name:'Yes or No Skills',        type:'bool',    label:'is true' },
-    { id:'single',      name:'Single Choice Field',     type:'choice',  label:'is exactly...' },
-    { id:'multi',       name:'Multi Choice Field',      type:'choice',  label:'is exactly...' },
-    { id:'numfield',    name:'Number Field Skill',      type:'number',  label:'is greater than...' },
+    { id:'javascript',  name:'Javascript',            type:'level',  label:'is at least...' },
+    { id:'datamig',     name:'Data Migration',         type:'level',  label:'is at least...' },
+    { id:'sfint',       name:'Salesforce Integration', type:'bool',   label:'is true' },
+    { id:'timemgmt',    name:'Time management',        type:'number', label:'is greater than...' },
+    { id:'budget',      name:'Budget',                 type:'number', label:'is greater than...' },
+    { id:'progmgmt',    name:'Program management',     type:'level',  label:'is at least...' },
+    { id:'softtesting', name:'Software Testing',       type:'level',  label:'is at least...' },
+    { id:'cert',        name:'Certification',          type:'cert',   label:'is exactly...' },
+    { id:'java',        name:'Java',                   type:'level',  label:'is at least...' },
+    { id:'typing',      name:'Typing Skill',           type:'level',  label:'is at least...' },
+    { id:'yesno',       name:'Yes or No Skills',       type:'bool',   label:'is true' },
+    { id:'single',      name:'Single Choice Field',    type:'choice', label:'is exactly...' },
+    { id:'multi',       name:'Multi Choice Field',     type:'choice', label:'is exactly...' },
+    { id:'numfield',    name:'Number Field Skill',     type:'number', label:'is greater than...' },
   ],
-  generic:      [{ id:'comm',   name:'Communication',   type:'level',  label:'is at least...' }, { id:'collab', name:'Collaboration', type:'level', label:'is at least...' }],
-  integrations: [{ id:'zapier', name:'Zapier',          type:'bool',   label:'is true' }, { id:'make', name:'Make / Integromat', type:'bool', label:'is true' }],
-  sae:          [{ id:'sae1',   name:'SAE Skill 1',     type:'level',  label:'is at least...' }],
-  section6:     [{ id:'s6f1',   name:'Section 6 Field', type:'bool',   label:'is true' }],
-  info:         [{ id:'dept',   name:'Department',      type:'choice', label:'is exactly...' }, { id:'loc', name:'Location', type:'choice', label:'is exactly...' }],
-  contact:      [{ id:'phone',  name:'Phone',           type:'bool',   label:'is true' }],
-  utilization:  [{ id:'target', name:'Target utilization', type:'number', label:'is greater than...' }],
-  default:      [{ id:'empid',  name:'Employee ID',     type:'choice', label:'is exactly...' }],
+  generic:      [{ id:'comm',   name:'Communication',       type:'level',  label:'is at least...' }, { id:'collab', name:'Collaboration', type:'level', label:'is at least...' }],
+  integrations: [{ id:'zapier', name:'Zapier',              type:'bool',   label:'is true' }, { id:'make', name:'Make / Integromat', type:'bool', label:'is true' }],
+  sae:          [{ id:'sae1',   name:'SAE Skill 1',         type:'level',  label:'is at least...' }],
+  section6:     [{ id:'s6f1',   name:'Section 6 Field',     type:'bool',   label:'is true' }],
+  info:         [{ id:'dept',   name:'Department',          type:'choice', label:'is exactly...' }, { id:'loc', name:'Location', type:'choice', label:'is exactly...' }],
+  contact:      [{ id:'phone',  name:'Phone',               type:'bool',   label:'is true' }],
+  utilization:  [{ id:'target', name:'Target utilization',  type:'number', label:'is greater than...' }],
+  default:      [{ id:'empid',  name:'Employee ID',         type:'choice', label:'is exactly...' }],
 };
 
-const GROUP_LABELS = {
-  skills:'Skills', generic:'Skills', integrations:'Skills', sae:'Skills', section6:'Skills',
-  info:'Team member fields', contact:'Team member fields', utilization:'Team member fields', default:'Team member fields',
-};
-const GROUP_SUBS = {
-  skills:'Technical Skills', generic:'Generic Skills', integrations:'Integrations', sae:'SAE tech skills', section6:'Section 6',
-  info:'Info', contact:'Contact Info', utilization:'Utilization', default:'Default',
-};
+const GROUP_LABELS = { skills:'Skills', generic:'Skills', integrations:'Skills', sae:'Skills', section6:'Skills', info:'Team member fields', contact:'Team member fields', utilization:'Team member fields', default:'Team member fields' };
+const GROUP_SUBS   = { skills:'Technical Skills', generic:'Generic Skills', integrations:'Integrations', sae:'SAE tech skills', section6:'Section 6', info:'Info', contact:'Contact Info', utilization:'Utilization', default:'Default' };
 
 /* ─── STATE ─── */
 let currentGroup = 'skills';
-let checkedFields = {};   // fieldId → true
-let certValue = '';       // currently selected cert value in modal
-let appliedFilters = [];  // [{id, name, condition, value, isCert}]
+let checkedFields = { cert: true };       // pre-checked from request
+let certValue = 'Salesforce Certified Administrator'; // pre-filled from request
+let certExpiresAfter = '2026-12-31';                  // pre-filled from request
+
+// Pre-populated from the original resource request
+let appliedFilters = [
+  { id:'cert', name:'Certification', condition:'is exactly...', value:'Salesforce Certified Administrator', expiresAfter:'2026-12-31', isCert:true }
+];
+
 let selectedMember = -1;
 let ddOpen = false;
+
+/* ─── HELPERS ─── */
+function fmtDate(d) {
+  if (!d) return null;
+  const [y,m,day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+}
+function certShortName(name) {
+  const map = {
+    'AWS Solutions Architect Professional': 'AWS SAA Pro',
+    'Project Management Professional (PMP)': 'PMP',
+    'Salesforce Certified Administrator': 'Salesforce Admin',
+    'Azure Fundamentals (AZ-900)': 'AZ-900',
+    'Cisco CCNA': 'Cisco CCNA',
+  };
+  return map[name] || (name.length > 20 ? name.slice(0,18)+'…' : name);
+}
+
+/* ─── MATCH LOGIC ─── */
+function memberCertStatus(m, certFilter) {
+  const rec = m.certRecords.find(c => c.name === certFilter.value);
+  if (!rec) return 'missing';
+  if (!certFilter.expiresAfter || !rec.expiry) return 'valid'; // no date constraint or permanent cert
+  return rec.expiry >= certFilter.expiresAfter ? 'valid' : 'expiring-early';
+}
 
 /* ─── RENDER MATCHES TABLE ─── */
 function renderMatches() {
@@ -590,20 +640,34 @@ function renderMatches() {
   const tbody = document.getElementById('matches-tbody');
   const certColHdr = document.getElementById('cert-col-hdr');
   certColHdr.style.display = certFilter ? '' : 'none';
+  if (certFilter) {
+    const label = certShortName(certFilter.value) + (certFilter.expiresAfter ? ' · exp. after ' + fmtDate(certFilter.expiresAfter) : '');
+    certColHdr.textContent = label;
+  }
 
   let shown = 0;
   tbody.innerHTML = MEMBERS.map((m, i) => {
-    const hasCert = certFilter ? m.certs.includes(certFilter.value) : null;
-    const hide = certFilter && !hasCert;
+    let certStatus = certFilter ? memberCertStatus(m, certFilter) : null;
+    const hide = certStatus === 'missing';
     if (!hide) shown++;
     const selCls = selectedMember === i ? ' sel' : '';
     const hideCls = hide ? ' filtered-out' : '';
-    const certCell = certFilter
-      ? `<td>${hasCert
-          ? `<span class="cert-tag cert-yes">✓ Has cert</span>`
-          : `<span class="cert-tag cert-no">— Missing</span>`}</td>`
-      : '';
-    return `<tr class="${selCls}${hideCls}" onclick="selectMember(${i})">
+
+    let certCell = '';
+    if (certFilter) {
+      if (certStatus === 'valid') {
+        const rec = m.certRecords.find(c => c.name === certFilter.value);
+        const expTxt = rec && rec.expiry ? `exp. ${fmtDate(rec.expiry)}` : 'Permanent';
+        certCell = `<td><span class="cert-tag cert-yes">✓ Valid</span> <span style="font-size:11px;color:var(--t3)">${expTxt}</span></td>`;
+      } else if (certStatus === 'expiring-early') {
+        const rec = m.certRecords.find(c => c.name === certFilter.value);
+        certCell = `<td><span class="cert-tag cert-warn">⚠ Exp. ${fmtDate(rec.expiry)}</span></td>`;
+      } else {
+        certCell = `<td><span class="cert-tag cert-no">— Missing</span></td>`;
+      }
+    }
+
+    return `<tr class="${selCls}${hideCls}" onclick="${hide ? '' : 'selectMember('+i+')'}">
       <td><div class="tm-cell"><div class="tm-av" style="background:${m.color}">${m.initials}</div>${m.name}</div></td>
       <td><div class="role-cell"><div class="rdot" style="background:var(--green-dk)">PM</div>Project Manager</div></td>
       <td class="util-c">15.36%</td>
@@ -632,19 +696,22 @@ function doApprove() {
 /* ─── SKILLS CHIPS in left panel ─── */
 function renderSkillsChips() {
   const wrap = document.getElementById('skills-chips');
-  const chips = appliedFilters.map(f =>
-    `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">
-      ${f.isCert ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>` : ''}
-      ${f.name}${f.value ? ': ' + (f.value.length > 20 ? f.value.slice(0,18)+'…' : f.value) : ''}
+  const CERT_ICO = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+  const chips = appliedFilters.map(f => {
+    let label = f.isCert ? certShortName(f.value) : f.name;
+    if (f.isCert && f.expiresAfter) label += ` · expires after ${f.expiresAfter}`;
+    return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.isCert ? f.value : f.name}">
+      ${f.isCert ? CERT_ICO : ''}
+      ${label}
       <button class="chip-x" onclick="removeFilter('${f.id}')">×</button>
-    </span>`
-  ).join('');
+    </span>`;
+  }).join('');
   wrap.innerHTML = chips + `<button class="add-link" onclick="openAF()">+ Add skills</button>`;
 }
 
 function removeFilter(id) {
   appliedFilters = appliedFilters.filter(f => f.id !== id);
-  if (id === 'cert') certValue = '';
+  if (id === 'cert') { certValue = ''; certExpiresAfter = ''; checkedFields.cert = false; }
   renderSkillsChips();
   renderMatches();
 }
@@ -652,9 +719,12 @@ function removeFilter(id) {
 /* ─── MODAL ─── */
 function openAF() {
   document.getElementById('af-back').classList.add('open');
-  // re-sync checked state from applied filters
+  // sync modal state from applied filters
   checkedFields = {};
-  appliedFilters.forEach(f => { checkedFields[f.id] = true; });
+  appliedFilters.forEach(f => {
+    checkedFields[f.id] = true;
+    if (f.isCert) { certValue = f.value; certExpiresAfter = f.expiresAfter || ''; }
+  });
   renderFieldList();
   renderSelPanel();
 }
@@ -671,7 +741,7 @@ function switchGroup(g, el) {
 
 function renderFieldList() {
   const fields = FIELDS_BY_GROUP[currentGroup] || [];
-  const html = fields.map(f => {
+  const rows = fields.map(f => {
     const isCert = f.type === 'cert';
     const checked = !!checkedFields[f.id];
     const cbCls = isCert && checked ? 'cert-on' : checked ? 'on' : '';
@@ -679,16 +749,14 @@ function renderFieldList() {
 
     let valHtml = '';
     if (f.type === 'level' || f.type === 'choice') {
-      valHtml = `<div class="af-val${checked ? ' has' : ''}" title="Select level">Select... <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>`;
+      valHtml = `<div class="af-val${checked ? ' has' : ''}">Select... <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>`;
     } else if (f.type === 'number') {
-      valHtml = `<input class="af-num" type="number" value="0">`;
-    } else if (f.type === 'bool') {
-      valHtml = '';
+      valHtml = `<input class="af-num" type="number" value="0" onclick="event.stopPropagation()">`;
     } else if (f.type === 'cert') {
       const hasVal = certValue && checkedFields['cert'];
-      const shortVal = hasVal && certValue.length > 18 ? certValue.slice(0,16)+'…' : certValue;
+      const shortVal = hasVal && certValue.length > 16 ? certValue.slice(0,14)+'…' : certValue;
       valHtml = `<div class="cert-dd-wrap">
-        <div class="af-val${hasVal ? ' cert-pick' : ''}" id="cert-val-btn" onclick="toggleCertDD(event)">
+        <div class="af-val${hasVal ? ' cert-pick' : ''}" onclick="toggleCertDD(event)">
           ${hasVal ? shortVal : 'Select...'}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
@@ -699,20 +767,33 @@ function renderFieldList() {
     }
 
     const certIco = isCert ? `<span class="cert-badge-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>` : '';
-    return `<div class="af-frow${rowCls}" onclick="toggleField('${f.id}', event)">
+    let html = `<div class="af-frow${rowCls}" onclick="toggleField('${f.id}', event)">
       <div class="af-cb ${cbCls}" id="cb-${f.id}"></div>
       <div class="af-fname">${certIco}${f.name}</div>
       <div class="af-cond">${f.label} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
       ${valHtml}
     </div>`;
+
+    // Expiry date sub-row — shown when cert is checked and a cert name is picked
+    if (isCert && checked && certValue) {
+      html += `<div class="cert-exp-sub" onclick="event.stopPropagation()">
+        <span class="cert-exp-lbl">Expires after</span>
+        <span class="cert-exp-opt">· optional</span>
+        <input type="date" class="cert-exp-input" value="${certExpiresAfter}"
+          onchange="certExpiresAfter=this.value;renderSelPanel()"
+          onclick="event.stopPropagation()">
+      </div>`;
+    }
+
+    return html;
   }).join('');
-  document.getElementById('af-field-list').innerHTML = html;
+  document.getElementById('af-field-list').innerHTML = rows;
 }
 
 function toggleField(id, e) {
-  if (e.target.closest('.cert-dd-wrap')) return;
+  if (e.target.closest('.cert-dd-wrap') || e.target.closest('.cert-exp-sub')) return;
   checkedFields[id] = !checkedFields[id];
-  if (!checkedFields[id] && id === 'cert') certValue = '';
+  if (!checkedFields[id] && id === 'cert') { certValue = ''; certExpiresAfter = ''; }
   renderFieldList();
   renderSelPanel();
 }
@@ -746,31 +827,35 @@ function renderSelPanel() {
     const f = allFields.find(x => x.id === id);
     if (!f) return null;
     const isCert = f.type === 'cert';
-    const valText = isCert && certValue ? certValue : '';
-    return { id, name: f.name, condition: f.label, value: valText, isCert };
+    const val = isCert ? certValue : '';
+    const expAfter = isCert ? certExpiresAfter : '';
+    return { id, name: f.name, condition: f.label, value: val, expiresAfter: expAfter, isCert };
   }).filter(Boolean);
 
   document.getElementById('sel-count').textContent = items.length;
   document.getElementById('af-empty').style.display = items.length ? 'none' : '';
 
-  const certIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
-  const skillIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>`;
+  const CERT_ICO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+  const SKILL_ICO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>`;
 
-  document.getElementById('af-sel-list').innerHTML = items.map(item =>
-    `<div class="af-sel-item${item.isCert ? ' c-item' : ''}">
-      ${item.isCert ? certIcoSvg : skillIcoSvg}
+  document.getElementById('af-sel-list').innerHTML = items.map(item => {
+    let condLine = item.condition;
+    if (item.isCert && item.value) condLine += ' ' + certShortName(item.value);
+    if (item.isCert && item.expiresAfter) condLine += ` · expires after ${item.expiresAfter}`;
+    return `<div class="af-sel-item${item.isCert ? ' c-item' : ''}">
+      ${item.isCert ? CERT_ICO : SKILL_ICO}
       <div class="af-sel-item-body">
-        <div class="af-sel-item-name">${item.name}</div>
-        <div class="af-sel-item-cond">${item.condition}${item.value ? ' ' + (item.value.length > 22 ? item.value.slice(0,20)+'…' : item.value) : ''}</div>
+        <div class="af-sel-item-name">${item.isCert ? (item.value || item.name) : item.name}</div>
+        <div class="af-sel-item-cond">${condLine}</div>
       </div>
       <button class="af-sel-rm" onclick="deselect('${item.id}')">×</button>
-    </div>`
-  ).join('');
+    </div>`;
+  }).join('');
 }
 
 function deselect(id) {
   checkedFields[id] = false;
-  if (id === 'cert') certValue = '';
+  if (id === 'cert') { certValue = ''; certExpiresAfter = ''; }
   renderFieldList();
   renderSelPanel();
 }
@@ -783,7 +868,7 @@ function applyFilters() {
       const f = allFields.find(x => x.id === id);
       if (!f) return null;
       const isCert = f.type === 'cert';
-      return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', isCert };
+      return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? certExpiresAfter : '', isCert };
     }).filter(Boolean);
   closeAF();
   renderSkillsChips();
@@ -801,7 +886,8 @@ function showToast(msg) {
 /* ─── CLOSE CERT DD ON OUTSIDE CLICK ─── */
 document.addEventListener('click', () => closeCertDD());
 
-/* ─── INIT ─── */
+/* ─── INIT — pre-populate with the cert from the original request ─── */
+renderSkillsChips();
 renderMatches();
 renderFieldList();
 </script>
