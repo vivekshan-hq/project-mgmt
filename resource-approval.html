@@ -169,6 +169,12 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .cert-exp-input{height:26px;padding:0 8px;border:1px solid var(--orange-b);border-radius:4px;background:var(--surface);color:var(--orange);font-size:12px;font-family:inherit;outline:none;cursor:pointer}
 .cert-exp-input:focus{border-color:var(--orange)}
 .cert-exp-input::-webkit-calendar-picker-indicator{opacity:.45;cursor:pointer}
+.cert-exp-clear{background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px;line-height:1;padding:0 2px;margin-left:auto;flex-shrink:0}
+.cert-exp-clear:hover{color:var(--red)}
+/* "+ Add expiry condition" link row */
+.cert-exp-add{display:flex;align-items:center;padding:5px 16px 6px 42px;border-bottom:1px solid var(--border-s);background:rgba(194,65,12,.01)}
+.cert-exp-add-btn{font-size:12px;color:var(--orange);background:none;border:none;cursor:pointer;padding:0;font-family:inherit;font-weight:500}
+.cert-exp-add-btn:hover{text-decoration:underline}
 
 /* ════ ADD FIELDS MODAL ════ */
 .af-back{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
@@ -598,7 +604,7 @@ const GROUP_SUBS   = { skills:'Technical Skills', generic:'Generic Skills', inte
 let currentGroup = 'skills';
 let checkedFields = { cert: true };       // pre-checked from request
 let certValue = 'Salesforce Certified Administrator'; // pre-filled from request
-let certExpiresAfter = '2026-12-31';                  // pre-filled from request
+let certExpiresAfter = '2026-12-31'; // string = expiry row shown; null = hidden (no expiry condition)
 
 // Pre-populated from the original resource request
 let appliedFilters = [
@@ -711,7 +717,7 @@ function renderSkillsChips() {
 
 function removeFilter(id) {
   appliedFilters = appliedFilters.filter(f => f.id !== id);
-  if (id === 'cert') { certValue = ''; certExpiresAfter = ''; checkedFields.cert = false; }
+  if (id === 'cert') { certValue = ''; certExpiresAfter = null; checkedFields.cert = false; }
   renderSkillsChips();
   renderMatches();
 }
@@ -723,7 +729,7 @@ function openAF() {
   checkedFields = {};
   appliedFilters.forEach(f => {
     checkedFields[f.id] = true;
-    if (f.isCert) { certValue = f.value; certExpiresAfter = f.expiresAfter || ''; }
+    if (f.isCert) { certValue = f.value; certExpiresAfter = f.expiresAfter || null; }
   });
   renderFieldList();
   renderSelPanel();
@@ -774,15 +780,21 @@ function renderFieldList() {
       ${valHtml}
     </div>`;
 
-    // Expiry date sub-row — shown when cert is checked and a cert name is picked
+    // Expiry sub-row — shown when cert is checked and a cert name is picked
     if (isCert && checked && certValue) {
-      html += `<div class="cert-exp-sub" onclick="event.stopPropagation()">
-        <span class="cert-exp-lbl">Expires after</span>
-        <span class="cert-exp-opt">· optional</span>
-        <input type="date" class="cert-exp-input" value="${certExpiresAfter}"
-          onchange="certExpiresAfter=this.value;renderSelPanel()"
-          onclick="event.stopPropagation()">
-      </div>`;
+      if (certExpiresAfter !== null) {
+        html += `<div class="cert-exp-sub" onclick="event.stopPropagation()">
+          <span class="cert-exp-lbl">Expires after</span>
+          <input type="date" class="cert-exp-input" value="${certExpiresAfter}"
+            onchange="certExpiresAfter=this.value;renderSelPanel()"
+            onclick="event.stopPropagation()">
+          <button class="cert-exp-clear" title="Remove expiry condition" onclick="clearCertExpiry(event)">×</button>
+        </div>`;
+      } else {
+        html += `<div class="cert-exp-add" onclick="event.stopPropagation()">
+          <button class="cert-exp-add-btn" onclick="addCertExpiry(event)">+ Add expiry condition</button>
+        </div>`;
+      }
     }
 
     return html;
@@ -793,7 +805,7 @@ function renderFieldList() {
 function toggleField(id, e) {
   if (e.target.closest('.cert-dd-wrap') || e.target.closest('.cert-exp-sub')) return;
   checkedFields[id] = !checkedFields[id];
-  if (!checkedFields[id] && id === 'cert') { certValue = ''; certExpiresAfter = ''; }
+  if (!checkedFields[id] && id === 'cert') { certValue = ''; certExpiresAfter = null; }
   renderFieldList();
   renderSelPanel();
 }
@@ -838,7 +850,7 @@ function renderSelPanel() {
     if (!f) return null;
     const isCert = f.type === 'cert';
     const val = isCert ? certValue : '';
-    const expAfter = isCert ? certExpiresAfter : '';
+    const expAfter = isCert ? (certExpiresAfter || '') : '';
     return { id, name: f.name, condition: f.label, value: val, expiresAfter: expAfter, isCert };
   }).filter(Boolean);
 
@@ -863,9 +875,23 @@ function renderSelPanel() {
   }).join('');
 }
 
+function clearCertExpiry(e) {
+  e.stopPropagation();
+  certExpiresAfter = null;
+  renderFieldList();
+  renderSelPanel();
+}
+
+function addCertExpiry(e) {
+  e.stopPropagation();
+  certExpiresAfter = '';
+  renderFieldList();
+  renderSelPanel();
+}
+
 function deselect(id) {
   checkedFields[id] = false;
-  if (id === 'cert') { certValue = ''; certExpiresAfter = ''; }
+  if (id === 'cert') { certValue = ''; certExpiresAfter = null; }
   renderFieldList();
   renderSelPanel();
 }
@@ -878,7 +904,7 @@ function applyFilters() {
       const f = allFields.find(x => x.id === id);
       if (!f) return null;
       const isCert = f.type === 'cert';
-      return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? certExpiresAfter : '', isCert };
+      return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
     }).filter(Boolean);
   closeAF();
   renderSkillsChips();
