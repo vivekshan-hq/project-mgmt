@@ -92,7 +92,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 .rq-lbl{width:140px;flex-shrink:0;font-size:12px;color:var(--t2);line-height:16px;padding-top:3px}
 .rq-val{flex:1;font-size:13px;color:var(--t1);display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:22px}
 .pm-ico{width:20px;height:20px;border-radius:4px;background:var(--green-dk);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.chip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:10px;font-size:12px;font-weight:500}
+.chip{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:500;line-height:1.4;max-width:100%}
 .chip-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-m)}
 .chip-green{background:var(--green-bg);color:var(--green-dk);border:1px solid #a7f3d0}
 .chip-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b)}
@@ -220,7 +220,7 @@ body{font-family:-apple-system,'SF Pro Text',BlinkMacSystemFont,'Segoe UI',sans-
 
 /* Cert value dropdown */
 .cert-dd-wrap{position:relative}
-.cert-dd{position:fixed;z-index:1200;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--sh4);min-width:260px;display:none;padding:4px 0}
+.cert-dd{position:fixed;z-index:1200;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--sh4);width:300px;display:none;padding:4px 0}
 .cert-dd.open{display:block}
 .cert-dd-opt{padding:7px 12px;font-size:13px;color:var(--t1);cursor:pointer}
 .cert-dd-opt:hover{background:var(--surface-2)}
@@ -700,7 +700,7 @@ function renderSkillsChips() {
   const chips = appliedFilters.map(f => {
     let label = f.isCert ? certShortName(f.value) : f.name;
     if (f.isCert && f.expiresAfter) label += ` · expires after ${f.expiresAfter}`;
-    return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.isCert ? f.value : f.name}">
+    return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">
       ${f.isCert ? CERT_ICO : ''}
       ${label}
       <button class="chip-x" onclick="removeFilter('${f.id}')">×</button>
@@ -807,8 +807,11 @@ function toggleCertDD(e) {
     const btn = e.currentTarget;
     const r = btn.getBoundingClientRect();
     dd.style.top = (r.bottom + 4) + 'px';
-    dd.style.left = r.left + 'px';
-    dd.style.width = Math.max(r.width, 260) + 'px';
+    // align right edge of dd with right edge of button so it doesn't overflow right
+    const ddW = 300;
+    const left = Math.max(8, r.right - ddW);
+    dd.style.left = left + 'px';
+    dd.style.width = ddW + 'px';
   }
   dd.classList.toggle('open', ddOpen);
 }
