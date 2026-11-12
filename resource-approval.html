@@ -7,18 +7,17 @@
 <link rel="stylesheet" href="Design System/rocketlane-x-shadcn/styles.css">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
-/* ── Semantic accent colors not in DS ── */
 :root {
-  --blue:       #0f62fe;
-  --blue-bg:    #edf5ff;
-  --blue-m:     #d0e2ff;
-  --green-dk:   #0e6027;
-  --green-bg:   #defbe6;
-  --orange:     #C2410C;
-  --orange-bg:  #FFF7ED;
-  --orange-b:   #FED7AA;
-  --warn:       #92400E;
-  --warn-bg:    #FEF3C7;
+  --blue:     #0f62fe;
+  --blue-bg:  #edf5ff;
+  --blue-m:   #d0e2ff;
+  --green-dk: #0e6027;
+  --green-bg: #defbe6;
+  --orange:   #C2410C;
+  --orange-bg:#FFF7ED;
+  --orange-b: #FED7AA;
+  --warn:     #92400E;
+  --warn-bg:  #FEF3C7;
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --blue-bg:#001141;--blue-m:#003082;
@@ -35,115 +34,118 @@
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(--muted);color:var(--foreground);height:100vh;overflow:hidden}
-
-/* ── App shell ── */
 .app{display:flex;height:100vh;overflow:hidden}
 
 /* ── Nav rail ── */
 .nav-rail{width:48px;background:oklch(0.145 0 0);display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;flex-shrink:0;gap:2px}
 .nav-logo{width:32px;height:32px;border-radius:8px;background:oklch(0.22 0 0);display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0;border:1px solid oklch(0.3 0 0)}
 .nav-logo i{width:15px;height:15px;color:#fff}
-.nav-item{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:oklch(0.5 0 0);cursor:pointer;border:none;background:transparent;transition:background .12s,color .12s}
+.nav-item{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:oklch(0.5 0 0);cursor:pointer;border:none;background:transparent;transition:background .12s,color .12s;position:relative}
 .nav-item:hover{background:oklch(0.22 0 0);color:oklch(0.85 0 0)}
 .nav-item.active{background:oklch(0.26 0 0);color:#fff}
 .nav-item i{width:16px;height:16px}
+.nav-badge{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:#ef4444;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
 .nav-spacer{flex:1}
 .nav-avatar{width:28px;height:28px;border-radius:50%;background:oklch(0.55 0.18 290);color:#fff;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:4px;cursor:pointer;letter-spacing:.02em}
 
-/* ── Split view ── */
 .split-view{flex:1;display:flex;overflow:hidden}
 
 /* ════ DETAIL PANEL ════ */
-.dp{width:380px;flex-shrink:0;background:var(--background);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative}
-.dp-topbar{padding:14px 36px 12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-.dp-from{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted-foreground);margin-bottom:5px}
-.dp-from-av{width:18px;height:18px;border-radius:50%;background:oklch(0.55 0.2 25);color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dp-title{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:600;color:var(--foreground)}
-.dp-circle{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border-strong);flex-shrink:0}
+.dp{width:390px;flex-shrink:0;background:var(--background);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative}
 
-/* Info fields */
-.dp-info{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px;flex-shrink:0}
-.dp-row{display:flex;align-items:center;min-height:22px}
-.dp-lbl{width:116px;flex-shrink:0;font-size:12px;color:var(--muted-foreground)}
-.dp-val{flex:1;font-size:13px;color:var(--foreground);display:flex;align-items:center;gap:5px}
-.dp-val.ph{color:var(--muted-foreground);font-style:italic}
-.pbar-wrap{flex:1;height:8px;background:var(--muted);border-radius:4px;position:relative}
-.pbar-fill{height:100%;background:oklch(0.5 0.22 25);border-radius:4px 0 0 4px;width:68%}
-.pbar-pin{position:absolute;top:-4px;left:68%;width:1.5px;height:16px;background:oklch(0.5 0.22 25);transform:translateX(-50%)}
+.dp-topbar{padding:14px 36px 10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.dp-from{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted-foreground);margin-bottom:4px}
+.dp-from-av{width:18px;height:18px;border-radius:50%;background:oklch(0.55 0.2 165);color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dp-title{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:600;color:var(--foreground)}
+.dp-circle{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--muted-foreground);flex-shrink:0}
 
-/* Underline-style tabs (intentionally not DS pill tabs) */
+/* Tabs — underline style matching actual product */
 .dp-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;padding:0 16px}
-.dp-tab{height:36px;padding:0 2px;margin-right:16px;font-size:13px;color:var(--muted-foreground);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;transition:color .12s}
+.dp-tab{height:38px;padding:0 2px;margin-right:16px;font-size:13.5px;color:var(--muted-foreground);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;font-weight:500;transition:color .12s}
 .dp-tab:hover{color:var(--foreground)}
-.dp-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+.dp-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
 
-/* Requirement rows */
+/* Detail field rows */
 .req-body{flex:1;overflow-y:auto}
-.rq-row{display:flex;align-items:flex-start;padding:8px 16px;border-bottom:1px solid var(--border);min-height:36px}
-.rq-lbl{width:140px;flex-shrink:0;font-size:12px;color:var(--muted-foreground);line-height:1.4;padding-top:4px}
-.rq-val{flex:1;font-size:13px;color:var(--foreground);display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:22px}
-.pm-ico{width:20px;height:20px;border-radius:4px;background:var(--green-dk);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rq-row{display:flex;align-items:flex-start;padding:7px 16px;border-bottom:1px solid var(--border);min-height:34px}
+.rq-lbl{width:136px;flex-shrink:0;font-size:13px;color:var(--muted-foreground);line-height:1.4;padding-top:3px}
+.rq-val{flex:1;font-size:13px;color:var(--foreground);display:flex;align-items:flex-start;flex-wrap:wrap;gap:4px;min-height:22px;padding-top:2px}
+.rq-val.center{align-items:center;padding-top:0}
+.rq-val.muted{color:var(--muted-foreground)}
+.pm-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
+.role-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:1px}
 
-/* Filter chips */
-.chip{display:inline-flex;align-items:center;flex-wrap:wrap;gap:3px;padding:2px 8px;border-radius:9999px;font-size:12px;font-weight:500;line-height:1.5;max-width:100%}
+/* Skill / cert chips — full text, wrappable */
+.chip{display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:3px;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:500;line-height:1.4;max-width:100%}
 .chip-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-m)}
+.chip-role{display:inline-flex;align-items:center;gap:5px;padding:3px 8px 3px 5px;border-radius:6px;font-size:12px;font-weight:500;background:color-mix(in oklab,#ef4444 12%,transparent);color:#b91c1c;border:1px solid color-mix(in oklab,#ef4444 25%,transparent)}
 .chip-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b)}
 .chip-x{width:14px;height:14px;border:none;background:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;opacity:.65;border-radius:50%;flex-shrink:0}
 .chip-x:hover{opacity:1}
 .add-link{display:inline-flex;align-items:center;gap:3px;color:var(--blue);font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
 .add-link:hover{text-decoration:underline}
-.sel-inline{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--foreground)}
-.sel-inline i{width:12px;height:12px;color:var(--muted-foreground)}
+.sel-inline{display:flex;align-items:center;justify-content:space-between;width:100%;font-size:13px;color:var(--foreground)}
+.sel-inline i{width:14px;height:14px;color:var(--muted-foreground)}
+.em-dash{color:var(--muted-foreground);font-size:14px}
+
+/* Pbar */
+.pbar-wrap{flex:1;height:8px;background:var(--muted);border-radius:4px;position:relative;margin-top:7px}
+.pbar-fill{height:100%;background:var(--blue-m);border-radius:4px 0 0 4px;width:68%}
 
 /* Allocations */
 .alloc-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px}
 .alloc-ttl{font-size:12px;font-weight:600;color:var(--foreground)}
-.alloc-row{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;border-bottom:1px solid var(--border)}
+.alloc-row{display:flex;align-items:center;gap:8px;padding:6px 16px;cursor:pointer;border-bottom:1px solid var(--border)}
 .alloc-row:hover{background:var(--muted)}
 .alloc-row i{width:11px;height:11px;color:var(--muted-foreground)}
 .alloc-range{font-size:13px;color:var(--muted-foreground)}
-.alloc-sep{font-size:13px;color:var(--muted-foreground);margin:0 2px}
+.alloc-sep{font-size:13px;color:var(--muted-foreground);margin:0 1px}
 .alloc-dur{font-size:13px;color:var(--foreground);font-weight:500}
 
 /* Footer */
-.dp-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--background)}
-.fp-spacer{flex:1}
-.btn-approve-off{opacity:.4;cursor:not-allowed !important;pointer-events:none}
+.dp-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;background:var(--background)}
+/* Approve disabled = outline, not filled */
+#approve-btn{transition:background .15s,color .15s,border-color .15s}
+#approve-btn.ready{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
 
 /* ════ MATCHES PANEL ════ */
 .matches{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--background)}
-.matches-top{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.matches-top{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
 .matches-count{font-size:13px;font-weight:500;color:var(--foreground)}
+
+/* View toggle — matches actual product: left active = filled black */
 .view-tog{display:flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-left:4px}
-.vt{width:30px;height:28px;border:none;cursor:pointer;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;background:var(--background);transition:background .1s,color .1s}
+.vt{width:36px;height:30px;border:none;cursor:pointer;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;background:var(--background);transition:background .1s,color .1s}
 .vt:hover{background:var(--muted)}
 .vt.on{background:var(--primary);color:var(--primary-foreground)}
-.vt i{width:13px;height:13px}
+.vt i{width:14px;height:14px}
 .soft-wrap{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:12px;color:var(--muted-foreground)}
+.info-ico{width:14px;height:14px;color:var(--muted-foreground);flex-shrink:0}
 
-/* Table — sticky header override */
+/* Table */
 .mtw{flex:1;overflow-y:auto}
-.mt-sticky th.sc-th{position:sticky;top:0;background:var(--background);z-index:2}
-/* Cert status badge color overrides */
+.mt-sticky th.sc-th{position:sticky;top:0;background:var(--background);z-index:2;font-size:12px}
 .cert-valid{background:var(--green-bg) !important;color:var(--green-dk) !important;border-color:oklch(0.72 0.14 155) !important}
 .cert-warn{background:var(--warn-bg) !important;color:var(--warn) !important;border-color:#fcd34d !important}
 .cert-miss{background:var(--muted) !important;color:var(--muted-foreground) !important;border-color:var(--border) !important}
-/* Selected row */
 .row-sel td.sc-td{background:var(--blue-bg) !important}
 .tm-av-wrap{display:flex;align-items:center;gap:8px}
 .role-cell{display:flex;align-items:center;gap:5px;color:var(--muted-foreground)}
-.rdot{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* Empty state */
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted-foreground);padding:40px}
+.empty-state i{width:40px;height:40px;opacity:.3}
+.empty-state p{font-size:13px;text-align:center}
 
 /* ════ ADD FIELDS MODAL ════ */
 .af-back{position:fixed;inset:0;z-index:800;background:rgb(0 0 0 / 0.5);display:none;align-items:center;justify-content:center;animation:sc-fade-in 180ms ease}
 .af-back.open{display:flex}
-/* Wider than DS default 420px dialog */
 .af-modal{background:var(--card);color:var(--card-foreground);border-radius:var(--radius-xl);width:960px;max-width:96vw;height:620px;display:flex;flex-direction:column;box-shadow:var(--shadow-2xl),0 0 0 4px color-mix(in oklab,var(--border) 80%,transparent);overflow:hidden;animation:sc-zoom-in 180ms ease}
 .af-search-bar{display:flex;align-items:center;gap:8px;padding:0 20px 0 16px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px}
 .af-search-bar i.search-ico{width:14px;height:14px;color:var(--muted-foreground);flex-shrink:0}
 .af-body{display:flex;flex:1;overflow:hidden}
 
-/* Groups column */
+/* Groups */
 .af-groups{width:200px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:8px 0}
 .afg-lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);padding:8px 16px 3px}
 .afg-parent{display:flex;align-items:center;gap:5px;padding:5px 16px;font-size:13px;color:var(--foreground);font-weight:600;user-select:none}
@@ -152,7 +154,7 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 .afg-child:hover{background:var(--muted);color:var(--foreground)}
 .afg-child.on{background:var(--blue-bg);color:var(--blue);font-weight:500;border-left-color:var(--blue)}
 
-/* Fields list */
+/* Fields */
 .af-fields{flex:1;overflow-y:auto;border-right:1px solid var(--border)}
 .af-f-hdr{font-size:14px;font-weight:600;color:var(--foreground);padding:12px 16px 0}
 .af-f-sub{font-size:12px;color:var(--muted-foreground);padding:2px 16px 8px;border-bottom:1px solid var(--border)}
@@ -160,7 +162,6 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 .af-frow:hover{background:var(--muted)}
 .af-frow.cert-row{background:color-mix(in oklab,var(--orange-bg) 60%,var(--background))}
 .af-frow.cert-row:hover{background:var(--orange-bg)}
-/* Orange cert checkbox */
 .sc-check.cert-on{background:var(--orange);border-color:var(--orange)}
 .af-fname{flex:1;font-size:13px;color:var(--foreground);display:flex;align-items:center;gap:6px}
 .cert-badge-ico{width:16px;height:16px;border-radius:3px;background:var(--orange-bg);border:1px solid var(--orange-b);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -173,14 +174,14 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 .af-val i{width:10px;height:10px;margin-left:auto;flex-shrink:0}
 .af-num{width:52px;height:26px;padding:0 6px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);color:var(--foreground);font-size:12px;font-family:inherit;text-align:center}
 
-/* Cert value dropdown */
+/* Cert dropdown */
 .cert-dd{position:fixed;z-index:1200;background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:300px;display:none;padding:4px 0;overflow:hidden}
 .cert-dd.open{display:block}
 .cert-dd-opt{padding:8px 12px;font-size:13px;color:var(--foreground);cursor:pointer}
 .cert-dd-opt:hover{background:var(--muted)}
 .cert-dd-opt.active{background:var(--orange-bg);color:var(--orange);font-weight:500}
 
-/* Expiry condition rows */
+/* Expiry rows */
 .cert-exp-sub{display:flex;align-items:center;gap:8px;padding:7px 16px 8px 42px;border-bottom:1px solid var(--border);background:color-mix(in oklab,var(--orange-bg) 40%,var(--background))}
 .cert-exp-lbl{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
 .cert-exp-input{height:28px;padding:0 8px;border:1px solid var(--orange-b);border-radius:var(--radius-md);background:var(--background);color:var(--orange);font-size:12px;font-family:inherit;outline:none;cursor:pointer}
@@ -212,7 +213,7 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 .af-sel-rm{background:none;border:none;cursor:pointer;color:var(--muted-foreground);font-size:14px;padding:0;line-height:1;border-radius:3px;flex-shrink:0}
 .af-sel-rm:hover{color:var(--destructive)}
 
-/* Toast animation */
+/* Toast */
 .toast-enter{opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s}
 .toast-show{opacity:1;transform:translateY(0)}
 </style>
@@ -223,13 +224,22 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
   <!-- Nav rail -->
   <nav class="nav-rail">
     <div class="nav-logo"><i data-lucide="zap"></i></div>
-    <button class="nav-item" title="Home"><i data-lucide="house"></i></button>
-    <button class="nav-item" title="Tasks"><i data-lucide="circle-check-big"></i></button>
-    <button class="nav-item" title="Calendar"><i data-lucide="calendar"></i></button>
-    <button class="nav-item active" title="Resource Planning"><i data-lucide="users"></i></button>
-    <button class="nav-item" title="Reports"><i data-lucide="bar-chart-2"></i></button>
-    <button class="nav-item" title="Settings"><i data-lucide="settings"></i></button>
+    <button class="nav-item"><i data-lucide="house"></i></button>
+    <button class="nav-item"><i data-lucide="circle-check-big"></i></button>
+    <button class="nav-item"><i data-lucide="layout-grid"></i></button>
+    <button class="nav-item"><i data-lucide="calendar"></i></button>
+    <button class="nav-item"><i data-lucide="star"></i></button>
+    <button class="nav-item active"><i data-lucide="users"></i></button>
+    <button class="nav-item"><i data-lucide="grid-3x3"></i></button>
+    <button class="nav-item"><i data-lucide="shield"></i></button>
+    <button class="nav-item"><i data-lucide="bar-chart-2"></i></button>
+    <button class="nav-item"><i data-lucide="settings"></i></button>
     <div class="nav-spacer"></div>
+    <button class="nav-item" style="position:relative">
+      <i data-lucide="gift"></i>
+      <span class="nav-badge">3</span>
+    </button>
+    <button class="nav-item"><i data-lucide="message-circle"></i></button>
     <div class="nav-avatar">VS</div>
   </nav>
 
@@ -237,7 +247,6 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 
     <!-- ════ DETAIL PANEL ════ -->
     <div class="dp">
-      <!-- DS ghost icon button -->
       <button class="sc-btn sc-btn--ghost sc-btn--size-icon" style="position:absolute;top:10px;right:8px;z-index:1" onclick="void(0)">
         <i data-lucide="x"></i>
       </button>
@@ -245,38 +254,12 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
       <div class="dp-topbar">
         <div class="dp-from">
           Assign placeholder request from
-          <div class="dp-from-av">S</div>
-          <span style="font-weight:600;color:var(--foreground)">shreeda</span>
+          <div class="dp-from-av">KS</div>
+          <span style="font-weight:600;color:var(--foreground)">Karpagavalli S</span>
         </div>
         <div class="dp-title">
           <div class="dp-circle"></div>
-          Project Manager for 5h 47m
-        </div>
-      </div>
-
-      <div class="dp-info">
-        <div class="dp-row">
-          <span class="dp-lbl">Approver</span>
-          <span class="dp-val ph">Select...</span>
-        </div>
-        <div class="dp-row">
-          <span class="dp-lbl">Project name</span>
-          <span class="dp-val">
-            <!-- DS badge — secondary style with green semantic override -->
-            <span class="sc-badge sc-badge--secondary" style="background:var(--green-bg);color:var(--green-dk);border:1px solid oklch(0.72 0.14 155)">Fixed fee</span>
-            <button class="sc-btn sc-btn--ghost sc-btn--size-icon-sm"><i data-lucide="external-link" style="width:11px;height:11px"></i></button>
-          </span>
-        </div>
-        <div class="dp-row">
-          <span class="dp-lbl">Project hours</span>
-          <div class="pbar-wrap">
-            <div class="pbar-fill"></div>
-            <div class="pbar-pin"></div>
-          </div>
-        </div>
-        <div class="dp-row">
-          <span class="dp-lbl">Fixed fee</span>
-          <span class="dp-val">USD 200</span>
+          Project Director &nbsp;for 7h 59m
         </div>
       </div>
 
@@ -287,83 +270,135 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 
       <div class="req-body">
         <div class="rq-row">
+          <span class="rq-lbl">Project name</span>
+          <span class="rq-val center">
+            <span class="sc-badge sc-badge--secondary" style="background:var(--warn-bg);color:var(--warn);border:1px solid #fcd34d">RM Testing</span>
+            <button class="sc-btn sc-btn--ghost sc-btn--size-icon-sm" style="margin-left:2px"><i data-lucide="external-link" style="width:11px;height:11px"></i></button>
+          </span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Project hours</span>
+          <div class="pbar-wrap"><div class="pbar-fill"></div></div>
+        </div>
+
+        <div class="rq-row">
           <span class="rq-lbl">Placeholder</span>
-          <span class="rq-val">
-            <span class="pm-ico">PM</span>
-            Project Manager
+          <span class="rq-val center">
+            <span class="pm-av" style="background:#8B5CF6">PD</span>
+            Project Director
           </span>
         </div>
         <div class="rq-row">
           <span class="rq-lbl">Role / Team member</span>
-          <span class="rq-val">
-            <span class="chip chip-blue">Project Manager <button class="chip-x">×</button></span>
+          <span class="rq-val center">
+            <span class="chip-role">
+              <span class="role-dot"></span>
+              Project Director
+              <button class="chip-x">×</button>
+            </span>
           </span>
         </div>
         <div class="rq-row">
           <span class="rq-lbl">Fields &amp; Skills</span>
+          <!-- Skills chips — show full condition text like actual product -->
           <span class="rq-val" id="skills-chips">
             <button class="add-link" onclick="openAF()">+ Add skills</button>
           </span>
         </div>
         <div class="rq-row">
           <span class="rq-lbl">Allocation method</span>
-          <span class="rq-val">
+          <span class="rq-val center">
             <span class="sel-inline">Total hours <i data-lucide="chevron-down"></i></span>
           </span>
         </div>
         <div class="rq-row">
           <span class="rq-lbl">Allocation type</span>
-          <span class="rq-val">
+          <span class="rq-val center">
             <span class="sel-inline">Hard <i data-lucide="chevron-down"></i></span>
           </span>
         </div>
-
-        <div class="alloc-hdr">
-          <span class="alloc-ttl">Allocations</span>
-          <div style="display:flex;gap:4px">
-            <!-- DS ghost xs buttons -->
-            <button class="sc-btn sc-btn--ghost sc-btn--size-xs">Expand all</button>
-            <button class="sc-btn sc-btn--ghost sc-btn--size-xs">Collapse all</button>
-          </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Dates</span>
+          <span class="rq-val center" style="justify-content:space-between">
+            <span>2 Nov – 7 Dec</span>
+            <i data-lucide="calendar" style="width:14px;height:14px;color:var(--muted-foreground)"></i>
+          </span>
         </div>
-        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">13 Mar – 13 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">1h 40m</span></div>
-        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">16 Mar – 19 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">2h 30m</span></div>
-        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">16 Mar – 22 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">38m</span></div>
-        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">18 Mar – 18 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">1h 00m</span></div>
+        <div class="rq-row">
+          <span class="rq-lbl">Hours</span>
+          <span class="rq-val center">8h 00m</span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Billable</span>
+          <span class="rq-val center">
+            <div class="sc-check sc-check--on"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Work</span>
+          <span class="rq-val center">
+            <span class="sel-inline" style="color:var(--muted-foreground);font-style:italic">Search... <i data-lucide="chevron-down"></i></span>
+          </span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Sales Order</span>
+          <span class="rq-val center em-dash">—</span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Billing Category</span>
+          <span class="rq-val center em-dash">—</span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">test_field <span style="color:var(--destructive)">*</span></span>
+          <span class="rq-val center">ccsxc</span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">type</span>
+          <span class="rq-val center em-dash">—</span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Text Test 1 <span style="color:var(--destructive)">*</span></span>
+          <span class="rq-val center">scscsc</span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Category</span>
+          <span class="rq-val center em-dash">—</span>
+        </div>
+        <div class="rq-row">
+          <span class="rq-lbl">Multi line</span>
+          <span class="rq-val center em-dash">—</span>
+        </div>
       </div>
 
       <div class="dp-footer">
-        <!-- DS destructive outline button -->
         <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="border-color:color-mix(in oklab,var(--destructive) 50%,transparent);color:var(--destructive)">Block</button>
-        <div class="fp-spacer"></div>
-        <!-- DS default button (primary) — disabled until member selected -->
-        <button class="sc-btn sc-btn--default sc-btn--size-sm btn-approve-off" id="approve-btn" onclick="doApprove()">Approve</button>
+        <!-- Approve: outline when disabled, filled when ready -->
+        <button class="sc-btn sc-btn--outline sc-btn--size-sm" id="approve-btn" onclick="doApprove()">Approve</button>
       </div>
     </div><!-- /dp -->
 
     <!-- ════ MATCHES PANEL ════ -->
     <div class="matches">
       <div class="matches-top">
-        <span class="matches-count" id="matches-count">Showing 6 relevant matches</span>
-        <div class="view-tog" style="margin-left:6px">
+        <span class="matches-count" id="matches-count">Showing 0 relevant matches</span>
+        <!-- View toggles matching actual product -->
+        <div class="view-tog" style="margin-left:8px">
           <button class="vt on"><i data-lucide="list"></i></button>
-          <button class="vt"><i data-lucide="align-left"></i></button>
+          <button class="vt"><i data-lucide="layout-panel-left"></i></button>
         </div>
-        <!-- DS outline icon button -->
-        <button class="sc-btn sc-btn--outline sc-btn--size-icon" style="width:30px;height:28px" title="Sort &amp; filter">
-          <i data-lucide="sliders-horizontal" style="width:13px;height:13px"></i>
+        <button class="sc-btn sc-btn--outline sc-btn--size-icon" style="width:34px;height:30px" title="Sort">
+          <i data-lucide="arrow-up-down" style="width:13px;height:13px"></i>
         </button>
         <div class="soft-wrap">
-          <!-- DS switch -->
           <button class="sc-switch" id="soft-tog" onclick="this.classList.toggle('sc-switch--on')">
             <span class="sc-switch-thumb"></span>
           </button>
           Ignore soft allocations
+          <i data-lucide="info" class="info-ico"></i>
         </div>
       </div>
 
       <div class="mtw">
-        <!-- DS table -->
         <div class="sc-table-wrap">
           <table class="sc-table mt-sticky" id="matches-table">
             <thead class="sc-thead">
@@ -373,40 +408,34 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
                 <th class="sc-th">Forecasted ut...</th>
                 <th class="sc-th">Forecasted bi...</th>
                 <th class="sc-th">Overallocations</th>
-                <th class="sc-th">Cost rate</th>
-                <th class="sc-th" id="cert-col-hdr" style="display:none">Certification</th>
+                <th class="sc-th" id="skill-col-hdr" style="display:none"></th>
               </tr>
             </thead>
             <tbody id="matches-tbody"></tbody>
           </table>
         </div>
+        <div class="empty-state" id="empty-state" style="display:none">
+          <i data-lucide="users"></i>
+          <p>No team members match the selected filters</p>
+        </div>
       </div>
     </div><!-- /matches -->
 
-  </div><!-- /split-view -->
+  </div>
 </div><!-- /app -->
 
 <!-- ════ ADD FIELDS MODAL ════ -->
-<!-- DS dialog overlay + custom wide modal -->
 <div class="af-back" id="af-back" onclick="if(event.target===this)closeAF()">
   <div class="af-modal">
-
     <div class="sc-dialog-header" style="padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;flex-direction:row;align-items:center;justify-content:space-between">
       <span class="sc-dialog-title" style="font-size:15px">Add fields</span>
-      <!-- DS ghost icon button -->
-      <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closeAF()">
-        <i data-lucide="x"></i>
-      </button>
+      <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closeAF()"><i data-lucide="x"></i></button>
     </div>
-
     <div class="af-search-bar">
       <i data-lucide="search" class="search-ico"></i>
-      <!-- DS input, border stripped for inline look -->
       <input class="sc-input" type="text" placeholder="Search" style="border:none;box-shadow:none;height:36px;padding:0 4px;font-size:14px">
     </div>
-
     <div class="af-body">
-      <!-- Groups -->
       <div class="af-groups">
         <div class="afg-lbl">Groups</div>
         <div class="afg-parent"><i data-lucide="chevron-down"></i>Skills</div>
@@ -415,7 +444,6 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
         <div class="afg-child" onclick="switchGroup('integrations',this)">Integrations</div>
         <div class="afg-child" onclick="switchGroup('sae',this)">SAE tech skills</div>
         <div class="afg-child" onclick="switchGroup('section6',this)">Section 6</div>
-        <!-- DS separator -->
         <div class="sc-separator" data-orientation="horizontal" style="margin:6px 0"></div>
         <div class="afg-parent"><i data-lucide="chevron-down"></i>Team member fields</div>
         <div class="afg-child" onclick="switchGroup('info',this)">Info</div>
@@ -423,15 +451,11 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
         <div class="afg-child" onclick="switchGroup('utilization',this)">Utilization</div>
         <div class="afg-child" onclick="switchGroup('default',this)">Default</div>
       </div>
-
-      <!-- Fields list (checkboxes rendered by JS using sc-check) -->
       <div class="af-fields">
         <div class="af-f-hdr" id="af-f-hdr">Skills</div>
         <div class="af-f-sub" id="af-f-sub">Technical Skills</div>
         <div id="af-field-list"></div>
       </div>
-
-      <!-- Selected panel -->
       <div class="af-sel">
         <div class="af-sel-hdr">Selected filters (<span id="sel-count">0</span>)</div>
         <div class="af-match-row">
@@ -442,8 +466,6 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
         <div class="af-sel-list" id="af-sel-list"></div>
       </div>
     </div>
-
-    <!-- DS dialog footer -->
     <div class="sc-dialog-footer" style="padding:12px 20px;border-top:1px solid var(--border)">
       <button class="sc-btn sc-btn--outline" onclick="closeAF()">Cancel</button>
       <button class="sc-btn sc-btn--default" onclick="applyFilters()">Done</button>
@@ -451,14 +473,10 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
   </div>
 </div>
 
-<!-- Cert dropdown (positioned via JS) -->
 <div class="cert-dd" id="cert-dd"></div>
-
-<!-- DS toaster — bottom center -->
 <div class="sc-toaster sc-toaster--bottom-center" id="toaster"></div>
 
 <script>
-/* ─── DATA ─── */
 const MEMBERS = [
   { name:'esswarapandian',  initials:'E',  color:'#6366F1', certRecords:[
     { name:'AWS Solutions Architect Professional', expiry:'2027-03-12' },
@@ -508,7 +526,7 @@ const FIELDS_BY_GROUP = {
     { id:'numfield',    name:'Number Field Skill',     type:'number', label:'is greater than...' },
   ],
   generic:      [{ id:'comm',   name:'Communication',      type:'level',  label:'is at least...' }, { id:'collab', name:'Collaboration', type:'level', label:'is at least...' }],
-  integrations: [{ id:'zapier', name:'Zapier',             type:'bool',   label:'is true' }, { id:'make', name:'Make / Integromat', type:'bool', label:'is true' }],
+  integrations: [{ id:'zapier', name:'Zapier',             type:'bool',   label:'is true' }, { id:'make',   name:'Make / Integromat', type:'bool', label:'is true' }],
   sae:          [{ id:'sae1',   name:'SAE Skill 1',        type:'level',  label:'is at least...' }],
   section6:     [{ id:'s6f1',   name:'Section 6 Field',    type:'bool',   label:'is true' }],
   info:         [{ id:'dept',   name:'Department',         type:'choice', label:'is exactly...' }, { id:'loc', name:'Location', type:'choice', label:'is exactly...' }],
@@ -517,21 +535,23 @@ const FIELDS_BY_GROUP = {
   default:      [{ id:'empid',  name:'Employee ID',        type:'choice', label:'is exactly...' }],
 };
 
+const LEVEL_OPTS = ['Beginner','Intermediate','Advanced','Expert'];
+
 const GROUP_LABELS = { skills:'Skills', generic:'Skills', integrations:'Skills', sae:'Skills', section6:'Skills', info:'Team member fields', contact:'Team member fields', utilization:'Team member fields', default:'Team member fields' };
 const GROUP_SUBS   = { skills:'Technical Skills', generic:'Generic Skills', integrations:'Integrations', sae:'SAE tech skills', section6:'Section 6', info:'Info', contact:'Contact Info', utilization:'Utilization', default:'Default' };
 
-/* ─── STATE ─── */
 let currentGroup = 'skills';
 let checkedFields = { cert: true };
 let certValue = 'Salesforce Certified Administrator';
 let certExpiresAfter = '2026-12-31';
+let levelValues = { progmgmt: 'Beginner' };
+// Pre-populated from request
 let appliedFilters = [
-  { id:'cert', name:'Certification', condition:'is exactly...', value:'Salesforce Certified Administrator', expiresAfter:'2026-12-31', isCert:true }
+  { id:'cert', name:'Certification', condition:'is exactly', value:'Salesforce Certified Administrator', level:'', expiresAfter:'2026-12-31', isCert:true }
 ];
 let selectedMember = -1;
 let ddOpen = false;
 
-/* ─── HELPERS ─── */
 function fmtDate(d) {
   if (!d) return null;
   const [y,m,day] = d.split('-');
@@ -543,7 +563,17 @@ function certShortName(name) {
   return map[name] || (name.length > 20 ? name.slice(0,18)+'…' : name);
 }
 
-/* ─── MATCH LOGIC ─── */
+/* Build chip label matching actual product: "Field name condition Value" */
+function chipLabel(f) {
+  if (f.isCert) {
+    let lbl = `${certShortName(f.value)} is exactly`;
+    if (f.expiresAfter) lbl += ` · expires after ${f.expiresAfter}`;
+    return lbl;
+  }
+  if (f.level) return `${f.name} ${f.condition} ${f.level}`;
+  return `${f.name} ${f.condition}`;
+}
+
 function memberCertStatus(m, certFilter) {
   const rec = m.certRecords.find(c => c.name === certFilter.value);
   if (!rec) return 'missing';
@@ -551,14 +581,20 @@ function memberCertStatus(m, certFilter) {
   return rec.expiry >= certFilter.expiresAfter ? 'valid' : 'expiring-early';
 }
 
-/* ─── RENDER MATCHES TABLE ─── */
 function renderMatches() {
   const certFilter = appliedFilters.find(f => f.isCert);
-  const certColHdr = document.getElementById('cert-col-hdr');
-  certColHdr.style.display = certFilter ? '' : 'none';
-  if (certFilter) {
-    const label = certShortName(certFilter.value) + (certFilter.expiresAfter ? ' · exp. after ' + fmtDate(certFilter.expiresAfter) : '');
-    certColHdr.textContent = label;
+  const skillFilter = appliedFilters.find(f => !f.isCert && f.level);
+  const skillColHdr = document.getElementById('skill-col-hdr');
+
+  // Show skill column header = last applied non-cert filter with a level
+  if (skillFilter) {
+    skillColHdr.style.display = '';
+    skillColHdr.textContent = skillFilter.name;
+  } else if (certFilter) {
+    skillColHdr.style.display = '';
+    skillColHdr.textContent = certShortName(certFilter.value) + (certFilter.expiresAfter ? ' · exp. after ' + fmtDate(certFilter.expiresAfter) : '');
+  } else {
+    skillColHdr.style.display = 'none';
   }
 
   let shown = 0;
@@ -569,18 +605,20 @@ function renderMatches() {
     const selCls = selectedMember === i ? ' row-sel' : '';
     const opacity = hide ? 'opacity:.28;pointer-events:none' : '';
 
-    let certTd = '';
+    let extraTd = '';
     if (certFilter) {
       if (certStatus === 'valid') {
         const rec = m.certRecords.find(c => c.name === certFilter.value);
         const expTxt = rec && rec.expiry ? `exp. ${fmtDate(rec.expiry)}` : 'Permanent';
-        certTd = `<td class="sc-td"><span class="sc-badge cert-valid">✓ Valid</span> <span style="font-size:11px;color:var(--muted-foreground)">${expTxt}</span></td>`;
+        extraTd = `<td class="sc-td"><span class="sc-badge cert-valid">✓ Valid</span> <span style="font-size:11px;color:var(--muted-foreground)">${expTxt}</span></td>`;
       } else if (certStatus === 'expiring-early') {
         const rec = m.certRecords.find(c => c.name === certFilter.value);
-        certTd = `<td class="sc-td"><span class="sc-badge cert-warn">⚠ Exp. ${fmtDate(rec.expiry)}</span></td>`;
+        extraTd = `<td class="sc-td"><span class="sc-badge cert-warn">⚠ Exp. ${fmtDate(rec.expiry)}</span></td>`;
       } else {
-        certTd = `<td class="sc-td"><span class="sc-badge cert-miss">— Missing</span></td>`;
+        extraTd = `<td class="sc-td"><span class="sc-badge cert-miss">— Missing</span></td>`;
       }
+    } else if (skillFilter) {
+      extraTd = `<td class="sc-td" style="color:var(--muted-foreground)">—</td>`;
     }
 
     return `<tr class="sc-tr${selCls}" style="${opacity}" onclick="${hide ? '' : 'selectMember('+i+')'}">
@@ -588,36 +626,38 @@ function renderMatches() {
         <span class="sc-avatar" style="background:${m.color};font-size:9px;font-weight:700;width:26px;height:26px">${m.initials}</span>
         ${m.name}
       </div></td>
-      <td class="sc-td"><div class="role-cell"><div class="rdot" style="background:var(--green-dk)">PM</div>Project Manager</div></td>
+      <td class="sc-td" style="color:var(--muted-foreground)">Project Director</td>
       <td class="sc-td" style="color:var(--muted-foreground)">15.36%</td>
       <td class="sc-td" style="color:var(--muted-foreground)">15.36%</td>
       <td class="sc-td" style="color:oklch(0.52 0.16 155)">0h</td>
-      <td class="sc-td">USD 275</td>
-      ${certTd}
+      ${extraTd}
     </tr>`;
   }).join('');
 
   document.getElementById('matches-tbody').innerHTML = rows;
-  document.getElementById('matches-count').textContent = `Showing ${shown} relevant match${shown === 1 ? '' : 'es'}`;
+  const count = appliedFilters.length > 0 ? shown : MEMBERS.length;
+  document.getElementById('matches-count').textContent = `Showing ${count} relevant match${count === 1 ? '' : 'es'}`;
+  document.getElementById('empty-state').style.display = count === 0 ? 'flex' : 'none';
 }
 
 function selectMember(i) {
   selectedMember = i;
   renderMatches();
-  document.getElementById('approve-btn').classList.remove('btn-approve-off');
+  const btn = document.getElementById('approve-btn');
+  btn.classList.remove('sc-btn--outline');
+  btn.classList.add('sc-btn--default', 'ready');
 }
 
 function doApprove() {
-  if (document.getElementById('approve-btn').classList.contains('btn-approve-off')) return;
-  showToast(`${MEMBERS[selectedMember].name} approved for Project Manager · 5h 47m`, 'success');
+  if (!document.getElementById('approve-btn').classList.contains('ready')) return;
+  showToast(`${MEMBERS[selectedMember].name} approved for Project Director · 7h 59m`, 'success');
 }
 
-/* ─── SKILLS CHIPS ─── */
+/* Skills chips — show full condition text like actual product */
 function renderSkillsChips() {
   const wrap = document.getElementById('skills-chips');
   const chips = appliedFilters.map(f => {
-    let label = f.isCert ? certShortName(f.value) : f.name;
-    if (f.isCert && f.expiresAfter) label += ` · expires after ${f.expiresAfter}`;
+    const label = chipLabel(f);
     const ico = f.isCert ? `<i data-lucide="award" style="width:10px;height:10px"></i>` : '';
     return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">${ico}${label}<button class="chip-x" onclick="removeFilter('${f.id}')">×</button></span>`;
   }).join('');
@@ -632,13 +672,13 @@ function removeFilter(id) {
   renderMatches();
 }
 
-/* ─── MODAL ─── */
 function openAF() {
   document.getElementById('af-back').classList.add('open');
   checkedFields = {};
   appliedFilters.forEach(f => {
     checkedFields[f.id] = true;
     if (f.isCert) { certValue = f.value; certExpiresAfter = f.expiresAfter || null; }
+    if (f.level) levelValues[f.id] = f.level;
   });
   renderFieldList();
   renderSelPanel();
@@ -654,7 +694,6 @@ function switchGroup(g, el) {
   renderFieldList();
 }
 
-/* DS sc-check checkbox */
 function cbHtml(isCert, checked) {
   const cls = isCert && checked ? 'sc-check cert-on' : checked ? 'sc-check sc-check--on' : 'sc-check';
   const inner = checked ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : '';
@@ -669,7 +708,13 @@ function renderFieldList() {
     const rowCls = isCert ? ' cert-row' : '';
 
     let valHtml = '';
-    if (f.type === 'level' || f.type === 'choice') {
+    if (f.type === 'level') {
+      const cur = levelValues[f.id] || '';
+      const opts = LEVEL_OPTS.map(o => `<option${o===cur?' selected':''}>${o}</option>`).join('');
+      valHtml = `<select class="af-val${checked ? ' has' : ''}" style="cursor:pointer;appearance:none;padding-right:20px" onclick="event.stopPropagation()" onchange="levelValues['${f.id}']=this.value;renderSelPanel()">
+        <option value="" disabled${!cur?' selected':''}>Select...</option>${opts}
+      </select>`;
+    } else if (f.type === 'choice') {
       valHtml = `<div class="af-val${checked ? ' has' : ''}">Select... <i data-lucide="chevron-down"></i></div>`;
     } else if (f.type === 'number') {
       valHtml = `<input class="af-num" type="number" value="0" onclick="event.stopPropagation()">`;
@@ -677,8 +722,7 @@ function renderFieldList() {
       const hasVal = certValue && checkedFields['cert'];
       const shortVal = hasVal && certValue.length > 16 ? certValue.slice(0,14)+'…' : certValue;
       valHtml = `<div class="af-val${hasVal ? ' cert-pick' : ''}" id="cert-dd-btn" onclick="toggleCertDD(event)">
-        ${hasVal ? shortVal : 'Select...'}
-        <i data-lucide="chevron-down"></i>
+        ${hasVal ? shortVal : 'Select...'} <i data-lucide="chevron-down"></i>
       </div>`;
     }
 
@@ -713,7 +757,7 @@ function renderFieldList() {
 }
 
 function toggleField(id, e) {
-  if (e.target.closest('#cert-dd-btn') || e.target.closest('.cert-exp-sub') || e.target.closest('.cert-exp-add')) return;
+  if (e.target.closest('#cert-dd-btn') || e.target.closest('.cert-exp-sub') || e.target.closest('.cert-exp-add') || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
   checkedFields[id] = !checkedFields[id];
   if (!checkedFields[id] && id === 'cert') { certValue = ''; certExpiresAfter = null; }
   renderFieldList();
@@ -737,19 +781,11 @@ function toggleCertDD(e) {
   }
   dd.classList.toggle('open', ddOpen);
 }
-
-function closeCertDD() {
-  ddOpen = false;
-  document.getElementById('cert-dd').classList.remove('open');
-}
-
+function closeCertDD() { ddOpen = false; document.getElementById('cert-dd').classList.remove('open'); }
 function pickCert(val, e) {
   e.stopPropagation();
-  certValue = val;
-  checkedFields['cert'] = true;
-  closeCertDD();
-  renderFieldList();
-  renderSelPanel();
+  certValue = val; checkedFields['cert'] = true;
+  closeCertDD(); renderFieldList(); renderSelPanel();
 }
 
 function renderSelPanel() {
@@ -758,7 +794,7 @@ function renderSelPanel() {
     const f = allFields.find(x => x.id === id);
     if (!f) return null;
     const isCert = f.type === 'cert';
-    return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
+    return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', level: levelValues[id] || '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
   }).filter(Boolean);
 
   document.getElementById('sel-count').textContent = items.length;
@@ -768,6 +804,7 @@ function renderSelPanel() {
     let condLine = item.condition;
     if (item.isCert && item.value) condLine += ' ' + certShortName(item.value);
     if (item.isCert && item.expiresAfter) condLine += ` · expires after ${item.expiresAfter}`;
+    if (item.level) condLine += ' ' + item.level;
     return `<div class="af-sel-item${item.isCert ? ' c-item' : ''}">
       <i data-lucide="${item.isCert ? 'award' : 'lightbulb'}"></i>
       <div class="af-sel-item-body">
@@ -782,12 +819,10 @@ function renderSelPanel() {
 
 function clearCertExpiry(e) { e.stopPropagation(); certExpiresAfter = null; renderFieldList(); renderSelPanel(); }
 function addCertExpiry(e)   { e.stopPropagation(); certExpiresAfter = ''; renderFieldList(); renderSelPanel(); }
-
 function deselect(id) {
   checkedFields[id] = false;
   if (id === 'cert') { certValue = ''; certExpiresAfter = null; }
-  renderFieldList();
-  renderSelPanel();
+  renderFieldList(); renderSelPanel();
 }
 
 function applyFilters() {
@@ -796,14 +831,11 @@ function applyFilters() {
     const f = allFields.find(x => x.id === id);
     if (!f) return null;
     const isCert = f.type === 'cert';
-    return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
+    return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', level: levelValues[id] || '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
   }).filter(Boolean);
-  closeAF();
-  renderSkillsChips();
-  renderMatches();
+  closeAF(); renderSkillsChips(); renderMatches();
 }
 
-/* ─── TOAST — DS sc-toast structure ─── */
 function showToast(msg, type = 'success') {
   const toaster = document.getElementById('toaster');
   const iconMap = { success:'circle-check', error:'circle-x', warning:'triangle-alert', default:'info' };
@@ -812,15 +844,9 @@ function showToast(msg, type = 'success') {
   el.innerHTML = `
     <div class="sc-toast-main">
       <i data-lucide="${iconMap[type]}" class="sc-toast-icon"></i>
-      <div class="sc-toast-body">
-        <div class="sc-toast-text">
-          <span class="sc-toast-title">${msg}</span>
-        </div>
-      </div>
+      <div class="sc-toast-body"><div class="sc-toast-text"><span class="sc-toast-title">${msg}</span></div></div>
     </div>
-    <button class="sc-toast-close" onclick="this.parentElement.remove()">
-      <i data-lucide="x"></i>
-    </button>`;
+    <button class="sc-toast-close" onclick="this.parentElement.remove()"><i data-lucide="x"></i></button>`;
   toaster.appendChild(el);
   lucide.createIcons({ nodes: [el] });
   requestAnimationFrame(() => el.classList.add('toast-show'));
@@ -831,7 +857,6 @@ document.addEventListener('click', e => {
   if (!e.target.closest('#cert-dd') && !e.target.closest('#cert-dd-btn')) closeCertDD();
 });
 
-/* ─── INIT ─── */
 lucide.createIcons();
 renderSkillsChips();
 renderMatches();
