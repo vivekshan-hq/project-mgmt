@@ -12,7 +12,6 @@
 .form-card-body{padding:22px 24px;display:flex;flex-direction:column;gap:18px;}
 .form-card-ftr{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
 .fld{display:flex;flex-direction:column;gap:5px;}
-.cert-section{padding-top:18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:16px;}
 </style>
 </head>
 <body>
@@ -86,40 +85,10 @@
             <div class="form-hint">Description will show as a tooltip to the team</div>
           </div>
 
-          <!-- Certification-specific details -->
-          <div class="cert-section">
-            <div class="cert-meta-header">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-              <div>
-                <div class="cert-meta-header-text">Certification details</div>
-                <div class="cert-meta-header-sub">Validity is tracked per team member, not per certificate.</div>
-              </div>
-            </div>
-
-            <div class="fld">
-              <label class="form-label">Vendor name</label>
-              <input type="text" class="form-input" id="c-vendor" placeholder="eg. Amazon Web Services">
-              <div class="form-hint">Free text — used for display alongside the certificate name.</div>
-            </div>
-
-            <div class="fld">
-              <label class="form-label">Expires <span class="req">*</span></label>
-              <div class="radio-group">
-                <label class="radio-opt sel" id="opt-yes" onclick="setExpires('yes')">
-                  <div class="radio-dot"></div> Yes — has a validity period
-                </label>
-                <label class="radio-opt" id="opt-no" onclick="setExpires('no')">
-                  <div class="radio-dot"></div> No — valid forever
-                </label>
-              </div>
-            </div>
-
-            <div id="validity-note" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
-              <div style="font-size:12px;color:var(--text-2);line-height:1.5;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;color:var(--text-3);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span id="validity-text">When this certificate is added to a team member, they will be required to enter an expiry date.</span>
-              </div>
-            </div>
+          <div class="fld">
+            <label class="form-label">Certification Source</label>
+            <input type="text" class="form-input" id="c-source" placeholder="eg. Amazon Web Services">
+            <div class="form-hint">Free text — used for display alongside the certificate name.</div>
           </div>
 
         </div>
@@ -138,17 +107,6 @@
 </div>
 
 <script>
-let expires = 'yes';
-
-function setExpires(v) {
-  expires = v;
-  document.getElementById('opt-yes').classList.toggle('sel', v === 'yes');
-  document.getElementById('opt-no').classList.toggle('sel', v === 'no');
-  document.getElementById('validity-text').textContent = v === 'yes'
-    ? 'When this certificate is added to a team member, they will be required to enter an expiry date.'
-    : 'This certificate never expires. No expiry date will be requested when it is assigned.';
-}
-
 function saveCert() {
   const name = document.getElementById('c-name').value.trim();
   if (!name) {
@@ -160,9 +118,8 @@ function saveCert() {
   // Hand the new certificate back to the library page
   const cert = {
     name,
-    vendor: document.getElementById('c-vendor').value.trim(),
+    source: document.getElementById('c-source').value.trim(),
     section: document.getElementById('c-section').value,
-    expires: expires === 'yes',
   };
   sessionStorage.setItem('newCert', JSON.stringify(cert));
   location.href = 'certifications.html#library';

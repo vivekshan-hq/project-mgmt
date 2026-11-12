@@ -104,7 +104,7 @@
           <thead>
             <tr>
               <th>Certificate name</th>
-              <th>Vendor</th>
+              <th>Certification source</th>
               <th>Expires</th>
               <th>Team members</th>
               <th style="width:72px"></th>
@@ -817,8 +817,9 @@ function absorbNewCert() {
     CERT_LIBRARY.unshift({
       id: 'new-' + CERT_LIBRARY.length,
       name: c.name,
-      vendor: c.vendor || '—',
-      expires: !!c.expires,
+      vendor: c.source || '—',
+      // Expiry is no longer declared per certificate, only per team member
+      expires: null,
       url: '',
       members: 0,
     });
@@ -839,7 +840,7 @@ function renderLibrary() {
         </div>
       </td>
       <td style="color:var(--text-3);font-size:12px;">${c.vendor}</td>
-      <td style="color:var(--text-3);font-size:12px;">${c.expires ? 'Yes' : 'No'}</td>
+      <td style="color:var(--text-3);font-size:12px;">${c.expires === null ? '—' : c.expires ? 'Yes' : 'No'}</td>
       <td style="color:var(--text-3);font-size:12px;text-align:center;">${c.members}</td>
       <td>
         <div class="ra">
