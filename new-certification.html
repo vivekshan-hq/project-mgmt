@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New certification</title>
+<!-- Same stylesheet as the library page, so the two stay visually identical -->
+<link rel="stylesheet" href="proto.css">
+<style>
+/* Page-specific: form card + sticky action bar */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:720px;}
+.form-card-body{padding:22px 24px;display:flex;flex-direction:column;gap:18px;}
+.form-card-ftr{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.fld{display:flex;flex-direction:column;gap:5px;}
+.cert-section{padding-top:18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:16px;}
+</style>
+</head>
+<body>
+
+<div class="screen active">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo-text">Rocketlane</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-sec-lbl">Settings</div>
+      <a class="nav-item" href="#">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        General
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Resource Planning</div>
+      <a class="nav-item active" href="certifications.html#library">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Skills
+      </a>
+      <div class="nav-sec-lbl" style="margin-top:8px">Fields</div>
+      <a class="nav-item nav-indent" href="#">Project fields</a>
+      <a class="nav-item nav-indent" href="#">Team member fields</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb">
+        <span style="color:var(--text-3)">Settings</span>
+        <span class="bc-sep">›</span>
+        <a href="certifications.html#library" style="color:var(--text-3);text-decoration:none">Skills</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-curr">New certification</span>
+      </div>
+      <div class="topbar-right"><div class="avatar">VS</div></div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">New certification</div>
+          <div class="page-desc">Add a certificate to the library. Team members can then be assigned this certificate along with their own expiry date.</div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-body">
+
+          <div class="fld">
+            <label class="form-label">Certificate name <span class="req">*</span></label>
+            <input type="text" class="form-input" id="c-name" placeholder="eg. AWS Solutions Architect Professional">
+          </div>
+
+          <div class="fld">
+            <label class="form-label">Section name</label>
+            <select class="form-select" id="c-section">
+              <option>Certifications</option>
+              <option>Technical Skills</option>
+              <option>Soft Skills</option>
+              <option>Languages</option>
+            </select>
+          </div>
+
+          <div class="fld">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" style="min-height:78px" id="c-desc" placeholder="Describe what this certification validates…"></textarea>
+            <div class="form-hint">Description will show as a tooltip to the team</div>
+          </div>
+
+          <!-- Certification-specific details -->
+          <div class="cert-section">
+            <div class="cert-meta-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+              <div>
+                <div class="cert-meta-header-text">Certification details</div>
+                <div class="cert-meta-header-sub">Validity is tracked per team member, not per certificate.</div>
+              </div>
+            </div>
+
+            <div class="fld">
+              <label class="form-label">Vendor name</label>
+              <input type="text" class="form-input" id="c-vendor" placeholder="eg. Amazon Web Services">
+              <div class="form-hint">Free text — used for display alongside the certificate name.</div>
+            </div>
+
+            <div class="fld">
+              <label class="form-label">Expires <span class="req">*</span></label>
+              <div class="radio-group">
+                <label class="radio-opt sel" id="opt-yes" onclick="setExpires('yes')">
+                  <div class="radio-dot"></div> Yes — has a validity period
+                </label>
+                <label class="radio-opt" id="opt-no" onclick="setExpires('no')">
+                  <div class="radio-dot"></div> No — valid forever
+                </label>
+              </div>
+            </div>
+
+            <div id="validity-note" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+              <div style="font-size:12px;color:var(--text-2);line-height:1.5;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;color:var(--text-3);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="validity-text">When this certificate is added to a team member, they will be required to enter an expiry date.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-card-ftr">
+          <a class="btn btn-ghost" href="certifications.html#library">Cancel</a>
+          <button class="btn btn-primary" onclick="saveCert()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save certification
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let expires = 'yes';
+
+function setExpires(v) {
+  expires = v;
+  document.getElementById('opt-yes').classList.toggle('sel', v === 'yes');
+  document.getElementById('opt-no').classList.toggle('sel', v === 'no');
+  document.getElementById('validity-text').textContent = v === 'yes'
+    ? 'When this certificate is added to a team member, they will be required to enter an expiry date.'
+    : 'This certificate never expires. No expiry date will be requested when it is assigned.';
+}
+
+function saveCert() {
+  const name = document.getElementById('c-name').value.trim();
+  if (!name) {
+    const el = document.getElementById('c-name');
+    el.style.borderColor = 'var(--danger, #da1e28)';
+    el.focus();
+    return;
+  }
+  // Hand the new certificate back to the library page
+  const cert = {
+    name,
+    vendor: document.getElementById('c-vendor').value.trim(),
+    section: document.getElementById('c-section').value,
+    expires: expires === 'yes',
+  };
+  sessionStorage.setItem('newCert', JSON.stringify(cert));
+  location.href = 'certifications.html#library';
+}
+
+document.getElementById('c-name').addEventListener('input', function () {
+  this.style.borderColor = '';
+});
+</script>
+</body>
+</html>

@@ -93,6 +93,11 @@
       <div class="lib-section" style="margin-top:8px">
         <span class="lib-section-lbl">Certifications</span>
         <span class="lib-section-line"></span>
+        <!-- Certifications get their own full page, not the New skill modal -->
+        <a class="btn btn-secondary btn-sm" href="new-certification.html" style="text-decoration:none;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          New certification
+        </a>
       </div>
       <div class="tbl-wrap">
         <table class="tbl" id="cert-lib-table">
@@ -801,7 +806,27 @@ const CERT_LIBRARY = [
   { id:'ccna', name:'Cisco CCNA', vendor:'Cisco', expires:true, url:'cisco.com/certifications', members:1 },
 ];
 
+/* new-certification.html hands a saved certificate over via sessionStorage */
+function absorbNewCert() {
+  const raw = sessionStorage.getItem('newCert');
+  if (!raw) return;
+  sessionStorage.removeItem('newCert');
+  try {
+    const c = JSON.parse(raw);
+    if (!c || !c.name) return;
+    CERT_LIBRARY.unshift({
+      id: 'new-' + CERT_LIBRARY.length,
+      name: c.name,
+      vendor: c.vendor || '—',
+      expires: !!c.expires,
+      url: '',
+      members: 0,
+    });
+  } catch (e) { /* ignore a malformed handoff rather than blanking the table */ }
+}
+
 function renderLibrary() {
+  absorbNewCert();
   const tbody = document.getElementById('cert-lib-tbody');
   tbody.innerHTML = CERT_LIBRARY.map(c => `
     <tr>
