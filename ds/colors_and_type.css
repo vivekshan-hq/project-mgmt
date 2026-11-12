@@ -1,0 +1,330 @@
+/* ==========================================================================
+   shadcn/ui — Colors & Type
+   ========================================================================== */
+
+/* Fonts — the system UI stack. No webfonts are shipped; type resolves to the
+   platform's native UI face (SF Pro, Segoe UI, Roboto…) and its mono companion. */
+
+:root {
+  /* ---------- Typography tokens ---------- */
+  --font-sans: "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Decorative display faces — headlines and accents only, never body copy. */
+  --font-pixel-square: "Geist Pixel Square", var(--font-sans);
+  --font-pixel-grid: "Geist Pixel Grid", var(--font-sans);
+  --font-pixel-circle: "Geist Pixel Circle", var(--font-sans);
+  --font-pixel-triangle: "Geist Pixel Triangle", var(--font-sans);
+  --font-pixel-line: "Geist Pixel Line", var(--font-sans);
+
+  /* Font sizes — Tailwind default text scale */
+  --text-xs: 0.75rem;       /* 12 */
+  --text-sm: 0.875rem;      /* 14 */
+  --text-base: 1rem;        /* 16 */
+  --text-lg: 1.125rem;      /* 18 */
+  --text-xl: 1.25rem;       /* 20 */
+  --text-2xl: 1.5rem;       /* 24 */
+  --text-3xl: 1.875rem;     /* 30 */
+  --text-4xl: 2.25rem;      /* 36 */
+  --text-5xl: 3rem;         /* 48 */
+  --text-6xl: 3.75rem;      /* 60 */
+
+  /* Weights — shadcn/ui primarily uses 400, 500, 600, 700 */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+
+  /* ---------- Radius (from globals.css --radius) ---------- */
+  --radius: 0.625rem;                    /* 10px */
+  --radius-sm: calc(var(--radius) * 0.6);  /* ~6px */
+  --radius-md: calc(var(--radius) * 0.8);  /* 8px */
+  --radius-lg: var(--radius);            /* 10px */
+  --radius-xl: calc(var(--radius) * 1.4);  /* 14px */
+  --radius-2xl: calc(var(--radius) * 1.8); /* 18px */
+  --radius-3xl: calc(var(--radius) * 2.2); /* ~22px */
+
+  /* ---------- Spacing (Tailwind v4 default --spacing: 0.25rem) ---------- */
+  --spacing: 0.25rem;
+
+  /* ---------- Shadows (Tailwind defaults) ---------- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm:
+    0 1px 3px 0 rgb(0 0 0 / 0.1),
+    0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* ============================================================
+     Light theme — neutral, the shadcn/ui default
+     Source: apps/v4/app/globals.css :root
+     ============================================================ */
+
+  /* Semantic surface colors */
+  --background: oklch(1 0 0);                 /* pure white */
+  --foreground: oklch(0.145 0 0);             /* near-black */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* Primary — the "brand" color for filled buttons. In base shadcn,
+     this is near-black on white. Projects override this for brand color. */
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.97 0.01 17);
+
+  /* Borders — subtle by default, strong for explicit emphasis.
+     Using these hairlines (0.94) instead of the previous 0.922 prevents
+     stacked borders (table rows + frames + cards) from reading heavy. */
+  --border: oklch(0.94 0 0);
+  --border-strong: oklch(0.905 0 0);
+  --input: oklch(0.92 0 0);
+  --ring: oklch(0.708 0 0);
+
+  /* Toast — banner states from the Figma kit's "Toast 1" family */
+  --toast-info: rgb(15,98,254);
+  --toast-info-surface: rgb(237,245,255);
+  --toast-success: rgb(25,128,56);
+  --toast-success-surface: rgb(222,251,230);
+  --toast-warning: rgb(255,191,0);
+  --toast-warning-surface: rgb(255,251,240);
+  --toast-error: rgb(218,30,40);
+  --toast-error-surface: rgb(255,241,241);
+
+  /* Charts — the base/neutral theme uses a blue ramp */
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+
+  /* Sidebar */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Code / surface */
+  --surface: oklch(0.98 0 0);
+  --surface-foreground: var(--foreground);
+  --code: var(--surface);
+  --code-foreground: var(--surface-foreground);
+  --code-highlight: oklch(0.96 0 0);
+  --code-number: oklch(0.56 0 0);
+
+  --selection: oklch(0.145 0 0);
+  --selection-foreground: oklch(1 0 0);
+}
+
+/* ============================================================
+   Dark theme (applied via .dark on <html> or ancestor)
+   Source: apps/v4/app/globals.css .dark
+   ============================================================ */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  --accent: oklch(0.371 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.58 0.22 27);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.439 0 0);
+
+  --surface: oklch(0.2 0 0);
+  --surface-foreground: oklch(0.708 0 0);
+  --code: var(--surface);
+  --code-foreground: var(--surface-foreground);
+  --code-highlight: oklch(0.27 0 0);
+  --code-number: oklch(0.72 0 0);
+
+  --selection: oklch(0.922 0 0);
+  --selection-foreground: oklch(0.205 0 0);
+}
+
+/* ============================================================
+   Base element styles — a "typography" starting point.
+   shadcn/ui itself is unopinionated at the element level; these
+   are the <Typography> docs defaults.
+   ============================================================ */
+html {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-synthesis-weight: none;
+}
+
+body { margin: 0; }
+
+::selection {
+  background: var(--selection);
+  color: var(--selection-foreground);
+}
+
+h1, .h1 {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  scroll-margin: calc(var(--spacing) * 20);
+  text-wrap: balance;
+}
+@media (min-width: 1024px) {
+  h1, .h1 { font-size: var(--text-5xl); }
+}
+
+h2, .h2 {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  padding-bottom: calc(var(--spacing) * 2);
+  border-bottom: 1px solid var(--border);
+  margin-top: calc(var(--spacing) * 10);
+  text-wrap: balance;
+}
+
+h3, .h3 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+}
+
+h4, .h4 {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+}
+
+p {
+  line-height: var(--leading-relaxed);
+  text-wrap: pretty;
+}
+p + p { margin-top: calc(var(--spacing) * 6); }
+
+.lead {
+  font-size: var(--text-xl);
+  color: var(--muted-foreground);
+  line-height: var(--leading-relaxed);
+}
+
+.large {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.small {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: 1.4;
+}
+
+.muted {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+}
+
+code {
+  font-size: 0.875em;
+  background: var(--muted);
+  padding: 0.15rem 0.35rem;
+  border-radius: var(--radius-sm);
+  font-weight: var(--weight-medium);
+}
+
+blockquote {
+  margin: calc(var(--spacing) * 6) 0;
+  border-left: 2px solid var(--border);
+  padding-left: calc(var(--spacing) * 6);
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: calc(var(--spacing) * 6) 0;
+}

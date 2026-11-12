@@ -1,0 +1,16 @@
+/* ==========================================================================
+   Rocketlane x shadcn — deployable design system entry point
+   ==========================================================================
+   This is a committed, URL-safe copy of the CSS from
+   "Design System/rocketlane-x-shadcn/". Prototypes MUST link this path
+   (`ds/styles.css`) and not the source folder: that folder is untracked and
+   its name contains a space, so it 404s on GitHub Pages. A 404 here is silent
+   and brutal — every --token and every .sc-* class stops existing, so the page
+   falls back to serif body text and raw unstyled HTML.
+
+   Order matters: @import rules must come before any other rule.
+   ========================================================================== */
+
+@import "fonts.css";
+@import "colors_and_type.css";
+@import "components.css";
