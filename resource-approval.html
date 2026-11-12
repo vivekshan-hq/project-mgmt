@@ -75,8 +75,10 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 .pm-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
 .role-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:1px}
 
-/* Skill / cert chips — full text, wrappable */
-.chip{display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:3px;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:500;line-height:1.4;max-width:100%}
+/* Skill / cert chips — flex row, text wraps inside, icon+× stay at top */
+.chip{display:flex;align-items:flex-start;gap:5px;padding:3px 6px 3px 8px;border-radius:6px;font-size:12px;font-weight:500;line-height:1.4}
+.chip svg{flex-shrink:0;margin-top:2px}
+.chip-text{flex:1;word-break:break-word}
 .chip-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-m)}
 .chip-role{display:inline-flex;align-items:center;gap:5px;padding:3px 8px 3px 5px;border-radius:6px;font-size:12px;font-weight:500;background:color-mix(in oklab,#ef4444 12%,transparent);color:#b91c1c;border:1px solid color-mix(in oklab,#ef4444 25%,transparent)}
 .chip-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b)}
@@ -653,16 +655,18 @@ function doApprove() {
   showToast(`${MEMBERS[selectedMember].name} approved for Project Director · 7h 59m`, 'success');
 }
 
-/* Skills chips — show full condition text like actual product */
+/* Skills chips — full condition text, inline SVG so size is controlled */
+const AWARD_SVG = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+const SKILL_SVG = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>`;
+
 function renderSkillsChips() {
   const wrap = document.getElementById('skills-chips');
   const chips = appliedFilters.map(f => {
     const label = chipLabel(f);
-    const ico = f.isCert ? `<i data-lucide="award" style="width:10px;height:10px"></i>` : '';
-    return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">${ico}${label}<button class="chip-x" onclick="removeFilter('${f.id}')">×</button></span>`;
+    const ico = f.isCert ? AWARD_SVG : SKILL_SVG;
+    return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">${ico}<span class="chip-text">${label}</span><button class="chip-x" onclick="removeFilter('${f.id}')">×</button></span>`;
   }).join('');
   wrap.innerHTML = chips + `<button class="add-link" onclick="openAF()">+ Add skills</button>`;
-  lucide.createIcons({ nodes: [wrap] });
 }
 
 function removeFilter(id) {
