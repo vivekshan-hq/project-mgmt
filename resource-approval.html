@@ -7,35 +7,30 @@
 <link rel="stylesheet" href="Design System/rocketlane-x-shadcn/styles.css">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
-/* ── Semantic tokens not in DS ── */
+/* ── Semantic accent colors not in DS ── */
 :root {
-  --blue: #0f62fe;
-  --blue-bg: #edf5ff;
-  --blue-m: #d0e2ff;
-  --green-dk: #0e6027;
-  --green-bg: #defbe6;
-  --orange: #C2410C;
-  --orange-bg: #FFF7ED;
-  --orange-b: #FED7AA;
-  --t3: oklch(0.6 0 0);
-  --t-ph: oklch(0.72 0 0);
-  --t-dis: oklch(0.82 0 0);
-  --border-s: oklch(0.96 0 0);
-  --surface-2: oklch(0.985 0 0);
+  --blue:       #0f62fe;
+  --blue-bg:    #edf5ff;
+  --blue-m:     #d0e2ff;
+  --green-dk:   #0e6027;
+  --green-bg:   #defbe6;
+  --orange:     #C2410C;
+  --orange-bg:  #FFF7ED;
+  --orange-b:   #FED7AA;
+  --warn:       #92400E;
+  --warn-bg:    #FEF3C7;
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --blue-bg:#001141;--blue-m:#003082;
   --green-bg:#071a08;--green-dk:#6fdc8c;
   --orange-bg:#1c0f00;--orange-b:#7c2d12;
-  --t3:oklch(0.48 0 0);--t-ph:oklch(0.38 0 0);--t-dis:oklch(0.28 0 0);
-  --border-s:oklch(0.21 0 0);--surface-2:oklch(0.19 0 0);
+  --warn-bg:#1c1200;--warn:#fbbf24;
 }}
 :root[data-theme="dark"]{
   --blue-bg:#001141;--blue-m:#003082;
   --green-bg:#071a08;--green-dk:#6fdc8c;
   --orange-bg:#1c0f00;--orange-b:#7c2d12;
-  --t3:oklch(0.48 0 0);--t-ph:oklch(0.38 0 0);--t-dis:oklch(0.28 0 0);
-  --border-s:oklch(0.21 0 0);--surface-2:oklch(0.19 0 0);
+  --warn-bg:#1c1200;--warn:#fbbf24;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -44,11 +39,11 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 /* ── App shell ── */
 .app{display:flex;height:100vh;overflow:hidden}
 
-/* ── Nav rail — matches DS workspace template ── */
+/* ── Nav rail ── */
 .nav-rail{width:48px;background:oklch(0.145 0 0);display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;flex-shrink:0;gap:2px}
-.nav-logo{width:32px;height:32px;border-radius:8px;background:oklch(0.205 0 0);display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0;border:1px solid oklch(0.28 0 0)}
-.nav-logo svg{width:15px;height:15px;color:#fff}
-.nav-item{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:oklch(0.55 0 0);cursor:pointer;transition:background .12s,color .12s;border:none;background:transparent}
+.nav-logo{width:32px;height:32px;border-radius:8px;background:oklch(0.22 0 0);display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0;border:1px solid oklch(0.3 0 0)}
+.nav-logo i{width:15px;height:15px;color:#fff}
+.nav-item{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:oklch(0.5 0 0);cursor:pointer;border:none;background:transparent;transition:background .12s,color .12s}
 .nav-item:hover{background:oklch(0.22 0 0);color:oklch(0.85 0 0)}
 .nav-item.active{background:oklch(0.26 0 0);color:#fff}
 .nav-item i{width:16px;height:16px}
@@ -56,215 +51,170 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 .nav-avatar{width:28px;height:28px;border-radius:50%;background:oklch(0.55 0.18 290);color:#fff;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:4px;cursor:pointer;letter-spacing:.02em}
 
 /* ── Split view ── */
-.split-view{flex:1;display:flex;overflow:hidden;gap:0}
+.split-view{flex:1;display:flex;overflow:hidden}
 
 /* ════ DETAIL PANEL ════ */
 .dp{width:380px;flex-shrink:0;background:var(--background);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative}
-.dp-topbar{padding:14px 36px 12px 16px;border-bottom:1px solid var(--border-s);flex-shrink:0}
+.dp-topbar{padding:14px 36px 12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
 .dp-from{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted-foreground);margin-bottom:5px}
 .dp-from-av{width:18px;height:18px;border-radius:50%;background:oklch(0.55 0.2 25);color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .dp-title{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:600;color:var(--foreground)}
 .dp-circle{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border-strong);flex-shrink:0}
-.dp-close{position:absolute;top:12px;right:10px;width:24px;height:24px;border:none;background:none;color:var(--muted-foreground);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center}
-.dp-close:hover{background:var(--muted);color:var(--foreground)}
-.dp-close i{width:14px;height:14px}
 
 /* Info fields */
-.dp-info{padding:10px 16px;border-bottom:1px solid var(--border-s);display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.dp-info{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px;flex-shrink:0}
 .dp-row{display:flex;align-items:center;min-height:22px}
-.dp-lbl{width:116px;flex-shrink:0;font-size:12px;color:var(--muted-foreground);line-height:1.4}
+.dp-lbl{width:116px;flex-shrink:0;font-size:12px;color:var(--muted-foreground)}
 .dp-val{flex:1;font-size:13px;color:var(--foreground);display:flex;align-items:center;gap:5px}
-.dp-val.ph{color:var(--t-ph)}
-.tag-g{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;background:var(--green-bg);color:var(--green-dk);font-size:11px;font-weight:600}
-.ico-btn{width:16px;height:16px;border:none;background:none;color:var(--muted-foreground);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px}
-.ico-btn:hover{color:var(--blue)}
-.ico-btn i{width:12px;height:12px}
-.pbar-wrap{flex:1;height:10px;background:var(--muted);border-radius:3px;position:relative;overflow:visible}
-.pbar-fill{height:100%;background:oklch(0.5 0.22 25);border-radius:3px 0 0 3px;width:68%}
-.pbar-pin{position:absolute;top:-3px;left:68%;width:1.5px;height:16px;background:oklch(0.5 0.22 25);transform:translateX(-50%)}
+.dp-val.ph{color:var(--muted-foreground);font-style:italic}
+.pbar-wrap{flex:1;height:8px;background:var(--muted);border-radius:4px;position:relative}
+.pbar-fill{height:100%;background:oklch(0.5 0.22 25);border-radius:4px 0 0 4px;width:68%}
+.pbar-pin{position:absolute;top:-4px;left:68%;width:1.5px;height:16px;background:oklch(0.5 0.22 25);transform:translateX(-50%)}
 
-/* Tabs */
-.dp-tabs{display:flex;border-bottom:1px solid var(--border-s);flex-shrink:0;padding:0 16px}
+/* Underline-style tabs (intentionally not DS pill tabs) */
+.dp-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;padding:0 16px}
 .dp-tab{height:36px;padding:0 2px;margin-right:16px;font-size:13px;color:var(--muted-foreground);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;transition:color .12s}
 .dp-tab:hover{color:var(--foreground)}
 .dp-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
 
 /* Requirement rows */
 .req-body{flex:1;overflow-y:auto}
-.rq-row{display:flex;align-items:flex-start;padding:8px 16px;border-bottom:1px solid var(--border-s);min-height:36px}
-.rq-lbl{width:140px;flex-shrink:0;font-size:12px;color:var(--muted-foreground);line-height:1.4;padding-top:3px}
+.rq-row{display:flex;align-items:flex-start;padding:8px 16px;border-bottom:1px solid var(--border);min-height:36px}
+.rq-lbl{width:140px;flex-shrink:0;font-size:12px;color:var(--muted-foreground);line-height:1.4;padding-top:4px}
 .rq-val{flex:1;font-size:13px;color:var(--foreground);display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:22px}
 .pm-ico{width:20px;height:20px;border-radius:4px;background:var(--green-dk);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.chip{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:500;line-height:1.4;max-width:100%}
+
+/* Filter chips */
+.chip{display:inline-flex;align-items:center;flex-wrap:wrap;gap:3px;padding:2px 8px;border-radius:9999px;font-size:12px;font-weight:500;line-height:1.5;max-width:100%}
 .chip-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-m)}
-.chip-green{background:var(--green-bg);color:var(--green-dk);border:1px solid oklch(0.72 0.14 155)}
 .chip-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b)}
-.chip-x{width:14px;height:14px;border:none;background:none;color:inherit;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0;opacity:.6;border-radius:50%}
-.chip-x:hover{opacity:1;background:rgba(0,0,0,.1)}
+.chip-x{width:14px;height:14px;border:none;background:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;opacity:.65;border-radius:50%;flex-shrink:0}
+.chip-x:hover{opacity:1}
 .add-link{display:inline-flex;align-items:center;gap:3px;color:var(--blue);font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
 .add-link:hover{text-decoration:underline}
-.sel-inline{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--foreground);cursor:default}
+.sel-inline{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--foreground)}
 .sel-inline i{width:12px;height:12px;color:var(--muted-foreground)}
 
 /* Allocations */
 .alloc-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px}
 .alloc-ttl{font-size:12px;font-weight:600;color:var(--foreground)}
-.alloc-acts{display:flex;align-items:center;gap:0}
-.alloc-act{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;font-family:inherit}
-.alloc-act:hover{text-decoration:underline}
-.alloc-dot-sep{font-size:12px;color:var(--t3);margin:0 5px}
-.alloc-row{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;border-bottom:1px solid var(--border-s)}
-.alloc-row:hover{background:var(--surface-2)}
-.alloc-chev{color:var(--t3)}
-.alloc-chev i{width:11px;height:11px}
+.alloc-row{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;border-bottom:1px solid var(--border)}
+.alloc-row:hover{background:var(--muted)}
+.alloc-row i{width:11px;height:11px;color:var(--muted-foreground)}
 .alloc-range{font-size:13px;color:var(--muted-foreground)}
+.alloc-sep{font-size:13px;color:var(--muted-foreground);margin:0 2px}
 .alloc-dur{font-size:13px;color:var(--foreground);font-weight:500}
 
 /* Footer */
 .dp-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--background)}
 .fp-spacer{flex:1}
-.btn-block{height:32px;padding:0 14px;border:1px solid var(--destructive);border-radius:8px;color:var(--destructive);background:transparent;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s}
-.btn-block:hover{background:oklch(0.98 0.01 25)}
-.btn-approve{height:32px;padding:0 18px;border:none;border-radius:8px;font-size:13.5px;font-weight:500;cursor:not-allowed;font-family:inherit;background:var(--t-dis);color:var(--background);opacity:.5;transition:background .15s,opacity .15s}
-.btn-approve.on{background:var(--primary);opacity:1;cursor:pointer}
-.btn-approve.on:hover{opacity:.88}
+.btn-approve-off{opacity:.4;cursor:not-allowed !important;pointer-events:none}
 
 /* ════ MATCHES PANEL ════ */
 .matches{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--background)}
-.matches-top{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border-s);flex-shrink:0}
+.matches-top{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
 .matches-count{font-size:13px;font-weight:500;color:var(--foreground)}
-.view-tog{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-left:4px}
+.view-tog{display:flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-left:4px}
 .vt{width:30px;height:28px;border:none;cursor:pointer;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;background:var(--background);transition:background .1s,color .1s}
 .vt:hover{background:var(--muted)}
 .vt.on{background:var(--primary);color:var(--primary-foreground)}
 .vt i{width:13px;height:13px}
-.sort-btn{width:30px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--background);cursor:pointer;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center}
-.sort-btn i{width:13px;height:13px}
 .soft-wrap{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:12px;color:var(--muted-foreground)}
-.tog{width:32px;height:18px;border-radius:9px;background:var(--muted);border:1px solid var(--border);position:relative;flex-shrink:0;cursor:pointer}
-.tog-k{width:12px;height:12px;border-radius:50%;background:var(--background);position:absolute;top:2px;left:2px;box-shadow:var(--shadow-xs);transition:transform .15s}
 
-/* Matches table */
+/* Table — sticky header override */
 .mtw{flex:1;overflow-y:auto}
-.mt{width:100%;border-collapse:collapse}
-.mt th{padding:8px 14px;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-foreground);font-weight:500;border-bottom:1px solid var(--border-s);text-align:left;white-space:nowrap;position:sticky;top:0;background:var(--background);z-index:2}
-.mt td{padding:10px 14px;border-bottom:1px solid var(--border-s);font-size:13px;color:var(--foreground);white-space:nowrap;font-variant-numeric:tabular-nums}
-.mt tr{cursor:pointer}
-.mt tr:hover td{background:var(--surface-2)}
-.mt tr.sel td{background:var(--blue-bg)}
-.mt tr.filtered-out td{opacity:.28;pointer-events:none}
-.tm-cell{display:flex;align-items:center;gap:8px}
-.tm-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.mt-sticky th.sc-th{position:sticky;top:0;background:var(--background);z-index:2}
+/* Cert status badge color overrides */
+.cert-valid{background:var(--green-bg) !important;color:var(--green-dk) !important;border-color:oklch(0.72 0.14 155) !important}
+.cert-warn{background:var(--warn-bg) !important;color:var(--warn) !important;border-color:#fcd34d !important}
+.cert-miss{background:var(--muted) !important;color:var(--muted-foreground) !important;border-color:var(--border) !important}
+/* Selected row */
+.row-sel td.sc-td{background:var(--blue-bg) !important}
+.tm-av-wrap{display:flex;align-items:center;gap:8px}
 .role-cell{display:flex;align-items:center;gap:5px;color:var(--muted-foreground)}
 .rdot{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
-.util-c{color:var(--muted-foreground)}
-.oa-c{color:oklch(0.52 0.16 155)}
-.cert-tag{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 7px;border-radius:4px;font-size:10px;font-weight:600}
-.cert-yes{background:var(--green-bg);color:var(--green-dk)}
-.cert-warn{background:#FEF3C7;color:#92400E}
-.cert-no{background:var(--muted);color:var(--t-ph)}
 
 /* ════ ADD FIELDS MODAL ════ */
-/* Expiry sub-row */
-.cert-exp-sub{display:flex;align-items:center;gap:8px;padding:7px 16px 8px 42px;border-bottom:1px solid var(--border-s);background:rgba(194,65,12,.025)}
-.cert-exp-lbl{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
-.cert-exp-input{height:28px;padding:0 8px;border:1px solid var(--orange-b);border-radius:6px;background:var(--background);color:var(--orange);font-size:12px;font-family:inherit;outline:none;cursor:pointer}
-.cert-exp-input:focus{border-color:var(--orange);box-shadow:0 0 0 2px rgba(194,65,12,.12)}
-.cert-exp-input::-webkit-calendar-picker-indicator{opacity:.45;cursor:pointer}
-.cert-exp-clear{background:none;border:none;cursor:pointer;color:var(--muted-foreground);font-size:16px;line-height:1;padding:0 2px;margin-left:auto;flex-shrink:0;border-radius:4px}
-.cert-exp-clear:hover{color:var(--destructive)}
-.cert-exp-add{display:flex;align-items:center;padding:5px 16px 6px 42px;border-bottom:1px solid var(--border-s);background:rgba(194,65,12,.01)}
-.cert-exp-add-btn{font-size:12px;color:var(--orange);background:none;border:none;cursor:pointer;padding:0;font-family:inherit;font-weight:500}
-.cert-exp-add-btn:hover{text-decoration:underline}
-
-.af-back{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center}
+.af-back{position:fixed;inset:0;z-index:800;background:rgb(0 0 0 / 0.5);display:none;align-items:center;justify-content:center;animation:sc-fade-in 180ms ease}
 .af-back.open{display:flex}
-.af-modal{background:var(--background);border-radius:12px;width:960px;max-width:96vw;height:620px;display:flex;flex-direction:column;box-shadow:var(--shadow-2xl);overflow:hidden;border:1px solid var(--border)}
-.af-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
-.af-title{font-size:15px;font-weight:600;color:var(--foreground)}
-.af-x{width:28px;height:28px;border:none;background:none;color:var(--muted-foreground);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background .12s}
-.af-x:hover{background:var(--muted);color:var(--foreground)}
-.af-x i{width:16px;height:16px}
-.af-search-bar{display:flex;align-items:center;gap:8px;padding:9px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
-.af-search-bar i{width:14px;height:14px;color:var(--t-ph);flex-shrink:0}
-.af-search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;color:var(--foreground);width:100%}
-.af-search-bar input::placeholder{color:var(--t-ph)}
+/* Wider than DS default 420px dialog */
+.af-modal{background:var(--card);color:var(--card-foreground);border-radius:var(--radius-xl);width:960px;max-width:96vw;height:620px;display:flex;flex-direction:column;box-shadow:var(--shadow-2xl),0 0 0 4px color-mix(in oklab,var(--border) 80%,transparent);overflow:hidden;animation:sc-zoom-in 180ms ease}
+.af-search-bar{display:flex;align-items:center;gap:8px;padding:0 20px 0 16px;border-bottom:1px solid var(--border);flex-shrink:0;height:44px}
+.af-search-bar i.search-ico{width:14px;height:14px;color:var(--muted-foreground);flex-shrink:0}
 .af-body{display:flex;flex:1;overflow:hidden}
 
 /* Groups column */
 .af-groups{width:200px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:8px 0}
-.afg-lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:8px 16px 3px}
-.afg-parent{display:flex;align-items:center;gap:5px;padding:5px 16px;font-size:13px;color:var(--foreground);font-weight:600;cursor:default;user-select:none}
+.afg-lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);padding:8px 16px 3px}
+.afg-parent{display:flex;align-items:center;gap:5px;padding:5px 16px;font-size:13px;color:var(--foreground);font-weight:600;user-select:none}
 .afg-parent i{width:10px;height:10px;color:var(--muted-foreground)}
 .afg-child{display:flex;align-items:center;height:30px;padding:0 16px 0 30px;font-size:13px;color:var(--muted-foreground);cursor:pointer;transition:background .1s,color .1s;border-left:2px solid transparent}
 .afg-child:hover{background:var(--muted);color:var(--foreground)}
 .afg-child.on{background:var(--blue-bg);color:var(--blue);font-weight:500;border-left-color:var(--blue)}
-.afg-sep{height:1px;background:var(--border-s);margin:6px 0}
 
 /* Fields list */
 .af-fields{flex:1;overflow-y:auto;border-right:1px solid var(--border)}
 .af-f-hdr{font-size:14px;font-weight:600;color:var(--foreground);padding:12px 16px 0}
-.af-f-sub{font-size:12px;color:var(--t3);padding:2px 16px 8px;border-bottom:1px solid var(--border-s)}
-.af-frow{display:flex;align-items:center;gap:8px;padding:7px 16px;border-bottom:1px solid var(--border-s);min-height:42px;cursor:pointer}
-.af-frow:hover{background:var(--surface-2)}
-.af-frow.cert-row{background:rgba(194,65,12,.02)}
-.af-frow.cert-row:hover{background:rgba(194,65,12,.05)}
-.af-cb{width:16px;height:16px;border:1.5px solid var(--border-strong);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .1s;position:relative}
-.af-cb.on{background:var(--blue);border-color:var(--blue)}
-.af-cb.on::after{content:'';width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translate(1px,-1px);display:block}
-.af-cb.cert-on{background:var(--orange);border-color:var(--orange)}
-.af-cb.cert-on::after{content:'';width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translate(1px,-1px);display:block}
+.af-f-sub{font-size:12px;color:var(--muted-foreground);padding:2px 16px 8px;border-bottom:1px solid var(--border)}
+.af-frow{display:flex;align-items:center;gap:8px;padding:7px 16px;border-bottom:1px solid var(--border);min-height:42px;cursor:pointer}
+.af-frow:hover{background:var(--muted)}
+.af-frow.cert-row{background:color-mix(in oklab,var(--orange-bg) 60%,var(--background))}
+.af-frow.cert-row:hover{background:var(--orange-bg)}
+/* Orange cert checkbox */
+.sc-check.cert-on{background:var(--orange);border-color:var(--orange)}
 .af-fname{flex:1;font-size:13px;color:var(--foreground);display:flex;align-items:center;gap:6px}
 .cert-badge-ico{width:16px;height:16px;border-radius:3px;background:var(--orange-bg);border:1px solid var(--orange-b);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cert-badge-ico svg{width:8px;height:8px;color:var(--orange)}
-.af-cond{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:6px;background:var(--background);color:var(--muted-foreground);font-size:12px;font-family:inherit;cursor:default;display:flex;align-items:center;gap:4px;white-space:nowrap;min-width:96px}
-.af-cond svg{width:10px;height:10px;color:var(--t3)}
-.af-val{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:6px;background:var(--background);color:var(--t-ph);font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:4px;min-width:76px;white-space:nowrap}
+.cert-badge-ico i{width:9px;height:9px;color:var(--orange)}
+.af-cond{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);color:var(--muted-foreground);font-size:12px;font-family:inherit;cursor:default;display:flex;align-items:center;gap:4px;white-space:nowrap;min-width:96px}
+.af-cond i{width:10px;height:10px}
+.af-val{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);color:var(--muted-foreground);font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:4px;min-width:76px;white-space:nowrap}
 .af-val.has{color:var(--foreground)}
 .af-val.cert-pick{border-color:var(--orange-b);color:var(--orange);background:var(--orange-bg);font-weight:500}
-.af-val svg{width:10px;height:10px;color:var(--t3);margin-left:auto;flex-shrink:0}
-.af-num{width:52px;height:26px;padding:0 6px;border:1px solid var(--border);border-radius:6px;background:var(--background);color:var(--foreground);font-size:12px;font-family:inherit;text-align:center}
+.af-val i{width:10px;height:10px;margin-left:auto;flex-shrink:0}
+.af-num{width:52px;height:26px;padding:0 6px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);color:var(--foreground);font-size:12px;font-family:inherit;text-align:center}
 
 /* Cert value dropdown */
-.cert-dd-wrap{position:relative}
-.cert-dd{position:fixed;z-index:1200;background:var(--background);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);width:300px;display:none;padding:4px 0;overflow:hidden}
+.cert-dd{position:fixed;z-index:1200;background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:300px;display:none;padding:4px 0;overflow:hidden}
 .cert-dd.open{display:block}
 .cert-dd-opt{padding:8px 12px;font-size:13px;color:var(--foreground);cursor:pointer}
 .cert-dd-opt:hover{background:var(--muted)}
 .cert-dd-opt.active{background:var(--orange-bg);color:var(--orange);font-weight:500}
+
+/* Expiry condition rows */
+.cert-exp-sub{display:flex;align-items:center;gap:8px;padding:7px 16px 8px 42px;border-bottom:1px solid var(--border);background:color-mix(in oklab,var(--orange-bg) 40%,var(--background))}
+.cert-exp-lbl{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
+.cert-exp-input{height:28px;padding:0 8px;border:1px solid var(--orange-b);border-radius:var(--radius-md);background:var(--background);color:var(--orange);font-size:12px;font-family:inherit;outline:none;cursor:pointer}
+.cert-exp-input:focus{border-color:var(--orange);box-shadow:0 0 0 2px color-mix(in oklab,var(--orange) 20%,transparent)}
+.cert-exp-input::-webkit-calendar-picker-indicator{opacity:.45;cursor:pointer}
+.cert-exp-clear{background:none;border:none;cursor:pointer;color:var(--muted-foreground);font-size:16px;line-height:1;padding:0 2px;margin-left:auto;border-radius:4px}
+.cert-exp-clear:hover{color:var(--destructive)}
+.cert-exp-add{display:flex;align-items:center;padding:5px 16px 6px 42px;border-bottom:1px solid var(--border)}
+.cert-exp-add-btn{font-size:12px;color:var(--orange);background:none;border:none;cursor:pointer;padding:0;font-family:inherit;font-weight:500}
+.cert-exp-add-btn:hover{text-decoration:underline}
 
 /* Selected panel */
 .af-sel{width:224px;flex-shrink:0;padding:12px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:var(--background)}
 .af-sel-hdr{font-size:13px;font-weight:600;color:var(--foreground)}
 .af-match-row{display:flex;align-items:center;gap:5px}
 .af-match-lbl{font-size:12px;color:var(--muted-foreground)}
-.af-match-val{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--foreground);font-weight:600;cursor:default}
-.af-match-val svg{width:10px;height:10px;color:var(--t3)}
-.af-empty{font-size:12px;color:var(--t-ph);font-style:italic}
+.af-match-val{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--foreground);font-weight:600}
+.af-match-val i{width:10px;height:10px;color:var(--muted-foreground)}
+.af-empty{font-size:12px;color:var(--muted-foreground);font-style:italic}
 .af-sel-list{display:flex;flex-direction:column;gap:5px}
-.af-sel-item{display:flex;align-items:flex-start;gap:6px;padding:8px 10px;background:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:12px}
+.af-sel-item{display:flex;align-items:flex-start;gap:6px;padding:8px 10px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius-md);font-size:12px}
 .af-sel-item.c-item{background:var(--orange-bg);border-color:var(--orange-b)}
-.af-sel-item svg{width:12px;height:12px;flex-shrink:0;margin-top:1px;color:var(--muted-foreground)}
-.af-sel-item.c-item svg{color:var(--orange)}
+.af-sel-item i{width:12px;height:12px;flex-shrink:0;margin-top:1px;color:var(--muted-foreground)}
+.af-sel-item.c-item i{color:var(--orange)}
 .af-sel-item-body{flex:1;line-height:1.45}
 .af-sel-item-name{font-weight:600;color:var(--foreground)}
 .af-sel-item.c-item .af-sel-item-name{color:var(--orange)}
-.af-sel-item-cond{font-size:11px;color:var(--t3);margin-top:1px}
-.af-sel-rm{background:none;border:none;cursor:pointer;color:var(--muted-foreground);font-size:14px;padding:0;line-height:1;flex-shrink:0;border-radius:3px}
+.af-sel-item-cond{font-size:11px;color:var(--muted-foreground);margin-top:1px}
+.af-sel-rm{background:none;border:none;cursor:pointer;color:var(--muted-foreground);font-size:14px;padding:0;line-height:1;border-radius:3px;flex-shrink:0}
 .af-sel-rm:hover{color:var(--destructive)}
 
-/* Modal footer */
-.af-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0;background:var(--background)}
-.btn-cancel{height:32px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:var(--background);color:var(--foreground);font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s}
-.btn-cancel:hover{background:var(--muted)}
-.btn-done{height:32px;padding:0 18px;background:var(--primary);color:var(--primary-foreground);border:none;border-radius:8px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity .12s}
-.btn-done:hover{opacity:.88}
-
-/* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--primary);color:var(--primary-foreground);padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:var(--shadow-xl);opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:9999;display:flex;align-items:center;gap:8px}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast-ico{width:18px;height:18px;border-radius:50%;background:oklch(0.52 0.16 155);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.toast-ico i{width:10px;height:10px;color:#fff}
+/* Toast animation */
+.toast-enter{opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s}
+.toast-show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -272,9 +222,7 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 
   <!-- Nav rail -->
   <nav class="nav-rail">
-    <div class="nav-logo">
-      <i data-lucide="zap"></i>
-    </div>
+    <div class="nav-logo"><i data-lucide="zap"></i></div>
     <button class="nav-item" title="Home"><i data-lucide="house"></i></button>
     <button class="nav-item" title="Tasks"><i data-lucide="circle-check-big"></i></button>
     <button class="nav-item" title="Calendar"><i data-lucide="calendar"></i></button>
@@ -285,12 +233,14 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
     <div class="nav-avatar">VS</div>
   </nav>
 
-  <!-- Split view -->
   <div class="split-view">
 
     <!-- ════ DETAIL PANEL ════ -->
     <div class="dp">
-      <button class="dp-close"><i data-lucide="x"></i></button>
+      <!-- DS ghost icon button -->
+      <button class="sc-btn sc-btn--ghost sc-btn--size-icon" style="position:absolute;top:10px;right:8px;z-index:1" onclick="void(0)">
+        <i data-lucide="x"></i>
+      </button>
 
       <div class="dp-topbar">
         <div class="dp-from">
@@ -300,7 +250,7 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
         </div>
         <div class="dp-title">
           <div class="dp-circle"></div>
-          <span>Project Manager for 5h 47m</span>
+          Project Manager for 5h 47m
         </div>
       </div>
 
@@ -312,8 +262,9 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
         <div class="dp-row">
           <span class="dp-lbl">Project name</span>
           <span class="dp-val">
-            <span class="tag-g">Fixed fee</span>
-            <button class="ico-btn"><i data-lucide="external-link"></i></button>
+            <!-- DS badge — secondary style with green semantic override -->
+            <span class="sc-badge sc-badge--secondary" style="background:var(--green-bg);color:var(--green-dk);border:1px solid oklch(0.72 0.14 155)">Fixed fee</span>
+            <button class="sc-btn sc-btn--ghost sc-btn--size-icon-sm"><i data-lucide="external-link" style="width:11px;height:11px"></i></button>
           </span>
         </div>
         <div class="dp-row">
@@ -343,12 +294,12 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
           </span>
         </div>
         <div class="rq-row">
-          <span class="rq-lbl">Role/Team member</span>
+          <span class="rq-lbl">Role / Team member</span>
           <span class="rq-val">
-            <span class="chip chip-green">Project Manager <button class="chip-x">×</button></span>
+            <span class="chip chip-blue">Project Manager <button class="chip-x">×</button></span>
           </span>
         </div>
-        <div class="rq-row" id="skills-row">
+        <div class="rq-row">
           <span class="rq-lbl">Fields &amp; Skills</span>
           <span class="rq-val" id="skills-chips">
             <button class="add-link" onclick="openAF()">+ Add skills</button>
@@ -369,42 +320,24 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 
         <div class="alloc-hdr">
           <span class="alloc-ttl">Allocations</span>
-          <div class="alloc-acts">
-            <button class="alloc-act">Expand all</button>
-            <span class="alloc-dot-sep">·</span>
-            <button class="alloc-act">Collapse all</button>
+          <div style="display:flex;gap:4px">
+            <!-- DS ghost xs buttons -->
+            <button class="sc-btn sc-btn--ghost sc-btn--size-xs">Expand all</button>
+            <button class="sc-btn sc-btn--ghost sc-btn--size-xs">Collapse all</button>
           </div>
         </div>
-        <div class="alloc-row">
-          <span class="alloc-chev"><i data-lucide="chevron-right"></i></span>
-          <span class="alloc-range">13 Mar – 13 Mar</span>
-          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
-          <span class="alloc-dur">1h 40m</span>
-        </div>
-        <div class="alloc-row">
-          <span class="alloc-chev"><i data-lucide="chevron-right"></i></span>
-          <span class="alloc-range">16 Mar – 19 Mar</span>
-          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
-          <span class="alloc-dur">2h 30m</span>
-        </div>
-        <div class="alloc-row">
-          <span class="alloc-chev"><i data-lucide="chevron-right"></i></span>
-          <span class="alloc-range">16 Mar – 22 Mar</span>
-          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
-          <span class="alloc-dur">38m</span>
-        </div>
-        <div class="alloc-row">
-          <span class="alloc-chev"><i data-lucide="chevron-right"></i></span>
-          <span class="alloc-range">18 Mar – 18 Mar</span>
-          <span class="alloc-dot-sep" style="margin:0 4px">·</span>
-          <span class="alloc-dur">1h 00m</span>
-        </div>
+        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">13 Mar – 13 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">1h 40m</span></div>
+        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">16 Mar – 19 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">2h 30m</span></div>
+        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">16 Mar – 22 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">38m</span></div>
+        <div class="alloc-row"><i data-lucide="chevron-right"></i><span class="alloc-range">18 Mar – 18 Mar</span><span class="alloc-sep">·</span><span class="alloc-dur">1h 00m</span></div>
       </div>
 
       <div class="dp-footer">
-        <button class="btn-block">Block</button>
+        <!-- DS destructive outline button -->
+        <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="border-color:color-mix(in oklab,var(--destructive) 50%,transparent);color:var(--destructive)">Block</button>
         <div class="fp-spacer"></div>
-        <button class="btn-approve" id="approve-btn" onclick="doApprove()">Approve</button>
+        <!-- DS default button (primary) — disabled until member selected -->
+        <button class="sc-btn sc-btn--default sc-btn--size-sm btn-approve-off" id="approve-btn" onclick="doApprove()">Approve</button>
       </div>
     </div><!-- /dp -->
 
@@ -413,31 +346,40 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
       <div class="matches-top">
         <span class="matches-count" id="matches-count">Showing 6 relevant matches</span>
         <div class="view-tog" style="margin-left:6px">
-          <button class="vt on" title="List view"><i data-lucide="list"></i></button>
-          <button class="vt" title="Timeline view"><i data-lucide="align-left"></i></button>
+          <button class="vt on"><i data-lucide="list"></i></button>
+          <button class="vt"><i data-lucide="align-left"></i></button>
         </div>
-        <button class="sort-btn" title="Sort &amp; filter"><i data-lucide="sliders-horizontal"></i></button>
+        <!-- DS outline icon button -->
+        <button class="sc-btn sc-btn--outline sc-btn--size-icon" style="width:30px;height:28px" title="Sort &amp; filter">
+          <i data-lucide="sliders-horizontal" style="width:13px;height:13px"></i>
+        </button>
         <div class="soft-wrap">
-          <div class="tog"><div class="tog-k"></div></div>
+          <!-- DS switch -->
+          <button class="sc-switch" id="soft-tog" onclick="this.classList.toggle('sc-switch--on')">
+            <span class="sc-switch-thumb"></span>
+          </button>
           Ignore soft allocations
         </div>
       </div>
 
       <div class="mtw">
-        <table class="mt" id="matches-table">
-          <thead>
-            <tr>
-              <th>Team member</th>
-              <th>Role</th>
-              <th>Forecasted ut...</th>
-              <th>Forecasted bi...</th>
-              <th>Overallocations</th>
-              <th>Cost rate</th>
-              <th id="cert-col-hdr" style="display:none">Certification</th>
-            </tr>
-          </thead>
-          <tbody id="matches-tbody"></tbody>
-        </table>
+        <!-- DS table -->
+        <div class="sc-table-wrap">
+          <table class="sc-table mt-sticky" id="matches-table">
+            <thead class="sc-thead">
+              <tr>
+                <th class="sc-th">Team member</th>
+                <th class="sc-th">Role</th>
+                <th class="sc-th">Forecasted ut...</th>
+                <th class="sc-th">Forecasted bi...</th>
+                <th class="sc-th">Overallocations</th>
+                <th class="sc-th">Cost rate</th>
+                <th class="sc-th" id="cert-col-hdr" style="display:none">Certification</th>
+              </tr>
+            </thead>
+            <tbody id="matches-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div><!-- /matches -->
 
@@ -445,43 +387,44 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 </div><!-- /app -->
 
 <!-- ════ ADD FIELDS MODAL ════ -->
+<!-- DS dialog overlay + custom wide modal -->
 <div class="af-back" id="af-back" onclick="if(event.target===this)closeAF()">
   <div class="af-modal">
-    <div class="af-hdr">
-      <span class="af-title">Add fields</span>
-      <button class="af-x" onclick="closeAF()"><i data-lucide="x"></i></button>
+
+    <div class="sc-dialog-header" style="padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;flex-direction:row;align-items:center;justify-content:space-between">
+      <span class="sc-dialog-title" style="font-size:15px">Add fields</span>
+      <!-- DS ghost icon button -->
+      <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closeAF()">
+        <i data-lucide="x"></i>
+      </button>
     </div>
+
     <div class="af-search-bar">
-      <i data-lucide="search"></i>
-      <input type="text" placeholder="Search">
+      <i data-lucide="search" class="search-ico"></i>
+      <!-- DS input, border stripped for inline look -->
+      <input class="sc-input" type="text" placeholder="Search" style="border:none;box-shadow:none;height:36px;padding:0 4px;font-size:14px">
     </div>
 
     <div class="af-body">
-
       <!-- Groups -->
       <div class="af-groups">
         <div class="afg-lbl">Groups</div>
-        <div class="afg-parent">
-          <i data-lucide="chevron-down"></i>
-          Skills
-        </div>
-        <div class="afg-child on" onclick="switchGroup('skills', this)">Technical Skills</div>
-        <div class="afg-child" onclick="switchGroup('generic', this)">Generic Skills</div>
-        <div class="afg-child" onclick="switchGroup('integrations', this)">Integrations</div>
-        <div class="afg-child" onclick="switchGroup('sae', this)">SAE tech skills</div>
-        <div class="afg-child" onclick="switchGroup('section6', this)">Section 6</div>
-        <div class="afg-sep"></div>
-        <div class="afg-parent">
-          <i data-lucide="chevron-down"></i>
-          Team member fields
-        </div>
-        <div class="afg-child" onclick="switchGroup('info', this)">Info</div>
-        <div class="afg-child" onclick="switchGroup('contact', this)">Contact Info</div>
-        <div class="afg-child" onclick="switchGroup('utilization', this)">Utilization</div>
-        <div class="afg-child" onclick="switchGroup('default', this)">Default</div>
+        <div class="afg-parent"><i data-lucide="chevron-down"></i>Skills</div>
+        <div class="afg-child on" onclick="switchGroup('skills',this)">Technical Skills</div>
+        <div class="afg-child" onclick="switchGroup('generic',this)">Generic Skills</div>
+        <div class="afg-child" onclick="switchGroup('integrations',this)">Integrations</div>
+        <div class="afg-child" onclick="switchGroup('sae',this)">SAE tech skills</div>
+        <div class="afg-child" onclick="switchGroup('section6',this)">Section 6</div>
+        <!-- DS separator -->
+        <div class="sc-separator" data-orientation="horizontal" style="margin:6px 0"></div>
+        <div class="afg-parent"><i data-lucide="chevron-down"></i>Team member fields</div>
+        <div class="afg-child" onclick="switchGroup('info',this)">Info</div>
+        <div class="afg-child" onclick="switchGroup('contact',this)">Contact Info</div>
+        <div class="afg-child" onclick="switchGroup('utilization',this)">Utilization</div>
+        <div class="afg-child" onclick="switchGroup('default',this)">Default</div>
       </div>
 
-      <!-- Fields list -->
+      <!-- Fields list (checkboxes rendered by JS using sc-check) -->
       <div class="af-fields">
         <div class="af-f-hdr" id="af-f-hdr">Skills</div>
         <div class="af-f-sub" id="af-f-sub">Technical Skills</div>
@@ -493,52 +436,49 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
         <div class="af-sel-hdr">Selected filters (<span id="sel-count">0</span>)</div>
         <div class="af-match-row">
           <span class="af-match-lbl">Matches:</span>
-          <span class="af-match-val">All <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><polyline points="6 9 12 15 18 9"/></svg></span>
+          <span class="af-match-val">All <i data-lucide="chevron-down"></i></span>
         </div>
         <div id="af-empty" class="af-empty">No filters selected</div>
         <div class="af-sel-list" id="af-sel-list"></div>
       </div>
+    </div>
 
-    </div><!-- /af-body -->
-
-    <div class="af-footer">
-      <button class="btn-cancel" onclick="closeAF()">Cancel</button>
-      <button class="btn-done" onclick="applyFilters()">Done</button>
+    <!-- DS dialog footer -->
+    <div class="sc-dialog-footer" style="padding:12px 20px;border-top:1px solid var(--border)">
+      <button class="sc-btn sc-btn--outline" onclick="closeAF()">Cancel</button>
+      <button class="sc-btn sc-btn--default" onclick="applyFilters()">Done</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast">
-  <div class="toast-ico">
-    <i data-lucide="check"></i>
-  </div>
-  <span id="toast-text"></span>
-</div>
+<!-- Cert dropdown (positioned via JS) -->
+<div class="cert-dd" id="cert-dd"></div>
+
+<!-- DS toaster — bottom center -->
+<div class="sc-toaster sc-toaster--bottom-center" id="toaster"></div>
 
 <script>
 /* ─── DATA ─── */
-// Each cert record has a name and expiry date (null = permanent/no expiry)
 const MEMBERS = [
   { name:'esswarapandian',  initials:'E',  color:'#6366F1', certRecords:[
     { name:'AWS Solutions Architect Professional', expiry:'2027-03-12' },
     { name:'Azure Fundamentals (AZ-900)',          expiry: null },
   ]},
   { name:'heather Pertel',  initials:'HP', color:'#F59E0B', certRecords:[
-    { name:'Project Management Professional (PMP)',  expiry:'2026-11-12' }, // expiring soon
-    { name:'Salesforce Certified Administrator',     expiry:'2027-06-01' },
+    { name:'Project Management Professional (PMP)', expiry:'2026-11-12' },
+    { name:'Salesforce Certified Administrator',    expiry:'2027-06-01' },
   ]},
   { name:'Jhonty Rhodes',   initials:'JR', color:'#EF4444', certRecords:[
-    { name:'Project Management Professional (PMP)',  expiry:'2027-05-01' },
+    { name:'Project Management Professional (PMP)', expiry:'2027-05-01' },
   ]},
   { name:'Pav Michalak',    initials:'PM', color:'#10B981', certRecords:[
-    { name:'AWS Solutions Architect Professional',   expiry:'2027-01-15' },
-    { name:'Cisco CCNA',                            expiry:'2026-12-01' },
+    { name:'AWS Solutions Architect Professional',  expiry:'2027-01-15' },
+    { name:'Cisco CCNA',                           expiry:'2026-12-01' },
   ]},
   { name:'vivekananth1 nm', initials:'VN', color:'#0f62fe', certRecords:[] },
   { name:'V K',             initials:'VK', color:'#8B5CF6', certRecords:[
-    { name:'Project Management Professional (PMP)',  expiry:'2027-02-20' },
-    { name:'Salesforce Certified Administrator',     expiry:'2028-01-01' },
+    { name:'Project Management Professional (PMP)', expiry:'2027-02-20' },
+    { name:'Salesforce Certified Administrator',    expiry:'2028-01-01' },
   ]},
 ];
 
@@ -567,14 +507,14 @@ const FIELDS_BY_GROUP = {
     { id:'multi',       name:'Multi Choice Field',     type:'choice', label:'is exactly...' },
     { id:'numfield',    name:'Number Field Skill',     type:'number', label:'is greater than...' },
   ],
-  generic:      [{ id:'comm',   name:'Communication',       type:'level',  label:'is at least...' }, { id:'collab', name:'Collaboration', type:'level', label:'is at least...' }],
-  integrations: [{ id:'zapier', name:'Zapier',              type:'bool',   label:'is true' }, { id:'make', name:'Make / Integromat', type:'bool', label:'is true' }],
-  sae:          [{ id:'sae1',   name:'SAE Skill 1',         type:'level',  label:'is at least...' }],
-  section6:     [{ id:'s6f1',   name:'Section 6 Field',     type:'bool',   label:'is true' }],
-  info:         [{ id:'dept',   name:'Department',          type:'choice', label:'is exactly...' }, { id:'loc', name:'Location', type:'choice', label:'is exactly...' }],
-  contact:      [{ id:'phone',  name:'Phone',               type:'bool',   label:'is true' }],
-  utilization:  [{ id:'target', name:'Target utilization',  type:'number', label:'is greater than...' }],
-  default:      [{ id:'empid',  name:'Employee ID',         type:'choice', label:'is exactly...' }],
+  generic:      [{ id:'comm',   name:'Communication',      type:'level',  label:'is at least...' }, { id:'collab', name:'Collaboration', type:'level', label:'is at least...' }],
+  integrations: [{ id:'zapier', name:'Zapier',             type:'bool',   label:'is true' }, { id:'make', name:'Make / Integromat', type:'bool', label:'is true' }],
+  sae:          [{ id:'sae1',   name:'SAE Skill 1',        type:'level',  label:'is at least...' }],
+  section6:     [{ id:'s6f1',   name:'Section 6 Field',    type:'bool',   label:'is true' }],
+  info:         [{ id:'dept',   name:'Department',         type:'choice', label:'is exactly...' }, { id:'loc', name:'Location', type:'choice', label:'is exactly...' }],
+  contact:      [{ id:'phone',  name:'Phone',              type:'bool',   label:'is true' }],
+  utilization:  [{ id:'target', name:'Target utilization', type:'number', label:'is greater than...' }],
+  default:      [{ id:'empid',  name:'Employee ID',        type:'choice', label:'is exactly...' }],
 };
 
 const GROUP_LABELS = { skills:'Skills', generic:'Skills', integrations:'Skills', sae:'Skills', section6:'Skills', info:'Team member fields', contact:'Team member fields', utilization:'Team member fields', default:'Team member fields' };
@@ -582,15 +522,12 @@ const GROUP_SUBS   = { skills:'Technical Skills', generic:'Generic Skills', inte
 
 /* ─── STATE ─── */
 let currentGroup = 'skills';
-let checkedFields = { cert: true };       // pre-checked from request
-let certValue = 'Salesforce Certified Administrator'; // pre-filled from request
-let certExpiresAfter = '2026-12-31'; // string = expiry row shown; null = hidden (no expiry condition)
-
-// Pre-populated from the original resource request
+let checkedFields = { cert: true };
+let certValue = 'Salesforce Certified Administrator';
+let certExpiresAfter = '2026-12-31';
 let appliedFilters = [
   { id:'cert', name:'Certification', condition:'is exactly...', value:'Salesforce Certified Administrator', expiresAfter:'2026-12-31', isCert:true }
 ];
-
 let selectedMember = -1;
 let ddOpen = false;
 
@@ -602,13 +539,7 @@ function fmtDate(d) {
   return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
 }
 function certShortName(name) {
-  const map = {
-    'AWS Solutions Architect Professional': 'AWS SAA Pro',
-    'Project Management Professional (PMP)': 'PMP',
-    'Salesforce Certified Administrator': 'Salesforce Admin',
-    'Azure Fundamentals (AZ-900)': 'AZ-900',
-    'Cisco CCNA': 'Cisco CCNA',
-  };
+  const map = { 'AWS Solutions Architect Professional':'AWS SAA Pro', 'Project Management Professional (PMP)':'PMP', 'Salesforce Certified Administrator':'Salesforce Admin', 'Azure Fundamentals (AZ-900)':'AZ-900', 'Cisco CCNA':'Cisco CCNA' };
   return map[name] || (name.length > 20 ? name.slice(0,18)+'…' : name);
 }
 
@@ -616,14 +547,13 @@ function certShortName(name) {
 function memberCertStatus(m, certFilter) {
   const rec = m.certRecords.find(c => c.name === certFilter.value);
   if (!rec) return 'missing';
-  if (!certFilter.expiresAfter || !rec.expiry) return 'valid'; // no date constraint or permanent cert
+  if (!certFilter.expiresAfter || !rec.expiry) return 'valid';
   return rec.expiry >= certFilter.expiresAfter ? 'valid' : 'expiring-early';
 }
 
 /* ─── RENDER MATCHES TABLE ─── */
 function renderMatches() {
   const certFilter = appliedFilters.find(f => f.isCert);
-  const tbody = document.getElementById('matches-tbody');
   const certColHdr = document.getElementById('cert-col-hdr');
   certColHdr.style.display = certFilter ? '' : 'none';
   if (certFilter) {
@@ -632,67 +562,67 @@ function renderMatches() {
   }
 
   let shown = 0;
-  tbody.innerHTML = MEMBERS.map((m, i) => {
-    let certStatus = certFilter ? memberCertStatus(m, certFilter) : null;
+  const rows = MEMBERS.map((m, i) => {
+    const certStatus = certFilter ? memberCertStatus(m, certFilter) : null;
     const hide = certStatus === 'missing';
     if (!hide) shown++;
-    const selCls = selectedMember === i ? ' sel' : '';
-    const hideCls = hide ? ' filtered-out' : '';
+    const selCls = selectedMember === i ? ' row-sel' : '';
+    const opacity = hide ? 'opacity:.28;pointer-events:none' : '';
 
-    let certCell = '';
+    let certTd = '';
     if (certFilter) {
       if (certStatus === 'valid') {
         const rec = m.certRecords.find(c => c.name === certFilter.value);
         const expTxt = rec && rec.expiry ? `exp. ${fmtDate(rec.expiry)}` : 'Permanent';
-        certCell = `<td><span class="cert-tag cert-yes">✓ Valid</span> <span style="font-size:11px;color:var(--t3)">${expTxt}</span></td>`;
+        certTd = `<td class="sc-td"><span class="sc-badge cert-valid">✓ Valid</span> <span style="font-size:11px;color:var(--muted-foreground)">${expTxt}</span></td>`;
       } else if (certStatus === 'expiring-early') {
         const rec = m.certRecords.find(c => c.name === certFilter.value);
-        certCell = `<td><span class="cert-tag cert-warn">⚠ Exp. ${fmtDate(rec.expiry)}</span></td>`;
+        certTd = `<td class="sc-td"><span class="sc-badge cert-warn">⚠ Exp. ${fmtDate(rec.expiry)}</span></td>`;
       } else {
-        certCell = `<td><span class="cert-tag cert-no">— Missing</span></td>`;
+        certTd = `<td class="sc-td"><span class="sc-badge cert-miss">— Missing</span></td>`;
       }
     }
 
-    return `<tr class="${selCls}${hideCls}" onclick="${hide ? '' : 'selectMember('+i+')'}">
-      <td><div class="tm-cell"><div class="tm-av" style="background:${m.color}">${m.initials}</div>${m.name}</div></td>
-      <td><div class="role-cell"><div class="rdot" style="background:var(--green-dk)">PM</div>Project Manager</div></td>
-      <td class="util-c">15.36%</td>
-      <td class="util-c">15.36%</td>
-      <td class="oa-c">0h</td>
-      <td>USD 275</td>
-      ${certCell}
+    return `<tr class="sc-tr${selCls}" style="${opacity}" onclick="${hide ? '' : 'selectMember('+i+')'}">
+      <td class="sc-td"><div class="tm-av-wrap">
+        <span class="sc-avatar" style="background:${m.color};font-size:9px;font-weight:700;width:26px;height:26px">${m.initials}</span>
+        ${m.name}
+      </div></td>
+      <td class="sc-td"><div class="role-cell"><div class="rdot" style="background:var(--green-dk)">PM</div>Project Manager</div></td>
+      <td class="sc-td" style="color:var(--muted-foreground)">15.36%</td>
+      <td class="sc-td" style="color:var(--muted-foreground)">15.36%</td>
+      <td class="sc-td" style="color:oklch(0.52 0.16 155)">0h</td>
+      <td class="sc-td">USD 275</td>
+      ${certTd}
     </tr>`;
   }).join('');
 
+  document.getElementById('matches-tbody').innerHTML = rows;
   document.getElementById('matches-count').textContent = `Showing ${shown} relevant match${shown === 1 ? '' : 'es'}`;
 }
 
 function selectMember(i) {
   selectedMember = i;
   renderMatches();
-  document.getElementById('approve-btn').classList.add('on');
+  document.getElementById('approve-btn').classList.remove('btn-approve-off');
 }
 
 function doApprove() {
-  if (!document.getElementById('approve-btn').classList.contains('on')) return;
-  const name = MEMBERS[selectedMember].name;
-  showToast(`${name} approved for Project Manager · 5h 47m`);
+  if (document.getElementById('approve-btn').classList.contains('btn-approve-off')) return;
+  showToast(`${MEMBERS[selectedMember].name} approved for Project Manager · 5h 47m`, 'success');
 }
 
-/* ─── SKILLS CHIPS in left panel ─── */
+/* ─── SKILLS CHIPS ─── */
 function renderSkillsChips() {
   const wrap = document.getElementById('skills-chips');
-  const CERT_ICO = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
   const chips = appliedFilters.map(f => {
     let label = f.isCert ? certShortName(f.value) : f.name;
     if (f.isCert && f.expiresAfter) label += ` · expires after ${f.expiresAfter}`;
-    return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">
-      ${f.isCert ? CERT_ICO : ''}
-      ${label}
-      <button class="chip-x" onclick="removeFilter('${f.id}')">×</button>
-    </span>`;
+    const ico = f.isCert ? `<i data-lucide="award" style="width:10px;height:10px"></i>` : '';
+    return `<span class="chip ${f.isCert ? 'chip-orange' : 'chip-blue'}">${ico}${label}<button class="chip-x" onclick="removeFilter('${f.id}')">×</button></span>`;
   }).join('');
   wrap.innerHTML = chips + `<button class="add-link" onclick="openAF()">+ Add skills</button>`;
+  lucide.createIcons({ nodes: [wrap] });
 }
 
 function removeFilter(id) {
@@ -705,7 +635,6 @@ function removeFilter(id) {
 /* ─── MODAL ─── */
 function openAF() {
   document.getElementById('af-back').classList.add('open');
-  // sync modal state from applied filters
   checkedFields = {};
   appliedFilters.forEach(f => {
     checkedFields[f.id] = true;
@@ -725,65 +654,66 @@ function switchGroup(g, el) {
   renderFieldList();
 }
 
+/* DS sc-check checkbox */
+function cbHtml(isCert, checked) {
+  const cls = isCert && checked ? 'sc-check cert-on' : checked ? 'sc-check sc-check--on' : 'sc-check';
+  const inner = checked ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : '';
+  return `<div class="${cls}">${inner}</div>`;
+}
+
 function renderFieldList() {
   const fields = FIELDS_BY_GROUP[currentGroup] || [];
-  const rows = fields.map(f => {
+  let html = fields.map(f => {
     const isCert = f.type === 'cert';
     const checked = !!checkedFields[f.id];
-    const cbCls = isCert && checked ? 'cert-on' : checked ? 'on' : '';
     const rowCls = isCert ? ' cert-row' : '';
 
     let valHtml = '';
     if (f.type === 'level' || f.type === 'choice') {
-      valHtml = `<div class="af-val${checked ? ' has' : ''}">Select... <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>`;
+      valHtml = `<div class="af-val${checked ? ' has' : ''}">Select... <i data-lucide="chevron-down"></i></div>`;
     } else if (f.type === 'number') {
       valHtml = `<input class="af-num" type="number" value="0" onclick="event.stopPropagation()">`;
     } else if (f.type === 'cert') {
       const hasVal = certValue && checkedFields['cert'];
       const shortVal = hasVal && certValue.length > 16 ? certValue.slice(0,14)+'…' : certValue;
-      valHtml = `<div class="cert-dd-wrap">
-        <div class="af-val${hasVal ? ' cert-pick' : ''}" onclick="toggleCertDD(event)">
-          ${hasVal ? shortVal : 'Select...'}
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="cert-dd" id="cert-dd">
-          ${CERT_OPTIONS.map(c => `<div class="cert-dd-opt${certValue===c?' active':''}" onclick="pickCert('${c.replace(/'/g,"\\'")}',event)">${c}</div>`).join('')}
-        </div>
+      valHtml = `<div class="af-val${hasVal ? ' cert-pick' : ''}" id="cert-dd-btn" onclick="toggleCertDD(event)">
+        ${hasVal ? shortVal : 'Select...'}
+        <i data-lucide="chevron-down"></i>
       </div>`;
     }
 
-    const certIco = isCert ? `<span class="cert-badge-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>` : '';
-    let html = `<div class="af-frow${rowCls}" onclick="toggleField('${f.id}', event)">
-      <div class="af-cb ${cbCls}" id="cb-${f.id}"></div>
+    const certIco = isCert ? `<span class="cert-badge-ico"><i data-lucide="award"></i></span>` : '';
+    let row = `<div class="af-frow${rowCls}" onclick="toggleField('${f.id}', event)">
+      ${cbHtml(isCert, checked)}
       <div class="af-fname">${certIco}${f.name}</div>
-      <div class="af-cond">${f.label} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="af-cond">${f.label} <i data-lucide="chevron-down"></i></div>
       ${valHtml}
     </div>`;
 
-    // Expiry sub-row — shown when cert is checked and a cert name is picked
     if (isCert && checked && certValue) {
       if (certExpiresAfter !== null) {
-        html += `<div class="cert-exp-sub" onclick="event.stopPropagation()">
+        row += `<div class="cert-exp-sub" onclick="event.stopPropagation()">
           <span class="cert-exp-lbl">Expires after</span>
           <input type="date" class="cert-exp-input" value="${certExpiresAfter}"
             onchange="certExpiresAfter=this.value;renderSelPanel()"
             onclick="event.stopPropagation()">
-          <button class="cert-exp-clear" title="Remove expiry condition" onclick="clearCertExpiry(event)">×</button>
+          <button class="cert-exp-clear" onclick="clearCertExpiry(event)">×</button>
         </div>`;
       } else {
-        html += `<div class="cert-exp-add" onclick="event.stopPropagation()">
+        row += `<div class="cert-exp-add" onclick="event.stopPropagation()">
           <button class="cert-exp-add-btn" onclick="addCertExpiry(event)">+ Add expiry condition</button>
         </div>`;
       }
     }
-
-    return html;
+    return row;
   }).join('');
-  document.getElementById('af-field-list').innerHTML = rows;
+
+  document.getElementById('af-field-list').innerHTML = html;
+  lucide.createIcons({ nodes: [document.getElementById('af-field-list')] });
 }
 
 function toggleField(id, e) {
-  if (e.target.closest('.cert-dd-wrap') || e.target.closest('.cert-exp-sub')) return;
+  if (e.target.closest('#cert-dd-btn') || e.target.closest('.cert-exp-sub') || e.target.closest('.cert-exp-add')) return;
   checkedFields[id] = !checkedFields[id];
   if (!checkedFields[id] && id === 'cert') { certValue = ''; certExpiresAfter = null; }
   renderFieldList();
@@ -792,25 +722,25 @@ function toggleField(id, e) {
 
 function toggleCertDD(e) {
   e.stopPropagation();
+  const btn = document.getElementById('cert-dd-btn');
   const dd = document.getElementById('cert-dd');
-  if (!dd) return;
+  if (!btn || !dd) return;
   ddOpen = !ddOpen;
   if (ddOpen) {
-    const btn = e.currentTarget;
+    dd.innerHTML = CERT_OPTIONS.map(c =>
+      `<div class="cert-dd-opt${certValue===c?' active':''}" onclick="pickCert('${c.replace(/'/g,"\\'")}',event)">${c}</div>`
+    ).join('');
     const r = btn.getBoundingClientRect();
-    dd.style.top = (r.bottom + 4) + 'px';
     const ddW = 300;
-    const left = Math.max(8, r.right - ddW);
-    dd.style.left = left + 'px';
-    dd.style.width = ddW + 'px';
+    dd.style.top = (r.bottom + 4) + 'px';
+    dd.style.left = Math.max(8, r.right - ddW) + 'px';
   }
   dd.classList.toggle('open', ddOpen);
 }
 
 function closeCertDD() {
   ddOpen = false;
-  const dd = document.getElementById('cert-dd');
-  if (dd) dd.classList.remove('open');
+  document.getElementById('cert-dd').classList.remove('open');
 }
 
 function pickCert(val, e) {
@@ -828,23 +758,18 @@ function renderSelPanel() {
     const f = allFields.find(x => x.id === id);
     if (!f) return null;
     const isCert = f.type === 'cert';
-    const val = isCert ? certValue : '';
-    const expAfter = isCert ? (certExpiresAfter || '') : '';
-    return { id, name: f.name, condition: f.label, value: val, expiresAfter: expAfter, isCert };
+    return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
   }).filter(Boolean);
 
   document.getElementById('sel-count').textContent = items.length;
   document.getElementById('af-empty').style.display = items.length ? 'none' : '';
-
-  const CERT_ICO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
-  const SKILL_ICO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>`;
 
   document.getElementById('af-sel-list').innerHTML = items.map(item => {
     let condLine = item.condition;
     if (item.isCert && item.value) condLine += ' ' + certShortName(item.value);
     if (item.isCert && item.expiresAfter) condLine += ` · expires after ${item.expiresAfter}`;
     return `<div class="af-sel-item${item.isCert ? ' c-item' : ''}">
-      ${item.isCert ? CERT_ICO : SKILL_ICO}
+      <i data-lucide="${item.isCert ? 'award' : 'lightbulb'}"></i>
       <div class="af-sel-item-body">
         <div class="af-sel-item-name">${item.isCert ? (item.value || item.name) : item.name}</div>
         <div class="af-sel-item-cond">${condLine}</div>
@@ -852,21 +777,11 @@ function renderSelPanel() {
       <button class="af-sel-rm" onclick="deselect('${item.id}')">×</button>
     </div>`;
   }).join('');
+  lucide.createIcons({ nodes: [document.getElementById('af-sel-list')] });
 }
 
-function clearCertExpiry(e) {
-  e.stopPropagation();
-  certExpiresAfter = null;
-  renderFieldList();
-  renderSelPanel();
-}
-
-function addCertExpiry(e) {
-  e.stopPropagation();
-  certExpiresAfter = '';
-  renderFieldList();
-  renderSelPanel();
-}
+function clearCertExpiry(e) { e.stopPropagation(); certExpiresAfter = null; renderFieldList(); renderSelPanel(); }
+function addCertExpiry(e)   { e.stopPropagation(); certExpiresAfter = ''; renderFieldList(); renderSelPanel(); }
 
 function deselect(id) {
   checkedFields[id] = false;
@@ -877,29 +792,44 @@ function deselect(id) {
 
 function applyFilters() {
   const allFields = Object.values(FIELDS_BY_GROUP).flat();
-  appliedFilters = Object.keys(checkedFields)
-    .filter(id => checkedFields[id])
-    .map(id => {
-      const f = allFields.find(x => x.id === id);
-      if (!f) return null;
-      const isCert = f.type === 'cert';
-      return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
-    }).filter(Boolean);
+  appliedFilters = Object.keys(checkedFields).filter(id => checkedFields[id]).map(id => {
+    const f = allFields.find(x => x.id === id);
+    if (!f) return null;
+    const isCert = f.type === 'cert';
+    return { id, name: f.name, condition: f.label, value: isCert ? certValue : '', expiresAfter: isCert ? (certExpiresAfter || '') : '', isCert };
+  }).filter(Boolean);
   closeAF();
   renderSkillsChips();
   renderMatches();
 }
 
-/* ─── TOAST ─── */
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  document.getElementById('toast-text').textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3200);
+/* ─── TOAST — DS sc-toast structure ─── */
+function showToast(msg, type = 'success') {
+  const toaster = document.getElementById('toaster');
+  const iconMap = { success:'circle-check', error:'circle-x', warning:'triangle-alert', default:'info' };
+  const el = document.createElement('div');
+  el.className = `sc-toast sc-toast--${type} toast-enter`;
+  el.innerHTML = `
+    <div class="sc-toast-main">
+      <i data-lucide="${iconMap[type]}" class="sc-toast-icon"></i>
+      <div class="sc-toast-body">
+        <div class="sc-toast-text">
+          <span class="sc-toast-title">${msg}</span>
+        </div>
+      </div>
+    </div>
+    <button class="sc-toast-close" onclick="this.parentElement.remove()">
+      <i data-lucide="x"></i>
+    </button>`;
+  toaster.appendChild(el);
+  lucide.createIcons({ nodes: [el] });
+  requestAnimationFrame(() => el.classList.add('toast-show'));
+  setTimeout(() => { el.classList.remove('toast-show'); setTimeout(() => el.remove(), 220); }, 3200);
 }
 
-/* ─── CLOSE CERT DD ON OUTSIDE CLICK ─── */
-document.addEventListener('click', () => closeCertDD());
+document.addEventListener('click', e => {
+  if (!e.target.closest('#cert-dd') && !e.target.closest('#cert-dd-btn')) closeCertDD();
+});
 
 /* ─── INIT ─── */
 lucide.createIcons();
