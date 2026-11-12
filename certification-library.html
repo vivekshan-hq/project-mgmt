@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certifications · Settings</title>
+<link rel="stylesheet" href="ds/styles.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--foreground);background:var(--background);height:100vh;overflow:hidden}
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* ── Icon rail ── */
+.rail{width:48px;background:oklch(0.145 0 0);display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;flex-shrink:0;gap:2px}
+.rail-logo{width:30px;height:30px;border-radius:8px;background:#2563eb;display:grid;place-items:center;margin-bottom:8px;color:#fff;font-weight:700;font-size:13px}
+.rail-i{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:oklch(0.5 0 0);cursor:pointer;border:none;background:transparent}
+.rail-i:hover{background:oklch(0.22 0 0);color:oklch(0.85 0 0)}
+.rail-i.on{background:oklch(0.26 0 0);color:#fff}
+.rail-i svg{width:16px;height:16px}
+.rail-sp{flex:1}
+.rail-av{width:26px;height:26px;border-radius:50%;background:oklch(0.55 0.18 290);color:#fff;font-size:9px;font-weight:600;display:grid;place-items:center;margin-top:6px}
+
+/* ── Settings sidebar ── */
+.sb{width:292px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--background)}
+.sb-hd{padding:18px 20px 12px}
+.sb-ttl{font-size:21px;font-weight:600;letter-spacing:-0.02em}
+.sb-search{margin:0 20px 10px;position:relative}
+.sb-search input{width:100%;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13.5px;color:var(--foreground);outline:none}
+.sb-search input:focus{border-color:var(--ring)}
+.sb-nav{flex:1;overflow-y:auto;padding:4px 12px 16px}
+.grp{font-size:12px;font-weight:600;color:var(--muted-foreground);padding:14px 8px 5px}
+.ni{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;cursor:pointer;color:var(--foreground);font-size:13.5px;text-decoration:none}
+.ni:hover{background:var(--muted)}
+.ni.on{background:var(--muted);font-weight:500}
+.ni-ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;color:#fff}
+.ni-ic svg{width:12px;height:12px}
+.ni-ar{margin-left:auto;color:var(--muted-foreground);display:none}
+.ni.on .ni-ar{display:block}
+.ni-ar svg{width:14px;height:14px}
+.sb-ft{border-top:1px solid var(--border);padding:10px 20px}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.pg-hd{padding:22px 28px 0;flex-shrink:0}
+.pg-ttl{display:flex;align-items:center;gap:9px;font-size:21px;font-weight:600;letter-spacing:-0.02em}
+.pg-ttl svg{width:19px;height:19px;color:var(--muted-foreground)}
+.pg-sub{font-size:13.5px;color:var(--muted-foreground);margin-top:5px}
+.pg-acts{display:flex;justify-content:flex-end;gap:10px;padding:16px 28px 14px;flex-shrink:0}
+.body{flex:1;overflow-y:auto;padding:0 28px 28px}
+
+/* Section group */
+.sec{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.sec-hd{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--muted);border-bottom:1px solid var(--border)}
+.sec-nm{font-size:14px;font-weight:500}
+.sec-ct{font-size:13px;color:var(--muted-foreground);margin-left:auto}
+.dots{width:26px;height:26px;border:none;background:transparent;border-radius:6px;cursor:pointer;color:var(--muted-foreground);display:grid;place-items:center}
+.dots:hover{background:var(--background)}
+.dots svg{width:15px;height:15px}
+
+/* Table */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:13px;font-weight:500;color:var(--foreground);padding:10px 14px;background:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
+tr.hl td{background:#FEFCE8}
+tr.hl:hover td{background:#FEF9C3}
+.grab{color:var(--muted-foreground);cursor:grab;display:inline-flex;vertical-align:middle;margin-right:9px}
+.grab svg{width:13px;height:13px}
+.ft{display:flex;align-items:center;gap:6px;color:var(--foreground)}
+.ft svg{width:14px;height:14px;color:var(--muted-foreground)}
+.muted{color:var(--muted-foreground)}
+.st{display:flex;align-items:center;gap:9px}
+.st-lb{font-size:13.5px}
+.w-act{width:46px}
+
+/* ── Drawer ── */
+.ovl{position:fixed;inset:0;background:rgb(0 0 0 / .35);opacity:0;pointer-events:none;transition:opacity .22s;z-index:900}
+.ovl.on{opacity:1;pointer-events:auto}
+.dr{position:fixed;top:0;right:0;bottom:0;width:580px;max-width:94vw;background:var(--background);border-left:1px solid var(--border);box-shadow:var(--shadow-2xl);transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:901;display:flex;flex-direction:column}
+.dr.on{transform:translateX(0)}
+.dr-hd{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.dr-ttl{font-size:17px;font-weight:600;letter-spacing:-0.01em}
+.dr-bd{flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:18px}
+.dr-ft{display:flex;justify-content:flex-end;gap:10px;padding:14px 24px;border-top:1px solid var(--border);flex-shrink:0}
+.fld{display:flex;flex-direction:column;gap:6px}
+.lb{font-size:13px;font-weight:500}
+.rq{color:var(--destructive)}
+.in,.se,.ta{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13.5px;color:var(--foreground);outline:none;transition:border-color .12s}
+.in:focus,.se:focus,.ta:focus{border-color:var(--ring)}
+.in::placeholder,.ta::placeholder{color:var(--muted-foreground)}
+.ta{min-height:92px;resize:vertical;line-height:1.5}
+.hint{font-size:12px;color:var(--muted-foreground)}
+.err{border-color:var(--destructive)!important}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="rail">
+    <div class="rail-logo">A</div>
+    <button class="rail-i"><i data-lucide="search"></i></button>
+    <button class="rail-i"><i data-lucide="bell"></i></button>
+    <button class="rail-i on"><i data-lucide="house"></i></button>
+    <button class="rail-i"><i data-lucide="image"></i></button>
+    <button class="rail-i"><i data-lucide="calendar"></i></button>
+    <button class="rail-i"><i data-lucide="clipboard-check"></i></button>
+    <button class="rail-i"><i data-lucide="list-checks"></i></button>
+    <button class="rail-i"><i data-lucide="users"></i></button>
+    <button class="rail-i"><i data-lucide="layout-grid"></i></button>
+    <button class="rail-i"><i data-lucide="sparkles"></i></button>
+    <button class="rail-i"><i data-lucide="grid-3x3"></i></button>
+    <div class="rail-sp"></div>
+    <button class="rail-i"><i data-lucide="message-circle"></i></button>
+    <div class="rail-av">VS</div>
+  </nav>
+
+  <aside class="sb">
+    <div class="sb-hd"><div class="sb-ttl">Settings</div></div>
+    <div class="sb-search"><input type="text" placeholder="Search"></div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-ft">
+      <a class="ni" href="#"><span class="ni-ic" style="background:#64748b"><i data-lucide="archive"></i></span>Archived projects</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="pg-hd">
+      <div class="pg-ttl">
+        <i data-lucide="award"></i>
+        Certifications
+      </div>
+      <div class="pg-sub">Certifications record the credentials your team members hold. Each team member keeps their own expiry date for a certificate.</div>
+    </div>
+
+    <div class="pg-acts">
+      <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="height:32px">
+        <i data-lucide="plus" style="width:14px;height:14px"></i>
+        New section
+      </button>
+      <!-- Opens the drawer, not a separate page -->
+      <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:32px" onclick="openDrawer()">
+        New certification
+        <i data-lucide="plus" style="width:14px;height:14px"></i>
+      </button>
+    </div>
+
+    <div class="body">
+      <div class="sec">
+        <div class="sec-hd">
+          <span class="sec-nm">Certifications</span>
+          <span class="sec-ct" id="sec-ct">(0)</span>
+          <button class="dots"><i data-lucide="ellipsis-vertical"></i></button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Certificate name</th>
+              <th>Description</th>
+              <th>Certification source</th>
+              <th>Status</th>
+              <th class="w-act"></th>
+            </tr>
+          </thead>
+          <tbody id="tb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── New certification drawer ── -->
+<div class="ovl" id="ovl" onclick="closeDrawer()"></div>
+<aside class="dr" id="dr" role="dialog" aria-modal="true" aria-labelledby="dr-ttl">
+  <div class="dr-hd">
+    <span class="dr-ttl" id="dr-ttl">New certification</span>
+    <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closeDrawer()"><i data-lucide="x"></i></button>
+  </div>
+
+  <div class="dr-bd">
+    <div class="fld">
+      <label class="lb" for="f-name">Certificate name <span class="rq">*</span></label>
+      <input class="in" id="f-name" placeholder="eg. AWS Solutions Architect Professional">
+    </div>
+
+    <div class="fld">
+      <label class="lb" for="f-sec">Section name</label>
+      <select class="se" id="f-sec">
+        <option>Certifications</option>
+        <option>Technical Skills</option>
+        <option>Languages</option>
+      </select>
+    </div>
+
+    <div class="fld">
+      <label class="lb" for="f-desc">Description</label>
+      <textarea class="ta" id="f-desc" placeholder="Describe what this certification validates…"></textarea>
+      <div class="hint">Description will show as a tooltip to the team</div>
+    </div>
+
+    <div class="fld">
+      <label class="lb" for="f-src">Certification Source</label>
+      <input class="in" id="f-src" placeholder="eg. Amazon Web Services">
+      <div class="hint">Free text — shown alongside the certificate name.</div>
+    </div>
+  </div>
+
+  <div class="dr-ft">
+    <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="height:32px" onclick="closeDrawer()">Cancel</button>
+    <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:32px" onclick="saveCert()">
+      <i data-lucide="save" style="width:13px;height:13px"></i>
+      Save
+    </button>
+  </div>
+</aside>
+
+<script>
+/* Settings nav — rendered from data so the markup stays short */
+const NAV = [
+  ['Sprints', [
+    ['Sprint settings','settings','#3b82f6'], ['Sprint fields','columns-3','#8b5cf6'], ['Epic fields','layers','#10b981'],
+  ]],
+  ['Fields', [
+    ['Project fields','folder','#ec4899'], ['Task fields','list-checks','#f59e0b'],
+    ['Team member fields','id-card','#8b5cf6'], ['Time entry fields','timer','#06b6d4'],
+    ['Allocation fields','calendar-range','#3b82f6'], ['Expense fields','receipt','#22c55e'],
+    ['Account fields','building-2','#8b5cf6'], ['Customer team member fields','users','#6366f1'],
+    ['Skills','sparkles','#14b8a6'], ['Certifications','award','#f97316'],
+  ]],
+  ['Advanced', [
+    ['Custom domain','globe','#3b82f6'], ['Email configuration','mail','#64748b'],
+    ['Security','shield-check','#22c55e'], ['SCIM','refresh-cw','#06b6d4'],
+    ['API','code','#8b5cf6'], ['Webhooks','webhook','#64748b'],
+    ['Language Configurations','languages','#ec4899'],
+  ]],
+];
+
+document.getElementById('sb-nav').innerHTML = NAV.map(([grp, items]) =>
+  `<div class="grp">${grp}</div>` + items.map(([label, icon, color]) => {
+    const on = label === 'Certifications';
+    return `<a class="ni${on ? ' on' : ''}" href="#">
+      <span class="ni-ic" style="background:${color}"><i data-lucide="${icon}"></i></span>
+      ${label}
+      <span class="ni-ar"><i data-lucide="arrow-right"></i></span>
+    </a>`;
+  }).join('')
+).join('');
+
+/* Certificate library */
+const CERTS = [
+  { name:'AWS Solutions Architect Professional', desc:'Validates advanced AWS architecture design', src:'Amazon Web Services', on:true },
+  { name:'Salesforce Certified Administrator',   desc:'Core Salesforce administration',            src:'Salesforce',          on:true },
+  { name:'Project Management Professional (PMP)',desc:'',                                          src:'PMI',                 on:true, hl:true },
+  { name:'Azure Fundamentals (AZ-900)',          desc:'Entry level Azure cloud concepts',           src:'Microsoft',           on:true },
+  { name:'Cisco CCNA',                           desc:'',                                           src:'Cisco',               on:false },
+];
+
+function render() {
+  document.getElementById('tb').innerHTML = CERTS.map((c, i) => `
+    <tr class="${c.hl ? 'hl' : ''}">
+      <td>
+        <span class="grab"><i data-lucide="grip-vertical"></i></span>
+        ${c.name}
+      </td>
+      <td class="muted">${c.desc || ''}</td>
+      <td><span class="ft"><i data-lucide="award"></i>${c.src || '—'}</span></td>
+      <td>
+        <div class="st">
+          <button class="sc-switch${c.on ? ' sc-switch--on' : ''}" onclick="toggle(${i})" aria-label="Toggle ${c.name}">
+            <span class="sc-switch-thumb"></span>
+          </button>
+          <span class="st-lb">${c.on ? 'Enabled' : 'Disabled'}</span>
+        </div>
+      </td>
+      <td><button class="dots"><i data-lucide="ellipsis-vertical"></i></button></td>
+    </tr>`).join('');
+  document.getElementById('sec-ct').textContent = `(${CERTS.length})`;
+  lucide.createIcons();
+}
+
+function toggle(i) { CERTS[i].on = !CERTS[i].on; render(); }
+
+/* Drawer */
+function openDrawer() {
+  document.getElementById('ovl').classList.add('on');
+  document.getElementById('dr').classList.add('on');
+  setTimeout(() => document.getElementById('f-name').focus(), 260);
+}
+
+function closeDrawer() {
+  document.getElementById('ovl').classList.remove('on');
+  document.getElementById('dr').classList.remove('on');
+  ['f-name','f-desc','f-src'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-name').classList.remove('err');
+}
+
+function saveCert() {
+  const nameEl = document.getElementById('f-name');
+  const name = nameEl.value.trim();
+  if (!name) { nameEl.classList.add('err'); nameEl.focus(); return; }
+  CERTS.unshift({
+    name,
+    desc: document.getElementById('f-desc').value.trim(),
+    src:  document.getElementById('f-src').value.trim(),
+    on: true,
+  });
+  closeDrawer();
+  render();
+}
+
+document.getElementById('f-name').addEventListener('input', function () { this.classList.remove('err'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+render();
+lucide.createIcons();
+</script>
+</body>
+</html>
