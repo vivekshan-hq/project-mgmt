@@ -1080,11 +1080,25 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
    SHARED
 ══════════════════════════════════════════════════════ */
 function switchScreen(id, btn) {
+  const screen = document.getElementById('screen-' + id);
+  if (!screen) return;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
+  screen.classList.add('active');
   document.querySelectorAll('.screen-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  // Called from a hash there is no btn, so find the tab that targets this id
+  const tab = btn || document.querySelector('.screen-tab[onclick*="\'' + id + '\'"]');
+  if (tab) tab.classList.add('active');
+  // Keep the URL in sync so any screen can be linked or shared
+  if (location.hash.slice(1) !== id) history.replaceState(null, '', '#' + id);
 }
+
+/* Deep links: certifications.html#tmlist opens that screen directly */
+function screenFromHash() {
+  const id = location.hash.slice(1);
+  if (id && document.getElementById('screen-' + id)) switchScreen(id);
+}
+window.addEventListener('hashchange', screenFromHash);
+screenFromHash();
 
 /* ══════════════════════════════════════════════════════
    SCREEN 1: CERTIFICATION LIBRARY
