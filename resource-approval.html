@@ -114,32 +114,34 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 
 /* ════ MATCHES PANEL ════ */
 .matches{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--background)}
-.matches-top{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-.matches-count{font-size:13px;font-weight:500;color:var(--foreground)}
-
-/* View toggle — matches actual product: left active = filled black */
-.view-tog{display:flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-left:4px}
-.vt{width:36px;height:30px;border:none;cursor:pointer;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;background:var(--background);transition:background .1s,color .1s}
+/* Toolbar: count left, view toggle truly centered, soft-allocations right */
+.matches-top{position:relative;display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.matches-count{font-size:14px;font-weight:600;color:var(--foreground)}
+.view-tog{position:absolute;left:50%;transform:translateX(-50%);display:flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.vt{width:44px;height:32px;border:none;cursor:pointer;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;background:var(--background);transition:background .1s,color .1s}
 .vt:hover{background:var(--muted)}
 .vt.on{background:var(--primary);color:var(--primary-foreground)}
-.vt i{width:14px;height:14px}
-.soft-wrap{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:12px;color:var(--muted-foreground)}
-.info-ico{width:14px;height:14px;color:var(--muted-foreground);flex-shrink:0}
+.vt svg{width:16px;height:16px}
+.soft-wrap{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:13px;color:var(--foreground)}
+.info-ico{width:15px;height:15px;color:var(--muted-foreground);flex-shrink:0}
 
-/* Table */
+/* Table — header has dark text and vertical column dividers */
 .mtw{flex:1;overflow-y:auto}
-.mt-sticky th.sc-th{position:sticky;top:0;background:var(--background);z-index:2;font-size:12px}
+.mt-sticky th.sc-th{position:sticky;top:0;background:var(--background);z-index:2;font-size:13.5px;font-weight:400;color:var(--foreground);border-right:1px solid var(--border);padding:12px 14px}
+.mt-sticky th.sc-th:last-child{border-right:none}
+.mt-sticky td.sc-td{font-size:13.5px}
+/* Trailing spacer column soaks up remaining width */
+.col-end{width:auto}
+
+/* Empty state — a skeleton bar, matching the product */
+.empty-bar{padding:8px 12px 0 32px}
+.empty-bar-inner{height:20px;background:var(--muted);border-radius:4px}
 .cert-valid{background:var(--green-bg) !important;color:var(--green-dk) !important;border-color:oklch(0.72 0.14 155) !important}
 .cert-warn{background:var(--warn-bg) !important;color:var(--warn) !important;border-color:#fcd34d !important}
 .cert-miss{background:var(--muted) !important;color:var(--muted-foreground) !important;border-color:var(--border) !important}
 .row-sel td.sc-td{background:var(--blue-bg) !important}
 .tm-av-wrap{display:flex;align-items:center;gap:8px}
 .role-cell{display:flex;align-items:center;gap:5px;color:var(--muted-foreground)}
-
-/* Empty state */
-.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted-foreground);padding:40px}
-.empty-state i{width:40px;height:40px;opacity:.3}
-.empty-state p{font-size:13px;text-align:center}
 
 /* ════ ADD FIELDS MODAL ════ */
 .af-back{position:fixed;inset:0;z-index:800;background:rgb(0 0 0 / 0.5);display:none;align-items:center;justify-content:center;animation:sc-fade-in 180ms ease}
@@ -385,14 +387,15 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
     <div class="matches">
       <div class="matches-top">
         <span class="matches-count" id="matches-count">Showing 0 relevant matches</span>
-        <!-- View toggles matching actual product -->
-        <div class="view-tog" style="margin-left:8px">
-          <button class="vt on"><i data-lucide="list"></i></button>
-          <button class="vt"><i data-lucide="layout-panel-left"></i></button>
+        <!-- View toggle: centered in the panel, no sort button (matches product) -->
+        <div class="view-tog">
+          <button class="vt on" title="List view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+          <button class="vt" title="Timeline view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4.5" width="8.5" height="6" rx="1.5"/><rect x="10" y="13.5" width="11" height="6" rx="1.5"/></svg>
+          </button>
         </div>
-        <button class="sc-btn sc-btn--outline sc-btn--size-icon" style="width:34px;height:30px" title="Sort">
-          <i data-lucide="arrow-up-down" style="width:13px;height:13px"></i>
-        </button>
         <div class="soft-wrap">
           <button class="sc-switch" id="soft-tog" onclick="this.classList.toggle('sc-switch--on')">
             <span class="sc-switch-thumb"></span>
@@ -413,14 +416,15 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
                 <th class="sc-th">Forecasted bi...</th>
                 <th class="sc-th">Overallocations</th>
                 <th class="sc-th" id="skill-col-hdr" style="display:none"></th>
+                <th class="sc-th col-end"></th>
               </tr>
             </thead>
             <tbody id="matches-tbody"></tbody>
           </table>
         </div>
-        <div class="empty-state" id="empty-state" style="display:none">
-          <i data-lucide="users"></i>
-          <p>No team members match the selected filters</p>
+        <!-- Empty state: skeleton bar, as the product shows -->
+        <div class="empty-bar" id="empty-state" style="display:none">
+          <div class="empty-bar-inner"></div>
         </div>
       </div>
     </div><!-- /matches -->
@@ -635,13 +639,14 @@ function renderMatches() {
       <td class="sc-td" style="color:var(--muted-foreground)">15.36%</td>
       <td class="sc-td" style="color:oklch(0.52 0.16 155)">0h</td>
       ${extraTd}
+      <td class="sc-td col-end"></td>
     </tr>`;
   }).join('');
 
   document.getElementById('matches-tbody').innerHTML = rows;
   const count = appliedFilters.length > 0 ? shown : MEMBERS.length;
   document.getElementById('matches-count').textContent = `Showing ${count} relevant match${count === 1 ? '' : 'es'}`;
-  document.getElementById('empty-state').style.display = count === 0 ? 'flex' : 'none';
+  document.getElementById('empty-state').style.display = count === 0 ? 'block' : 'none';
 }
 
 function selectMember(i) {
