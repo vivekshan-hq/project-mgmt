@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certifications flow</title>
+<link rel="stylesheet" href="ds/styles.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font-sans);font-size:14px;color:var(--foreground);background:var(--muted);display:flex;flex-direction:column;overflow:hidden}
+
+.bar{display:flex;align-items:center;gap:16px;padding:0 16px;height:52px;background:var(--background);border-bottom:1px solid var(--border);flex-shrink:0}
+.brand{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;letter-spacing:-0.01em;white-space:nowrap}
+.brand i{width:16px;height:16px;color:var(--muted-foreground)}
+
+.tabs{display:flex;gap:3px;background:var(--muted);border-radius:var(--radius-md);padding:3px}
+.tab{display:flex;align-items:center;gap:7px;padding:6px 13px;border:none;background:transparent;border-radius:7px;font-family:inherit;font-size:13px;color:var(--muted-foreground);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s}
+.tab:hover{color:var(--foreground)}
+.tab.on{background:var(--background);color:var(--foreground);font-weight:500;box-shadow:var(--shadow-sm)}
+.tab .n{width:17px;height:17px;border-radius:50%;background:var(--border);color:var(--muted-foreground);font-size:10px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+.tab.on .n{background:var(--primary);color:var(--primary-foreground)}
+
+.spacer{flex:1}
+.step{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
+.ext{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted-foreground);text-decoration:none;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-md);white-space:nowrap}
+.ext:hover{background:var(--muted);color:var(--foreground)}
+.ext i{width:13px;height:13px}
+
+.stage{flex:1;min-height:0;background:var(--background)}
+iframe{width:100%;height:100%;border:none;display:block}
+
+@media (max-width:1100px){ .brand span{display:none} .step{display:none} }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <span class="brand"><i data-lucide="award"></i><span>Certifications</span></span>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <div class="spacer"></div>
+  <span class="step" id="step"></span>
+  <a class="ext" id="ext" target="_blank" rel="noopener">
+    <i data-lucide="external-link"></i>
+    Open standalone
+  </a>
+</header>
+
+<div class="stage">
+  <iframe id="frame" title="Prototype screen"></iframe>
+</div>
+
+<script>
+/* Each screen is iframed rather than inlined: the four pages define the same
+   globals (openDrawer, render) and class names (.rail, .main), so merging them
+   into one document would break all four. */
+const SCREENS = [
+  { id:'library',  n:1, label:'Certification library', src:'certification-library.html',
+    step:'Define a certificate, and its levels if it has them' },
+  { id:'team',     n:2, label:'Team members',          src:'team-members.html',
+    step:'Assign it to a person with level, issue and expiry dates' },
+  { id:'request',  n:3, label:'Resource request',      src:'resource-request.html',
+    step:'Ask for a role, requiring a level and a validity date' },
+  { id:'approval', n:4, label:'Resource approval',     src:'resource-approval.html',
+    step:'Only candidates meeting every condition are listed' },
+];
+
+const frame = document.getElementById('frame');
+const ext   = document.getElementById('ext');
+
+document.getElementById('tabs').innerHTML = SCREENS.map(s =>
+  `<button class="tab" id="tab-${s.id}" onclick="go('${s.id}')">
+     <span class="n">${s.n}</span>${s.label}
+   </button>`).join('');
+
+function go(id, replace) {
+  const s = SCREENS.find(x => x.id === id) || SCREENS[0];
+  SCREENS.forEach(x => document.getElementById('tab-' + x.id).classList.toggle('on', x.id === s.id));
+  document.getElementById('step').textContent = s.step;
+  ext.href = s.src;
+  // Re-pointing the iframe at the page it already shows would throw away its state
+  if (frame.dataset.src !== s.src) { frame.dataset.src = s.src; frame.src = s.src; }
+  if (location.hash.slice(1) !== s.id) {
+    if (replace) history.replaceState(null, '', '#' + s.id);
+    else location.hash = s.id;
+  }
+}
+
+/* Deep links, and the browser's back button, both drive the tabs */
+window.addEventListener('hashchange', () => go(location.hash.slice(1) || 'library', true));
+go(location.hash.slice(1) || 'library', true);
+lucide.createIcons();
+</script>
+</body>
+</html>
