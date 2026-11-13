@@ -33,7 +33,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--foreground);backgro
 .tb.on{background:var(--background);color:#2563eb;font-weight:500;box-shadow:var(--shadow-sm)}
 .body{flex:1;overflow:auto;padding:0 26px 26px}
 
-/* Table */
+/* List table */
 .tw{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:12px;font-weight:500;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;background:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
@@ -50,61 +50,110 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .s-appr{background:#defbe6;color:#0e6027;border-color:#9ef0b0}
 .s-draft{background:var(--muted);color:var(--muted-foreground);border-color:var(--border)}
 .st svg{width:11px;height:11px}
-
-/* Requirement chips */
 .reqs{display:flex;flex-wrap:wrap;gap:4px;max-width:330px}
 .rq-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:11.5px;font-weight:500;border:1px solid;white-space:nowrap}
 .rq-cert{background:#FFF7ED;color:#C2410C;border-color:#FED7AA}
 .rq-skill{background:#edf5ff;color:#0f62fe;border-color:#d0e2ff}
 .rq-chip svg{width:10px;height:10px;flex-shrink:0}
 
-/* Drawer */
-.ovl{position:fixed;inset:0;background:rgb(0 0 0 / .35);opacity:0;pointer-events:none;transition:opacity .22s;z-index:900}
-.ovl.on{opacity:1;pointer-events:auto}
-.dr{position:fixed;top:0;right:0;bottom:0;width:640px;max-width:95vw;background:var(--background);border-left:1px solid var(--border);box-shadow:var(--shadow-2xl);transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:901;display:flex;flex-direction:column}
-.dr.on{transform:translateX(0)}
-.dr-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
-.dr-ttl{font-size:16px;font-weight:600;letter-spacing:-0.01em}
-.dr-bd{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:18px}
-.dr-ft{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0}
-.sec-lb{font-size:11.5px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px}
+/* ── Request modal ── */
+.ovl{position:fixed;inset:0;background:rgb(0 0 0 / .4);display:none;align-items:center;justify-content:center;z-index:900;padding:24px}
+.ovl.on{display:flex}
+.modal{background:var(--background);border-radius:14px;width:1150px;max-width:97vw;max-height:94vh;display:flex;flex-direction:column;box-shadow:var(--shadow-2xl);overflow:hidden}
+.m-hd{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 26px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.m-eyebrow{font-size:13px;color:var(--muted-foreground)}
+.m-ttl{font-size:21px;font-weight:600;letter-spacing:-0.02em;margin-top:2px}
+.m-bd{flex:1;overflow-y:auto;padding:22px 26px}
+.m-ft{display:flex;justify-content:flex-end;gap:10px;padding:14px 26px;border-top:1px solid var(--border);flex-shrink:0}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px}
 .fld{display:flex;flex-direction:column;gap:6px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.lb{font-size:13px;font-weight:500}
-.rq{color:var(--destructive)}
-.in,.se{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13.5px;color:var(--foreground);outline:none}
+.lb{font-size:13px;font-weight:500;display:flex;align-items:center;gap:4px}
+.lb .rq{color:var(--destructive)}
+.lb svg{width:13px;height:13px;color:var(--muted-foreground)}
+.sub{font-size:12px;color:var(--muted-foreground)}
+
+/* Input that carries an avatar, like the product's project/role pickers */
+.pick{display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);padding:0 10px;height:40px}
+.pick:focus-within{border-color:var(--ring)}
+.pick .pav{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:8.5px;font-weight:700;color:#fff;flex-shrink:0}
+.pick select{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:14px;color:var(--foreground);height:100%;cursor:pointer}
+.in,.se{width:100%;height:40px;padding:0 11px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:14px;color:var(--foreground);outline:none}
 .in:focus,.se:focus{border-color:var(--ring)}
-.err{border-color:var(--destructive)!important}
-.hint{font-size:12px;color:var(--muted-foreground)}
+.in::placeholder{color:var(--muted-foreground)}
 
-/* Requirements table in drawer */
-.rtw{border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
-.rt{width:100%;border-collapse:collapse}
-.rt th{font-size:11.5px;padding:9px 12px;background:var(--muted);border-bottom:1px solid var(--border)}
-.rt td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border)}
-.rt tr:last-child td{border-bottom:none}
-.rt tbody tr:hover td{background:transparent}
-.rt-nm{display:flex;align-items:center;gap:9px;font-weight:500;font-size:13px}
-.rt-ic{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;flex-shrink:0}
-.rt-ic.cert{background:#FFF7ED;border:1px solid #FED7AA;color:#C2410C}
-.rt-ic.skill{background:#edf5ff;border:1px solid #d0e2ff;color:#0f62fe}
-.rt-ic svg{width:12px;height:12px}
-.rm{border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:3px;border-radius:5px}
-.rm:hover{color:var(--destructive);background:var(--muted)}
-.rm svg{width:14px;height:14px}
-.grp-row td{background:var(--muted);font-size:11px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.05em;padding:6px 12px!important}
-.empty-td{text-align:center;color:var(--muted-foreground);padding:24px 12px!important;font-size:13px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px}
+.sec-t{font-size:17px;font-weight:600;letter-spacing:-0.01em}
+.lnk{background:none;border:none;font-family:inherit;font-size:14px;color:#2563eb;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:6px}
+.lnk:hover{text-decoration:underline}
+.lnk svg{width:14px;height:14px}
 
-/* Add requirement form */
-.addbox{margin-top:12px;border:1px solid var(--border);border-radius:var(--radius-md);padding:15px;display:none;flex-direction:column;gap:14px;background:var(--muted)}
-.addbox.on{display:flex}
-.seg{display:flex;gap:3px;background:var(--background);border:1px solid var(--border);border-radius:var(--radius-md);padding:3px;width:fit-content}
-.sg{padding:5px 14px;border:none;background:transparent;border-radius:6px;font-family:inherit;font-size:13px;color:var(--muted-foreground);cursor:pointer;display:flex;align-items:center;gap:6px}
-.sg.on{background:var(--primary);color:var(--primary-foreground);font-weight:500}
-.sg svg{width:13px;height:13px}
-.addrow{display:flex;justify-content:flex-end;gap:8px}
-.callout{display:flex;gap:9px;padding:10px 12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--radius-md);font-size:12px;color:#9A3412;line-height:1.5}
-.callout svg{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+/* Allocation card */
+.alloc{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px}
+.alloc-h{display:flex;align-items:center;gap:9px;padding:11px 16px;background:var(--muted);cursor:pointer}
+.alloc-h .chev{width:16px;height:16px;color:var(--muted-foreground);transition:transform .18s}
+.alloc.closed .chev{transform:rotate(-90deg)}
+.alloc-t{font-size:14px;font-weight:500}
+.alloc-rm{margin-left:auto;border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:3px;border-radius:5px}
+.alloc-rm:hover{color:var(--destructive);background:var(--background)}
+.alloc-rm svg{width:14px;height:14px}
+.alloc-b{padding:18px 16px;background:color-mix(in oklab,var(--muted) 35%,transparent)}
+.alloc.closed .alloc-b{display:none}
+.bill{display:flex;flex-direction:column;gap:6px;width:72px;flex-shrink:0}
+.cb{width:19px;height:19px;border:1.5px solid var(--border-strong);border-radius:4px;background:var(--background);cursor:pointer;display:grid;place-items:center;padding:0}
+.cb.on{background:#2563eb;border-color:#2563eb}
+.cb svg{width:12px;height:12px;color:#fff;display:none}
+.cb.on svg{display:block}
+.row-dt{display:flex;gap:26px}
+.row-dt>.fld{flex:1}
+
+/* Skills / Fields */
+.chipbox{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.sec-sub{font-size:11.5px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 7px}
+
+/* ── Add skills picker ── */
+.povl{position:fixed;inset:0;background:rgb(0 0 0 / .45);display:none;align-items:center;justify-content:center;z-index:950;padding:24px}
+.povl.on{display:flex}
+.pmodal{background:var(--background);border-radius:14px;width:1000px;max-width:96vw;height:600px;display:flex;flex-direction:column;box-shadow:var(--shadow-2xl);overflow:hidden}
+.p-hd{display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.p-ttl{font-size:16px;font-weight:600;white-space:nowrap}
+.p-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--muted);border-radius:var(--radius-md);padding:0 12px;height:38px}
+.p-search svg{width:15px;height:15px;color:var(--muted-foreground);flex-shrink:0}
+.p-search input{flex:1;border:none;background:transparent;outline:none;font-family:inherit;font-size:14px;color:var(--foreground)}
+.p-bd{flex:1;display:flex;overflow:hidden}
+.p-nav{width:250px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:14px 0}
+.p-grp{font-size:11px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.06em;padding:12px 20px 6px}
+.p-item{display:flex;align-items:center;gap:9px;padding:8px 20px;font-size:14px;color:var(--foreground);cursor:pointer;border:none;background:none;width:100%;font-family:inherit;text-align:left}
+.p-item:hover{background:var(--muted)}
+.p-item.on{background:#EEF0FF;color:#4338ca;font-weight:500}
+.p-item .ico{width:15px;height:15px;color:var(--muted-foreground);flex-shrink:0}
+.p-item.on .ico{color:#4338ca}
+.p-item .n{margin-left:auto;font-size:12.5px;color:var(--muted-foreground)}
+.p-list{flex:1;overflow-y:auto;border-right:1px solid var(--border)}
+.p-list-h{font-size:11.5px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.06em;padding:14px 20px 10px;border-bottom:1px solid var(--border)}
+.p-row{display:flex;align-items:flex-start;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border);cursor:pointer}
+.p-row:hover{background:color-mix(in oklab,var(--muted) 45%,transparent)}
+.p-row-nm{font-size:14.5px}
+.p-row-sub{font-size:12.5px;color:var(--muted-foreground);margin-top:2px}
+.p-cond{margin-top:9px;display:none;gap:8px;align-items:center}
+.p-row.sel .p-cond{display:flex}
+.p-cond label{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
+.p-cond input,.p-cond select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12.5px;background:var(--background);color:var(--foreground);outline:none}
+.p-sel{width:280px;flex-shrink:0;padding:16px 18px;overflow-y:auto}
+.p-sel-h{font-size:14.5px;font-weight:600}
+.p-sel-d{font-size:13px;color:var(--muted-foreground);line-height:1.5;margin-top:6px}
+.p-sel-e{font-size:13px;color:var(--muted-foreground);font-style:italic;margin-top:14px}
+.p-sel-l{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.p-sel-i{display:flex;align-items:flex-start;gap:7px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:12.5px}
+.p-sel-i.cert{background:#FFF7ED;border-color:#FED7AA}
+.p-sel-i.skill{background:#edf5ff;border-color:#d0e2ff}
+.p-sel-i svg{width:12px;height:12px;flex-shrink:0;margin-top:2px}
+.p-sel-i.cert svg{color:#C2410C}
+.p-sel-i.skill svg{color:#0f62fe}
+.p-sel-i b{font-weight:600;display:block}
+.p-sel-i span{color:var(--muted-foreground)}
+.p-ft{display:flex;align-items:center;padding:13px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.p-ft-l{font-size:13px;color:var(--muted-foreground)}
 </style>
 </head>
 <body>
@@ -118,7 +167,6 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
     <button class="rail-i"><i data-lucide="calendar"></i></button>
     <button class="rail-i on"><i data-lucide="users"></i></button>
     <button class="rail-i"><i data-lucide="layout-grid"></i></button>
-    <button class="rail-i"><i data-lucide="chart-no-axes-column"></i></button>
     <div class="rail-sp"></div>
     <div class="rail-av">VS</div>
   </nav>
@@ -140,7 +188,7 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
           <i data-lucide="user-check" style="width:14px;height:14px"></i>
           Approver view
         </a>
-        <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:34px" onclick="openDrawer()">
+        <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:34px" onclick="openModal()">
           New request
           <i data-lucide="plus" style="width:14px;height:14px"></i>
         </button>
@@ -152,14 +200,8 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Project</th>
-              <th>Role requested</th>
-              <th>Dates</th>
-              <th>Hours</th>
-              <th>Requirements</th>
-              <th>Status</th>
-              <th>Requested by</th>
+              <th>ID</th><th>Project</th><th>Role requested</th><th>Dates</th>
+              <th>Hours</th><th>Requirements</th><th>Status</th><th>Requested by</th>
             </tr>
           </thead>
           <tbody id="tb"></tbody>
@@ -169,336 +211,354 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
   </div>
 </div>
 
-<!-- New request drawer -->
-<div class="ovl" id="ovl" onclick="closeDrawer()"></div>
-<aside class="dr" id="dr" role="dialog" aria-modal="true">
-  <div class="dr-hd">
-    <span class="dr-ttl">New resource request</span>
-    <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closeDrawer()"><i data-lucide="x"></i></button>
-  </div>
-
-  <div class="dr-bd">
-    <div class="two">
-      <div class="fld">
-        <label class="lb" for="f-proj">Project <span class="rq">*</span></label>
-        <select class="se" id="f-proj">
-          <option>Acme — Platform rollout</option>
-          <option>Northwind — Data migration</option>
-          <option>RM Testing</option>
-        </select>
+<!-- ══ New request modal ══ -->
+<div class="ovl" id="ovl" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="m-hd">
+      <div>
+        <div class="m-eyebrow">Resource request</div>
+        <div class="m-ttl">New team member</div>
       </div>
-      <div class="fld">
-        <label class="lb" for="f-role">Role <span class="rq">*</span></label>
-        <select class="se" id="f-role">
-          <option>Project Manager</option>
-          <option>Solutions Architect</option>
-          <option>Network Engineer</option>
-          <option>Business Analyst</option>
-        </select>
-      </div>
+      <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closeModal()"><i data-lucide="x"></i></button>
     </div>
 
-    <div class="two">
-      <div class="fld">
-        <label class="lb" for="f-from">Start date <span class="rq">*</span></label>
-        <input class="in" type="date" id="f-from" value="2026-12-01" onchange="syncValidThrough()">
-      </div>
-      <div class="fld">
-        <label class="lb" for="f-to">End date <span class="rq">*</span></label>
-        <input class="in" type="date" id="f-to" value="2027-03-31" onchange="syncValidThrough()">
-      </div>
-    </div>
-
-    <div class="two">
-      <div class="fld">
-        <label class="lb" for="f-hrs">Time requested <span class="rq">*</span></label>
-        <input class="in" id="f-hrs" value="40h 00m">
-      </div>
-      <div class="fld">
-        <label class="lb" for="f-type">Allocation type</label>
-        <select class="se" id="f-type"><option>Hard</option><option>Soft</option></select>
-      </div>
-    </div>
-
-    <div>
-      <div class="sec-lb">Requirements</div>
-      <div class="rtw">
-        <table class="rt">
-          <thead>
-            <tr>
-              <th>Requirement</th>
-              <th>Condition</th>
-              <th style="width:40px"></th>
-            </tr>
-          </thead>
-          <tbody id="d-reqs"></tbody>
-        </table>
-      </div>
-
-      <button class="sc-btn sc-btn--outline sc-btn--size-sm" id="add-btn" style="height:32px;margin-top:12px" onclick="showAdd()">
-        <i data-lucide="plus" style="width:14px;height:14px"></i>
-        Add requirement
-      </button>
-
-      <div class="addbox" id="addbox">
-        <div class="seg">
-          <button class="sg on" id="sg-cert" onclick="setKind('cert')"><i data-lucide="award"></i>Certification</button>
-          <button class="sg" id="sg-skill" onclick="setKind('skill')"><i data-lucide="lightbulb"></i>Skill</button>
+    <div class="m-bd">
+      <div class="g2">
+        <div class="fld">
+          <label class="lb"><span class="rq">*</span>Project</label>
+          <div class="pick">
+            <span class="pav" style="background:#6366f1">AC</span>
+            <select id="f-proj" onchange="onProject()">
+              <option data-dates="7 Sep – 20 Oct">Acme internal</option>
+              <option data-dates="1 Dec – 31 Mar">RM Testing</option>
+              <option data-dates="15 Dec – 30 Jun">Northwind — Data migration</option>
+            </select>
+          </div>
+          <div class="sub" id="proj-dates">Project dates: 7 Sep – 20 Oct</div>
         </div>
 
-        <!-- Certification -->
-        <div id="pane-cert" style="display:flex;flex-direction:column;gap:14px">
-          <div class="fld">
-            <label class="lb" for="a-cert">Certificate <span class="rq">*</span></label>
-            <select class="se" id="a-cert" onchange="this.classList.remove('err')"></select>
-          </div>
-          <div class="fld">
-            <label class="lb" for="a-vt">Must stay valid through</label>
-            <input class="in" type="date" id="a-vt">
-            <div class="hint">Defaults to the booking's end date. Anyone whose certificate expires before this is dropped from the approver's match list.</div>
-          </div>
-          <div class="callout">
-            <i data-lucide="info"></i>
-            <span>Expiry lives on each team member's record, not on the certificate, so this checks every candidate's own date.</span>
-          </div>
-        </div>
-
-        <!-- Skill -->
-        <div id="pane-skill" style="display:none;flex-direction:column;gap:14px">
-          <div class="fld">
-            <label class="lb" for="a-skill">Skill <span class="rq">*</span></label>
-            <select class="se" id="a-skill" onchange="this.classList.remove('err')"></select>
-          </div>
-          <div class="fld">
-            <label class="lb" for="a-lvl">Minimum level</label>
-            <select class="se" id="a-lvl">
-              <option>Beginner</option><option>Intermediate</option>
-              <option selected>Advanced</option><option>Expert</option>
+        <div class="fld">
+          <label class="lb"><span class="rq">*</span>Team member or role <i data-lucide="info"></i></label>
+          <div class="pick">
+            <span class="pav" style="background:#16a34a">PM</span>
+            <select id="f-role">
+              <option>Product Manager</option>
+              <option>Project Manager</option>
+              <option>Solutions Architect</option>
+              <option>Network Engineer</option>
             </select>
           </div>
         </div>
 
-        <div class="addrow">
-          <button class="sc-btn sc-btn--ghost sc-btn--size-sm" style="height:30px" onclick="hideAdd()">Cancel</button>
-          <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:30px" onclick="addReq()">Add</button>
+        <div class="fld">
+          <label class="lb"><span class="rq">*</span>Allocation method</label>
+          <select class="se" id="f-method"><option>Total hours</option><option>Hours per day</option><option>Percentage</option></select>
         </div>
+
+        <div class="fld">
+          <label class="lb">Allocation type</label>
+          <select class="se" id="f-type"><option>Hard</option><option>Soft</option></select>
+        </div>
+      </div>
+
+      <div class="sec-h">
+        <div class="sec-t">Request information</div>
+        <button class="lnk">Switch to timeline</button>
+      </div>
+
+      <div id="allocs"></div>
+
+      <button class="lnk" onclick="addAlloc()"><i data-lucide="plus"></i>Add allocation</button>
+
+      <div class="sec-h" style="margin-bottom:10px">
+        <div class="sec-t">Skills/Fields</div>
+      </div>
+      <div class="chipbox" id="req-chips"></div>
+      <button class="lnk" onclick="openPicker()"><i data-lucide="plus"></i>Add skills</button>
+    </div>
+
+    <div class="m-ft">
+      <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="height:34px" onclick="closeModal()">Back</button>
+      <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:34px" onclick="submitReq()">Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Add skills & certifications picker ══ -->
+<div class="povl" id="povl" onclick="if(event.target===this)closePicker()">
+  <div class="pmodal">
+    <div class="p-hd">
+      <span class="p-ttl">Add skills &amp; certifications</span>
+      <div class="p-search">
+        <i data-lucide="search"></i>
+        <input id="p-q" placeholder="Search skills and certifications…" oninput="renderList()">
+      </div>
+      <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closePicker()"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="p-bd">
+      <div class="p-nav" id="p-nav"></div>
+      <div class="p-list">
+        <div class="p-list-h" id="p-list-h">Certifications</div>
+        <div id="p-rows"></div>
+      </div>
+      <div class="p-sel">
+        <div class="p-sel-h">Selected (<span id="p-n">0</span>)</div>
+        <div class="p-sel-d">Candidates matching <b>all</b> conditions will be shown.</div>
+        <div class="p-sel-e" id="p-empty">No filters added yet.</div>
+        <div class="p-sel-l" id="p-sel-l"></div>
+      </div>
+    </div>
+
+    <div class="p-ft">
+      <span class="p-ft-l" id="p-ft-l">Showing <b>all</b> candidates · add filters to narrow</span>
+      <div style="margin-left:auto;display:flex;gap:10px">
+        <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="height:32px" onclick="closePicker()">Cancel</button>
+        <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:32px" onclick="applyPicker()">Apply filters</button>
       </div>
     </div>
   </div>
-
-  <div class="dr-ft">
-    <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="height:32px" onclick="closeDrawer()">Cancel</button>
-    <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:32px" onclick="submitReq()">
-      <i data-lucide="send" style="width:13px;height:13px"></i>
-      Submit request
-    </button>
-  </div>
-</aside>
+</div>
 
 <script>
-const LIB = [
-  'AWS Solutions Architect Professional',
-  'Project Management Professional (PMP)',
-  'Salesforce Certified Administrator',
-  'Azure Fundamentals (AZ-900)',
-  'Cisco CCNA',
-];
-const SKILLS = ['Javascript','Data Migration','Program management','Software Testing','Java','Budget'];
-const SHORT = {
-  'AWS Solutions Architect Professional':'AWS SAA Pro',
-  'Project Management Professional (PMP)':'PMP',
-  'Salesforce Certified Administrator':'Salesforce Admin',
-  'Azure Fundamentals (AZ-900)':'AZ-900',
-  'Cisco CCNA':'Cisco CCNA',
-};
-const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const fmt = d => { if (!d) return null; const [y,m,dd] = d.split('-'); return `${parseInt(dd)} ${MON[parseInt(m)-1]} ${y}`; };
-const short = d => { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${parseInt(dd)} ${MON[parseInt(m)-1]} ${String(y).slice(2)}`; };
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const short=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return `${parseInt(dd)} ${MON[parseInt(m)-1]} ${String(y).slice(2)}`};
+const fmt=d=>{if(!d)return null;const[y,m,dd]=d.split('-');return `${parseInt(dd)} ${MON[parseInt(m)-1]} ${y}`};
 
-/* Seeded requests. RR-104 is the one resource-approval.html opens. */
-const REQS = [
+const CERTS=[
+  ['AWS Solutions Architect Professional','Amazon Web Services'],
+  ['Salesforce Certified Administrator','Salesforce'],
+  ['Project Management Professional (PMP)','Project Management Institute'],
+  ['Azure Fundamentals (AZ-900)','Microsoft'],
+  ['Cisco CCNA','Cisco'],
+];
+const SHORT={'AWS Solutions Architect Professional':'AWS SAA Pro','Project Management Professional (PMP)':'PMP','Salesforce Certified Administrator':'Salesforce Admin','Azure Fundamentals (AZ-900)':'AZ-900','Cisco CCNA':'Cisco CCNA'};
+
+/* Certifications sit in their own top-level section, not under Skills:
+   they carry a source and per-member issue/expiry dates. */
+const SECTIONS=[
+  { grp:'Skills', items:[
+    { id:'languages', label:'Languages', icon:'code', rows:[
+      ['React'],['Node.js'],['Python'],['Java'] ] },
+    { id:'misc', label:'Miscellaneous', icon:'circle-dot', rows:[
+      ['Program management'],['Software Testing'] ] },
+  ]},
+  { grp:'Certifications', items:[
+    { id:'certs', label:'All certifications', icon:'award', isCert:true, rows:CERTS },
+  ]},
+  { grp:'Team member fields', items:[
+    { id:'general', label:'General information', icon:'circle-dot', rows:[['Region'],['Department']] },
+  ]},
+];
+const byId=id=>SECTIONS.flatMap(s=>s.items).find(i=>i.id===id);
+
+const REQS=[
   { id:'RR-104', proj:'RM Testing', role:'Project Manager', from:'2026-12-01', to:'2027-03-31', hrs:'7h 59m',
     status:'pending', by:'Karpagavalli S', byI:'KS', byC:'#10b981',
-    reqs:[{ kind:'cert', name:'Salesforce Certified Administrator', validThrough:'2026-12-31' }] },
-  { id:'RR-103', proj:'Acme — Platform rollout', role:'Solutions Architect', from:'2026-12-15', to:'2027-06-30', hrs:'120h 00m',
+    reqs:[{kind:'cert',name:'Salesforce Certified Administrator',validThrough:'2026-12-31'}] },
+  { id:'RR-103', proj:'Acme internal', role:'Solutions Architect', from:'2026-12-15', to:'2027-06-30', hrs:'120h 00m',
     status:'pending', by:'shreeda', byI:'S', byC:'#ef4444',
-    reqs:[
-      { kind:'cert', name:'AWS Solutions Architect Professional', validThrough:'2027-06-30' },
-      { kind:'skill', name:'Data Migration', level:'Advanced' },
-    ] },
+    reqs:[{kind:'cert',name:'AWS Solutions Architect Professional',validThrough:'2027-06-30'},
+          {kind:'skill',name:'Program management',level:'Advanced'}] },
   { id:'RR-102', proj:'Northwind — Data migration', role:'Business Analyst', from:'2026-11-20', to:'2027-01-31', hrs:'60h 00m',
     status:'approved', by:'shreeda', byI:'S', byC:'#ef4444',
-    reqs:[{ kind:'skill', name:'Program management', level:'Intermediate' }] },
-  { id:'RR-101', proj:'Acme — Platform rollout', role:'Network Engineer', from:'2027-01-05', to:'2027-04-30', hrs:'80h 00m',
+    reqs:[{kind:'skill',name:'Program management',level:'Intermediate'}] },
+  { id:'RR-101', proj:'Acme internal', role:'Network Engineer', from:'2027-01-05', to:'2027-04-30', hrs:'80h 00m',
     status:'draft', by:'Vivek S', byI:'VS', byC:'#8b5cf6', reqs:[] },
 ];
+const ST={pending:['s-pend','clock','Pending'],approved:['s-appr','check','Approved'],draft:['s-draft','pencil','Draft']};
 
-const ST = {
-  pending:['s-pend','clock','Pending'],
-  approved:['s-appr','check','Approved'],
-  draft:['s-draft','pencil','Draft'],
-};
+let allocs=[], picked={}, activeSec='certs', chosen=[];
 
-let draft = [];      // requirements being built in the drawer
-let kind = 'cert';
-
-function chip(r) {
-  if (r.kind === 'cert') {
-    const vt = r.validThrough ? ` · valid thru ${short(r.validThrough)}` : '';
-    return `<span class="rq-chip rq-cert"><i data-lucide="award"></i>${SHORT[r.name] || r.name}${vt}</span>`;
+function chip(r){
+  if(r.kind==='cert'){
+    const vt=r.validThrough?` · valid thru ${short(r.validThrough)}`:'';
+    return `<span class="rq-chip rq-cert"><i data-lucide="award"></i>${SHORT[r.name]||r.name}${vt}</span>`;
   }
   return `<span class="rq-chip rq-skill"><i data-lucide="lightbulb"></i>${r.name} · ${r.level}</span>`;
 }
 
-function render() {
-  document.getElementById('tb').innerHTML = REQS.map(r => {
-    const [cls, ico, lbl] = ST[r.status];
-    const reqs = r.reqs.length
-      ? r.reqs.map(chip).join('')
-      : '<span class="muted" style="font-size:12.5px">None</span>';
+function render(){
+  document.getElementById('tb').innerHTML=REQS.map(r=>{
+    const[cls,ico,lbl]=ST[r.status];
+    const rq=r.reqs.length?r.reqs.map(chip).join(''):'<span class="muted" style="font-size:12.5px">None</span>';
     return `<tr>
-      <td class="id">${r.id}</td>
-      <td>${r.proj}</td>
-      <td>${r.role}</td>
+      <td class="id">${r.id}</td><td>${r.proj}</td><td>${r.role}</td>
       <td class="nowrap muted">${short(r.from)} – ${short(r.to)}</td>
       <td class="nowrap">${r.hrs}</td>
-      <td><div class="reqs">${reqs}</div></td>
+      <td><div class="reqs">${rq}</div></td>
       <td><span class="st ${cls}"><i data-lucide="${ico}"></i>${lbl}</span></td>
       <td><div class="who"><span class="av" style="background:${r.byC}">${r.byI}</span>${r.by}</div></td>
-    </tr>`;
-  }).join('');
+    </tr>`}).join('');
   lucide.createIcons();
 }
 
-function renderDraft() {
-  const el = document.getElementById('d-reqs');
-  if (!draft.length) {
-    el.innerHTML = '<tr><td class="empty-td" colspan="3">No requirements yet. The request will match on role and availability alone.</td></tr>';
-    return;
-  }
-  // Certifications and skills are different things, so they get their own
-  // sections rather than being interleaved in one undifferentiated list.
-  const row = (r, i) => {
-    const isCert = r.kind === 'cert';
-    const cond = isCert
-      ? (r.validThrough ? `Must be valid through <b>${fmt(r.validThrough)}</b>` : 'Held — no expiry condition')
-      : `At least <b>${r.level}</b>`;
-    return `<tr>
-      <td><div class="rt-nm"><span class="rt-ic ${isCert ? 'cert' : 'skill'}"><i data-lucide="${isCert ? 'award' : 'lightbulb'}"></i></span>${r.name}</div></td>
-      <td class="muted">${cond}</td>
-      <td><button class="rm" title="Remove" onclick="rmReq(${i})"><i data-lucide="trash-2"></i></button></td>
-    </tr>`;
-  };
+function onProject(){
+  const o=document.getElementById('f-proj').selectedOptions[0];
+  document.getElementById('proj-dates').textContent='Project dates: '+o.dataset.dates;
+}
 
-  const idx = draft.map((r, i) => ({ r, i }));
-  const groups = [
-    ['Certifications', idx.filter(x => x.r.kind === 'cert')],
-    ['Skills',         idx.filter(x => x.r.kind === 'skill')],
-  ].filter(([, rows]) => rows.length);
+/* ── Allocations ── */
+const FIELDS=[['Work','Search...','se'],['Sales Order','Enter text','in'],
+  ['Billing Category','Select option','se'],['test_field','Enter text','in',1],
+  ['type','Enter text','in'],['Text Test 1','Enter text','in',1],
+  ['Category','Enter text','in'],['Multi line','Enter text','in']];
 
-  el.innerHTML = groups.map(([label, rows]) =>
-    `<tr class="grp-row"><td colspan="3">${label}</td></tr>` + rows.map(x => row(x.r, x.i)).join('')
-  ).join('');
+function renderAllocs(){
+  document.getElementById('allocs').innerHTML=allocs.map((a,i)=>`
+    <div class="alloc" id="al-${i}">
+      <div class="alloc-h" onclick="toggleAlloc(${i})">
+        <i data-lucide="chevron-down" class="chev"></i>
+        <span class="alloc-t">New allocation</span>
+        ${allocs.length>1?`<button class="alloc-rm" onclick="event.stopPropagation();rmAlloc(${i})"><i data-lucide="trash-2"></i></button>`:''}
+      </div>
+      <div class="alloc-b">
+        <div class="row-dt" style="margin-bottom:16px">
+          <div class="fld"><label class="lb"><span class="rq">*</span>Dates</label>
+            <input class="in" type="date" value="${a.date}" onchange="allocs[${i}].date=this.value"></div>
+          <div class="fld"><label class="lb"><span class="rq">*</span>Time requested</label>
+            <input class="in" value="${a.hrs}" onchange="allocs[${i}].hrs=this.value"></div>
+          <div class="bill"><label class="lb">Billable?</label>
+            <button class="cb${a.billable?' on':''}" onclick="allocs[${i}].billable=!allocs[${i}].billable;renderAllocs()"><i data-lucide="check"></i></button></div>
+        </div>
+        <div class="g2">
+          ${FIELDS.map(([l,ph,t,req])=>`<div class="fld">
+            <label class="lb">${req?'<span class="rq">*</span>':''}${l}</label>
+            ${t==='se'?`<select class="se"><option>${ph}</option></select>`:`<input class="in" placeholder="${ph}">`}
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
   lucide.createIcons();
 }
+function addAlloc(){allocs.push({date:'',hrs:'8h 00m',billable:true});renderAllocs()}
+function rmAlloc(i){allocs.splice(i,1);renderAllocs()}
+function toggleAlloc(i){document.getElementById('al-'+i).classList.toggle('closed')}
 
-/* The booking's end date is the sensible default for "must stay valid through" */
-function syncValidThrough() {
-  const vt = document.getElementById('a-vt');
-  if (vt && !vt.dataset.touched) vt.value = document.getElementById('f-to').value;
-}
-
-function setKind(k) {
-  kind = k;
-  document.getElementById('sg-cert').classList.toggle('on', k === 'cert');
-  document.getElementById('sg-skill').classList.toggle('on', k === 'skill');
-  document.getElementById('pane-cert').style.display  = k === 'cert'  ? 'flex' : 'none';
-  document.getElementById('pane-skill').style.display = k === 'skill' ? 'flex' : 'none';
-}
-
-function showAdd() {
-  const usedC = new Set(draft.filter(r => r.kind === 'cert').map(r => r.name));
-  const usedS = new Set(draft.filter(r => r.kind === 'skill').map(r => r.name));
-  const freeC = LIB.filter(n => !usedC.has(n));
-  const freeS = SKILLS.filter(n => !usedS.has(n));
-
-  const c = document.getElementById('a-cert');
-  c.innerHTML = freeC.length
-    ? '<option value="">Select a certificate…</option>' + freeC.map(n => `<option>${n}</option>`).join('')
-    : '<option value="">Every certificate is already required</option>';
-  c.classList.remove('err');
-
-  const s = document.getElementById('a-skill');
-  s.innerHTML = freeS.length
-    ? '<option value="">Select a skill…</option>' + freeS.map(n => `<option>${n}</option>`).join('')
-    : '<option value="">Every skill is already required</option>';
-  s.classList.remove('err');
-
-  const vt = document.getElementById('a-vt');
-  delete vt.dataset.touched;
-  vt.value = document.getElementById('f-to').value;
-  vt.onchange = () => { vt.dataset.touched = '1'; };
-
-  setKind('cert');
-  document.getElementById('addbox').classList.add('on');
-  document.getElementById('add-btn').style.display = 'none';
-}
-
-function hideAdd() {
-  document.getElementById('addbox').classList.remove('on');
-  document.getElementById('add-btn').style.display = '';
-}
-
-function addReq() {
-  if (kind === 'cert') {
-    const sel = document.getElementById('a-cert');
-    if (!sel.value) { sel.classList.add('err'); sel.focus(); return; }
-    draft.push({ kind:'cert', name:sel.value, validThrough:document.getElementById('a-vt').value || null });
-  } else {
-    const sel = document.getElementById('a-skill');
-    if (!sel.value) { sel.classList.add('err'); sel.focus(); return; }
-    draft.push({ kind:'skill', name:sel.value, level:document.getElementById('a-lvl').value });
-  }
-  hideAdd();
-  renderDraft();
-}
-
-function rmReq(i) { draft.splice(i, 1); renderDraft(); }
-
-function openDrawer() {
-  draft = [];
-  hideAdd();
-  renderDraft();
+/* ── Modal ── */
+function openModal(){
+  allocs=[{date:'',hrs:'8h 00m',billable:true}];
+  chosen=[];
+  renderAllocs(); renderChips(); onProject();
   document.getElementById('ovl').classList.add('on');
-  document.getElementById('dr').classList.add('on');
+}
+function closeModal(){document.getElementById('ovl').classList.remove('on')}
+
+function renderChips(){
+  const box=document.getElementById('req-chips');
+  box.innerHTML=chosen.length?chosen.map(chip).join(''):'';
+  lucide.createIcons();
 }
 
-function closeDrawer() {
-  document.getElementById('ovl').classList.remove('on');
-  document.getElementById('dr').classList.remove('on');
-  hideAdd();
+/* ── Picker ── */
+function openPicker(){
+  picked={};
+  chosen.forEach(c=>{picked[c.name]=c.kind==='cert'
+    ?{kind:'cert',validThrough:c.validThrough}:{kind:'skill',level:c.level}});
+  activeSec='certs';
+  renderNav(); renderList(); renderSel();
+  document.getElementById('povl').classList.add('on');
+}
+function closePicker(){document.getElementById('povl').classList.remove('on')}
+
+function renderNav(){
+  document.getElementById('p-nav').innerHTML=SECTIONS.map(s=>
+    `<div class="p-grp">${s.grp}</div>`+s.items.map(it=>
+      `<button class="p-item${it.id===activeSec?' on':''}" onclick="activeSec='${it.id}';renderNav();renderList()">
+        <i data-lucide="${it.icon}" class="ico"></i>${it.label}<span class="n">${it.rows.length}</span>
+      </button>`).join('')).join('');
+  lucide.createIcons();
 }
 
-function submitReq() {
-  const n = REQS.length ? Math.max(...REQS.map(r => parseInt(r.id.slice(3)))) + 1 : 101;
+function renderList(){
+  const it=byId(activeSec);
+  const q=(document.getElementById('p-q').value||'').toLowerCase();
+  document.getElementById('p-list-h').textContent=it.label;
+  const rows=it.rows.filter(([n])=>!q||n.toLowerCase().includes(q));
+  document.getElementById('p-rows').innerHTML=rows.map(([n,src])=>{
+    const p=picked[n], on=!!p;
+    const cond=it.isCert
+      ? `<div class="p-cond"><label>Must stay valid through</label>
+           <input type="date" value="${(p&&p.validThrough)||''}" onclick="event.stopPropagation()"
+             onchange="picked['${n.replace(/'/g,"\\'")}'].validThrough=this.value;renderSel()"></div>`
+      : `<div class="p-cond"><label>Minimum level</label>
+           <select onclick="event.stopPropagation()" onchange="picked['${n.replace(/'/g,"\\'")}'].level=this.value;renderSel()">
+             ${['Beginner','Intermediate','Advanced','Expert'].map(l=>`<option${p&&p.level===l?' selected':''}>${l}</option>`).join('')}
+           </select></div>`;
+    return `<div class="p-row${on?' sel':''}" onclick="toggleRow('${n.replace(/'/g,"\\'")}')">
+      <button class="cb${on?' on':''}"><i data-lucide="check"></i></button>
+      <div style="flex:1">
+        <div class="p-row-nm">${n}</div>
+        ${src?`<div class="p-row-sub">${src}</div>`:''}
+        ${cond}
+      </div>
+    </div>`}).join('');
+  lucide.createIcons();
+}
+
+function toggleRow(n){
+  const it=byId(activeSec);
+  if(picked[n]) delete picked[n];
+  else picked[n]=it.isCert
+    ? {kind:'cert',validThrough:defaultValidThrough()}
+    : {kind:'skill',level:'Advanced'};
+  renderList(); renderSel();
+}
+
+/* The last allocation date is the sensible default for a validity window */
+function defaultValidThrough(){
+  const d=allocs.map(a=>a.date).filter(Boolean).sort();
+  return d.length?d[d.length-1]:'';
+}
+
+function renderSel(){
+  const keys=Object.keys(picked);
+  document.getElementById('p-n').textContent=keys.length;
+  document.getElementById('p-empty').style.display=keys.length?'none':'';
+  document.getElementById('p-ft-l').innerHTML=keys.length
+    ? `Narrowing by <b>${keys.length}</b> condition${keys.length>1?'s':''}`
+    : 'Showing <b>all</b> candidates · add filters to narrow';
+  document.getElementById('p-sel-l').innerHTML=keys.map(n=>{
+    const p=picked[n], isC=p.kind==='cert';
+    const line=isC
+      ? (p.validThrough?`Valid through ${fmt(p.validThrough)}`:'Held — no expiry condition')
+      : `At least ${p.level}`;
+    return `<div class="p-sel-i ${isC?'cert':'skill'}">
+      <i data-lucide="${isC?'award':'lightbulb'}"></i>
+      <div><b>${isC?(SHORT[n]||n):n}</b><span>${line}</span></div>
+    </div>`}).join('');
+  lucide.createIcons();
+}
+
+function applyPicker(){
+  chosen=Object.keys(picked).map(n=>picked[n].kind==='cert'
+    ?{kind:'cert',name:n,validThrough:picked[n].validThrough||null}
+    :{kind:'skill',name:n,level:picked[n].level});
+  closePicker(); renderChips();
+}
+
+function submitReq(){
+  const n=REQS.length?Math.max(...REQS.map(r=>parseInt(r.id.slice(3))))+1:101;
+  const ds=allocs.map(a=>a.date).filter(Boolean).sort();
   REQS.unshift({
-    id: 'RR-' + n,
-    proj: document.getElementById('f-proj').value,
-    role: document.getElementById('f-role').value,
-    from: document.getElementById('f-from').value,
-    to:   document.getElementById('f-to').value,
-    hrs:  document.getElementById('f-hrs').value,
+    id:'RR-'+n,
+    proj:document.getElementById('f-proj').value,
+    role:document.getElementById('f-role').value,
+    from:ds[0]||'2026-12-01', to:ds[ds.length-1]||'2027-03-31',
+    hrs:allocs[0]?allocs[0].hrs:'8h 00m',
     status:'pending', by:'Vivek S', byI:'VS', byC:'#8b5cf6',
-    reqs: draft.slice(),
+    reqs:chosen.slice(),
   });
-  closeDrawer();
-  render();
+  closeModal(); render();
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('povl').classList.contains('on'))closePicker();
+  else closeModal();
+});
 
-render();
-lucide.createIcons();
+render(); lucide.createIcons();
 </script>
 </body>
 </html>
