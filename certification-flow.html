@@ -82,7 +82,13 @@ function go(id, replace) {
   document.getElementById('step').textContent = s.step;
   ext.href = s.src;
   // Re-pointing the iframe at the page it already shows would throw away its state
-  if (frame.dataset.src !== s.src) { frame.dataset.src = s.src; frame.src = s.src; }
+  if (frame.dataset.src !== s.src) {
+    frame.dataset.src = s.src;
+    // GitHub Pages serves these with cache-control: max-age=600, so a freshly
+    // updated screen can sit stale in the browser for ten minutes. These pages
+    // change constantly, so bypass that rather than ship a stale prototype.
+    frame.src = s.src + '?t=' + Date.now();
+  }
   if (location.hash.slice(1) !== s.id) {
     if (replace) history.replaceState(null, '', '#' + s.id);
     else location.hash = s.id;
