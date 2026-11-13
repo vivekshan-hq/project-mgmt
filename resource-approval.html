@@ -137,8 +137,6 @@ body{font-family:var(--font-sans);font-size:14px;line-height:1.5;background:var(
 .empty-bar{padding:8px 12px 0 32px}
 .empty-bar-inner{height:20px;background:var(--muted);border-radius:4px}
 .cert-valid{background:var(--green-bg) !important;color:var(--green-dk) !important;border-color:oklch(0.72 0.14 155) !important}
-.cert-warn{background:var(--warn-bg) !important;color:var(--warn) !important;border-color:#fcd34d !important}
-.cert-miss{background:var(--muted) !important;color:var(--muted-foreground) !important;border-color:var(--border) !important}
 .row-sel td.sc-td{background:var(--blue-bg) !important}
 .tm-av-wrap{display:flex;align-items:center;gap:8px}
 .role-cell{display:flex;align-items:center;gap:5px;color:var(--muted-foreground)}
@@ -625,35 +623,34 @@ function renderMatches() {
     skillColHdr.style.display = 'none';
   }
 
-  let shown = 0;
-  const rows = MEMBERS.map((m, i) => {
-    const certStatus = certFilter ? memberCertStatus(m, certFilter) : null;
-    const hide = certStatus === 'missing' || certStatus === 'below-level';
-    if (!hide) shown++;
+  // The list is matches only. Anyone failing a condition is not rendered at all,
+  // so every row shown satisfies every applied filter.
+  const matches = MEMBERS
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => !certFilter || memberCertStatus(m, certFilter) === 'valid');
+
+  // A member who stops matching must not stay selected and approvable
+  if (selectedMember >= 0 && !matches.some(x => x.i === selectedMember)) {
+    selectedMember = -1;
+    const btn = document.getElementById('approve-btn');
+    btn.classList.remove('sc-btn--default', 'ready');
+    btn.classList.add('sc-btn--outline');
+  }
+
+  document.getElementById('matches-tbody').innerHTML = matches.map(({ m, i }) => {
     const selCls = selectedMember === i ? ' row-sel' : '';
-    const opacity = hide ? 'opacity:.28;pointer-events:none' : '';
 
     let extraTd = '';
     if (certFilter) {
-      if (certStatus === 'valid') {
-        const rec = m.certRecords.find(c => c.name === certFilter.value);
-        const expTxt = rec && rec.expiry ? `exp. ${fmtDate(rec.expiry)}` : 'Permanent';
-        const lvTxt = rec && rec.level ? `${rec.level} · ` : '';
-        extraTd = `<td class="sc-td"><span class="sc-badge cert-valid">✓ Valid</span> <span style="font-size:11px;color:var(--muted-foreground)">${lvTxt}${expTxt}</span></td>`;
-      } else if (certStatus === 'expiring-early') {
-        const rec = m.certRecords.find(c => c.name === certFilter.value);
-        extraTd = `<td class="sc-td"><span class="sc-badge cert-warn">⚠ Exp. ${fmtDate(rec.expiry)}</span></td>`;
-      } else if (certStatus === 'below-level') {
-        const rec = m.certRecords.find(c => c.name === certFilter.value);
-        extraTd = `<td class="sc-td"><span class="sc-badge cert-warn">↓ ${rec.level || 'No level'}</span> <span style="font-size:11px;color:var(--muted-foreground)">below ${certFilter.certLevel}</span></td>`;
-      } else {
-        extraTd = `<td class="sc-td"><span class="sc-badge cert-miss">— Missing</span></td>`;
-      }
+      const rec = m.certRecords.find(c => c.name === certFilter.value);
+      const expTxt = rec && rec.expiry ? `exp. ${fmtDate(rec.expiry)}` : 'Permanent';
+      const lvTxt  = rec && rec.level  ? `${rec.level} · ` : '';
+      extraTd = `<td class="sc-td"><span class="sc-badge cert-valid">✓ Valid</span> <span style="font-size:11px;color:var(--muted-foreground)">${lvTxt}${expTxt}</span></td>`;
     } else if (skillFilter) {
       extraTd = `<td class="sc-td" style="color:var(--muted-foreground)">—</td>`;
     }
 
-    return `<tr class="sc-tr${selCls}" style="${opacity}" onclick="${hide ? '' : 'selectMember('+i+')'}">
+    return `<tr class="sc-tr${selCls}" onclick="selectMember(${i})">
       <td class="sc-td"><div class="tm-av-wrap">
         <span class="sc-avatar" style="background:${m.color};font-size:9px;font-weight:700;width:26px;height:26px">${m.initials}</span>
         ${m.name}
@@ -667,8 +664,7 @@ function renderMatches() {
     </tr>`;
   }).join('');
 
-  document.getElementById('matches-tbody').innerHTML = rows;
-  const count = appliedFilters.length > 0 ? shown : MEMBERS.length;
+  const count = matches.length;
   document.getElementById('matches-count').textContent = `Showing ${count} relevant match${count === 1 ? '' : 'es'}`;
   document.getElementById('empty-state').style.display = count === 0 ? 'block' : 'none';
 }
