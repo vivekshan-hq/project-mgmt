@@ -131,6 +131,7 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .cr-rm{border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:3px;border-radius:5px}
 .cr-rm:hover{color:var(--destructive);background:var(--muted)}
 .cr-rm svg{width:14px;height:14px}
+.lvl-chip{display:inline-block;padding:1px 7px;border-radius:9999px;font-size:10.5px;font-weight:500;background:#EEF2FF;color:#4338ca;border:1px solid #C7D2FE;margin-left:7px;white-space:nowrap}
 .empty-td{text-align:center;color:var(--muted-foreground);padding:26px 12px!important;font-size:13px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:11.5px;font-weight:500;border:1px solid}
 .c-ok{background:#defbe6;color:#0e6027;border-color:#9ef0b0}
@@ -289,7 +290,12 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
     <div class="addbox" id="addbox">
       <div class="fld">
         <label class="lb" for="a-cert">Certificate <span class="rq">*</span></label>
-        <select class="se" id="a-cert" onchange="this.classList.remove('err')"></select>
+        <select class="se" id="a-cert" onchange="onCertPick()"></select>
+      </div>
+      <div class="fld" id="lvl-fld" style="display:none">
+        <label class="lb" for="a-lvl">Level <span class="rq">*</span></label>
+        <select class="se" id="a-lvl"></select>
+        <div class="hint">This certificate is issued at more than one level.</div>
       </div>
       <div class="two">
         <div class="fld">
@@ -352,12 +358,14 @@ document.getElementById('sb-nav').innerHTML = NAV.map(([grp, items]) =>
 
 /* Certificate library */
 const LIB = [
-  'AWS Solutions Architect Professional',
-  'Project Management Professional (PMP)',
-  'Salesforce Certified Administrator',
-  'Azure Fundamentals (AZ-900)',
-  'Cisco CCNA',
+  { name:'AWS Solutions Architect Professional',  levels:[] },
+  { name:'Project Management Professional (PMP)', levels:[] },
+  { name:'Salesforce Certified Administrator',    levels:[] },
+  { name:'Azure Fundamentals (AZ-900)',           levels:[] },
+  { name:'Cisco CCNA',                            levels:[] },
+  { name:'ITIL Service Management',               levels:['Foundation','Practitioner','Intermediate','Expert'] },
 ];
+const libCert = name => LIB.find(c => c.name === name);
 
 const RC = {
   'Engineer':['#FCE7F3','#9D174D'], 'Finance Team':['#DCFCE7','#166534'],
@@ -371,7 +379,9 @@ const RC = {
 /* Members — the certificate holders match resource-approval.html so the
    prototype tells one story end to end. */
 const M = [
-  { n:'aathi', e:'aathi@rocketlane.com', r:'Engineer', p:'Account Admin', ai:true, rec:false, certs:[] },
+  { n:'aathi', e:'aathi@rocketlane.com', r:'Engineer', p:'Account Admin', ai:true, rec:false, certs:[
+      { name:'ITIL Service Management', level:'Practitioner', issued:'2025-04-10', expiry:'2028-04-10' },
+  ]},
   { n:'abhishek reddy L', e:'abhishek@rocketlane.com', r:'Account Executive', p:'Account Admin', ai:true, rec:false, certs:[] },
   { n:'Adithya Gopi', e:'adithya@rocketlane.com', r:'Implementation Consultant', p:'Account Admin', ai:true, rec:true, certs:[] },
   { n:'aishwaryarv', e:'aishwaryarv@rocketlane.com', r:'Consultant', p:'Account Admin', ai:true, rec:true, certs:[] },
@@ -480,7 +490,7 @@ function renderCerts() {
   el.innerHTML = m.certs.map((c, j) => {
     const s = status(c.expiry);
     return `<tr>
-      <td><div class="ct-nm"><span class="ct-ic"><i data-lucide="award"></i></span>${c.name}</div></td>
+      <td><div class="ct-nm"><span class="ct-ic"><i data-lucide="award"></i></span>${c.name}${c.level ? `<span class="lvl-chip">${c.level}</span>` : ''}</div></td>
       <td class="ct-dt">${fmt(c.issued) || '<span class="ct-never">—</span>'}</td>
       <td class="ct-dt">${fmt(c.expiry) || '<span class="ct-never">Never</span>'}</td>
       <td><span class="chip ${CLS[s]}"><i data-lucide="${ICON[s]}"></i>${LBL[s]}</span></td>
@@ -492,18 +502,34 @@ function renderCerts() {
 
 function showAdd() {
   const held = new Set(M[cur].certs.map(c => c.name));
-  const free = LIB.filter(n => !held.has(n));
+  const free = LIB.filter(c => !held.has(c.name));
   const sel = document.getElementById('a-cert');
   sel.innerHTML = free.length
-    ? '<option value="">Select a certificate…</option>' + free.map(n => `<option>${n}</option>`).join('')
+    ? '<option value="">Select a certificate…</option>' + free.map(c => `<option>${c.name}</option>`).join('')
     : '<option value="">All library certificates are already assigned</option>';
   sel.classList.remove('err');
+  onCertPick();
   document.getElementById('a-iss').value = '';
   document.getElementById('a-exp').value = '';
   document.getElementById('a-warn').classList.remove('on');
   document.getElementById('addbox').classList.add('on');
   document.getElementById('add-btn').style.display = 'none';
 }
+/* Only laddered certificates ask for a level */
+function onCertPick() {
+  const sel = document.getElementById('a-cert');
+  sel.classList.remove('err');
+  const c = libCert(sel.value), fld = document.getElementById('lvl-fld');
+  const lv = document.getElementById('a-lvl');
+  if (c && c.levels.length) {
+    lv.innerHTML = c.levels.map(l => `<option>${l}</option>`).join('');
+    fld.style.display = '';
+  } else {
+    lv.innerHTML = '';
+    fld.style.display = 'none';
+  }
+}
+
 function hideAdd() {
   document.getElementById('addbox').classList.remove('on');
   document.getElementById('add-btn').style.display = '';
@@ -521,8 +547,10 @@ function addCert() {
   const sel = document.getElementById('a-cert');
   if (!sel.value) { sel.classList.add('err'); sel.focus(); return; }
   if (!checkDates()) return;
+  const lib = libCert(sel.value);
   M[cur].certs.push({
     name: sel.value,
+    level: (lib && lib.levels.length) ? document.getElementById('a-lvl').value : null,
     issued: document.getElementById('a-iss').value || null,
     expiry: document.getElementById('a-exp').value || null,
   });
