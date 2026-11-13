@@ -1320,8 +1320,14 @@ const SK_GROUPS = [
   {
     id:'skills', label:'Skills', icon:'⚡', children:[
       { id:'languages', label:'Languages' },
-      { id:'certifications', label:'Certifications', isCert:true },
       { id:'misc', label:'Miscellaneous' },
+    ]
+  },
+  // Certifications are not a kind of skill: they carry a source and
+  // per-member issue/expiry dates, so they get their own top-level section.
+  {
+    id:'certs-grp', label:'Certifications', icon:'🏅', children:[
+      { id:'certifications', label:'All certifications', isCert:true },
     ]
   },
   {
