@@ -271,10 +271,10 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
       <button class="lnk" onclick="addAlloc()"><i data-lucide="plus"></i>Add allocation</button>
 
       <div class="sec-h" style="margin-bottom:10px">
-        <div class="sec-t">Skills/Fields</div>
+        <div class="sec-t">Skills/Fields/Certifications</div>
+        <button class="lnk" onclick="openPicker()"><i data-lucide="plus"></i>Add</button>
       </div>
       <div class="chipbox" id="req-chips"></div>
-      <button class="lnk" onclick="openPicker()"><i data-lucide="plus"></i>Add skills</button>
     </div>
 
     <div class="m-ft">
@@ -444,7 +444,9 @@ function closeModal(){document.getElementById('ovl').classList.remove('on')}
 
 function renderChips(){
   const box=document.getElementById('req-chips');
-  box.innerHTML=chosen.length?chosen.map(chip).join(''):'';
+  // The Add control now lives in the heading, so say what the empty section is for
+  box.innerHTML=chosen.length?chosen.map(chip).join('')
+    :'<span class="muted" style="font-size:13px">No skills or certifications added yet.</span>';
   lucide.createIcons();
 }
 
