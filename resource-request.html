@@ -116,14 +116,14 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 /* ── Add skills picker ── */
 .povl{position:fixed;inset:0;background:rgb(0 0 0 / .45);display:none;align-items:center;justify-content:center;z-index:950;padding:24px}
 .povl.on{display:flex}
-.pmodal{background:var(--background);border-radius:14px;width:1000px;max-width:96vw;height:600px;display:flex;flex-direction:column;box-shadow:var(--shadow-2xl);overflow:hidden}
+.pmodal{background:var(--background);border-radius:14px;width:1140px;max-width:96vw;height:620px;display:flex;flex-direction:column;box-shadow:var(--shadow-2xl);overflow:hidden}
 .p-hd{display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
 .p-ttl{font-size:16px;font-weight:600;white-space:nowrap}
 .p-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--muted);border-radius:var(--radius-md);padding:0 12px;height:38px}
 .p-search svg{width:15px;height:15px;color:var(--muted-foreground);flex-shrink:0}
 .p-search input{flex:1;border:none;background:transparent;outline:none;font-family:inherit;font-size:14px;color:var(--foreground)}
 .p-bd{flex:1;display:flex;overflow:hidden}
-.p-nav{width:250px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:14px 0}
+.p-nav{width:240px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:14px 0}
 .p-grp{font-size:11px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.06em;padding:12px 20px 6px}
 .p-item{display:flex;align-items:center;gap:9px;padding:8px 20px;font-size:14px;color:var(--foreground);cursor:pointer;border:none;background:none;width:100%;font-family:inherit;text-align:left}
 .p-item:hover{background:var(--muted)}
@@ -139,11 +139,12 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .p-row-nm{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .p-row-sub{font-size:12.5px;color:var(--muted-foreground);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Condition reads as a control but never opens — it is always "is atleast" */
-.p-op{height:34px;min-width:132px;padding:0 11px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);color:var(--foreground);font-size:13px;display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;cursor:default}
+.p-op{height:34px;min-width:112px;padding:0 11px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);color:var(--foreground);font-size:13px;display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;cursor:default}
 .p-op i{width:13px;height:13px;margin-left:auto;color:var(--muted-foreground);opacity:.6}
-.p-val{height:34px;min-width:152px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13px;color:var(--foreground);outline:none;flex-shrink:0;cursor:pointer}
+.p-val{height:34px;min-width:136px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13px;color:var(--foreground);outline:none;flex-shrink:0;cursor:pointer}
 .p-val:focus{border-color:var(--ring)}
 .p-val:disabled{color:var(--muted-foreground);background:var(--background);cursor:default}
+.p-val-none{min-width:136px;flex-shrink:0}
 /* Validity sits under the certificate it qualifies, indented past the checkbox */
 .p-sub{display:flex;align-items:center;gap:9px;padding:9px 20px 11px 52px;border-bottom:1px solid var(--border);background:color-mix(in oklab,var(--muted) 35%,transparent)}
 .p-sub label{font-size:12.5px;color:var(--muted-foreground);white-space:nowrap}
@@ -151,7 +152,7 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .p-sub .cb svg{width:10px;height:10px}
 .p-sub .till{font-size:12.5px;font-weight:500;color:var(--foreground);white-space:nowrap}
 .p-sub input,.p-sub select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12.5px;background:var(--background);color:var(--foreground);outline:none}
-.p-sel{width:280px;flex-shrink:0;padding:16px 18px;overflow-y:auto}
+.p-sel{width:260px;flex-shrink:0;padding:16px 18px;overflow-y:auto}
 .p-sel-h{font-size:14.5px;font-weight:600}
 .p-sel-d{font-size:13px;color:var(--muted-foreground);line-height:1.5;margin-top:6px}
 .p-sel-e{font-size:13px;color:var(--muted-foreground);font-style:italic;margin-top:14px}
@@ -497,11 +498,12 @@ function renderList(){
     const esc=n.replace(/'/g,"\\'");
 
     // One row shape for everything: checkbox · name · condition · value.
-    // Certificates without a ladder have nothing to grade, so they read "is held".
+    // A certificate with no ladder is simply held or not, so it reads "is true"
+    // and offers no value to pick.
     const levels = it.isCert ? (lv||[]) : SKILL_LEVELS;
     const graded = levels.length > 0;
     const value = !graded
-      ? `<select class="p-val" disabled><option>—</option></select>`
+      ? `<span class="p-val-none"></span>`
       : on
         ? `<select class="p-val" onclick="event.stopPropagation()"
              onchange="picked['${esc}'].level=this.value;renderSel()">
@@ -515,7 +517,7 @@ function renderList(){
         <div class="p-row-nm" title="${n}">${n}</div>
         ${src?`<div class="p-row-sub">${src}</div>`:''}
       </div>
-      <span class="p-op">${graded?'is atleast':'is held'}<i data-lucide="chevron-down"></i></span>
+      <span class="p-op">${graded?'is atleast':'is true'}<i data-lucide="chevron-down"></i></span>
       ${value}
     </div>`;
 
