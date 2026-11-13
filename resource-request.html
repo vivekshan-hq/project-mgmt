@@ -518,7 +518,6 @@ function toggleRow(n){
 
 /* Validity can track the project's own dates instead of a hand-typed one */
 const TILL=[['project','Project end date'],['budget','Budget end date'],['specific','Specific date']];
-const tillLabel=m=>(TILL.find(t=>t[0]===m)||[,''])[1];
 function projDates(){
   const o=document.getElementById('f-proj').selectedOptions[0];
   return {project:o.dataset.pend,budget:o.dataset.bend};
@@ -543,7 +542,7 @@ function renderSel(){
     const p=picked[n], isC=p.kind==='cert';
     const till=isC?resolveTill(p):'';
     const line=isC
-      ? (till?`Valid till ${fmt(till)} · ${tillLabel(p.mode)}`:`${tillLabel(p.mode)} — not set`)
+      ? (till?`Valid till ${fmt(till)}`:'Valid till — not set')
       : `At least ${p.level}`;
     return `<div class="p-sel-i ${isC?'cert':'skill'}">
       <i data-lucide="${isC?'award':'lightbulb'}"></i>
