@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team members · Settings</title>
+<link rel="stylesheet" href="ds/styles.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--foreground);background:var(--background);height:100vh;overflow:hidden}
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* Rail */
+.rail{width:48px;background:oklch(0.145 0 0);display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;flex-shrink:0;gap:2px}
+.rail-logo{width:30px;height:30px;border-radius:8px;background:#2563eb;display:grid;place-items:center;margin-bottom:8px;color:#fff;font-weight:700;font-size:13px}
+.rail-i{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:oklch(0.5 0 0);cursor:pointer;border:none;background:transparent}
+.rail-i:hover{background:oklch(0.22 0 0);color:oklch(0.85 0 0)}
+.rail-i.on{background:oklch(0.26 0 0);color:#fff}
+.rail-i svg{width:16px;height:16px}
+.rail-sp{flex:1}
+.rail-av{width:26px;height:26px;border-radius:50%;background:oklch(0.55 0.18 290);color:#fff;font-size:9px;font-weight:600;display:grid;place-items:center;margin-top:6px}
+
+/* Settings sidebar */
+.sb{width:300px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sb-hd{padding:18px 20px 12px}
+.sb-ttl{font-size:21px;font-weight:600;letter-spacing:-0.02em}
+.sb-s{margin:0 20px 10px}
+.sb-s input{width:100%;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13.5px;outline:none;color:var(--foreground)}
+.sb-s input:focus{border-color:var(--ring)}
+.sb-nav{flex:1;overflow-y:auto;padding:4px 12px 16px}
+.grp{font-size:12px;font-weight:600;color:var(--muted-foreground);padding:14px 8px 5px}
+.ni{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;cursor:pointer;color:var(--foreground);font-size:13.5px;text-decoration:none}
+.ni:hover{background:var(--muted)}
+.ni.on{background:#EEF0FF;font-weight:500}
+.ni.sub{padding-left:22px}
+.ni-ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;color:#fff}
+.ni-ic svg{width:12px;height:12px}
+.ni-ar{margin-left:auto;color:var(--muted-foreground);display:none}
+.ni.on .ni-ar{display:block}
+.ni-ar svg{width:14px;height:14px}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.pg-hd{padding:20px 26px 0;flex-shrink:0}
+.pg-ttl{display:flex;align-items:center;gap:9px;font-size:21px;font-weight:600;letter-spacing:-0.02em}
+.pg-ttl svg{width:19px;height:19px;color:var(--muted-foreground)}
+.body{flex:1;overflow:auto;padding:16px 26px 26px}
+
+/* License cards */
+.lic{display:grid;grid-template-columns:1fr 1.25fr 1fr;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:18px}
+.lc{padding:14px 18px;border-right:1px solid var(--border)}
+.lc:last-child{border-right:none;padding:0}
+.lc-lb{font-size:13px;color:var(--muted-foreground)}
+.lc-n{font-size:21px;font-weight:600;margin-top:4px}
+.lc-cap{font-size:12px;color:var(--muted-foreground);margin-top:22px}
+.lc-row{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border)}
+.lc-row:last-child{border-bottom:none}
+.lc-row b{font-size:15px;font-weight:600}
+.lc-top{display:flex;align-items:baseline;justify-content:space-between}
+.lc-top b{font-size:21px;font-weight:600}
+
+/* Tabs + actions */
+.bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.tabs{display:flex;gap:2px;background:var(--muted);border-radius:var(--radius-md);padding:3px}
+.tb{padding:5px 12px;border:none;background:transparent;border-radius:6px;font-family:inherit;font-size:13.5px;color:var(--muted-foreground);cursor:pointer}
+.tb.on{background:var(--background);color:#2563eb;font-weight:500;box-shadow:var(--shadow-sm)}
+.ic-btn{width:32px;height:32px;border:none;background:transparent;border-radius:7px;cursor:pointer;color:var(--muted-foreground);display:grid;place-items:center}
+.ic-btn:hover{background:var(--muted)}
+.ic-btn svg{width:16px;height:16px}
+
+/* Table */
+.tw{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:visible}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:13px;font-weight:500;color:var(--foreground);padding:11px 14px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);white-space:nowrap}
+th:last-child{border-right:none}
+td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
+.who{display:flex;align-items:center;gap:9px}
+.av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0;background:#F87171}
+.muted{color:var(--muted-foreground)}
+.rchip{display:inline-block;padding:3px 9px;border-radius:6px;font-size:12.5px;font-weight:500}
+.cb{width:17px;height:17px;border:1.5px solid var(--border-strong);border-radius:4px;background:var(--background);cursor:pointer;display:grid;place-items:center;padding:0}
+.cb.on{background:#2563eb;border-color:#2563eb}
+.cb svg{width:11px;height:11px;color:#fff;display:none}
+.cb.on svg{display:block}
+.w-cb{width:160px}
+.w-act{width:46px}
+.dots{width:28px;height:28px;border:none;background:transparent;border-radius:6px;cursor:pointer;color:var(--muted-foreground);display:grid;place-items:center}
+.dots:hover{background:var(--muted)}
+.dots svg{width:15px;height:15px}
+.cert-dot{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:#C2410C;margin-left:7px}
+.cert-dot svg{width:11px;height:11px}
+
+/* Row menu */
+.menu{position:fixed;z-index:1200;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:6px;min-width:210px;display:none}
+.menu.on{display:block}
+.mi{display:flex;align-items:center;gap:9px;width:100%;padding:9px 11px;border:none;background:transparent;border-radius:7px;font-family:inherit;font-size:14px;color:var(--foreground);cursor:pointer;text-align:left}
+.mi:hover{background:var(--muted)}
+.mi svg{width:15px;height:15px;color:var(--muted-foreground)}
+.mi.danger{color:var(--destructive)}
+.mi.danger svg{color:var(--destructive)}
+.msep{height:1px;background:var(--border);margin:5px 0}
+
+/* Drawer */
+.ovl{position:fixed;inset:0;background:rgb(0 0 0 / .35);opacity:0;pointer-events:none;transition:opacity .22s;z-index:900}
+.ovl.on{opacity:1;pointer-events:auto}
+.dr{position:fixed;top:0;right:0;bottom:0;width:620px;max-width:95vw;background:var(--background);border-left:1px solid var(--border);box-shadow:var(--shadow-2xl);transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:901;display:flex;flex-direction:column}
+.dr.on{transform:translateX(0)}
+.dr-hd{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+.dr-av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;color:#fff;background:#F87171;flex-shrink:0}
+.dr-ttl{font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.dr-sub{font-size:13px;color:var(--muted-foreground)}
+.dr-bd{flex:1;overflow-y:auto;padding:18px 22px}
+.dr-ft{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0}
+.sec-lb{font-size:12px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px}
+
+/* Assigned cert rows */
+.cl{display:flex;flex-direction:column;gap:8px}
+.cr{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-md)}
+.cr-ic{width:30px;height:30px;border-radius:7px;background:#FFF7ED;border:1px solid #FED7AA;display:grid;place-items:center;color:#C2410C;flex-shrink:0}
+.cr-ic svg{width:14px;height:14px}
+.cr-bd{flex:1;min-width:0}
+.cr-nm{font-size:13.5px;font-weight:500}
+.cr-dates{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px;font-size:12px;color:var(--muted-foreground)}
+.cr-dates b{font-weight:500;color:var(--foreground)}
+.cr-rm{border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:3px;border-radius:5px;flex-shrink:0}
+.cr-rm:hover{color:var(--destructive);background:var(--muted)}
+.cr-rm svg{width:14px;height:14px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:11.5px;font-weight:500;border:1px solid}
+.c-ok{background:#defbe6;color:#0e6027;border-color:#9ef0b0}
+.c-soon{background:#FEF3C7;color:#92400E;border-color:#fcd34d}
+.c-exp{background:#fff1f1;color:#b91c1c;border-color:#fca5a5}
+.c-none{background:var(--muted);color:var(--muted-foreground);border-color:var(--border)}
+.chip svg{width:10px;height:10px}
+.empty{padding:26px;text-align:center;color:var(--muted-foreground);font-size:13px;border:1px dashed var(--border);border-radius:var(--radius-md)}
+
+/* Add form */
+.addbox{margin-top:16px;border:1px solid var(--border);border-radius:var(--radius-md);padding:15px;display:none;flex-direction:column;gap:14px;background:var(--muted)}
+.addbox.on{display:flex}
+.fld{display:flex;flex-direction:column;gap:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lb{font-size:13px;font-weight:500}
+.rq{color:var(--destructive)}
+.in,.se{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13.5px;color:var(--foreground);outline:none}
+.in:focus,.se:focus{border-color:var(--ring)}
+.err{border-color:var(--destructive)!important}
+.hint{font-size:12px;color:var(--muted-foreground)}
+.warn{font-size:12px;color:#b91c1c;display:none}
+.warn.on{display:block}
+.addrow{display:flex;justify-content:flex-end;gap:8px}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="rail">
+    <div class="rail-logo">A</div>
+    <button class="rail-i"><i data-lucide="search"></i></button>
+    <button class="rail-i"><i data-lucide="bell"></i></button>
+    <button class="rail-i on"><i data-lucide="house"></i></button>
+    <button class="rail-i"><i data-lucide="image"></i></button>
+    <button class="rail-i"><i data-lucide="calendar"></i></button>
+    <button class="rail-i"><i data-lucide="clipboard-check"></i></button>
+    <button class="rail-i"><i data-lucide="list-checks"></i></button>
+    <button class="rail-i"><i data-lucide="users"></i></button>
+    <button class="rail-i"><i data-lucide="layout-grid"></i></button>
+    <button class="rail-i"><i data-lucide="sparkles"></i></button>
+    <div class="rail-sp"></div>
+    <div class="rail-av">VS</div>
+  </nav>
+
+  <aside class="sb">
+    <div class="sb-hd"><div class="sb-ttl">Settings</div></div>
+    <div class="sb-s"><input type="text" placeholder="Search"></div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+  </aside>
+
+  <div class="main">
+    <div class="pg-hd">
+      <div class="pg-ttl"><i data-lucide="users"></i>Team members</div>
+    </div>
+
+    <div class="body">
+      <!-- Licence summary -->
+      <div class="lic">
+        <div class="lc">
+          <div class="lc-lb">Total licenses</div>
+          <div class="lc-n">300</div>
+          <div class="lc-cap">Number of licenses purchased, including add-ons.</div>
+        </div>
+        <div class="lc">
+          <div class="lc-top"><span class="lc-lb">Available user licenses</span><b>209</b></div>
+          <div class="lc-cap" style="margin-top:12px">New licenses will be purchased only when the available licenses are exceeded.</div>
+        </div>
+        <div class="lc">
+          <div class="lc-row"><span class="lc-lb">Used by Acme</span><b>47</b></div>
+          <div class="lc-row"><span class="lc-lb">Used by Partners</span><b>31</b></div>
+          <div class="lc-row"><span class="lc-lb">Used by client partners</span><b>13</b></div>
+        </div>
+      </div>
+
+      <!-- Tabs + actions -->
+      <div class="bar">
+        <div class="tabs">
+          <button class="tb on">Active (458)</button>
+          <button class="tb">Invited (96)</button>
+          <button class="tb">Deactivated (79)</button>
+        </div>
+        <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="height:32px">Filter</button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
+          <button class="ic-btn"><i data-lucide="search"></i></button>
+          <button class="ic-btn"><i data-lucide="upload"></i></button>
+          <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:34px;margin-left:6px">
+            Invite members
+            <i data-lucide="plus" style="width:14px;height:14px"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>Team member (458) <i data-lucide="arrow-up" style="width:12px;height:12px;vertical-align:-1px"></i></th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Permission</th>
+              <th class="w-cb">Record meetings for AI</th>
+              <th class="w-cb">Record</th>
+              <th class="w-act"></th>
+            </tr>
+          </thead>
+          <tbody id="tb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Row menu -->
+<div class="menu" id="menu">
+  <button class="mi" onclick="closeMenu()"><i data-lucide="eye"></i>View Details</button>
+  <button class="mi" onclick="closeMenu()"><i data-lucide="banknote"></i>Manage cost rate</button>
+  <!-- New: certifications for this person -->
+  <button class="mi" onclick="openDrawer()"><i data-lucide="award"></i>Manage Certifications</button>
+  <div class="msep"></div>
+  <button class="mi danger" onclick="closeMenu()"><i data-lucide="user-x"></i>Deactivate</button>
+</div>
+
+<!-- Manage certifications drawer -->
+<div class="ovl" id="ovl" onclick="closeDrawer()"></div>
+<aside class="dr" id="dr" role="dialog" aria-modal="true">
+  <div class="dr-hd">
+    <div class="dr-av" id="d-av"></div>
+    <div style="flex:1">
+      <div class="dr-ttl">Manage certifications</div>
+      <div class="dr-sub" id="d-sub"></div>
+    </div>
+    <button class="sc-btn sc-btn--ghost sc-btn--size-icon" onclick="closeDrawer()"><i data-lucide="x"></i></button>
+  </div>
+
+  <div class="dr-bd">
+    <div class="sec-lb">Assigned certificates</div>
+    <div class="cl" id="d-certs"></div>
+
+    <button class="sc-btn sc-btn--outline sc-btn--size-sm" id="add-btn" style="height:32px;margin-top:16px" onclick="showAdd()">
+      <i data-lucide="plus" style="width:14px;height:14px"></i>
+      Add certification
+    </button>
+
+    <div class="addbox" id="addbox">
+      <div class="fld">
+        <label class="lb" for="a-cert">Certificate <span class="rq">*</span></label>
+        <select class="se" id="a-cert" onchange="this.classList.remove('err')"></select>
+      </div>
+      <div class="two">
+        <div class="fld">
+          <label class="lb" for="a-iss">Issue date</label>
+          <input class="in" type="date" id="a-iss" onchange="checkDates()">
+        </div>
+        <div class="fld">
+          <label class="lb" for="a-exp">Expiry date</label>
+          <input class="in" type="date" id="a-exp" onchange="checkDates()">
+        </div>
+      </div>
+      <div class="warn" id="a-warn">Expiry date is before the issue date.</div>
+      <div class="hint">Leave the expiry blank if this certificate does not expire. These dates belong to this team member, not to the certificate.</div>
+      <div class="addrow">
+        <button class="sc-btn sc-btn--ghost sc-btn--size-sm" style="height:30px" onclick="hideAdd()">Cancel</button>
+        <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:30px" onclick="addCert()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dr-ft">
+    <button class="sc-btn sc-btn--default sc-btn--size-sm" style="height:32px" onclick="closeDrawer()">Done</button>
+  </div>
+</aside>
+
+<script>
+/* Settings nav, rendered from data to keep the markup short */
+const NAV = [
+  ['', [
+    ['New customer portal','monitor','#3b82f6',0],
+    ['Customer portal invite configuration','user-plus','#8b5cf6',1],
+    ['Customer portal theme','palette','#06b6d4',1],
+    ['Embed customer portal','code','#6366f1',1],
+  ]],
+  ['Account', [
+    ['Preferences','settings','#ec4899',0], ['Account addresses','map-pin','#f43f5e',0],
+    ['Holiday calendar','calendar-days','#22c55e',0], ['Out of office','plane','#3b82f6',0],
+    ['Plans & Billing','credit-card','#8b5cf6',0], ['Team members','users','#6366f1',0],
+    ['Skills matrix','grid-3x3','#f59e0b',0], ['Groups','boxes','#14b8a6',0],
+    ['Roles & Placeholders','id-card','#ec4899',0], ['Permissions','lock','#ef4444',0],
+    ['Customer portal configuration','sliders-horizontal','#0ea5e9',0],
+    ['Partners','handshake','#f97316',0], ['Integrations','plug','#64748b',0],
+    ['Vault','shield','#22c55e',0],
+  ]],
+  ['Meeting intelligence', [
+    ['Capture','video','#64748b',0], ['AI Fills','sparkles','#3b82f6',0], ['Meeting signals','activity','#ef4444',0],
+  ]],
+];
+
+document.getElementById('sb-nav').innerHTML = NAV.map(([grp, items]) =>
+  (grp ? `<div class="grp">${grp}</div>` : '') + items.map(([label, icon, color, sub]) => {
+    const on = label === 'Team members';
+    return `<a class="ni${on ? ' on' : ''}${sub ? ' sub' : ''}" href="#">
+      <span class="ni-ic" style="background:${color}"><i data-lucide="${icon}"></i></span>
+      ${label}
+      <span class="ni-ar"><i data-lucide="arrow-right"></i></span>
+    </a>`;
+  }).join('')
+).join('');
+
+/* Certificate library */
+const LIB = [
+  'AWS Solutions Architect Professional',
+  'Project Management Professional (PMP)',
+  'Salesforce Certified Administrator',
+  'Azure Fundamentals (AZ-900)',
+  'Cisco CCNA',
+];
+
+const RC = {
+  'Engineer':['#FCE7F3','#9D174D'], 'Finance Team':['#DCFCE7','#166534'],
+  'Assistant Manager':['#F1F5F9','#334155'], 'Account Executive':['#DBEAFE','#1E40AF'],
+  'Implementation Consultant':['#FFE4E6','#9F1239'], 'Customer Success Engineer':['#FEF3C7','#92400E'],
+  'Implementation Manager':['#DBEAFE','#1E40AF'], 'Consultant':['#FCE7F3','#9D174D'],
+  'Project Manager':['#E0E7FF','#3730A3'], 'Solutions Architect':['#CCFBF1','#115E59'],
+  'Network Engineer':['#F1F5F9','#334155'], 'Business Analyst':['#FEF3C7','#92400E'],
+};
+
+/* Members — the certificate holders match resource-approval.html so the
+   prototype tells one story end to end. */
+const M = [
+  { n:'aathi', e:'aathi@rocketlane.com', r:'Engineer', p:'Account Admin', ai:true, rec:false, certs:[] },
+  { n:'abhishek reddy L', e:'abhishek@rocketlane.com', r:'Account Executive', p:'Account Admin', ai:true, rec:false, certs:[] },
+  { n:'Adithya Gopi', e:'adithya@rocketlane.com', r:'Implementation Consultant', p:'Account Admin', ai:true, rec:true, certs:[] },
+  { n:'aishwaryarv', e:'aishwaryarv@rocketlane.com', r:'Consultant', p:'Account Admin', ai:true, rec:true, certs:[] },
+  { n:'esswarapandian', e:'esswara@rocketlane.com', r:'Solutions Architect', p:'Account Admin', ai:true, rec:false, certs:[
+      { name:'AWS Solutions Architect Professional', issued:'2024-03-12', expiry:'2027-03-12' },
+      { name:'Azure Fundamentals (AZ-900)',          issued:'2023-07-01', expiry:null },
+  ]},
+  { n:'heather Pertel', e:'heather@rocketlane.com', r:'Project Manager', p:'Account Admin', ai:true, rec:false, certs:[
+      { name:'Project Management Professional (PMP)', issued:'2023-11-12', expiry:'2026-11-12' },
+      { name:'Salesforce Certified Administrator',    issued:'2024-06-01', expiry:'2027-06-01' },
+  ]},
+  { n:'Jhonty Rhodes', e:'jhonty@rocketlane.com', r:'Project Manager', p:'Test Access', ai:true, rec:false, certs:[
+      { name:'Project Management Professional (PMP)', issued:'2024-05-01', expiry:'2027-05-01' },
+  ]},
+  { n:'Pav Michalak', e:'pav@rocketlane.com', r:'Network Engineer', p:'Account Admin', ai:true, rec:false, certs:[
+      { name:'AWS Solutions Architect Professional', issued:'2024-01-15', expiry:'2027-01-15' },
+      { name:'Cisco CCNA',                           issued:'2023-12-01', expiry:'2026-12-01' },
+  ]},
+  { n:'V K', e:'vk@rocketlane.com', r:'Project Manager', p:'Account Admin', ai:true, rec:false, certs:[
+      { name:'Project Management Professional (PMP)', issued:'2024-02-20', expiry:'2027-02-20' },
+      { name:'Salesforce Certified Administrator',    issued:'2025-01-01', expiry:'2028-01-01' },
+  ]},
+  { n:'vivekananth1 nm', e:'vivekananth+1@rocketlane.com', r:'Business Analyst', p:'No financials', ai:true, rec:false, certs:[] },
+];
+
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmt = d => { if (!d) return null; const [y,m,dd] = d.split('-'); return `${parseInt(dd)} ${MON[parseInt(m)-1]} ${y}`; };
+
+function status(expiry) {
+  if (!expiry) return 'none';
+  const t = new Date(); t.setHours(0,0,0,0);
+  const days = Math.round((new Date(expiry + 'T00:00:00') - t) / 86400000);
+  return days < 0 ? 'expired' : days <= 90 ? 'soon' : 'valid';
+}
+const CLS  = { valid:'c-ok', soon:'c-soon', expired:'c-exp', none:'c-none' };
+const ICON = { valid:'check', soon:'triangle-alert', expired:'circle-x', none:'infinity' };
+const LBL  = { valid:'Valid', soon:'Expiring soon', expired:'Expired', none:'No expiry' };
+
+const initials = n => n.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+let cur = -1;
+
+function render() {
+  document.getElementById('tb').innerHTML = M.map((m, i) => {
+    const [bg, fg] = RC[m.r] || ['#F1F5F9','#334155'];
+    // Surface a problem certificate on the row itself
+    const bad = m.certs.find(c => status(c.expiry) === 'expired') ? 'expired'
+              : m.certs.find(c => status(c.expiry) === 'soon') ? 'soon' : null;
+    const flag = bad
+      ? `<span class="cert-dot" title="${bad === 'expired' ? 'Has an expired certificate' : 'Certificate expiring soon'}">
+           <i data-lucide="${bad === 'expired' ? 'circle-x' : 'triangle-alert'}"></i>${m.certs.length}</span>`
+      : (m.certs.length ? `<span class="cert-dot" style="color:var(--muted-foreground)"><i data-lucide="award"></i>${m.certs.length}</span>` : '');
+    return `<tr>
+      <td><div class="who"><span class="av">${initials(m.n)}</span>${m.n}${flag}</div></td>
+      <td class="muted">${m.e}</td>
+      <td><span class="rchip" style="background:${bg};color:${fg}">${m.r}</span></td>
+      <td>${m.p}</td>
+      <td><button class="cb${m.ai ? ' on' : ''}" onclick="flip(${i},'ai')"><i data-lucide="check"></i></button></td>
+      <td><button class="cb${m.rec ? ' on' : ''}" onclick="flip(${i},'rec')"><i data-lucide="check"></i></button></td>
+      <td><button class="dots" onclick="openMenu(event,${i})"><i data-lucide="ellipsis-vertical"></i></button></td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function flip(i, k) { M[i][k] = !M[i][k]; render(); }
+
+/* Row menu */
+function openMenu(e, i) {
+  e.stopPropagation();
+  cur = i;
+  const menu = document.getElementById('menu');
+  const r = e.currentTarget.getBoundingClientRect();
+  menu.classList.add('on');
+  const h = menu.offsetHeight;
+  // Flip above the button when there is not enough room below
+  menu.style.top = (r.bottom + h + 8 > innerHeight ? r.top - h - 4 : r.bottom + 4) + 'px';
+  menu.style.left = Math.max(8, r.right - 210) + 'px';
+}
+function closeMenu() { document.getElementById('menu').classList.remove('on'); }
+document.addEventListener('click', e => { if (!e.target.closest('#menu')) closeMenu(); });
+
+/* Drawer */
+function openDrawer() {
+  closeMenu();
+  const m = M[cur];
+  document.getElementById('d-av').textContent = initials(m.n);
+  document.getElementById('d-sub').textContent = `${m.n} · ${m.r}`;
+  hideAdd();
+  renderCerts();
+  document.getElementById('ovl').classList.add('on');
+  document.getElementById('dr').classList.add('on');
+}
+function closeDrawer() {
+  document.getElementById('ovl').classList.remove('on');
+  document.getElementById('dr').classList.remove('on');
+  hideAdd();
+}
+
+function renderCerts() {
+  const m = M[cur];
+  const el = document.getElementById('d-certs');
+  if (!m.certs.length) { el.innerHTML = '<div class="empty">No certificates assigned yet.</div>'; return; }
+  el.innerHTML = m.certs.map((c, j) => {
+    const s = status(c.expiry);
+    return `<div class="cr">
+      <div class="cr-ic"><i data-lucide="award"></i></div>
+      <div class="cr-bd">
+        <div class="cr-nm">${c.name}</div>
+        <div class="cr-dates">
+          <span class="chip ${CLS[s]}"><i data-lucide="${ICON[s]}"></i>${LBL[s]}</span>
+          <span>Issued <b>${fmt(c.issued) || '—'}</b></span>
+          <span>Expires <b>${fmt(c.expiry) || 'Never'}</b></span>
+        </div>
+      </div>
+      <button class="cr-rm" title="Remove" onclick="rmCert(${j})"><i data-lucide="trash-2"></i></button>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function showAdd() {
+  const held = new Set(M[cur].certs.map(c => c.name));
+  const free = LIB.filter(n => !held.has(n));
+  const sel = document.getElementById('a-cert');
+  sel.innerHTML = free.length
+    ? '<option value="">Select a certificate…</option>' + free.map(n => `<option>${n}</option>`).join('')
+    : '<option value="">All library certificates are already assigned</option>';
+  sel.classList.remove('err');
+  document.getElementById('a-iss').value = '';
+  document.getElementById('a-exp').value = '';
+  document.getElementById('a-warn').classList.remove('on');
+  document.getElementById('addbox').classList.add('on');
+  document.getElementById('add-btn').style.display = 'none';
+}
+function hideAdd() {
+  document.getElementById('addbox').classList.remove('on');
+  document.getElementById('add-btn').style.display = '';
+}
+
+/* Expiry before issue is a data error worth catching at entry */
+function checkDates() {
+  const i = document.getElementById('a-iss').value, x = document.getElementById('a-exp').value;
+  const bad = i && x && x < i;
+  document.getElementById('a-warn').classList.toggle('on', bad);
+  return !bad;
+}
+
+function addCert() {
+  const sel = document.getElementById('a-cert');
+  if (!sel.value) { sel.classList.add('err'); sel.focus(); return; }
+  if (!checkDates()) return;
+  M[cur].certs.push({
+    name: sel.value,
+    issued: document.getElementById('a-iss').value || null,
+    expiry: document.getElementById('a-exp').value || null,
+  });
+  hideAdd(); renderCerts(); render();
+}
+
+function rmCert(j) { M[cur].certs.splice(j, 1); renderCerts(); render(); }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closeDrawer(); } });
+
+render();
+lucide.createIcons();
+</script>
+</body>
+</html>
