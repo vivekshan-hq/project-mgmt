@@ -140,6 +140,7 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .p-cond{margin-top:9px;display:none;gap:8px;align-items:center}
 .p-row.sel .p-cond{display:flex}
 .p-cond label{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
+.p-cond .till{font-size:12.5px;font-weight:500;color:var(--foreground);white-space:nowrap}
 .p-cond input,.p-cond select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12.5px;background:var(--background);color:var(--foreground);outline:none}
 .p-sel{width:280px;flex-shrink:0;padding:16px 18px;overflow-y:auto}
 .p-sel-h{font-size:14.5px;font-weight:600}
@@ -176,7 +177,7 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
   <div class="main">
     <div class="pg-hd">
       <div class="pg-ttl"><i data-lucide="file-plus-2"></i>Resource requests</div>
-      <div class="pg-sub">Ask for a role on a project and state what the person must have. A certification requirement can demand the certificate stay valid through the booking, which is what the approver's match list filters on.</div>
+      <div class="pg-sub">Ask for a role on a project and state what the person must have. A certification requirement can demand the certificate stay valid till the project or budget ends, which is what the approver's match list filters on.</div>
     </div>
 
     <div class="bar">
@@ -231,9 +232,9 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
           <div class="pick">
             <span class="pav" style="background:#6366f1">AC</span>
             <select id="f-proj" onchange="onProject()">
-              <option data-dates="7 Sep – 20 Oct">Acme internal</option>
-              <option data-dates="1 Dec – 31 Mar">RM Testing</option>
-              <option data-dates="15 Dec – 30 Jun">Northwind — Data migration</option>
+              <option data-dates="7 Sep – 20 Oct" data-pend="2026-10-20" data-bend="2026-12-31">Acme internal</option>
+              <option data-dates="1 Dec – 31 Mar" data-pend="2027-03-31" data-bend="2027-06-30">RM Testing</option>
+              <option data-dates="15 Dec – 30 Jun" data-pend="2027-06-30" data-bend="2027-09-30">Northwind — Data migration</option>
             </select>
           </div>
           <div class="sub" id="proj-dates">Project dates: 7 Sep – 20 Oct</div>
@@ -374,7 +375,7 @@ let allocs=[], picked={}, activeSec='certs', chosen=[];
 
 function chip(r){
   if(r.kind==='cert'){
-    const vt=r.validThrough?` · valid thru ${short(r.validThrough)}`:'';
+    const vt=r.validThrough?` · valid till ${short(r.validThrough)}`:'';
     return `<span class="rq-chip rq-cert"><i data-lucide="award"></i>${SHORT[r.name]||r.name}${vt}</span>`;
   }
   return `<span class="rq-chip rq-skill"><i data-lucide="lightbulb"></i>${r.name} · ${r.level}</span>`;
@@ -456,7 +457,8 @@ function renderChips(){
 function openPicker(){
   picked={};
   chosen.forEach(c=>{picked[c.name]=c.kind==='cert'
-    ?{kind:'cert',validThrough:c.validThrough}:{kind:'skill',level:c.level}});
+    ?{kind:'cert',mode:c.mode||'specific',date:c.mode==='specific'?c.validThrough:''}
+    :{kind:'skill',level:c.level}});
   activeSec='certs';
   renderNav(); renderList(); renderSel();
   document.getElementById('povl').classList.add('on');
@@ -479,12 +481,19 @@ function renderList(){
   const rows=it.rows.filter(([n])=>!q||n.toLowerCase().includes(q));
   document.getElementById('p-rows').innerHTML=rows.map(([n,src])=>{
     const p=picked[n], on=!!p;
+    const esc=n.replace(/'/g,"\\'");
     const cond=it.isCert
-      ? `<div class="p-cond"><label>Must stay valid through</label>
-           <input type="date" value="${(p&&p.validThrough)||''}" onclick="event.stopPropagation()"
-             onchange="picked['${n.replace(/'/g,"\\'")}'].validThrough=this.value;renderSel()"></div>`
+      ? `<div class="p-cond"><label>Must stay valid till</label>
+           <select onclick="event.stopPropagation()" onchange="setTillMode('${esc}',this.value)">
+             ${TILL.map(([v,l])=>`<option value="${v}"${p&&p.mode===v?' selected':''}>${l}</option>`).join('')}
+           </select>
+           ${p&&p.mode==='specific'
+             ? `<input type="date" value="${p.date||''}" onclick="event.stopPropagation()"
+                  onchange="picked['${esc}'].date=this.value;renderSel()">`
+             : `<span class="till">${p?(fmt(resolveTill(p))||'—'):''}</span>`}
+         </div>`
       : `<div class="p-cond"><label>Minimum level</label>
-           <select onclick="event.stopPropagation()" onchange="picked['${n.replace(/'/g,"\\'")}'].level=this.value;renderSel()">
+           <select onclick="event.stopPropagation()" onchange="picked['${esc}'].level=this.value;renderSel()">
              ${['Beginner','Intermediate','Advanced','Expert'].map(l=>`<option${p&&p.level===l?' selected':''}>${l}</option>`).join('')}
            </select></div>`;
     return `<div class="p-row${on?' sel':''}" onclick="toggleRow('${n.replace(/'/g,"\\'")}')">
@@ -502,15 +511,25 @@ function toggleRow(n){
   const it=byId(activeSec);
   if(picked[n]) delete picked[n];
   else picked[n]=it.isCert
-    ? {kind:'cert',validThrough:defaultValidThrough()}
+    ? {kind:'cert',mode:'project',date:''}
     : {kind:'skill',level:'Advanced'};
   renderList(); renderSel();
 }
 
-/* The last allocation date is the sensible default for a validity window */
-function defaultValidThrough(){
-  const d=allocs.map(a=>a.date).filter(Boolean).sort();
-  return d.length?d[d.length-1]:'';
+/* Validity can track the project's own dates instead of a hand-typed one */
+const TILL=[['project','Project end date'],['budget','Budget end date'],['specific','Specific date']];
+const tillLabel=m=>(TILL.find(t=>t[0]===m)||[,''])[1];
+function projDates(){
+  const o=document.getElementById('f-proj').selectedOptions[0];
+  return {project:o.dataset.pend,budget:o.dataset.bend};
+}
+function resolveTill(p){
+  return p.mode==='specific'?(p.date||''):(projDates()[p.mode]||'');
+}
+function setTillMode(name,m){
+  picked[name].mode=m;
+  if(m!=='specific')picked[name].date='';
+  renderList(); renderSel();
 }
 
 function renderSel(){
@@ -522,8 +541,9 @@ function renderSel(){
     : 'Showing <b>all</b> candidates · add filters to narrow';
   document.getElementById('p-sel-l').innerHTML=keys.map(n=>{
     const p=picked[n], isC=p.kind==='cert';
+    const till=isC?resolveTill(p):'';
     const line=isC
-      ? (p.validThrough?`Valid through ${fmt(p.validThrough)}`:'Held — no expiry condition')
+      ? (till?`Valid till ${fmt(till)} · ${tillLabel(p.mode)}`:`${tillLabel(p.mode)} — not set`)
       : `At least ${p.level}`;
     return `<div class="p-sel-i ${isC?'cert':'skill'}">
       <i data-lucide="${isC?'award':'lightbulb'}"></i>
@@ -534,7 +554,7 @@ function renderSel(){
 
 function applyPicker(){
   chosen=Object.keys(picked).map(n=>picked[n].kind==='cert'
-    ?{kind:'cert',name:n,validThrough:picked[n].validThrough||null}
+    ?{kind:'cert',name:n,mode:picked[n].mode,validThrough:resolveTill(picked[n])||null}
     :{kind:'skill',name:n,level:picked[n].level});
   closePicker(); renderChips();
 }
