@@ -133,17 +133,24 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .p-item .n{margin-left:auto;font-size:12.5px;color:var(--muted-foreground)}
 .p-list{flex:1;overflow-y:auto;border-right:1px solid var(--border)}
 .p-list-h{font-size:11.5px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.06em;padding:14px 20px 10px;border-bottom:1px solid var(--border)}
-.p-row{display:flex;align-items:flex-start;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border);cursor:pointer}
+.p-row{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--border);cursor:pointer}
 .p-row:hover{background:color-mix(in oklab,var(--muted) 45%,transparent)}
-.p-row-nm{font-size:14.5px}
-.p-row-sub{font-size:12.5px;color:var(--muted-foreground);margin-top:2px}
-.p-cond{margin-top:9px;display:none;gap:8px;align-items:center}
-.p-row.sel .p-cond{display:flex}
-.p-cond label{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
-.p-cond .cb{width:16px;height:16px;flex-shrink:0}
-.p-cond .cb svg{width:10px;height:10px}
-.p-cond .till{font-size:12.5px;font-weight:500;color:var(--foreground);white-space:nowrap}
-.p-cond input,.p-cond select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12.5px;background:var(--background);color:var(--foreground);outline:none}
+.p-nm{flex:1;min-width:0}
+.p-row-nm{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-row-sub{font-size:12.5px;color:var(--muted-foreground);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Condition reads as a control but never opens — it is always "is atleast" */
+.p-op{height:34px;min-width:132px;padding:0 11px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);color:var(--foreground);font-size:13px;display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;cursor:default}
+.p-op i{width:13px;height:13px;margin-left:auto;color:var(--muted-foreground);opacity:.6}
+.p-val{height:34px;min-width:152px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);font-family:inherit;font-size:13px;color:var(--foreground);outline:none;flex-shrink:0;cursor:pointer}
+.p-val:focus{border-color:var(--ring)}
+.p-val:disabled{color:var(--muted-foreground);background:var(--background);cursor:default}
+/* Validity sits under the certificate it qualifies, indented past the checkbox */
+.p-sub{display:flex;align-items:center;gap:9px;padding:9px 20px 11px 52px;border-bottom:1px solid var(--border);background:color-mix(in oklab,var(--muted) 35%,transparent)}
+.p-sub label{font-size:12.5px;color:var(--muted-foreground);white-space:nowrap}
+.p-sub .cb{width:16px;height:16px;flex-shrink:0}
+.p-sub .cb svg{width:10px;height:10px}
+.p-sub .till{font-size:12.5px;font-weight:500;color:var(--foreground);white-space:nowrap}
+.p-sub input,.p-sub select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12.5px;background:var(--background);color:var(--foreground);outline:none}
 .p-sel{width:280px;flex-shrink:0;padding:16px 18px;overflow-y:auto}
 .p-sel-h{font-size:14.5px;font-weight:600}
 .p-sel-d{font-size:13px;color:var(--muted-foreground);line-height:1.5;margin-top:6px}
@@ -342,6 +349,7 @@ const SHORT={'AWS Solutions Architect Professional':'AWS SAA Pro','Project Manag
 
 /* Certifications sit in their own top-level section, not under Skills:
    they carry a source and per-member issue/expiry dates. */
+const SKILL_LEVELS=['Beginner','Intermediate','Advanced','Expert'];
 const SECTIONS=[
   { grp:'Skills', items:[
     { id:'languages', label:'Languages', icon:'code', rows:[
@@ -487,36 +495,47 @@ function renderList(){
   document.getElementById('p-rows').innerHTML=rows.map(([n,src,lv])=>{
     const p=picked[n], on=!!p;
     const esc=n.replace(/'/g,"\\'");
-    const cond=it.isCert
-      ? `${(lv&&lv.length)?`<div class="p-cond"><label>Must be at least</label>
-           <select onclick="event.stopPropagation()" onchange="picked['${esc}'].level=this.value;renderSel()">
-             ${lv.map(l=>`<option${p&&p.level===l?' selected':''}>${l}</option>`).join('')}
-           </select></div>`:''}
-         <div class="p-cond">
-           <button class="cb${p&&p.till?' on':''}" onclick="event.stopPropagation();toggleTill('${esc}')"><i data-lucide="check"></i></button>
-           <label>Must stay valid till</label>
-           ${p&&p.till
-             ? `<select onclick="event.stopPropagation()" onchange="setTillMode('${esc}',this.value)">
-                  ${TILL.map(([v,l])=>`<option value="${v}"${p.mode===v?' selected':''}>${l}</option>`).join('')}
-                </select>
-                ${p.mode==='specific'
-                  ? `<input type="date" value="${p.date||''}" onclick="event.stopPropagation()"
-                       onchange="picked['${esc}'].date=this.value;renderSel()">`
-                  : `<span class="till">${fmt(resolveTill(p))||'—'}</span>`}`
-             : `<span class="till" style="color:var(--muted-foreground);font-weight:400">Not required</span>`}
-         </div>`
-      : `<div class="p-cond"><label>Minimum level</label>
-           <select onclick="event.stopPropagation()" onchange="picked['${esc}'].level=this.value;renderSel()">
-             ${['Beginner','Intermediate','Advanced','Expert'].map(l=>`<option${p&&p.level===l?' selected':''}>${l}</option>`).join('')}
-           </select></div>`;
-    return `<div class="p-row${on?' sel':''}" onclick="toggleRow('${n.replace(/'/g,"\\'")}')">
+
+    // One row shape for everything: checkbox · name · condition · value.
+    // Certificates without a ladder have nothing to grade, so they read "is held".
+    const levels = it.isCert ? (lv||[]) : SKILL_LEVELS;
+    const graded = levels.length > 0;
+    const value = !graded
+      ? `<select class="p-val" disabled><option>—</option></select>`
+      : on
+        ? `<select class="p-val" onclick="event.stopPropagation()"
+             onchange="picked['${esc}'].level=this.value;renderSel()">
+             ${levels.map(l=>`<option${p.level===l?' selected':''}>${l}</option>`).join('')}
+           </select>`
+        : `<select class="p-val" disabled><option>Select...</option></select>`;
+
+    let html = `<div class="p-row${on?' sel':''}" onclick="toggleRow('${esc}')">
       <button class="cb${on?' on':''}"><i data-lucide="check"></i></button>
-      <div style="flex:1">
-        <div class="p-row-nm">${n}</div>
+      <div class="p-nm">
+        <div class="p-row-nm" title="${n}">${n}</div>
         ${src?`<div class="p-row-sub">${src}</div>`:''}
-        ${cond}
       </div>
-    </div>`}).join('');
+      <span class="p-op">${graded?'is atleast':'is held'}<i data-lucide="chevron-down"></i></span>
+      ${value}
+    </div>`;
+
+    // Validity is a certificate-only extra, so it sits under the row it belongs to
+    if (it.isCert && on) {
+      html += `<div class="p-sub" onclick="event.stopPropagation()">
+        <button class="cb${p.till?' on':''}" onclick="toggleTill('${esc}')"><i data-lucide="check"></i></button>
+        <label>Must stay valid till</label>
+        ${p.till
+          ? `<select onchange="setTillMode('${esc}',this.value)">
+               ${TILL.map(([v,l])=>`<option value="${v}"${p.mode===v?' selected':''}>${l}</option>`).join('')}
+             </select>
+             ${p.mode==='specific'
+               ? `<input type="date" value="${p.date||''}" onchange="picked['${esc}'].date=this.value;renderSel()">`
+               : `<span class="till">${fmt(resolveTill(p))||'—'}</span>`}`
+          : `<span class="till" style="color:var(--muted-foreground);font-weight:400">Not required</span>`}
+      </div>`;
+    }
+    return html;
+  }).join('');
   lucide.createIcons();
 }
 
@@ -528,7 +547,7 @@ function toggleRow(n){
     // Lowest rung by default, so the requirement starts permissive
     picked[n]={kind:'cert',level:lv[0]||null,till:true,mode:'project',date:''};
   }
-  else picked[n]={kind:'skill',level:'Advanced'};
+  else picked[n]={kind:'skill',level:SKILL_LEVELS[0]};
   renderList(); renderSel();
 }
 
