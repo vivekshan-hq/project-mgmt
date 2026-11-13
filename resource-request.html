@@ -140,6 +140,8 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .p-cond{margin-top:9px;display:none;gap:8px;align-items:center}
 .p-row.sel .p-cond{display:flex}
 .p-cond label{font-size:12px;color:var(--muted-foreground);white-space:nowrap}
+.p-cond .cb{width:16px;height:16px;flex-shrink:0}
+.p-cond .cb svg{width:10px;height:10px}
 .p-cond .till{font-size:12.5px;font-weight:500;color:var(--foreground);white-space:nowrap}
 .p-cond input,.p-cond select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12.5px;background:var(--background);color:var(--foreground);outline:none}
 .p-sel{width:280px;flex-shrink:0;padding:16px 18px;overflow-y:auto}
@@ -329,13 +331,14 @@ const short=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return `${parseInt(dd)
 const fmt=d=>{if(!d)return null;const[y,m,dd]=d.split('-');return `${parseInt(dd)} ${MON[parseInt(m)-1]} ${y}`};
 
 const CERTS=[
-  ['AWS Solutions Architect Professional','Amazon Web Services'],
-  ['Salesforce Certified Administrator','Salesforce'],
-  ['Project Management Professional (PMP)','Project Management Institute'],
-  ['Azure Fundamentals (AZ-900)','Microsoft'],
-  ['Cisco CCNA','Cisco'],
+  ['AWS Solutions Architect Professional','Amazon Web Services',[]],
+  ['Salesforce Certified Administrator','Salesforce',[]],
+  ['Project Management Professional (PMP)','Project Management Institute',[]],
+  ['Azure Fundamentals (AZ-900)','Microsoft',[]],
+  ['Cisco CCNA','Cisco',[]],
+  ['ITIL Service Management','AXELOS',['Foundation','Practitioner','Intermediate','Expert']],
 ];
-const SHORT={'AWS Solutions Architect Professional':'AWS SAA Pro','Project Management Professional (PMP)':'PMP','Salesforce Certified Administrator':'Salesforce Admin','Azure Fundamentals (AZ-900)':'AZ-900','Cisco CCNA':'Cisco CCNA'};
+const SHORT={'AWS Solutions Architect Professional':'AWS SAA Pro','Project Management Professional (PMP)':'PMP','Salesforce Certified Administrator':'Salesforce Admin','Azure Fundamentals (AZ-900)':'AZ-900','Cisco CCNA':'Cisco CCNA','ITIL Service Management':'ITIL'};
 
 /* Certifications sit in their own top-level section, not under Skills:
    they carry a source and per-member issue/expiry dates. */
@@ -375,8 +378,9 @@ let allocs=[], picked={}, activeSec='certs', chosen=[];
 
 function chip(r){
   if(r.kind==='cert'){
+    const lv=r.level?` · ${r.level}+`:'';
     const vt=r.validThrough?` · valid till ${short(r.validThrough)}`:'';
-    return `<span class="rq-chip rq-cert"><i data-lucide="award"></i>${SHORT[r.name]||r.name}${vt}</span>`;
+    return `<span class="rq-chip rq-cert"><i data-lucide="award"></i>${SHORT[r.name]||r.name}${lv}${vt}</span>`;
   }
   return `<span class="rq-chip rq-skill"><i data-lucide="lightbulb"></i>${r.name} · ${r.level}</span>`;
 }
@@ -457,7 +461,8 @@ function renderChips(){
 function openPicker(){
   picked={};
   chosen.forEach(c=>{picked[c.name]=c.kind==='cert'
-    ?{kind:'cert',mode:c.mode||'specific',date:c.mode==='specific'?c.validThrough:''}
+    ?{kind:'cert',level:c.level||null,till:!!c.validThrough,mode:c.mode||'specific',
+      date:c.mode==='specific'?c.validThrough:''}
     :{kind:'skill',level:c.level}});
   activeSec='certs';
   renderNav(); renderList(); renderSel();
@@ -479,18 +484,26 @@ function renderList(){
   const q=(document.getElementById('p-q').value||'').toLowerCase();
   document.getElementById('p-list-h').textContent=it.label;
   const rows=it.rows.filter(([n])=>!q||n.toLowerCase().includes(q));
-  document.getElementById('p-rows').innerHTML=rows.map(([n,src])=>{
+  document.getElementById('p-rows').innerHTML=rows.map(([n,src,lv])=>{
     const p=picked[n], on=!!p;
     const esc=n.replace(/'/g,"\\'");
     const cond=it.isCert
-      ? `<div class="p-cond"><label>Must stay valid till</label>
-           <select onclick="event.stopPropagation()" onchange="setTillMode('${esc}',this.value)">
-             ${TILL.map(([v,l])=>`<option value="${v}"${p&&p.mode===v?' selected':''}>${l}</option>`).join('')}
-           </select>
-           ${p&&p.mode==='specific'
-             ? `<input type="date" value="${p.date||''}" onclick="event.stopPropagation()"
-                  onchange="picked['${esc}'].date=this.value;renderSel()">`
-             : `<span class="till">${p?(fmt(resolveTill(p))||'—'):''}</span>`}
+      ? `${(lv&&lv.length)?`<div class="p-cond"><label>Must be at least</label>
+           <select onclick="event.stopPropagation()" onchange="picked['${esc}'].level=this.value;renderSel()">
+             ${lv.map(l=>`<option${p&&p.level===l?' selected':''}>${l}</option>`).join('')}
+           </select></div>`:''}
+         <div class="p-cond">
+           <button class="cb${p&&p.till?' on':''}" onclick="event.stopPropagation();toggleTill('${esc}')"><i data-lucide="check"></i></button>
+           <label>Must stay valid till</label>
+           ${p&&p.till
+             ? `<select onclick="event.stopPropagation()" onchange="setTillMode('${esc}',this.value)">
+                  ${TILL.map(([v,l])=>`<option value="${v}"${p.mode===v?' selected':''}>${l}</option>`).join('')}
+                </select>
+                ${p.mode==='specific'
+                  ? `<input type="date" value="${p.date||''}" onclick="event.stopPropagation()"
+                       onchange="picked['${esc}'].date=this.value;renderSel()">`
+                  : `<span class="till">${fmt(resolveTill(p))||'—'}</span>`}`
+             : `<span class="till" style="color:var(--muted-foreground);font-weight:400">Not required</span>`}
          </div>`
       : `<div class="p-cond"><label>Minimum level</label>
            <select onclick="event.stopPropagation()" onchange="picked['${esc}'].level=this.value;renderSel()">
@@ -510,9 +523,12 @@ function renderList(){
 function toggleRow(n){
   const it=byId(activeSec);
   if(picked[n]) delete picked[n];
-  else picked[n]=it.isCert
-    ? {kind:'cert',mode:'project',date:''}
-    : {kind:'skill',level:'Advanced'};
+  else if(it.isCert){
+    const lv=(it.rows.find(r=>r[0]===n)||[])[2]||[];
+    // Lowest rung by default, so the requirement starts permissive
+    picked[n]={kind:'cert',level:lv[0]||null,till:true,mode:'project',date:''};
+  }
+  else picked[n]={kind:'skill',level:'Advanced'};
   renderList(); renderSel();
 }
 
@@ -524,6 +540,10 @@ function projDates(){
 }
 function resolveTill(p){
   return p.mode==='specific'?(p.date||''):(projDates()[p.mode]||'');
+}
+function toggleTill(name){
+  picked[name].till=!picked[name].till;
+  renderList(); renderSel();
 }
 function setTillMode(name,m){
   picked[name].mode=m;
@@ -540,9 +560,11 @@ function renderSel(){
     : 'Showing <b>all</b> candidates · add filters to narrow';
   document.getElementById('p-sel-l').innerHTML=keys.map(n=>{
     const p=picked[n], isC=p.kind==='cert';
-    const till=isC?resolveTill(p):'';
+    const till=(isC&&p.till)?resolveTill(p):'';
     const line=isC
-      ? (till?`Valid till ${fmt(till)}`:'Valid till — not set')
+      ? [p.level?`${p.level} or above`:null,
+         p.till?(till?`Valid till ${fmt(till)}`:'Valid till — not set'):'No validity condition'
+        ].filter(Boolean).join(' · ')
       : `At least ${p.level}`;
     return `<div class="p-sel-i ${isC?'cert':'skill'}">
       <i data-lucide="${isC?'award':'lightbulb'}"></i>
@@ -553,7 +575,8 @@ function renderSel(){
 
 function applyPicker(){
   chosen=Object.keys(picked).map(n=>picked[n].kind==='cert'
-    ?{kind:'cert',name:n,mode:picked[n].mode,validThrough:resolveTill(picked[n])||null}
+    ?{kind:'cert',name:n,level:picked[n].level,mode:picked[n].mode,
+      validThrough:picked[n].till?(resolveTill(picked[n])||null):null}
     :{kind:'skill',name:n,level:picked[n].level});
   closePicker(); renderChips();
 }
