@@ -108,6 +108,15 @@ tr.hl:hover td{background:#FEF9C3}
 .lv-rm:hover{color:var(--destructive);background:var(--muted)}
 .lv-rm svg{width:13px;height:13px}
 .lv-chip{display:inline-block;padding:1px 8px;border-radius:9999px;font-size:11px;font-weight:500;background:#EEF2FF;color:#4338ca;border:1px solid #C7D2FE;margin:1px 3px 1px 0}
+
+/* Row menu */
+.menu{position:fixed;z-index:1200;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:6px;min-width:200px;display:none}
+.menu.on{display:block}
+.mi{display:flex;align-items:center;gap:9px;width:100%;padding:9px 11px;border:none;background:transparent;border-radius:7px;font-family:inherit;font-size:14px;color:var(--foreground);cursor:pointer;text-align:left}
+.mi:hover{background:var(--muted)}
+.mi svg{width:15px;height:15px;color:var(--muted-foreground)}
+.mi.danger,.mi.danger svg{color:var(--destructive)}
+.msep{height:1px;background:var(--border);margin:5px 0}
 </style>
 </head>
 <body>
@@ -190,7 +199,13 @@ tr.hl:hover td{background:#FEF9C3}
   </div>
 </div>
 
-<!-- ── New certification drawer ── -->
+<div class="menu" id="menu">
+  <button class="mi" onclick="editFromMenu()"><i data-lucide="pencil"></i>Edit certificate</button>
+  <div class="msep"></div>
+  <button class="mi danger" onclick="delFromMenu()"><i data-lucide="trash-2"></i>Delete</button>
+</div>
+
+<!-- ── Certification drawer (create and edit) ── -->
 <div class="ovl" id="ovl" onclick="closeDrawer()"></div>
 <aside class="dr" id="dr" role="dialog" aria-modal="true" aria-labelledby="dr-ttl">
   <div class="dr-hd">
@@ -314,7 +329,7 @@ function render() {
           <span class="st-lb">${c.on ? 'Enabled' : 'Disabled'}</span>
         </div>
       </td>
-      <td><button class="dots"><i data-lucide="ellipsis-vertical"></i></button></td>
+      <td><button class="dots" onclick="openMenu(event,${i})"><i data-lucide="ellipsis-vertical"></i></button></td>
     </tr>`).join('');
   document.getElementById('sec-ct').textContent = `(${CERTS.length})`;
   lucide.createIcons();
@@ -348,18 +363,50 @@ function addLevel() { levels.push(''); renderLevels(); }
 function rmLevel(i) { levels.splice(i, 1); renderLevels(); }
 
 /* Drawer */
-function openDrawer() {
+let editIdx = -1, menuIdx = -1;
+
+/* Load a certificate into the drawer, or clear it for a new one */
+function fillDrawer(c) {
+  document.getElementById('f-name').value = c ? c.name : '';
+  document.getElementById('f-desc').value = c ? (c.desc || '') : '';
+  document.getElementById('f-src').value  = c ? (c.src  || '') : '';
+  levels = (c && c.levels) ? c.levels.slice() : [];
+  hasLevels = levels.length > 0;
+  document.getElementById('lv-sw').classList.toggle('sc-switch--on', hasLevels);
+  document.getElementById('lv-wrap').style.display = hasLevels ? '' : 'none';
+  renderLevels();
+}
+
+function openDrawer(i) {
+  editIdx = (typeof i === 'number') ? i : -1;
+  document.getElementById('dr-ttl').textContent = editIdx >= 0 ? 'Edit certification' : 'New certification';
+  fillDrawer(editIdx >= 0 ? CERTS[editIdx] : null);
+  document.getElementById('f-name').classList.remove('err');
   document.getElementById('ovl').classList.add('on');
   document.getElementById('dr').classList.add('on');
   setTimeout(() => document.getElementById('f-name').focus(), 260);
 }
+
+function openMenu(e, i) {
+  e.stopPropagation();
+  menuIdx = i;
+  const menu = document.getElementById('menu'), r = e.currentTarget.getBoundingClientRect();
+  menu.classList.add('on');
+  const h = menu.offsetHeight;
+  menu.style.top = (r.bottom + h + 8 > innerHeight ? r.top - h - 4 : r.bottom + 4) + 'px';
+  menu.style.left = Math.max(8, r.right - 200) + 'px';
+}
+function closeMenu() { document.getElementById('menu').classList.remove('on'); }
+function editFromMenu() { const i = menuIdx; closeMenu(); openDrawer(i); }
+function delFromMenu() { CERTS.splice(menuIdx, 1); closeMenu(); render(); }
+document.addEventListener('click', e => { if (!e.target.closest('#menu')) closeMenu(); });
 
 function closeDrawer() {
   document.getElementById('ovl').classList.remove('on');
   document.getElementById('dr').classList.remove('on');
   ['f-name','f-desc','f-src'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-name').classList.remove('err');
-  levels = []; hasLevels = false;
+  levels = []; hasLevels = false; editIdx = -1;
   document.getElementById('lv-sw').classList.remove('sc-switch--on');
   document.getElementById('lv-wrap').style.display = 'none';
 }
@@ -368,19 +415,21 @@ function saveCert() {
   const nameEl = document.getElementById('f-name');
   const name = nameEl.value.trim();
   if (!name) { nameEl.classList.add('err'); nameEl.focus(); return; }
-  CERTS.unshift({
+  const data = {
     name,
     desc: document.getElementById('f-desc').value.trim(),
     src:  document.getElementById('f-src').value.trim(),
-    on: true,
     levels: hasLevels ? levels.map(l => l.trim()).filter(Boolean) : [],
-  });
+  };
+  // Editing keeps the row's existing status rather than resetting it
+  if (editIdx >= 0) Object.assign(CERTS[editIdx], data);
+  else CERTS.unshift(Object.assign({ on: true }, data));
   closeDrawer();
   render();
 }
 
 document.getElementById('f-name').addEventListener('input', function () { this.classList.remove('err'); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closeDrawer(); } });
 
 render();
 lucide.createIcons();
