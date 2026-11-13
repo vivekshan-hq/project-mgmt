@@ -116,25 +116,28 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .dr-ft{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0}
 .sec-lb{font-size:12px;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px}
 
-/* Assigned cert rows */
-.cl{display:flex;flex-direction:column;gap:8px}
-.cr{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-md)}
-.cr-ic{width:30px;height:30px;border-radius:7px;background:#FFF7ED;border:1px solid #FED7AA;display:grid;place-items:center;color:#C2410C;flex-shrink:0}
-.cr-ic svg{width:14px;height:14px}
-.cr-bd{flex:1;min-width:0}
-.cr-nm{font-size:13.5px;font-weight:500}
-.cr-dates{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px;font-size:12px;color:var(--muted-foreground)}
-.cr-dates b{font-weight:500;color:var(--foreground)}
-.cr-rm{border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:3px;border-radius:5px;flex-shrink:0}
+/* Assigned certificates table (overrides the page-level th/td rules) */
+.ctw{border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.ct{width:100%;border-collapse:collapse}
+.ct th{font-size:11.5px;font-weight:500;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;background:var(--muted);border-right:none;border-bottom:1px solid var(--border)}
+.ct td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+.ct tr:last-child td{border-bottom:none}
+.ct tbody tr:hover td{background:transparent}
+.ct-nm{display:flex;align-items:center;gap:9px;font-weight:500;font-size:13px}
+.ct-ic{width:26px;height:26px;border-radius:6px;background:#FFF7ED;border:1px solid #FED7AA;display:grid;place-items:center;color:#C2410C;flex-shrink:0}
+.ct-ic svg{width:12px;height:12px}
+.ct-dt{white-space:nowrap;font-variant-numeric:tabular-nums}
+.ct-never{color:var(--muted-foreground)}
+.cr-rm{border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:3px;border-radius:5px}
 .cr-rm:hover{color:var(--destructive);background:var(--muted)}
 .cr-rm svg{width:14px;height:14px}
+.empty-td{text-align:center;color:var(--muted-foreground);padding:26px 12px!important;font-size:13px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:11.5px;font-weight:500;border:1px solid}
 .c-ok{background:#defbe6;color:#0e6027;border-color:#9ef0b0}
 .c-soon{background:#FEF3C7;color:#92400E;border-color:#fcd34d}
 .c-exp{background:#fff1f1;color:#b91c1c;border-color:#fca5a5}
 .c-none{background:var(--muted);color:var(--muted-foreground);border-color:var(--border)}
 .chip svg{width:10px;height:10px}
-.empty{padding:26px;text-align:center;color:var(--muted-foreground);font-size:13px;border:1px dashed var(--border);border-radius:var(--radius-md)}
 
 /* Add form */
 .addbox{margin-top:16px;border:1px solid var(--border);border-radius:var(--radius-md);padding:15px;display:none;flex-direction:column;gap:14px;background:var(--muted)}
@@ -263,7 +266,20 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 
   <div class="dr-bd">
     <div class="sec-lb">Assigned certificates</div>
-    <div class="cl" id="d-certs"></div>
+    <div class="ctw">
+      <table class="ct">
+        <thead>
+          <tr>
+            <th>Certificate</th>
+            <th>Issued</th>
+            <th>Expires</th>
+            <th>Status</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody id="d-certs"></tbody>
+      </table>
+    </div>
 
     <button class="sc-btn sc-btn--outline sc-btn--size-sm" id="add-btn" style="height:32px;margin-top:16px" onclick="showAdd()">
       <i data-lucide="plus" style="width:14px;height:14px"></i>
@@ -457,21 +473,19 @@ function closeDrawer() {
 function renderCerts() {
   const m = M[cur];
   const el = document.getElementById('d-certs');
-  if (!m.certs.length) { el.innerHTML = '<div class="empty">No certificates assigned yet.</div>'; return; }
+  if (!m.certs.length) {
+    el.innerHTML = '<tr><td class="empty-td" colspan="5">No certificates assigned yet.</td></tr>';
+    return;
+  }
   el.innerHTML = m.certs.map((c, j) => {
     const s = status(c.expiry);
-    return `<div class="cr">
-      <div class="cr-ic"><i data-lucide="award"></i></div>
-      <div class="cr-bd">
-        <div class="cr-nm">${c.name}</div>
-        <div class="cr-dates">
-          <span class="chip ${CLS[s]}"><i data-lucide="${ICON[s]}"></i>${LBL[s]}</span>
-          <span>Issued <b>${fmt(c.issued) || '—'}</b></span>
-          <span>Expires <b>${fmt(c.expiry) || 'Never'}</b></span>
-        </div>
-      </div>
-      <button class="cr-rm" title="Remove" onclick="rmCert(${j})"><i data-lucide="trash-2"></i></button>
-    </div>`;
+    return `<tr>
+      <td><div class="ct-nm"><span class="ct-ic"><i data-lucide="award"></i></span>${c.name}</div></td>
+      <td class="ct-dt">${fmt(c.issued) || '<span class="ct-never">—</span>'}</td>
+      <td class="ct-dt">${fmt(c.expiry) || '<span class="ct-never">Never</span>'}</td>
+      <td><span class="chip ${CLS[s]}"><i data-lucide="${ICON[s]}"></i>${LBL[s]}</span></td>
+      <td><button class="cr-rm" title="Remove" onclick="rmCert(${j})"><i data-lucide="trash-2"></i></button></td>
+    </tr>`;
   }).join('');
   lucide.createIcons();
 }
