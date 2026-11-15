@@ -317,23 +317,6 @@ body{padding-top:36px;box-sizing:border-box;}
   .date-input:focus { border-color: var(--accent); }
 
   /* Effective-mode switch: a single open-ended date, or a bounded range. */
-  .eff-seg {
-    display: inline-flex; padding: 2px; gap: 2px;
-    background: var(--bg-sidebar); border: 1px solid var(--border);
-    border-radius: 7px;
-  }
-  .eff-seg button {
-    border: none; background: none; cursor: pointer;
-    padding: 4px 10px; border-radius: 5px;
-    font-family: inherit; font-size: 11.5px; font-weight: 500;
-    color: var(--text-secondary); white-space: nowrap; transition: background .12s, color .12s;
-  }
-  .eff-seg button:hover { color: var(--text-primary); }
-  .eff-seg button.active { background: var(--bg); color: var(--text-primary); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.07); }
-
-  .date-row { display: flex; align-items: center; gap: 7px; }
-  .date-sep { font-size: 12px; color: var(--text-muted); }
-  .set-form.mode-from .range-only { display: none; }
 
   .form-hint {
     font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin-top: -4px;
@@ -345,6 +328,10 @@ body{padding-top:36px;box-sizing:border-box;}
      components expect the DS meanings, so restore them here rather than
      letting a ghost/outline button hover fill solid blue. */
   .eff-dialog-overlay {
+    /* The drawers and their backdrops stack well above the design system's
+       default dialog z-index (50), which left the dialog visible but with
+       the backdrop swallowing every click. Sit above both. */
+    z-index: 300;
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --border: oklch(0.94 0 0);
@@ -397,6 +384,10 @@ body{padding-top:36px;box-sizing:border-box;}
 
   /* History / Audit tables */
   .drawer-body { flex: 1; overflow-y: auto; }
+  .drawer-footer {
+    padding: 14px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0;
+  }
 
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
@@ -706,36 +697,17 @@ body{padding-top:36px;box-sizing:border-box;}
     <button class="drawer-close" onclick="closeAll()">×</button>
   </div>
 
-  <!-- Set new value -->
-  <div class="set-form mode-from" id="set-form">
-    <div class="set-row">
-      <div class="form-field">
-        <div class="form-label">Target utilisation</div>
-        <div class="pct-wrap">
-          <input class="pct-input" type="number" min="0" max="100" placeholder="e.g. 80" id="util-pct-input" />
-          <span class="pct-sfx">%</span>
-        </div>
-      </div>
-      <div class="form-field">
-        <div class="form-label">Effective</div>
-        <div class="eff-seg" id="eff-seg">
-          <button type="button" class="active" onclick="setEffMode('from')">From a date</button>
-          <button type="button" onclick="setEffMode('range')">Date range</button>
-        </div>
+  <!-- Set new value. The effective dates are captured by the dialog that
+       Save raises, so this form holds the percentage only. -->
+  <div class="set-form" id="set-form">
+    <div class="form-field">
+      <div class="form-label">Target utilisation</div>
+      <div class="pct-wrap">
+        <input class="pct-input" type="number" min="0" max="100" placeholder="e.g. 80" id="util-pct-input" />
+        <span class="pct-sfx">%</span>
       </div>
     </div>
-    <div class="set-row">
-      <div class="form-field">
-        <div class="form-label" id="date-label">Effective from</div>
-        <div class="date-row">
-          <input class="date-input" type="date" id="util-date-input" />
-          <span class="date-sep range-only">to</span>
-          <input class="date-input range-only" type="date" id="util-date-end" />
-        </div>
-      </div>
-      <button class="btn-set" onclick="applyUtil()">Save</button>
-    </div>
-    <div class="form-hint" id="form-hint">Applies from this date onwards, until a later value replaces it.</div>
+    <div class="form-hint">Save asks which dates this value covers.</div>
   </div>
 
   <!-- Tabs -->
@@ -772,6 +744,10 @@ body{padding-top:36px;box-sizing:border-box;}
         <tbody id="audit-tbody"></tbody>
       </table>
     </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel-sm" onclick="closeAll()">Cancel</button>
+    <button class="btn-save-sm" onclick="applyUtil()">Save</button>
   </div>
 </div>
 
@@ -854,8 +830,8 @@ body{padding-top:36px;box-sizing:border-box;}
     <div class="eff-error" id="eff-error" hidden></div>
 
     <div class="sc-dialog-footer">
-      <button class="sc-btn sc-btn--outline sc-btn--size-default" onclick="closeEffDialog()">Cancel</button>
-      <button class="sc-btn sc-btn--default sc-btn--size-default" onclick="confirmEffDialog()">OK</button>
+      <button class="sc-btn sc-btn--outline sc-btn--size-default" id="eff-cancel" onclick="closeEffDialog()">Cancel</button>
+      <button class="sc-btn sc-btn--default sc-btn--size-default" id="eff-ok" onclick="confirmEffDialog()">OK</button>
     </div>
   </div>
 </div>
@@ -878,7 +854,6 @@ body{padding-top:36px;box-sizing:border-box;}
      meaning open-ended.
      ══════════════════════════════════════════════════════════ */
 
-  let effMode = 'from';         // 'from' | 'range'
   let activeRole = null;
 
   /* Seeded per role, newest first. */
@@ -988,23 +963,8 @@ body{padding-top:36px;box-sizing:border-box;}
     });
   }
 
-  function setEffMode(mode) {
-    effMode = mode;
-    const form = document.getElementById('set-form');
-    form.classList.toggle('mode-from',  mode === 'from');
-    form.classList.toggle('mode-range', mode === 'range');
-    document.querySelectorAll('#eff-seg button').forEach((b,i) =>
-      b.classList.toggle('active', (i === 0) === (mode === 'from')));
-    document.getElementById('date-label').textContent =
-      mode === 'from' ? 'Effective from' : 'Effective between';
-    document.getElementById('form-hint').textContent = mode === 'from'
-      ? 'Applies from this date onwards, until a later value replaces it.'
-      : 'Applies only inside the range. When it ends, the previous target resumes.';
-  }
-
-  // Set today's date as default
+  // Default for the dialog's date fields
   const today = iso(new Date());
-  document.getElementById('util-date-input').value = today;
 
   function openUtilDrawer(roleName) {
     activeRole = roleName;
@@ -1014,7 +974,6 @@ body{padding-top:36px;box-sizing:border-box;}
     // Reset to history tab
     switchTab('history', document.querySelector('.drawer-tab'));
     document.getElementById('util-pct-input').value = '';
-    setEffMode('from');
     renderHistory();
     renderAudit();
   }
@@ -1028,6 +987,7 @@ body{padding-top:36px;box-sizing:border-box;}
   let editingRole = null;     // role being edited, or null when creating
   let effDialogMode = 'from';
   let pendingPct = null;
+  let effContext = 'role-create';   // 'role-create' | 'role-manage'
 
   const nrdName = () => document.querySelector('#new-role-drawer .text-input');
   const nrdPct  = () => document.querySelector('#new-role-drawer .pct-field-input');
@@ -1058,6 +1018,7 @@ body{padding-top:36px;box-sizing:border-box;}
     if (cur && cur.pct === pct && name === editingRole) { commitRole(name, null); return; }
 
     pendingPct = pct;
+    effContext = 'role-create';
     openEffDialog(name, pct);
   }
 
@@ -1105,7 +1066,9 @@ body{padding-top:36px;box-sizing:border-box;}
       if (before(to, from)) { showEffError('The end date must fall on or after the start date.'); return; }
     }
     document.getElementById('eff-dialog').style.display = 'none';
-    commitRole((nrdName().value || '').trim(), {pct: pendingPct, from, to, ranged: effDialogMode === 'range'});
+    const seg = {pct: pendingPct, from, to, ranged: effDialogMode === 'range'};
+    if (effContext === 'role-manage') commitManagedTarget(seg);
+    else commitRole((nrdName().value || '').trim(), seg);
     pendingPct = null;
   }
 
@@ -1208,28 +1171,31 @@ body{padding-top:36px;box-sizing:border-box;}
     document.getElementById('tab-audit').classList.toggle('active', tab === 'audit');
   }
 
-  // Apply a new value over the existing segments
+  /* Save on the Manage drawer takes the same route as Save on the New role
+     drawer: the percentage here, the dates in the dialog. */
   function applyUtil() {
     const pct = parseInt(document.getElementById('util-pct-input').value, 10);
-    const from = document.getElementById('util-date-input').value;
-    const to   = effMode === 'range' ? document.getElementById('util-date-end').value : null;
-    if (isNaN(pct) || pct < 0 || pct > 100 || !from) return;
-    if (effMode === 'range') {
-      if (!to) return;
-      if (before(to, from)) { alert('The end date must fall on or after the start date.'); return; }
+    if (isNaN(pct) || pct < 0 || pct > 100) {
+      document.getElementById('util-pct-input').focus();
+      return;
     }
+    pendingPct = pct;
+    effContext = 'role-manage';
+    openEffDialog(activeRole, pct);
+  }
 
-    ROLE_HISTORY[activeRole] = overlay(ROLE_HISTORY[activeRole] || [],
-                                       {pct, from, to, ranged: effMode === 'range'});
-
-    (ROLE_AUDIT[activeRole] = ROLE_AUDIT[activeRole] || []).unshift({
-      pct,
-      eff: to === null ? pretty(from) + ' onwards' : pretty(from) + ' – ' + pretty(to),
+  /* Write a dated target into the active role's history. */
+  function commitManagedTarget(seg) {
+    ROLE_HISTORY[activeRole] = overlay(ROLE_HISTORY[activeRole] || [], seg);
+    ROLE_AUDIT[activeRole] = ROLE_AUDIT[activeRole] || [];
+    ROLE_AUDIT[activeRole].unshift({
+      pct: seg.pct,
+      eff: seg.to === null ? pretty(seg.from) + ' onwards'
+                           : pretty(seg.from) + ' – ' + pretty(seg.to),
       by: 'Vivek', init: 'VS', colour: '#2563EB',
       when: new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) +
             ', ' + new Date().toLocaleTimeString('en-GB', {hour:'numeric', minute:'2-digit'}),
     });
-
     renderHistory();
     renderAudit();
     syncRoleTable();

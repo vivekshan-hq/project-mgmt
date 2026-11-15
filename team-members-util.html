@@ -537,23 +537,6 @@ body{padding-top:36px;box-sizing:border-box;}
   }
   .pct-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,111,224,.15); }
   /* Effective-mode switch: one open-ended date, or a bounded range. */
-  .eff-seg {
-    display: inline-flex; padding: 2px; gap: 2px;
-    background: var(--bg-sidebar); border: 1px solid var(--border);
-    border-radius: 7px;
-  }
-  .eff-seg button {
-    border: none; background: none; cursor: pointer;
-    padding: 4px 10px; border-radius: 5px;
-    font-family: var(--font); font-size: 11.5px; font-weight: 500;
-    color: var(--text-secondary); white-space: nowrap;
-    transition: background var(--transition), color var(--transition);
-  }
-  .eff-seg button:hover { color: var(--text-primary); }
-  .eff-seg button.active { background: var(--bg); color: var(--text-primary); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.07); }
-  .date-row { display: flex; align-items: center; gap: 7px; }
-  .date-sep { font-size: 12px; color: var(--text-muted); }
-  .drawer-form.mode-from .range-only { display: none; }
   .form-hint { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin-top: -4px; }
   .range-badge {
     display: inline-block; padding: 1px 6px; border-radius: 3px;
@@ -649,6 +632,50 @@ body{padding-top:36px;box-sizing:border-box;}
   .drawer-body {
     flex: 1;
     overflow-y: auto;
+  }
+  .drawer-footer {
+    padding: 14px 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0;
+  }
+  .btn-cancel-sm {
+    height: 32px; padding: 0 16px; border-radius: var(--radius-md);
+    border: 1px solid var(--border); background: var(--bg);
+    font-family: var(--font); font-size: 13px; font-weight: 500;
+    color: var(--text-primary); cursor: pointer;
+  }
+  .btn-cancel-sm:hover { background: var(--bg-hover); }
+  .btn-save-sm {
+    height: 32px; padding: 0 16px; border-radius: var(--radius-md);
+    border: none; background: #18181B; color: #fff;
+    font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  .btn-save-sm:hover { background: #27272A; }
+
+  /* ── Effective-date dialog ──
+     This page defines its own --accent (blue) and --border, shadowing the
+     design system tokens of the same name. Restore the DS meanings inside
+     the dialog so its .sc-* components render as intended. */
+  .eff-dialog-overlay {
+    /* The drawers and their backdrops stack well above the design system's
+       default dialog z-index (50), which left the dialog visible but with
+       the backdrop swallowing every click. Sit above both. */
+    z-index: 300;
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --border: oklch(0.94 0 0);
+  }
+  .eff-dialog-overlay .sc-dialog { max-width: 440px; }
+  .eff-opt-main { display: block; font-size: 13.5px; font-weight: 500; color: var(--text-primary); }
+  .eff-opt-sub  { display: block; font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-top: 2px; }
+  .sc-radio-row { align-items: flex-start; }
+  .sc-radio-row .sc-radio { margin-top: 2px; flex-shrink: 0; }
+  .eff-dates { display: flex; gap: 10px; }
+  .eff-date-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+  .eff-dialog-overlay.mode-from .eff-range-only { display: none; }
+  .eff-error {
+    font-size: 12px; color: var(--destructive);
+    background: color-mix(in oklab, var(--destructive) 8%, transparent);
+    border-radius: 6px; padding: 7px 10px;
   }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
@@ -991,36 +1018,19 @@ body{padding-top:36px;box-sizing:border-box;}
     </div>
   </div>
 
-  <!-- Set-value form -->
-  <div class="drawer-form mode-from" id="drawer-form">
+  <!-- Set-value form. The effective dates are captured by the dialog that
+       Save raises, so this form holds the percentage only. -->
+  <div class="drawer-form" id="drawer-form">
     <div class="form-row">
       <div class="form-field">
         <label class="form-label" for="util-input">Target utilisation</label>
         <div class="pct-wrap">
-          <input class="pct-input" id="util-input" type="number" min="0" max="100" step="1" value="85" placeholder="0">
+          <input class="pct-input" id="util-input" type="number" min="0" max="100" step="1" placeholder="0">
           <span class="pct-suffix">%</span>
         </div>
       </div>
-      <div class="form-field">
-        <label class="form-label">Effective</label>
-        <div class="eff-seg" id="eff-seg">
-          <button type="button" class="active" data-mode="from">From a date</button>
-          <button type="button" data-mode="range">Date range</button>
-        </div>
-      </div>
     </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label class="form-label" id="date-label" for="date-input">Effective from</label>
-        <div class="date-row">
-          <input class="date-input" id="date-input" type="date">
-          <span class="date-sep range-only">to</span>
-          <input class="date-input range-only" id="date-end" type="date">
-        </div>
-      </div>
-      <button class="save-btn" id="save-btn">Save</button>
-    </div>
-    <div class="form-hint" id="form-hint">Overrides the role's target from this date onwards.</div>
+    <div class="form-hint">Save asks which dates this value covers.</div>
   </div>
 
   <!-- Segmented tab control -->
@@ -1070,7 +1080,52 @@ body{padding-top:36px;box-sizing:border-box;}
       </div>
     </div>
   </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel-sm" id="drawer-cancel">Cancel</button>
+    <button class="btn-save-sm" id="save-btn">Save</button>
+  </div>
 </aside>
+
+<!-- Effective-date dialog, same component and copy as the Roles screen. -->
+<div class="sc-dialog-overlay eff-dialog-overlay mode-from" id="eff-dialog" style="display:none">
+  <div class="sc-dialog" role="dialog" aria-modal="true" aria-labelledby="eff-dialog-title">
+    <div class="sc-dialog-header">
+      <div class="sc-dialog-title" id="eff-dialog-title">When does this target apply?</div>
+      <div class="sc-dialog-desc" id="eff-dialog-desc"></div>
+    </div>
+    <div class="sc-radio-group">
+      <label class="sc-radio-row">
+        <span class="sc-radio sc-radio--on" id="eff-radio-from" data-mode="from"></span>
+        <span>
+          <span class="eff-opt-main">From a specific date</span>
+          <span class="eff-opt-sub">Applies from that date onwards, until a later value replaces it.</span>
+        </span>
+      </label>
+      <label class="sc-radio-row">
+        <span class="sc-radio" id="eff-radio-range" data-mode="range"></span>
+        <span>
+          <span class="eff-opt-main">For a date range</span>
+          <span class="eff-opt-sub">Applies only inside the range. When it ends, whatever applied before resumes — usually the role's target.</span>
+        </span>
+      </label>
+    </div>
+    <div class="eff-dates">
+      <div class="eff-date-field">
+        <label class="sc-label" id="eff-from-label" for="eff-from">Effective from</label>
+        <input class="sc-input" type="date" id="eff-from">
+      </div>
+      <div class="eff-date-field eff-range-only">
+        <label class="sc-label" for="eff-to">To</label>
+        <input class="sc-input" type="date" id="eff-to">
+      </div>
+    </div>
+    <div class="eff-error" id="eff-error" hidden></div>
+    <div class="sc-dialog-footer">
+      <button class="sc-btn sc-btn--outline sc-btn--size-default" id="eff-cancel">Cancel</button>
+      <button class="sc-btn sc-btn--default sc-btn--size-default" id="eff-ok">OK</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════════ -->
 <script>
@@ -1099,7 +1154,6 @@ body{padding-top:36px;box-sizing:border-box;}
      Segments are { pct, follows, rolePct, from, to, ranged } with ISO dates
      and to === null meaning open-ended. */
 
-  let effMode = 'from';
 
   /* ── Date helpers ──
      Built from local components, never toISOString(): the date inputs are
@@ -1157,7 +1211,7 @@ body{padding-top:36px;box-sizing:border-box;}
 
   /* ── Today's date for date input default ──────────────────── */
   const todayISO = iso(new Date());
-  document.getElementById('date-input').value = todayISO;
+
 
   /* The segment covering today. */
   function currentSeg(segs) {
@@ -1165,23 +1219,62 @@ body{padding-top:36px;box-sizing:border-box;}
                           (s.to === null || !afterD(todayISO, s.to))) || null;
   }
 
-  function setEffMode(mode) {
-    effMode = mode;
-    const form = document.getElementById('drawer-form');
-    form.classList.toggle('mode-from', mode === 'from');
-    document.querySelectorAll('#eff-seg button').forEach(b =>
-      b.classList.toggle('active', b.dataset.mode === mode));
-    document.getElementById('date-label').textContent =
-      mode === 'from' ? 'Effective from' : 'Effective between';
-    document.getElementById('form-hint').textContent = mode === 'from'
-      ? "Overrides the role's target from this date onwards."
-      : "Overrides the role's target only inside the range. When it ends, whatever applied before resumes.";
+  /* ── Effective-date dialog ──
+     Save supplies the percentage; this dialog supplies the dates. Same
+     component and copy as the Roles screen, so both levels behave alike. */
+  let effDialogMode = 'from';
+  let pendingPct = null;
+
+  const effDlg = () => document.getElementById('eff-dialog');
+
+  function openEffDialog(memberName, pct) {
+    document.getElementById('eff-dialog-desc').textContent =
+      `Setting ${memberName} to ${pct}%. Target utilisation is historized, so every value is tied to the dates it covers.`;
+    document.getElementById('eff-from').value = todayISO;
+    document.getElementById('eff-to').value = '';
+    setEffDialogMode('from');
+    hideEffError();
+    effDlg().style.display = 'flex';
   }
 
-  document.getElementById('eff-seg').addEventListener('click', e => {
-    const b = e.target.closest('button');
-    if (b) setEffMode(b.dataset.mode);
+  function setEffDialogMode(mode) {
+    effDialogMode = mode;
+    effDlg().classList.toggle('mode-from', mode === 'from');
+    document.getElementById('eff-radio-from').classList.toggle('sc-radio--on', mode === 'from');
+    document.getElementById('eff-radio-range').classList.toggle('sc-radio--on', mode === 'range');
+    document.getElementById('eff-from-label').textContent =
+      mode === 'from' ? 'Effective from' : 'From';
+    hideEffError();
+  }
+
+  function showEffError(msg) {
+    const el = document.getElementById('eff-error');
+    el.textContent = msg; el.hidden = false;
+  }
+  function hideEffError() { document.getElementById('eff-error').hidden = true; }
+
+  function closeEffDialog() { effDlg().style.display = 'none'; pendingPct = null; }
+
+  function confirmEffDialog() {
+    const from = document.getElementById('eff-from').value;
+    const to   = effDialogMode === 'range' ? document.getElementById('eff-to').value : null;
+    if (!from) { showEffError('Pick the date this target starts from.'); return; }
+    if (effDialogMode === 'range') {
+      if (!to) { showEffError('Pick the date this target runs until.'); return; }
+      if (beforeD(to, from)) { showEffError('The end date must fall on or after the start date.'); return; }
+    }
+    effDlg().style.display = 'none';
+    commitMemberTarget({pct: pendingPct, follows: false, from, to, ranged: effDialogMode === 'range'});
+    pendingPct = null;
+  }
+
+  effDlg().addEventListener('click', e => {
+    const row = e.target.closest('.sc-radio-row');
+    if (row) { setEffDialogMode(row.querySelector('.sc-radio').dataset.mode); return; }
+    if (e.target.id === 'eff-dialog') closeEffDialog();   // backdrop
   });
+  document.getElementById('eff-cancel').addEventListener('click', closeEffDialog);
+  document.getElementById('eff-ok').addEventListener('click', confirmEffDialog);
 
   /* ── Dropdown ──────────────────────────────────────────────── */
   const dropdown = document.getElementById('dropdown');
@@ -1259,9 +1352,7 @@ body{padding-top:36px;box-sizing:border-box;}
     document.getElementById('util-input').value =
       cur ? (cur.follows ? cur.rolePct : cur.pct)
           : (ROLE_TARGET[memberRole[memberName]] || '');
-    document.getElementById('date-input').value = todayISO;
-    document.getElementById('date-end').value = '';
-    setEffMode('from');
+
     overlay.classList.add('visible');
     drawer.classList.add('open');
   }
@@ -1354,19 +1445,21 @@ body{padding-top:36px;box-sizing:border-box;}
 
   /* ── Save button ───────────────────────────────────────────── */
   document.getElementById('save-btn').addEventListener('click', () => {
-    const memberName = eyebrow.textContent;
-    const pct  = parseInt(document.getElementById('util-input').value, 10);
-    const from = document.getElementById('date-input').value;
-    const to   = effMode === 'range' ? document.getElementById('date-end').value : null;
-    if (isNaN(pct) || pct < 0 || pct > 100 || !from) return;
-    if (effMode === 'range') {
-      if (!to) return;
-      if (beforeD(to, from)) { alert('The end date must fall on or after the start date.'); return; }
+    const pct = parseInt(document.getElementById('util-input').value, 10);
+    if (isNaN(pct) || pct < 0 || pct > 100) {
+      document.getElementById('util-input').focus();
+      return;
     }
+    pendingPct = pct;
+    openEffDialog(eyebrow.textContent, pct);
+  });
 
-    memberHistory[memberName] = overlaySegments(memberHistory[memberName] || [], {
-      pct, follows: false, from, to, ranged: effMode === 'range',
-    });
+  document.getElementById('drawer-cancel').addEventListener('click', closeDrawer);
+
+  /* Write a dated override into the active member's history. */
+  function commitMemberTarget(seg) {
+    const memberName = eyebrow.textContent;
+    memberHistory[memberName] = overlaySegments(memberHistory[memberName] || [], seg);
 
     const now = new Date();
     const fmtNow = now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear()
@@ -1374,31 +1467,25 @@ body{padding-top:36px;box-sizing:border-box;}
       + (now.getHours() < 12 ? 'AM' : 'PM');
 
     memberAudit[memberName].unshift({
-      util: pct + '% (Custom)',
-      effective: to === null ? pretty(from) + ' onwards'
-                             : pretty(from) + ' – ' + pretty(to),
-      by: 'Vivek Shanmugasundaram',
-      by_init: 'VS',
-      by_color: '#2563EB',
-      when: fmtNow,
+      util: seg.pct + '% (Custom)',
+      effective: seg.to === null ? pretty(seg.from) + ' onwards'
+                                 : pretty(seg.from) + ' – ' + pretty(seg.to),
+      by: 'Vivek Shanmugasundaram', by_init: 'VS', by_color: '#2563EB', when: fmtNow,
     });
 
     renderHistory(memberName);
     renderAudit(memberName);
 
-    // Visual feedback: briefly highlight save button
     const btn = document.getElementById('save-btn');
     btn.textContent = 'Saved';
     btn.style.background = '#059669';
-    setTimeout(() => {
-      btn.textContent = 'Save';
-      btn.style.background = '';
-    }, 1400);
-  });
+    setTimeout(() => { btn.textContent = 'Save'; btn.style.background = ''; }, 1400);
+  }
 
   /* ── Keyboard: Escape closes everything ────────────────────── */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+      if (effDlg().style.display === 'flex') { closeEffDialog(); return; }
       if (drawer.classList.contains('open')) closeDrawer();
       if (dropdown.style.display !== 'none') closeDropdown();
     }
