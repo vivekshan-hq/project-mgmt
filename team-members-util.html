@@ -15,6 +15,7 @@ body{padding-top:36px;box-sizing:border-box;}
 </div>
 <script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","rm-people.html":"nav-people","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
 
+<link rel="stylesheet" href="ds/styles.css">
 <title>Team Member Utilisation</title>
 <style>
   /* ── Design tokens ─────────────────────────────────────────── */
@@ -39,7 +40,7 @@ body{padding-top:36px;box-sizing:border-box;}
     --radius-md: 6px;
     --radius-lg: 8px;
     --radius-pill: 999px;
-    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font: var(--font-sans);
     --transition: 240ms cubic-bezier(.25,.46,.45,.94);
   }
 

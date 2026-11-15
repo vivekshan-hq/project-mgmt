@@ -15,6 +15,7 @@ body{padding-top:36px;box-sizing:border-box;}
 </div>
 <script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","rm-people.html":"nav-people","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
 
+<link rel="stylesheet" href="ds/styles.css">
 <title>Roles & Placeholders</title>
 <style>
   :root {
@@ -88,7 +89,7 @@ body{padding-top:36px;box-sizing:border-box;}
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-sans);
     font-size: 13.5px;
     line-height: 1.5;
     background: var(--bg);
@@ -338,6 +339,32 @@ body{padding-top:36px;box-sizing:border-box;}
     font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin-top: -4px;
   }
 
+  /* ── Effective-date dialog ──
+     The page defines its own --accent (blue) and --border, which shadow the
+     design system's tokens of the same name. Inside the dialog the .sc-*
+     components expect the DS meanings, so restore them here rather than
+     letting a ghost/outline button hover fill solid blue. */
+  .eff-dialog-overlay {
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --border: oklch(0.94 0 0);
+  }
+  .eff-dialog-overlay .sc-dialog { max-width: 440px; }
+  .eff-opt-main { display: block; font-size: 13.5px; font-weight: 500; color: var(--text-primary); }
+  .eff-opt-sub  { display: block; font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-top: 2px; }
+  .sc-radio-row { align-items: flex-start; }
+  .sc-radio-row .sc-radio { margin-top: 2px; flex-shrink: 0; }
+
+  .eff-dates { display: flex; gap: 10px; }
+  .eff-date-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+  .eff-dialog-overlay.mode-from .eff-range-only { display: none; }
+
+  .eff-error {
+    font-size: 12px; color: var(--destructive);
+    background: color-mix(in oklab, var(--destructive) 8%, transparent);
+    border-radius: 6px; padding: 7px 10px;
+  }
+
   /* A bounded segment reads differently from an open-ended one. */
   .range-badge {
     display: inline-block; margin-left: 7px; padding: 1px 6px; border-radius: 3px;
@@ -564,7 +591,7 @@ body{padding-top:36px;box-sizing:border-box;}
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-pm')">⋯</button>
               <div class="ctx-menu" id="menu-pm">
                 <div class="ctx-label">More actions</div>
-                <div class="ctx-item" onclick="closeMenus(); openNewRole()">
+                <div class="ctx-item" onclick="closeMenus(); openNewRole('Product Manager')">
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role
                 </div>
                 <div class="ctx-item" onclick="closeMenus()">
@@ -588,7 +615,7 @@ body{padding-top:36px;box-sizing:border-box;}
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-cs')">⋯</button>
               <div class="ctx-menu" id="menu-cs">
                 <div class="ctx-label">More actions</div>
-                <div class="ctx-item" onclick="closeMenus(); openNewRole()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
+                <div class="ctx-item" onclick="closeMenus(); openNewRole('Customer success')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
                 <div class="ctx-item" onclick="closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 3.5V2.5a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.3"/></svg>Manage cost rate</div>
                 <div class="ctx-item" onclick="openUtilDrawer('Customer success'); closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v2.5l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Manage target utilisation</div>
                 <div class="ctx-divider"></div>
@@ -604,7 +631,7 @@ body{padding-top:36px;box-sizing:border-box;}
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-eng')">⋯</button>
               <div class="ctx-menu" id="menu-eng">
                 <div class="ctx-label">More actions</div>
-                <div class="ctx-item" onclick="closeMenus(); openNewRole()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
+                <div class="ctx-item" onclick="closeMenus(); openNewRole('Engineer')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
                 <div class="ctx-item" onclick="closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 3.5V2.5a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.3"/></svg>Manage cost rate</div>
                 <div class="ctx-item" onclick="openUtilDrawer('Engineer'); closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v2.5l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Manage target utilisation</div>
                 <div class="ctx-divider"></div>
@@ -620,7 +647,7 @@ body{padding-top:36px;box-sizing:border-box;}
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-pjm')">⋯</button>
               <div class="ctx-menu" id="menu-pjm">
                 <div class="ctx-label">More actions</div>
-                <div class="ctx-item" onclick="closeMenus(); openNewRole()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
+                <div class="ctx-item" onclick="closeMenus(); openNewRole('Project Manager')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
                 <div class="ctx-item" onclick="closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 3.5V2.5a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.3"/></svg>Manage cost rate</div>
                 <div class="ctx-item" onclick="openUtilDrawer('Project Manager'); closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v2.5l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Manage target utilisation</div>
                 <div class="ctx-divider"></div>
@@ -636,7 +663,7 @@ body{padding-top:36px;box-sizing:border-box;}
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-im')">⋯</button>
               <div class="ctx-menu" id="menu-im">
                 <div class="ctx-label">More actions</div>
-                <div class="ctx-item" onclick="closeMenus(); openNewRole()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
+                <div class="ctx-item" onclick="closeMenus(); openNewRole('Implementation Manager')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
                 <div class="ctx-item" onclick="closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 3.5V2.5a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.3"/></svg>Manage cost rate</div>
                 <div class="ctx-item" onclick="openUtilDrawer('Implementation Manager'); closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v2.5l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Manage target utilisation</div>
                 <div class="ctx-divider"></div>
@@ -652,7 +679,7 @@ body{padding-top:36px;box-sizing:border-box;}
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-sales')">⋯</button>
               <div class="ctx-menu" id="menu-sales">
                 <div class="ctx-label">More actions</div>
-                <div class="ctx-item" onclick="closeMenus(); openNewRole()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
+                <div class="ctx-item" onclick="closeMenus(); openNewRole('Sales')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 2.5l1 1-7 7-1.5.5.5-1.5 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit role</div>
                 <div class="ctx-item" onclick="closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 3.5V2.5a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.3"/></svg>Manage cost rate</div>
                 <div class="ctx-item" onclick="openUtilDrawer('Sales'); closeMenus()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v2.5l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Manage target utilisation</div>
                 <div class="ctx-divider"></div>
@@ -781,7 +808,55 @@ body{padding-top:36px;box-sizing:border-box;}
   </div>
   <div class="nrd-footer">
     <button class="btn-cancel-sm" onclick="closeNewRole()">Cancel</button>
-    <button class="btn-save-sm" onclick="closeNewRole()">Save</button>
+    <button class="btn-save-sm" onclick="saveRole()">Save</button>
+  </div>
+</div>
+
+<!-- Effective-date dialog: raised by Save when a target utilisation was entered.
+     Built from the design system's dialog, radio and button components. -->
+<div class="sc-dialog-overlay eff-dialog-overlay" id="eff-dialog" style="display:none">
+  <div class="sc-dialog" role="dialog" aria-modal="true" aria-labelledby="eff-dialog-title">
+    <div class="sc-dialog-header">
+      <div class="sc-dialog-title" id="eff-dialog-title">When does this target apply?</div>
+      <div class="sc-dialog-desc" id="eff-dialog-desc">
+        Target utilisation is historized, so every value is tied to the dates it covers.
+      </div>
+    </div>
+
+    <div class="sc-radio-group">
+      <label class="sc-radio-row">
+        <span class="sc-radio sc-radio--on" id="eff-radio-from" data-mode="from"></span>
+        <span>
+          <span class="eff-opt-main">From a specific date</span>
+          <span class="eff-opt-sub">Applies from that date onwards, until a later value replaces it.</span>
+        </span>
+      </label>
+      <label class="sc-radio-row">
+        <span class="sc-radio" id="eff-radio-range" data-mode="range"></span>
+        <span>
+          <span class="eff-opt-main">For a date range</span>
+          <span class="eff-opt-sub">Applies only inside the range. When it ends, the previous target resumes.</span>
+        </span>
+      </label>
+    </div>
+
+    <div class="eff-dates" id="eff-dates">
+      <div class="eff-date-field">
+        <label class="sc-label" id="eff-from-label" for="eff-from">Effective from</label>
+        <input class="sc-input" type="date" id="eff-from">
+      </div>
+      <div class="eff-date-field eff-range-only">
+        <label class="sc-label" for="eff-to">To</label>
+        <input class="sc-input" type="date" id="eff-to">
+      </div>
+    </div>
+
+    <div class="eff-error" id="eff-error" hidden></div>
+
+    <div class="sc-dialog-footer">
+      <button class="sc-btn sc-btn--outline sc-btn--size-default" onclick="closeEffDialog()">Cancel</button>
+      <button class="sc-btn sc-btn--default sc-btn--size-default" onclick="confirmEffDialog()">OK</button>
+    </div>
   </div>
 </div>
 
@@ -944,10 +1019,174 @@ body{padding-top:36px;box-sizing:border-box;}
     renderAudit();
   }
 
-  function openNewRole() {
+  /* ══ New / Edit role ══
+     The drawer captures the target %, but a target means nothing without the
+     dates it covers — so Save raises the effective-date dialog, and only an
+     OK there writes the value into the role's history. Leaving the target
+     blank skips the dialog entirely; the field is optional. */
+
+  let editingRole = null;     // role being edited, or null when creating
+  let effDialogMode = 'from';
+  let pendingPct = null;
+
+  const nrdName = () => document.querySelector('#new-role-drawer .text-input');
+  const nrdPct  = () => document.querySelector('#new-role-drawer .pct-field-input');
+
+  function openNewRole(roleName) {
+    editingRole = roleName || null;
+    document.querySelector('.nrd-title').textContent = editingRole ? 'Edit role' : 'New role';
+    nrdName().value = editingRole || '';
+    const cur = editingRole ? currentSeg(ROLE_HISTORY[editingRole] || []) : null;
+    nrdPct().value = cur ? cur.pct : '';
     document.getElementById('new-role-drawer').classList.add('open');
     document.getElementById('overlay').classList.add('open');
   }
+
+  function saveRole() {
+    const name = (nrdName().value || '').trim();
+    const raw  = (nrdPct().value || '').trim();
+    if (!name) { nrdName().focus(); return; }
+
+    // No target entered — nothing to date, so save straight away.
+    if (raw === '') { commitRole(name, null); return; }
+
+    const pct = parseInt(raw, 10);
+    if (isNaN(pct) || pct < 0 || pct > 100) { nrdPct().focus(); return; }
+
+    // Unchanged target on an existing role needs no new dated segment.
+    const cur = editingRole ? currentSeg(ROLE_HISTORY[editingRole] || []) : null;
+    if (cur && cur.pct === pct && name === editingRole) { commitRole(name, null); return; }
+
+    pendingPct = pct;
+    openEffDialog(name, pct);
+  }
+
+  /* ── Effective-date dialog ── */
+  function openEffDialog(roleName, pct) {
+    const dlg = document.getElementById('eff-dialog');
+    document.getElementById('eff-dialog-desc').textContent =
+      `Setting ${roleName} to ${pct}%. Target utilisation is historized, so every value is tied to the dates it covers.`;
+    document.getElementById('eff-from').value = today;
+    document.getElementById('eff-to').value = '';
+    setEffDialogMode('from');
+    hideEffError();
+    dlg.style.display = 'flex';
+  }
+
+  function setEffDialogMode(mode) {
+    effDialogMode = mode;
+    const dlg = document.getElementById('eff-dialog');
+    dlg.classList.toggle('mode-from', mode === 'from');
+    document.getElementById('eff-radio-from').classList.toggle('sc-radio--on', mode === 'from');
+    document.getElementById('eff-radio-range').classList.toggle('sc-radio--on', mode === 'range');
+    document.getElementById('eff-from-label').textContent =
+      mode === 'from' ? 'Effective from' : 'From';
+    hideEffError();
+  }
+
+  function showEffError(msg) {
+    const el = document.getElementById('eff-error');
+    el.textContent = msg;
+    el.hidden = false;
+  }
+  function hideEffError() { document.getElementById('eff-error').hidden = true; }
+
+  function closeEffDialog() {
+    document.getElementById('eff-dialog').style.display = 'none';
+    pendingPct = null;
+  }
+
+  function confirmEffDialog() {
+    const from = document.getElementById('eff-from').value;
+    const to   = effDialogMode === 'range' ? document.getElementById('eff-to').value : null;
+    if (!from) { showEffError('Pick the date this target starts from.'); return; }
+    if (effDialogMode === 'range') {
+      if (!to) { showEffError('Pick the date this target runs until.'); return; }
+      if (before(to, from)) { showEffError('The end date must fall on or after the start date.'); return; }
+    }
+    document.getElementById('eff-dialog').style.display = 'none';
+    commitRole((nrdName().value || '').trim(), {pct: pendingPct, from, to, ranged: effDialogMode === 'range'});
+    pendingPct = null;
+  }
+
+  /* Write the role (and any dated target) away, then close the drawer. */
+  function commitRole(name, seg) {
+    const wasEditing = editingRole;
+
+    if (wasEditing && name !== wasEditing) {       // renamed
+      ROLE_HISTORY[name] = ROLE_HISTORY[wasEditing] || [];
+      ROLE_AUDIT[name]   = ROLE_AUDIT[wasEditing]   || [];
+      delete ROLE_HISTORY[wasEditing]; delete ROLE_AUDIT[wasEditing];
+      renameRoleRow(wasEditing, name);
+    }
+    ROLE_HISTORY[name] = ROLE_HISTORY[name] || [];
+    ROLE_AUDIT[name]   = ROLE_AUDIT[name]   || [];
+
+    if (seg) {
+      ROLE_HISTORY[name] = overlay(ROLE_HISTORY[name], seg);
+      ROLE_AUDIT[name].unshift({
+        pct: seg.pct,
+        eff: seg.to === null ? pretty(seg.from) + ' onwards'
+                             : pretty(seg.from) + ' – ' + pretty(seg.to),
+        by: 'Vivek', init: 'VS', colour: '#2563EB',
+        when: new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) +
+              ', ' + new Date().toLocaleTimeString('en-GB', {hour:'numeric', minute:'2-digit'}),
+      });
+    }
+
+    if (!wasEditing) addRoleRow(name);
+    syncRoleTable();
+    closeNewRole();
+  }
+
+  /* ── Roles table upkeep ── */
+  const AVATAR_COLOURS = ['#6366F1','#0EA5E9','#10B981','#F59E0B','#EF4444','#8B5CF6'];
+  let roleSeq = 0;
+
+  const initialsOf = n => n.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+  function renameRoleRow(oldName, newName) {
+    const cell = document.querySelector(`[data-role-target="${oldName}"]`);
+    if (!cell) return;
+    cell.dataset.roleTarget = newName;
+    const row = cell.closest('tr');
+    row.querySelector('.role-name').textContent = newName;
+    row.querySelector('.role-avatar').textContent = initialsOf(newName);
+    const manage = [...row.querySelectorAll('.ctx-item')]
+      .find(i => i.textContent.trim().startsWith('Manage target'));
+    if (manage) manage.setAttribute('onclick', `openUtilDrawer('${newName}'); closeMenus()`);
+    const edit = [...row.querySelectorAll('.ctx-item')]
+      .find(i => i.textContent.trim().startsWith('Edit role'));
+    if (edit) edit.setAttribute('onclick', `closeMenus(); openNewRole('${newName}')`);
+  }
+
+  function addRoleRow(name) {
+    const id = 'menu-new' + (++roleSeq);
+    const colour = AVATAR_COLOURS[roleSeq % AVATAR_COLOURS.length];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="role-cell"><div class="role-avatar" style="background:${colour}">${initialsOf(name)}</div><span class="role-name">${name}</span></div></td>
+      <td data-role-target="${name}" class="util-val"></td>
+      <td class="text-sec">0</td><td>Yes</td><td>No</td>
+      <td class="row-actions">
+        <button class="ellipsis-btn" onclick="toggleMenu(event,'${id}')">⋯</button>
+        <div class="ctx-menu" id="${id}">
+          <div class="ctx-label">More actions</div>
+          <div class="ctx-item" onclick="closeMenus(); openNewRole('${name}')">Edit role</div>
+          <div class="ctx-item" onclick="closeMenus()">Manage cost rate</div>
+          <div class="ctx-item" onclick="openUtilDrawer('${name}'); closeMenus()">Manage target utilisation</div>
+        </div>
+      </td>`;
+    document.querySelector('table tbody').appendChild(tr);
+    const count = document.querySelector('.table-count');
+    if (count) count.textContent = 'Role (' + document.querySelectorAll('[data-role-target]').length + ')';
+  }
+
+  document.getElementById('eff-dialog').addEventListener('click', e => {
+    const row = e.target.closest('.sc-radio-row');
+    if (row) { setEffDialogMode(row.querySelector('.sc-radio').dataset.mode); return; }
+    if (e.target.id === 'eff-dialog') closeEffDialog();   // backdrop
+  });
 
   function closeNewRole() {
     document.getElementById('new-role-drawer').classList.remove('open');
