@@ -131,6 +131,24 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
 .cr-rm{border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:3px;border-radius:5px}
 .cr-rm:hover{color:var(--destructive);background:var(--muted)}
 .cr-rm svg{width:14px;height:14px}
+/* Proof attachments */
+.drop{display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px dashed var(--border-strong);border-radius:var(--radius-md);background:var(--background);cursor:pointer;font-size:13px;color:var(--muted-foreground);transition:border-color .12s,background .12s,color .12s}
+.drop:hover,.drop.over{border-color:#2563eb;background:#EFF6FF;color:#1d4ed8}
+.drop svg{width:15px;height:15px;flex-shrink:0}
+.drop-hint{margin-left:auto;font-size:11.5px;opacity:.8;white-space:nowrap}
+.files{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.f-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:12.5px}
+.f-ic{width:24px;height:24px;border-radius:5px;background:var(--muted);display:grid;place-items:center;flex-shrink:0;color:var(--muted-foreground)}
+.f-ic svg{width:12px;height:12px}
+.f-nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.f-sz{color:var(--muted-foreground);font-size:11.5px;white-space:nowrap;flex-shrink:0}
+.f-rm{border:none;background:none;cursor:pointer;color:var(--muted-foreground);padding:2px;border-radius:4px;flex-shrink:0}
+.f-rm:hover{color:var(--destructive);background:var(--muted)}
+.f-rm svg{width:13px;height:13px}
+.clip{display:inline-flex;align-items:center;gap:3px;margin-left:8px;font-size:11px;color:var(--muted-foreground);text-decoration:none;vertical-align:middle}
+.clip:hover{color:#2563eb}
+.clip svg{width:11px;height:11px}
+.noproof{margin-left:8px;font-size:11px;color:#b45309;white-space:nowrap}
 .lvl-chip{display:inline-block;padding:1px 7px;border-radius:9999px;font-size:10.5px;font-weight:500;background:#EEF2FF;color:#4338ca;border:1px solid #C7D2FE;margin-left:7px;white-space:nowrap}
 .empty-td{text-align:center;color:var(--muted-foreground);padding:26px 12px!important;font-size:13px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:11.5px;font-weight:500;border:1px solid}
@@ -308,6 +326,21 @@ tbody tr:hover td{background:color-mix(in oklab,var(--muted) 45%,transparent)}
         </div>
       </div>
       <div class="warn" id="a-warn">Expiry date is before the issue date.</div>
+      <div class="fld">
+        <label class="lb">Proof</label>
+        <div class="drop" id="drop"
+          onclick="document.getElementById('a-file').click()"
+          ondragover="event.preventDefault();this.classList.add('over')"
+          ondragleave="this.classList.remove('over')"
+          ondrop="event.preventDefault();this.classList.remove('over');onFiles(event.dataTransfer.files)">
+          <i data-lucide="paperclip"></i>
+          <span>Attach the certificate</span>
+          <span class="drop-hint">PDF, PNG or JPG</span>
+        </div>
+        <input type="file" id="a-file" multiple accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*"
+          style="display:none" onchange="onFiles(this.files);this.value=''">
+        <div class="files" id="a-files"></div>
+      </div>
       <div class="hint">Leave the expiry blank if this certificate does not expire. These dates belong to this team member, not to the certificate.</div>
       <div class="addrow">
         <button class="sc-btn sc-btn--ghost sc-btn--size-sm" style="height:30px" onclick="hideAdd()">Cancel</button>
@@ -380,7 +413,8 @@ const RC = {
    prototype tells one story end to end. */
 const M = [
   { n:'aathi', e:'aathi@rocketlane.com', r:'Engineer', p:'Account Admin', ai:true, rec:false, certs:[
-      { name:'ITIL Service Management', level:'Practitioner', issued:'2025-04-10', expiry:'2028-04-10' },
+      { name:'ITIL Service Management', level:'Practitioner', issued:'2025-04-10', expiry:'2028-04-10',
+        files:[{ name:'itil-practitioner-certificate.pdf', size:284160, url:null }] },
   ]},
   { n:'abhishek reddy L', e:'abhishek@rocketlane.com', r:'Account Executive', p:'Account Admin', ai:true, rec:false, certs:[] },
   { n:'Adithya Gopi', e:'adithya@rocketlane.com', r:'Implementation Consultant', p:'Account Admin', ai:true, rec:true, certs:[] },
@@ -480,6 +514,16 @@ function closeDrawer() {
   hideAdd();
 }
 
+/* Missing proof is worth seeing at a glance, so say so rather than show nothing */
+function proofCell(c) {
+  const fs = c.files || [];
+  if (!fs.length) return '<span class="noproof" title="No proof attached">No proof</span>';
+  return fs.map(f => f.url
+    ? `<a class="clip" href="${f.url}" target="_blank" rel="noopener" title="${f.name}" onclick="event.stopPropagation()"><i data-lucide="paperclip"></i>${fs.length > 1 ? '' : 'Proof'}</a>`
+    : `<span class="clip" title="${f.name}"><i data-lucide="paperclip"></i></span>`).join('')
+    + (fs.length > 1 ? `<span class="clip">${fs.length} files</span>` : '');
+}
+
 function renderCerts() {
   const m = M[cur];
   const el = document.getElementById('d-certs');
@@ -490,7 +534,7 @@ function renderCerts() {
   el.innerHTML = m.certs.map((c, j) => {
     const s = status(c.expiry);
     return `<tr>
-      <td><div class="ct-nm"><span class="ct-ic"><i data-lucide="award"></i></span>${c.name}${c.level ? `<span class="lvl-chip">${c.level}</span>` : ''}</div></td>
+      <td><div class="ct-nm"><span class="ct-ic"><i data-lucide="award"></i></span>${c.name}${c.level ? `<span class="lvl-chip">${c.level}</span>` : ''}${proofCell(c)}</div></td>
       <td class="ct-dt">${fmt(c.issued) || '<span class="ct-never">—</span>'}</td>
       <td class="ct-dt">${fmt(c.expiry) || '<span class="ct-never">Never</span>'}</td>
       <td><span class="chip ${CLS[s]}"><i data-lucide="${ICON[s]}"></i>${LBL[s]}</span></td>
@@ -512,9 +556,46 @@ function showAdd() {
   document.getElementById('a-iss').value = '';
   document.getElementById('a-exp').value = '';
   document.getElementById('a-warn').classList.remove('on');
+  clearFiles();
   document.getElementById('addbox').classList.add('on');
   document.getElementById('add-btn').style.display = 'none';
 }
+let pending = [];   // files chosen but not yet attached to a certificate
+
+const fmtSize = b => b < 1024 ? b + ' B'
+  : b < 1048576 ? (b/1024).toFixed(0) + ' KB'
+  : (b/1048576).toFixed(1) + ' MB';
+
+function onFiles(list) {
+  // Object URLs let the prototype open what was attached; revoked on removal
+  for (const f of list) pending.push({ name:f.name, size:f.size, url:URL.createObjectURL(f) });
+  renderFiles();
+}
+
+function renderFiles() {
+  document.getElementById('a-files').innerHTML = pending.map((f, i) => `
+    <div class="f-row">
+      <span class="f-ic"><i data-lucide="${/\.pdf$/i.test(f.name) ? 'file-text' : 'image'}"></i></span>
+      <span class="f-nm" title="${f.name}">${f.name}</span>
+      <span class="f-sz">${fmtSize(f.size)}</span>
+      <button class="f-rm" title="Remove" onclick="rmFile(${i})"><i data-lucide="x"></i></button>
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function rmFile(i) {
+  if (pending[i].url) URL.revokeObjectURL(pending[i].url);
+  pending.splice(i, 1);
+  renderFiles();
+}
+
+function clearFiles() {
+  pending.forEach(f => f.url && URL.revokeObjectURL(f.url));
+  pending = [];
+  const box = document.getElementById('a-files');
+  if (box) box.innerHTML = '';
+}
+
 /* Only laddered certificates ask for a level */
 function onCertPick() {
   const sel = document.getElementById('a-cert');
@@ -531,6 +612,9 @@ function onCertPick() {
 }
 
 function hideAdd() {
+  // Abandoning the form must not leak the object URLs it created. addCert()
+  // empties pending first, so a saved certificate keeps its files.
+  clearFiles();
   document.getElementById('addbox').classList.remove('on');
   document.getElementById('add-btn').style.display = '';
 }
@@ -553,7 +637,9 @@ function addCert() {
     level: (lib && lib.levels.length) ? document.getElementById('a-lvl').value : null,
     issued: document.getElementById('a-iss').value || null,
     expiry: document.getElementById('a-exp').value || null,
+    files: pending.slice(),
   });
+  pending = [];   // handed to the record, so do not revoke these URLs
   hideAdd(); renderCerts(); render();
 }
 
