@@ -150,6 +150,55 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
 .util-zero .util-block{background:var(--util-zero-bg);}
 .util-zero .util-pct,.util-zero .util-hrs{color:var(--util-zero-text);}
 
+/* ── Target-utilisation mode ──
+   With "Show against Target" on, the number in each cell becomes
+   Attainment = allocated util % ÷ target %, so the bands below are centred
+   on 100% *of target* rather than 100% of capacity. The hours are untouched. */
+.util-block{position:relative;}
+.td-util[data-tip]:hover::after{opacity:1;}
+.td-util[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% - 6px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10.5px;font-weight:500;line-height:1.5;padding:6px 9px;border-radius:5px;white-space:pre;opacity:0;pointer-events:none;transition:opacity .1s;z-index:40;box-shadow:0 4px 14px rgba(0,0,0,.18);text-align:left;}
+.td-util{position:relative;}
+
+/* Attainment bands. Same ramp as capacity mode so the grid stays learnable:
+   red = past the line, darker = closer to it. */
+.att-over .util-block{background:var(--util-over-bg);}
+.att-over .util-pct,.att-over .util-hrs{color:var(--util-over-text);}
+.att-on   .util-block{background:var(--util-full-bg);}
+.att-on   .util-pct,.att-on   .util-hrs{color:var(--util-full-text);}
+.att-near .util-block{background:var(--util-mid-bg);}
+.att-near .util-pct,.att-near .util-hrs{color:var(--util-mid-text);}
+.att-under .util-block{background:var(--util-low-bg);}
+.att-under .util-pct,.att-under .util-hrs{color:var(--util-low-text);}
+.att-zero .util-block{background:var(--util-zero-bg);}
+.att-zero .util-pct,.att-zero .util-hrs{color:var(--util-zero-text);}
+
+/* Toggle in the toolbar */
+.tgt-toggle{display:inline-flex;align-items:center;gap:7px;padding:4px 9px 4px 7px;border-radius:var(--radius-sm);cursor:pointer;user-select:none;border:1px solid transparent;}
+.tgt-toggle:hover{background:var(--bg);}
+.tgt-toggle.on{background:var(--brand-light);border-color:var(--brand-muted);}
+.tgt-sw{width:28px;height:16px;border-radius:999px;background:var(--border-strong);position:relative;flex-shrink:0;transition:background .14s;}
+.tgt-toggle.on .tgt-sw{background:var(--brand);}
+.tgt-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .14s;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+.tgt-toggle.on .tgt-sw::after{transform:translateX(12px);}
+.tgt-lbl{font-size:12px;font-weight:500;color:var(--text-2);white-space:nowrap;}
+.tgt-toggle.on .tgt-lbl{color:var(--brand-dark);font-weight:600;}
+
+/* The resolved target, shown on the member row so the resolution
+   (member override → role → default) is legible while the toggle is on. */
+.tgt-chip{display:none;align-items:center;gap:4px;margin-top:3px;font-size:10.5px;font-weight:600;line-height:1;}
+body.tgt-on .tgt-chip{display:inline-flex;}
+.tgt-chip-val{color:var(--text-2);font-variant-numeric:tabular-nums;}
+.tgt-chip-src{padding:1px 5px;border-radius:3px;font-size:9.5px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;}
+.src-member{background:var(--brand-light);color:var(--brand-dark);}
+.src-role{background:#E7F0FB;color:#1D4ED8;}
+.src-default{background:#F3F4F6;color:#6B7280;}
+
+/* Legend */
+.legend{flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;gap:14px;height:30px;padding:0 18px;background:var(--surface);border-top:1px solid var(--border);font-size:10.5px;color:var(--text-3);overflow-x:auto;}
+.lg-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.lg-sw{width:16px;height:11px;border-radius:2px;flex-shrink:0;border:1px solid rgba(0,0,0,.06);}
+.lg-note{margin-right:auto;font-weight:500;color:var(--text-3);}
+
 /* ══ Timeline bars ══
    Each week cell is a 7-day track. The duration line runs along the top
    for the row's whole date range; below it, allocation chips cover the
@@ -242,6 +291,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
   </div>
 
   <div class="sub-toolbar-right">
+    <div class="tgt-toggle" id="tgt-toggle" onclick="setTargetMode(!targetMode)" title="Compare each week's planned utilisation against the resolved target">
+      <span class="tgt-sw"></span>
+      <span class="tgt-lbl">Show against Target</span>
+    </div>
+    <div class="tb-divider"></div>
     <button class="icon-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
     <select class="week-select"><option>Week</option><option>Month</option></select>
     <div class="tb-divider"></div>
@@ -262,6 +316,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1
     </table>
   </div>
 </div>
+
+<div class="legend" id="legend"></div>
 
 <script>
 /* ══════════════════════════════════════════════════════════
@@ -295,6 +351,55 @@ const MONTH_COLS = [3,5];
 const N = WEEKS.length;
 const DAYS = N * 7;
 const isWorkday = d => d % 7 < 5;   // day 0 of each week is Monday
+
+/* ══ Target utilisation ══
+   Resolution priority, per the brief: Team Member override if set, else the
+   Role's target, else the tenant default. Resolved once per person and applied
+   to every weekly cell — Target is defined at weekly grain, same as a cell,
+   so nothing is pro-rated inside this view.
+
+   Prototype simplification: a single current value per level. The real model
+   is historized (as-of-date), so a week in the past would resolve against
+   whatever target was active then — see the Roles and Team members screens
+   for the history/audit UI that captures those segments. */
+let targetMode = false;
+
+const TENANT_DEFAULT_TARGET = 75;
+
+/* Keyed by the role as it appears on the member row. */
+const ROLE_TARGETS = {
+  'Senior Digital Building Consultant': 80,
+  'Digital Building Consultant':        80,
+  'Project Manager':                    85,
+  'Regional Service Lead (PM)':         85,
+  // Solution Architect deliberately has no role target, so that person
+  // falls through to the tenant default.
+};
+
+/* Team-member overrides, keyed by member id. */
+const MEMBER_TARGETS = {
+  augie: 90,   // beats the Project Manager role target of 85
+  becca: 60,   // part-time arrangement, well under the role's 85
+};
+
+/* → { pct, src } where src is 'member' | 'role' | 'default'. */
+function resolveTarget(m){
+  if(MEMBER_TARGETS[m.id] != null) return { pct: MEMBER_TARGETS[m.id], src:'member' };
+  const roleName = m.role.split('·')[0].trim();
+  if(ROLE_TARGETS[roleName] != null) return { pct: ROLE_TARGETS[roleName], src:'role' };
+  return { pct: TENANT_DEFAULT_TARGET, src:'default' };
+}
+
+/* Attainment bands, centred on 100% of target rather than 100% of capacity. */
+function attCls(att){
+  if(att >= 110) return 'att-over';
+  if(att >=  90) return 'att-on';
+  if(att >=  60) return 'att-near';
+  if(att >   0)  return 'att-under';
+  return 'att-zero';
+}
+
+const SRC_LABEL = { member:'Member', role:'Role', default:'Default' };
 
 /* Rows are described in whole days across the visible range.
      dur     — [firstDay, lastDay] the project/budget runs; the thin line
@@ -649,11 +754,24 @@ function renderBody(){
 
     // Utilisation always reflects every allocation, in scope or not, so the
     // person's true load is never understated.
+    const tgt = resolveTarget(m);
+
     const utilCells = WEEKS.map((w,i)=>{
       const mins = m.projects.reduce((s,p)=>s+projWeekMins(p,i),0);
       const pct  = Math.round(mins/capMins*100);
-      return `<td class="td-util ${utilCls(pct)}" style="border-right:${rightBorder(i)}">
-                <div class="util-block"><span class="util-pct">${pct}%</span><span class="util-hrs">(${fmtMins(mins)})</span></div>
+
+      // Off: the raw allocated utilisation. On: attainment against target.
+      // The hours stay the same either way — only the % changes meaning.
+      const att  = Math.round(pct / tgt.pct * 100);
+      const show = targetMode ? att : pct;
+      const cls  = targetMode ? attCls(att) : utilCls(pct);
+
+      const tip = targetMode
+        ? `${fmtMins(mins)} of ${m.capHrs}h capacity = ${pct}% planned\nTarget ${tgt.pct}% (${SRC_LABEL[tgt.src]}) = ${fmtMins(Math.round(capMins*tgt.pct/100))}\n${pct}% ÷ ${tgt.pct}% = ${att}% of target`
+        : `${fmtMins(mins)} of ${m.capHrs}h capacity = ${pct}% planned`;
+
+      return `<td class="td-util ${cls}" style="border-right:${rightBorder(i)}" data-tip="${tip}">
+                <div class="util-block"><span class="util-pct">${show}%</span><span class="util-hrs">(${fmtMins(mins)})</span></div>
               </td>`;
     }).join('');
 
@@ -668,6 +786,10 @@ function renderBody(){
             <div class="member-info">
               <div class="member-name">${m.name}</div>
               <div class="member-role">${m.role}</div>
+              <div class="tgt-chip">
+                <span class="tgt-chip-val">Target ${tgt.pct}%</span>
+                <span class="tgt-chip-src src-${tgt.src}">${SRC_LABEL[tgt.src]}</span>
+              </div>
             </div>
           </div>
         </td>
@@ -752,6 +874,45 @@ function setScope(scope){
   renderBody();
 }
 
+/* ── Target mode ──
+   Flipping the toggle only changes what the cell's number is measured
+   against; the grid, its hours, and the hierarchy below are unaffected. */
+function setTargetMode(on){
+  targetMode = on;
+  document.getElementById('tgt-toggle').classList.toggle('on', on);
+  document.body.classList.toggle('tgt-on', on);
+  renderBody();
+  renderLegend();
+}
+
+const LEGEND_CAPACITY = [
+  { sw:'var(--util-over-bg)',  t:'> 100%'   },
+  { sw:'var(--util-full-bg)',  t:'81–100%'  },
+  { sw:'var(--util-mid-bg)',   t:'51–80%'   },
+  { sw:'var(--util-low-bg)',   t:'0–50%'    },
+  { sw:'var(--util-zero-bg)',  t:'0%'       },
+];
+const LEGEND_TARGET = [
+  { sw:'var(--util-over-bg)',  t:'≥ 110% of target' },
+  { sw:'var(--util-full-bg)',  t:'90–109% · on target' },
+  { sw:'var(--util-mid-bg)',   t:'60–89%'   },
+  { sw:'var(--util-low-bg)',   t:'1–59%'    },
+  { sw:'var(--util-zero-bg)',  t:'0%'       },
+];
+
+function renderLegend(){
+  const items = targetMode ? LEGEND_TARGET : LEGEND_CAPACITY;
+  const note  = targetMode
+    ? 'Each % is planned utilisation ÷ target. Hours are unchanged.'
+    : 'Each % is planned utilisation against capacity.';
+  document.getElementById('legend').innerHTML =
+    `<span class="lg-note">${note}</span>` +
+    items.map(i=>`<span class="lg-item"><span class="lg-sw" style="background:${i.sw}"></span>${i.t}</span>`).join('') +
+    `<span class="lg-item"><span class="lg-sw" style="background:#FDE68A"></span>Partners</span>` +
+    `<span class="lg-item"><span class="lg-sw" style="background:#FFEDD5"></span>Placeholder</span>` +
+    `<span class="lg-item"><span class="lg-sw" style="background:#DBEAFE"></span>Soft allocated</span>`;
+}
+
 /* Measure the rendered month-row height and pin the week row to it, rather
    than trusting the CSS approximation across browsers and zoom levels. */
 function fixWeekTop(){
@@ -762,7 +923,8 @@ function fixWeekTop(){
 }
 
 renderHeader();
-renderBody();
+// ?target=1 opens straight into target mode, so a link can share either view.
+setTargetMode(new URLSearchParams(location.search).get('target') === '1');
 requestAnimationFrame(fixWeekTop);
 </script>
 </body>
