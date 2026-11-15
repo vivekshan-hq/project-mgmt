@@ -10,9 +10,10 @@ body{padding-top:36px;box-sizing:border-box;}
   <span class="proto-nav-label">Target Utilisation</span>
   <a href="roles-placeholders.html" id="nav-roles">Roles &amp; Placeholders</a>
   <a href="team-members-util.html" id="nav-members">Team Members</a>
+  <a href="rm-people.html" id="nav-people">People grid</a>
   <a href="util-report.html" id="nav-report">Utilisation Report</a>
 </div>
-<script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
+<script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","rm-people.html":"nav-people","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
 
 <title>Team Member Utilisation</title>
 <style>
@@ -449,9 +450,9 @@ body{padding-top:36px;box-sizing:border-box;}
 
   .drawer {
     position: fixed;
-    top: 0;
+    top: 36px;
     right: 0;
-    height: 100vh;
+    height: calc(100vh - 36px);
     width: 520px;
     background: var(--bg);
     border-left: 1px solid var(--border);
@@ -509,11 +510,11 @@ body{padding-top:36px;box-sizing:border-box;}
     padding: 16px 24px;
     border-bottom: 1px solid var(--border);
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
     gap: 12px;
     flex-shrink: 0;
-    flex-wrap: wrap;
   }
+  .form-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
   .form-field {
     display: flex;
     flex-direction: column;
@@ -534,6 +535,30 @@ body{padding-top:36px;box-sizing:border-box;}
     transition: border-color var(--transition);
   }
   .pct-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,111,224,.15); }
+  /* Effective-mode switch: one open-ended date, or a bounded range. */
+  .eff-seg {
+    display: inline-flex; padding: 2px; gap: 2px;
+    background: var(--bg-sidebar); border: 1px solid var(--border);
+    border-radius: 7px;
+  }
+  .eff-seg button {
+    border: none; background: none; cursor: pointer;
+    padding: 4px 10px; border-radius: 5px;
+    font-family: var(--font); font-size: 11.5px; font-weight: 500;
+    color: var(--text-secondary); white-space: nowrap;
+    transition: background var(--transition), color var(--transition);
+  }
+  .eff-seg button:hover { color: var(--text-primary); }
+  .eff-seg button.active { background: var(--bg); color: var(--text-primary); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.07); }
+  .date-row { display: flex; align-items: center; gap: 7px; }
+  .date-sep { font-size: 12px; color: var(--text-muted); }
+  .drawer-form.mode-from .range-only { display: none; }
+  .form-hint { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin-top: -4px; }
+  .range-badge {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    background: #EEF2FF; color: #4338CA; font-size: 10px; font-weight: 600;
+    letter-spacing: .02em; text-transform: uppercase;
+  }
   .pct-input {
     width: 80px;
     border: none;
@@ -567,6 +592,7 @@ body{padding-top:36px;box-sizing:border-box;}
   .date-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,111,224,.15); }
   .save-btn {
     height: 32px;
+    align-self: flex-end;
     padding: 0 16px;
     background: var(--accent);
     color: white;
@@ -965,19 +991,35 @@ body{padding-top:36px;box-sizing:border-box;}
   </div>
 
   <!-- Set-value form -->
-  <div class="drawer-form">
-    <div class="form-field">
-      <label class="form-label" for="util-input">Target utilisation</label>
-      <div class="pct-wrap">
-        <input class="pct-input" id="util-input" type="number" min="0" max="100" step="1" value="85" placeholder="0">
-        <span class="pct-suffix">%</span>
+  <div class="drawer-form mode-from" id="drawer-form">
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label" for="util-input">Target utilisation</label>
+        <div class="pct-wrap">
+          <input class="pct-input" id="util-input" type="number" min="0" max="100" step="1" value="85" placeholder="0">
+          <span class="pct-suffix">%</span>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Effective</label>
+        <div class="eff-seg" id="eff-seg">
+          <button type="button" class="active" data-mode="from">From a date</button>
+          <button type="button" data-mode="range">Date range</button>
+        </div>
       </div>
     </div>
-    <div class="form-field">
-      <label class="form-label" for="date-input">Effective from</label>
-      <input class="date-input" id="date-input" type="date" value="2026-09-01">
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label" id="date-label" for="date-input">Effective from</label>
+        <div class="date-row">
+          <input class="date-input" id="date-input" type="date">
+          <span class="date-sep range-only">to</span>
+          <input class="date-input range-only" id="date-end" type="date">
+        </div>
+      </div>
+      <button class="save-btn" id="save-btn">Save</button>
     </div>
-    <button class="save-btn" id="save-btn">Save</button>
+    <div class="form-hint" id="form-hint">Overrides the role's target from this date onwards.</div>
   </div>
 
   <!-- Segmented tab control -->
@@ -1040,16 +1082,105 @@ body{padding-top:36px;box-sizing:border-box;}
   let memberAudit   = {};
   let openDotsBtn   = null;     // currently open ⋯ button
 
-  /* Pre-seed from data attrs */
+  /* ══ Target utilisation — historized, as-of-date ══
+
+     A member's target is a list of dated segments. A segment either sets an
+     explicit override or defers to the role ("Follows role"); resolution at
+     read time is Team Member override if set, else the Role's target.
+
+     Saving never rewrites the past — it clips, splits or closes the segments
+     it overlaps, so a past date keeps whatever target was active then:
+
+       "From a date" → open-ended; applies from that date onwards.
+       "Date range"  → bounded; whatever applied before the range resumes
+                       once it ends (usually, falling back to the role).
+
+     Segments are { pct, follows, rolePct, from, to, ranged } with ISO dates
+     and to === null meaning open-ended. */
+
+  let effMode = 'from';
+
+  /* ── Date helpers ──
+     Built from local components, never toISOString(): the date inputs are
+     local-midnight values, so a UTC round-trip slides them back a day for
+     anyone east of Greenwich and every boundary lands one day early. */
+  const iso    = d => d.getFullYear() + '-' +
+                      String(d.getMonth()+1).padStart(2,'0') + '-' +
+                      String(d.getDate()).padStart(2,'0');
+  const parseD = v => new Date(v + 'T00:00:00');
+  const shift  = (v,n) => { const d = parseD(v); d.setDate(d.getDate()+n); return iso(d); };
+  const beforeD = (a,b) => parseD(a) < parseD(b);
+  const afterD  = (a,b) => parseD(a) > parseD(b);
+  const MONTHS  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const pretty  = v => { const d = parseD(v);
+    return String(d.getDate()).padStart(2,'0') + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear(); };
+
+  /* Lay a new segment over the existing ones, clipping and splitting. */
+  function overlaySegments(segments, add) {
+    const out = [];
+    segments.forEach(seg => {
+      const endsBefore  = seg.to !== null && beforeD(seg.to, add.from);
+      const startsAfter = add.to !== null && afterD(seg.from, add.to);
+      if (endsBefore || startsAfter) { out.push(seg); return; }
+      if (beforeD(seg.from, add.from)) {
+        out.push(Object.assign({}, seg, { to: shift(add.from, -1) }));
+      }
+      // What makes the prior value resume when a bounded range ends.
+      if (add.to !== null && (seg.to === null || afterD(seg.to, add.to))) {
+        out.push(Object.assign({}, seg, { from: shift(add.to, 1) }));
+      }
+    });
+    out.push(add);
+    out.sort((a,b) => parseD(b.from) - parseD(a.from));
+    return out;
+  }
+
+  const ROLE_TARGET = { 'Engineer':80, 'Customer success':70, 'Project Manager':85 };
+  const memberRole  = {};
+
+  memberHistory = {
+    'Paul':   [ {pct:85, follows:false, from:'2026-09-01', to:null},
+                {follows:true, rolePct:80, from:'2026-01-01', to:'2026-08-31'} ],
+    'Rachel': [ {pct:72, follows:false, from:'2026-09-01', to:null},
+                {follows:true, rolePct:70, from:'2026-01-01', to:'2026-08-31'} ],
+    'Vivek Shanmugasundaram':
+              [ {pct:90, follows:false, from:'2026-09-01', to:null},
+                {follows:true, rolePct:85, from:'2026-01-01', to:'2026-08-31'} ],
+  };
+
   document.querySelectorAll('#member-table-body tr').forEach(tr => {
     const name = tr.dataset.member;
-    memberHistory[name] = JSON.parse(tr.dataset.history);
-    memberAudit[name]   = JSON.parse(tr.dataset.audit);
+    memberRole[name]  = tr.dataset.role;
+    memberAudit[name] = JSON.parse(tr.dataset.audit);
   });
 
   /* ── Today's date for date input default ──────────────────── */
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = iso(new Date());
   document.getElementById('date-input').value = todayISO;
+
+  /* The segment covering today. */
+  function currentSeg(segs) {
+    return segs.find(s => !beforeD(todayISO, s.from) &&
+                          (s.to === null || !afterD(todayISO, s.to))) || null;
+  }
+
+  function setEffMode(mode) {
+    effMode = mode;
+    const form = document.getElementById('drawer-form');
+    form.classList.toggle('mode-from', mode === 'from');
+    document.querySelectorAll('#eff-seg button').forEach(b =>
+      b.classList.toggle('active', b.dataset.mode === mode));
+    document.getElementById('date-label').textContent =
+      mode === 'from' ? 'Effective from' : 'Effective between';
+    document.getElementById('form-hint').textContent = mode === 'from'
+      ? "Overrides the role's target from this date onwards."
+      : "Overrides the role's target only inside the range. When it ends, whatever applied before resumes.";
+  }
+
+  document.getElementById('eff-seg').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b) setEffMode(b.dataset.mode);
+  });
 
   /* ── Dropdown ──────────────────────────────────────────────── */
   const dropdown = document.getElementById('dropdown');
@@ -1122,12 +1253,14 @@ body{padding-top:36px;box-sizing:border-box;}
     renderAudit(memberName);
     // Reset seg to history tab
     switchTab('history');
-    // Set default util from first history row
-    const hist = memberHistory[memberName];
-    if (hist && hist[0] && hist[0].util) {
-      document.getElementById('util-input').value = parseInt(hist[0].util);
-    }
+    // Seed the input from whatever applies today
+    const cur = currentSeg(memberHistory[memberName] || []);
+    document.getElementById('util-input').value =
+      cur ? (cur.follows ? cur.rolePct : cur.pct)
+          : (ROLE_TARGET[memberRole[memberName]] || '');
     document.getElementById('date-input').value = todayISO;
+    document.getElementById('date-end').value = '';
+    setEffMode('from');
     overlay.classList.add('visible');
     drawer.classList.add('open');
   }
@@ -1167,32 +1300,30 @@ body{padding-top:36px;box-sizing:border-box;}
   }
 
   /* ── Render helpers ────────────────────────────────────────── */
-  function fmtEffective(row) {
-    if (row.to) return row.from + ' – ' + row.to;
-    return row.from + ' onwards';
+  function fmtEffective(seg) {
+    return seg.to === null ? pretty(seg.from) + ' onwards'
+                           : pretty(seg.from) + ' – ' + pretty(seg.to);
   }
 
   function renderHistory(memberName) {
     const tbody = document.getElementById('history-tbody');
-    const rows  = memberHistory[memberName] || [];
-    tbody.innerHTML = rows.map((row, i) => {
-      const isFirst = i === 0;
-      const utilCell = row.util_follows
-        ? `<div class="follows-role-main">Follows role</div>
-           <div class="follows-role-val">${row.role_pct}</div>`
-        : `<span style="font-weight:500;font-variant-numeric:tabular-nums">${row.util}</span>`;
+    const segs  = memberHistory[memberName] || [];
+    const cur   = currentSeg(segs);
 
-      const effectiveStr = fmtEffective(row);
-      const badgeHtml = isFirst
-        ? `<span class="current-badge">Current</span>`
-        : '';
+    tbody.innerHTML = segs.map(seg => {
+      const utilCell = seg.follows
+        ? `<div class="follows-role-main">Follows role</div>
+           <div class="follows-role-val">${seg.rolePct}%</div>`
+        : `<span style="font-weight:500;font-variant-numeric:tabular-nums">${seg.pct}%</span>`;
 
       return `<tr>
         <td>${utilCell}</td>
-        <td><span class="mode-label">${row.mode}</span></td>
+        <td><span class="mode-label">${seg.follows ? 'Follows role' : 'Custom'}</span></td>
         <td>
           <div class="effective-cell">
-            <span>${effectiveStr}</span>${badgeHtml}
+            <span>${fmtEffective(seg)}</span>
+            ${seg === cur ? '<span class="current-badge">Current</span>' : ''}
+            ${seg.ranged ? '<span class="range-badge">Range</span>' : ''}
           </div>
         </td>
       </tr>`;
@@ -1223,42 +1354,34 @@ body{padding-top:36px;box-sizing:border-box;}
   /* ── Save button ───────────────────────────────────────────── */
   document.getElementById('save-btn').addEventListener('click', () => {
     const memberName = eyebrow.textContent;
-    const pct  = parseInt(document.getElementById('util-input').value);
-    const date = document.getElementById('date-input').value;
-    if (isNaN(pct) || pct < 0 || pct > 100 || !date) return;
+    const pct  = parseInt(document.getElementById('util-input').value, 10);
+    const from = document.getElementById('date-input').value;
+    const to   = effMode === 'range' ? document.getElementById('date-end').value : null;
+    if (isNaN(pct) || pct < 0 || pct > 100 || !from) return;
+    if (effMode === 'range') {
+      if (!to) return;
+      if (beforeD(to, from)) { alert('The end date must fall on or after the start date.'); return; }
+    }
 
-    // Format date nicely
-    const d = new Date(date + 'T00:00:00');
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const fmtDate = String(d.getDate()).padStart(2,'0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    memberHistory[memberName] = overlaySegments(memberHistory[memberName] || [], {
+      pct, follows: false, from, to, ranged: effMode === 'range',
+    });
 
     const now = new Date();
-    const fmtNow = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear()
-      + ', ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0') + ' '
+    const fmtNow = now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear()
+      + ', ' + (now.getHours() % 12 || 12) + ':' + String(now.getMinutes()).padStart(2,'0') + ' '
       + (now.getHours() < 12 ? 'AM' : 'PM');
 
-    // Update history: remove Current from previous first, prepend new
-    const hist = memberHistory[memberName];
-    // The previous "current" row stays but now has a to-date: one day before new from
-    if (hist.length > 0 && hist[0].util) {
-      hist[0].to = String(d.getDate() > 1
-        ? String(d.getDate()-1).padStart(2,'0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
-        : '28 ' + months[(d.getMonth() + 11) % 12] + ' ' + (d.getMonth() === 0 ? d.getFullYear()-1 : d.getFullYear()));
-    }
-    hist.unshift({ util: pct + '%', mode: 'Custom', from: fmtDate, to: null });
-
-    // Update audit log
-    const audit = memberAudit[memberName];
-    audit.unshift({
+    memberAudit[memberName].unshift({
       util: pct + '% (Custom)',
-      effective: fmtDate + ' onwards',
+      effective: to === null ? pretty(from) + ' onwards'
+                             : pretty(from) + ' – ' + pretty(to),
       by: 'Vivek Shanmugasundaram',
       by_init: 'VS',
       by_color: '#2563EB',
-      when: fmtNow
+      when: fmtNow,
     });
 
-    // Re-render
     renderHistory(memberName);
     renderAudit(memberName);
 

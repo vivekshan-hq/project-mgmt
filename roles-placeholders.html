@@ -10,9 +10,10 @@ body{padding-top:36px;box-sizing:border-box;}
   <span class="proto-nav-label">Target Utilisation</span>
   <a href="roles-placeholders.html" id="nav-roles">Roles &amp; Placeholders</a>
   <a href="team-members-util.html" id="nav-members">Team Members</a>
+  <a href="rm-people.html" id="nav-people">People grid</a>
   <a href="util-report.html" id="nav-report">Utilisation Report</a>
 </div>
-<script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
+<script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","rm-people.html":"nav-people","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
 
 <title>Roles & Placeholders</title>
 <style>
@@ -250,7 +251,7 @@ body{padding-top:36px;box-sizing:border-box;}
   .overlay.open { opacity: 1; pointer-events: auto; }
 
   .drawer {
-    position: fixed; top: 0; right: 0; bottom: 0;
+    position: fixed; top: 36px; right: 0; bottom: 0;
     width: 520px;
     background: var(--bg-drawer);
     border-left: 1px solid var(--border);
@@ -282,8 +283,9 @@ body{padding-top:36px;box-sizing:border-box;}
   .set-form {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border);
-    display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
+    display: flex; flex-direction: column; gap: 12px;
   }
+  .set-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 
   .form-field { display: flex; flex-direction: column; gap: 5px; }
   .form-label { font-size: 12px; font-weight: 600; color: var(--text-primary); }
@@ -312,6 +314,38 @@ body{padding-top:36px;box-sizing:border-box;}
     transition: border-color 0.15s; width: 160px;
   }
   .date-input:focus { border-color: var(--accent); }
+
+  /* Effective-mode switch: a single open-ended date, or a bounded range. */
+  .eff-seg {
+    display: inline-flex; padding: 2px; gap: 2px;
+    background: var(--bg-sidebar); border: 1px solid var(--border);
+    border-radius: 7px;
+  }
+  .eff-seg button {
+    border: none; background: none; cursor: pointer;
+    padding: 4px 10px; border-radius: 5px;
+    font-family: inherit; font-size: 11.5px; font-weight: 500;
+    color: var(--text-secondary); white-space: nowrap; transition: background .12s, color .12s;
+  }
+  .eff-seg button:hover { color: var(--text-primary); }
+  .eff-seg button.active { background: var(--bg); color: var(--text-primary); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.07); }
+
+  .date-row { display: flex; align-items: center; gap: 7px; }
+  .date-sep { font-size: 12px; color: var(--text-muted); }
+  .set-form.mode-from .range-only { display: none; }
+
+  .form-hint {
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin-top: -4px;
+  }
+
+  /* A bounded segment reads differently from an open-ended one. */
+  .range-badge {
+    display: inline-block; margin-left: 7px; padding: 1px 6px; border-radius: 3px;
+    background: #EEF2FF; color: #4338CA; font-size: 10px; font-weight: 600;
+    letter-spacing: .02em; text-transform: uppercase;
+  }
+  .revert-row td { background: var(--bg-sidebar); }
+  .revert-note { color: var(--text-muted); font-size: 11.5px; font-style: italic; }
 
   .btn-set {
     background: var(--accent); color: white; border: none;
@@ -377,7 +411,7 @@ body{padding-top:36px;box-sizing:border-box;}
 
   /* New role drawer (secondary) */
   .new-role-drawer {
-    position: fixed; top: 0; right: 0; bottom: 0; width: 360px;
+    position: fixed; top: 36px; right: 0; bottom: 0; width: 360px;
     background: var(--bg-drawer); border-left: 1px solid var(--border);
     box-shadow: var(--shadow-drawer); z-index: 40;
     display: flex; flex-direction: column;
@@ -512,10 +546,11 @@ body{padding-top:36px;box-sizing:border-box;}
       <table>
         <thead>
           <tr>
-            <th style="width:38%">Role</th>
-            <th style="width:13%">Members</th>
-            <th style="width:22%">Use as placeholders</th>
-            <th style="width:22%">Available to partners</th>
+            <th style="width:30%">Role</th>
+            <th style="width:15%">Target utilisation</th>
+            <th style="width:10%">Members</th>
+            <th style="width:20%">Use as placeholders</th>
+            <th style="width:20%">Available to partners</th>
             <th style="width:5%"></th>
           </tr>
         </thead>
@@ -523,6 +558,7 @@ body{padding-top:36px;box-sizing:border-box;}
           <!-- Each row: role data + ellipsis -->
           <tr>
             <td><div class="role-cell"><div class="role-avatar" style="background:#6366F1">PM</div><span class="role-name">Product Manager</span></div></td>
+            <td data-role-target="Product Manager" class="util-val"></td>
             <td class="text-sec">2</td><td>Yes</td><td>Yes</td>
             <td class="row-actions">
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-pm')">⋯</button>
@@ -546,6 +582,7 @@ body{padding-top:36px;box-sizing:border-box;}
           </tr>
           <tr>
             <td><div class="role-cell"><div class="role-avatar" style="background:#0EA5E9">CS</div><span class="role-name">Customer success</span></div></td>
+            <td data-role-target="Customer success" class="util-val"></td>
             <td class="text-sec">3</td><td>Yes</td><td>Yes</td>
             <td class="row-actions">
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-cs')">⋯</button>
@@ -561,6 +598,7 @@ body{padding-top:36px;box-sizing:border-box;}
           </tr>
           <tr>
             <td><div class="role-cell"><div class="role-avatar" style="background:#10B981">E</div><span class="role-name">Engineer</span></div></td>
+            <td data-role-target="Engineer" class="util-val"></td>
             <td class="text-sec">1</td><td>Yes</td><td>Yes</td>
             <td class="row-actions">
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-eng')">⋯</button>
@@ -576,6 +614,7 @@ body{padding-top:36px;box-sizing:border-box;}
           </tr>
           <tr>
             <td><div class="role-cell"><div class="role-avatar" style="background:#6366F1">PM</div><span class="role-name">Project Manager</span></div></td>
+            <td data-role-target="Project Manager" class="util-val"></td>
             <td class="text-sec">1</td><td>Yes</td><td>Yes</td>
             <td class="row-actions">
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-pjm')">⋯</button>
@@ -591,6 +630,7 @@ body{padding-top:36px;box-sizing:border-box;}
           </tr>
           <tr>
             <td><div class="role-cell"><div class="role-avatar" style="background:#F59E0B">IM</div><span class="role-name">Implementation Manager</span></div></td>
+            <td data-role-target="Implementation Manager" class="util-val"></td>
             <td class="text-sec">2</td><td>Yes</td><td>Yes</td>
             <td class="row-actions">
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-im')">⋯</button>
@@ -606,6 +646,7 @@ body{padding-top:36px;box-sizing:border-box;}
           </tr>
           <tr>
             <td><div class="role-cell"><div class="role-avatar" style="background:#EF4444">S</div><span class="role-name">Sales</span></div></td>
+            <td data-role-target="Sales" class="util-val"></td>
             <td class="text-sec">0</td><td>Yes</td><td>Yes</td>
             <td class="row-actions">
               <button class="ellipsis-btn" onclick="toggleMenu(event,'menu-sales')">⋯</button>
@@ -639,19 +680,35 @@ body{padding-top:36px;box-sizing:border-box;}
   </div>
 
   <!-- Set new value -->
-  <div class="set-form">
-    <div class="form-field">
-      <div class="form-label">Target utilisation</div>
-      <div class="pct-wrap">
-        <input class="pct-input" type="number" min="0" max="100" placeholder="e.g. 80" id="util-pct-input" />
-        <span class="pct-sfx">%</span>
+  <div class="set-form mode-from" id="set-form">
+    <div class="set-row">
+      <div class="form-field">
+        <div class="form-label">Target utilisation</div>
+        <div class="pct-wrap">
+          <input class="pct-input" type="number" min="0" max="100" placeholder="e.g. 80" id="util-pct-input" />
+          <span class="pct-sfx">%</span>
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Effective</div>
+        <div class="eff-seg" id="eff-seg">
+          <button type="button" class="active" onclick="setEffMode('from')">From a date</button>
+          <button type="button" onclick="setEffMode('range')">Date range</button>
+        </div>
       </div>
     </div>
-    <div class="form-field">
-      <div class="form-label">Effective from</div>
-      <input class="date-input" type="date" id="util-date-input" />
+    <div class="set-row">
+      <div class="form-field">
+        <div class="form-label" id="date-label">Effective from</div>
+        <div class="date-row">
+          <input class="date-input" type="date" id="util-date-input" />
+          <span class="date-sep range-only">to</span>
+          <input class="date-input range-only" type="date" id="util-date-end" />
+        </div>
+      </div>
+      <button class="btn-set" onclick="applyUtil()">Save</button>
     </div>
-    <button class="btn-set" onclick="applyUtil()">Save</button>
+    <div class="form-hint" id="form-hint">Applies from this date onwards, until a later value replaces it.</div>
   </div>
 
   <!-- Tabs -->
@@ -670,16 +727,7 @@ body{padding-top:36px;box-sizing:border-box;}
             <th>Effective</th>
           </tr>
         </thead>
-        <tbody id="history-tbody">
-          <tr>
-            <td><span class="util-val">80%</span></td>
-            <td><span class="eff-date">01 Sep 2026 onwards</span><span class="current-badge">Current</span></td>
-          </tr>
-          <tr>
-            <td><span class="util-val">75%</span></td>
-            <td><span class="eff-date">01 Jan 2026 – 31 Aug 2026</span></td>
-          </tr>
-        </tbody>
+        <tbody id="history-tbody"></tbody>
       </table>
     </div>
 
@@ -694,20 +742,7 @@ body{padding-top:36px;box-sizing:border-box;}
             <th>Changed date</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td><span class="util-val">80%</span></td>
-            <td><span class="eff-date">01 Sep 2026 onwards</span></td>
-            <td><div class="person-cell"><div class="person-avatar">VS</div>Vivek</div></td>
-            <td><span class="changed-date">1 Sep 2026, 9:15 AM</span></td>
-          </tr>
-          <tr>
-            <td><span class="util-val">75%</span></td>
-            <td><span class="eff-date">01 Jan 2026 onwards</span></td>
-            <td><div class="person-cell"><div class="person-avatar" style="background:#0EA5E9">SS</div>Srinath Srinivasarao</div></td>
-            <td><span class="changed-date">2 Jan 2026, 10:02 AM</span></td>
-          </tr>
-        </tbody>
+        <tbody id="audit-tbody"></tbody>
       </table>
     </div>
   </div>
@@ -751,17 +786,162 @@ body{padding-top:36px;box-sizing:border-box;}
 </div>
 
 <script>
+  /* ══════════════════════════════════════════════════════════
+     Target utilisation — historized, as-of-date
+
+     A role's target is a list of dated segments, not a single value.
+     Saving never rewrites the past: it clips, splits or closes the
+     segments it overlaps, so whatever was active on a past date stays
+     tied to that date.
+
+       "From a date"  → an open-ended segment; everything from that date
+                        onwards becomes the new value.
+       "Date range"   → a bounded segment; the value that was in effect
+                        before the range resumes once the range ends.
+
+     Segments are held as { pct, from, to } with ISO dates and to === null
+     meaning open-ended.
+     ══════════════════════════════════════════════════════════ */
+
+  let effMode = 'from';         // 'from' | 'range'
+  let activeRole = null;
+
+  /* Seeded per role, newest first. */
+  const ROLE_HISTORY = {
+    'Product Manager':        [ {pct:80, from:'2026-09-01', to:null}, {pct:75, from:'2026-01-01', to:'2026-08-31'} ],
+    'Customer success':       [ {pct:70, from:'2026-01-01', to:null} ],
+    'Engineer':               [ {pct:85, from:'2026-04-01', to:null}, {pct:80, from:'2026-01-01', to:'2026-03-31'} ],
+    'Project Manager':        [ {pct:85, from:'2026-01-01', to:null} ],
+    'Implementation Manager': [ {pct:90, from:'2026-07-01', to:null}, {pct:85, from:'2026-01-01', to:'2026-06-30'} ],
+    'Sales':                  [ {pct:60, from:'2026-01-01', to:null} ],
+  };
+
+  const ROLE_AUDIT = {
+    'Product Manager':        [ {pct:80, eff:'01 Sep 2026 onwards',           by:'Vivek', init:'VS', colour:'#2563EB', when:'1 Sep 2026, 9:15 AM'},
+                                {pct:75, eff:'01 Jan 2026 onwards',           by:'Srinath Srinivasarao', init:'SS', colour:'#0EA5E9', when:'2 Jan 2026, 10:02 AM'} ],
+    'Customer success':       [ {pct:70, eff:'01 Jan 2026 onwards',           by:'Srinath Srinivasarao', init:'SS', colour:'#0EA5E9', when:'2 Jan 2026, 10:06 AM'} ],
+    'Engineer':               [ {pct:85, eff:'01 Apr 2026 onwards',           by:'Vivek', init:'VS', colour:'#2563EB', when:'28 Mar 2026, 4:40 PM'},
+                                {pct:80, eff:'01 Jan 2026 onwards',           by:'Srinath Srinivasarao', init:'SS', colour:'#0EA5E9', when:'2 Jan 2026, 10:08 AM'} ],
+    'Project Manager':        [ {pct:85, eff:'01 Jan 2026 onwards',           by:'Srinath Srinivasarao', init:'SS', colour:'#0EA5E9', when:'2 Jan 2026, 10:12 AM'} ],
+    'Implementation Manager': [ {pct:90, eff:'01 Jul 2026 onwards',           by:'Vivek', init:'VS', colour:'#2563EB', when:'29 Jun 2026, 11:05 AM'},
+                                {pct:85, eff:'01 Jan 2026 onwards',           by:'Srinath Srinivasarao', init:'SS', colour:'#0EA5E9', when:'2 Jan 2026, 10:14 AM'} ],
+    'Sales':                  [ {pct:60, eff:'01 Jan 2026 onwards',           by:'Srinath Srinivasarao', init:'SS', colour:'#0EA5E9', when:'2 Jan 2026, 10:18 AM'} ],
+  };
+
+  /* ── Date helpers ──
+     Formatted from local components, never toISOString(): the inputs are
+     local-midnight dates, so a UTC round-trip slides them back a day for
+     anyone east of Greenwich and every boundary lands one day early. */
+  const iso    = d => d.getFullYear() + '-' +
+                      String(d.getMonth()+1).padStart(2,'0') + '-' +
+                      String(d.getDate()).padStart(2,'0');
+  const parse  = v => new Date(v + 'T00:00:00');
+  const shift  = (v,n) => { const d = parse(v); d.setDate(d.getDate()+n); return iso(d); };
+  const pretty = v => parse(v).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  const before = (a,b) => parse(a) < parse(b);
+  const after  = (a,b) => parse(a) > parse(b);
+
+  /* Lay a new segment over the existing ones, clipping and splitting as
+     needed. Nothing already in the past is recomputed — it is only bounded. */
+  function overlay(segments, add) {
+    const out = [];
+    segments.forEach(seg => {
+      const segEndsBeforeAdd = seg.to !== null && before(seg.to, add.from);
+      const segStartsAfterAdd = add.to !== null && after(seg.from, add.to);
+      if (segEndsBeforeAdd || segStartsAfterAdd) { out.push(seg); return; }
+
+      // Keep the part of this segment that sits before the new one.
+      if (before(seg.from, add.from)) {
+        out.push({ pct: seg.pct, from: seg.from, to: shift(add.from, -1), ranged: seg.ranged });
+      }
+      // Keep the part that sits after a bounded new segment — this is what
+      // makes the old value resume when the range ends.
+      if (add.to !== null && (seg.to === null || after(seg.to, add.to))) {
+        out.push({ pct: seg.pct, from: shift(add.to, 1), to: seg.to, ranged: seg.ranged });
+      }
+    });
+    out.push(add);
+    out.sort((a,b) => parse(b.from) - parse(a.from));
+    return out;
+  }
+
+  function effLabel(seg) {
+    return seg.to === null
+      ? pretty(seg.from) + ' onwards'
+      : pretty(seg.from) + ' – ' + pretty(seg.to);
+  }
+
+  /* The segment covering today, if any — what the roles table shows. */
+  function currentSeg(segments) {
+    const t = iso(new Date());
+    return segments.find(s => !before(t, s.from) && (s.to === null || !after(t, s.to))) || null;
+  }
+
+  function renderHistory() {
+    const segs = ROLE_HISTORY[activeRole] || [];
+    const cur  = currentSeg(segs);
+    document.getElementById('history-tbody').innerHTML = segs.length
+      ? segs.map(seg => `
+          <tr>
+            <td><span class="util-val">${seg.pct}%</span></td>
+            <td>
+              <span class="eff-date">${effLabel(seg)}</span>
+              ${seg === cur ? '<span class="current-badge">Current</span>' : ''}
+              ${seg.ranged ? '<span class="range-badge">Range</span>' : ''}
+            </td>
+          </tr>`).join('')
+      : '<tr><td colspan="2" class="revert-note">No target set for this role.</td></tr>';
+  }
+
+  function renderAudit() {
+    const rows = ROLE_AUDIT[activeRole] || [];
+    document.getElementById('audit-tbody').innerHTML = rows.map(r => `
+      <tr>
+        <td><span class="util-val">${r.pct}%</span></td>
+        <td><span class="eff-date">${r.eff}</span></td>
+        <td><div class="person-cell"><div class="person-avatar" style="background:${r.colour}">${r.init}</div>${r.by}</div></td>
+        <td><span class="changed-date">${r.when}</span></td>
+      </tr>`).join('');
+  }
+
+  /* Keep the roles table's Target column honest after an edit. */
+  function syncRoleTable() {
+    document.querySelectorAll('[data-role-target]').forEach(cell => {
+      const seg = currentSeg(ROLE_HISTORY[cell.dataset.roleTarget] || []);
+      cell.textContent = seg ? seg.pct + '%' : '—';
+      cell.classList.toggle('text-sec', !seg);
+    });
+  }
+
+  function setEffMode(mode) {
+    effMode = mode;
+    const form = document.getElementById('set-form');
+    form.classList.toggle('mode-from',  mode === 'from');
+    form.classList.toggle('mode-range', mode === 'range');
+    document.querySelectorAll('#eff-seg button').forEach((b,i) =>
+      b.classList.toggle('active', (i === 0) === (mode === 'from')));
+    document.getElementById('date-label').textContent =
+      mode === 'from' ? 'Effective from' : 'Effective between';
+    document.getElementById('form-hint').textContent = mode === 'from'
+      ? 'Applies from this date onwards, until a later value replaces it.'
+      : 'Applies only inside the range. When it ends, the previous target resumes.';
+  }
+
   // Set today's date as default
-  const today = new Date().toISOString().split('T')[0];
+  const today = iso(new Date());
   document.getElementById('util-date-input').value = today;
 
   function openUtilDrawer(roleName) {
+    activeRole = roleName;
     document.getElementById('drawer-eyebrow').textContent = roleName;
     document.getElementById('util-drawer').classList.add('open');
     document.getElementById('overlay').classList.add('open');
     // Reset to history tab
     switchTab('history', document.querySelector('.drawer-tab'));
     document.getElementById('util-pct-input').value = '';
+    setEffMode('from');
+    renderHistory();
+    renderAudit();
   }
 
   function openNewRole() {
@@ -789,34 +969,31 @@ body{padding-top:36px;box-sizing:border-box;}
     document.getElementById('tab-audit').classList.toggle('active', tab === 'audit');
   }
 
-  // Apply new utilisation value — prepend to history
+  // Apply a new value over the existing segments
   function applyUtil() {
     const pct = parseInt(document.getElementById('util-pct-input').value, 10);
-    const dateVal = document.getElementById('util-date-input').value;
-    if (isNaN(pct) || pct < 0 || pct > 100 || !dateVal) return;
-
-    const formatted = new Date(dateVal + 'T00:00:00').toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-    const tbody = document.getElementById('history-tbody');
-
-    // Remove existing Current badge
-    tbody.querySelectorAll('.current-badge').forEach(b => b.remove());
-
-    // Update previous top row's effective to end on day before
-    const firstRow = tbody.querySelector('tr');
-    if (firstRow) {
-      const effCell = firstRow.querySelector('.eff-date');
-      const prevText = effCell.textContent.replace(' onwards','');
-      const prevEnd = new Date(dateVal);
-      prevEnd.setDate(prevEnd.getDate() - 1);
-      const prevEndStr = prevEnd.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
-      effCell.textContent = prevText + ' – ' + prevEndStr;
+    const from = document.getElementById('util-date-input').value;
+    const to   = effMode === 'range' ? document.getElementById('util-date-end').value : null;
+    if (isNaN(pct) || pct < 0 || pct > 100 || !from) return;
+    if (effMode === 'range') {
+      if (!to) return;
+      if (before(to, from)) { alert('The end date must fall on or after the start date.'); return; }
     }
 
-    // Insert new row at top
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `<td><span class="util-val">${pct}%</span></td><td><span class="eff-date">${formatted} onwards</span><span class="current-badge">Current</span></td>`;
-    tbody.insertBefore(newRow, tbody.firstChild);
+    ROLE_HISTORY[activeRole] = overlay(ROLE_HISTORY[activeRole] || [],
+                                       {pct, from, to, ranged: effMode === 'range'});
 
+    (ROLE_AUDIT[activeRole] = ROLE_AUDIT[activeRole] || []).unshift({
+      pct,
+      eff: to === null ? pretty(from) + ' onwards' : pretty(from) + ' – ' + pretty(to),
+      by: 'Vivek', init: 'VS', colour: '#2563EB',
+      when: new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) +
+            ', ' + new Date().toLocaleTimeString('en-GB', {hour:'numeric', minute:'2-digit'}),
+    });
+
+    renderHistory();
+    renderAudit();
+    syncRoleTable();
     document.getElementById('util-pct-input').value = '';
   }
 
@@ -839,4 +1016,6 @@ body{padding-top:36px;box-sizing:border-box;}
   }
 
   document.addEventListener('click', closeMenus);
+
+  syncRoleTable();
 </script>
