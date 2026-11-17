@@ -89,11 +89,7 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-1);background:
 .find-avail-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;}
 .find-avail-btn svg{width:13px;height:13px;}
 .sub-toolbar-right{margin-left:auto;display:flex;align-items:center;gap:3px;}
-.week-select,.scope-select{padding:5px 9px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;outline:none;}
-.scope-select{border-style:dashed;border-color:var(--border-strong);color:var(--text-3);}
-.scope-select:focus{border-color:var(--brand);}
-.scope-wrap{display:inline-flex;align-items:center;gap:6px;margin-left:4px;}
-.scope-lbl{font-size:11px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.week-select{padding:5px 9px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;outline:none;}
 .today-btn{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface);cursor:pointer;white-space:nowrap;}
 
 /* ── Layout ── */
@@ -159,19 +155,6 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-1);background:
 .td-util[data-tip]:hover::after{opacity:1;}
 .td-util[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% - 6px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10.5px;font-weight:500;line-height:1.5;padding:6px 9px;border-radius:5px;white-space:pre;opacity:0;pointer-events:none;transition:opacity .1s;z-index:40;box-shadow:0 4px 14px rgba(0,0,0,.18);text-align:left;}
 .td-util{position:relative;}
-
-/* Attainment bands. Same ramp as capacity mode so the grid stays learnable:
-   red = past the line, darker = closer to it. */
-.att-over .util-block{background:var(--util-over-bg);}
-.att-over .util-pct,.att-over .util-hrs{color:var(--util-over-text);}
-.att-on   .util-block{background:var(--util-full-bg);}
-.att-on   .util-pct,.att-on   .util-hrs{color:var(--util-full-text);}
-.att-near .util-block{background:var(--util-mid-bg);}
-.att-near .util-pct,.att-near .util-hrs{color:var(--util-mid-text);}
-.att-under .util-block{background:var(--util-low-bg);}
-.att-under .util-pct,.att-under .util-hrs{color:var(--util-low-text);}
-.att-zero .util-block{background:var(--util-zero-bg);}
-.att-zero .util-pct,.att-zero .util-hrs{color:var(--util-zero-text);}
 
 /* Toggle in the toolbar */
 .tgt-toggle{display:inline-flex;align-items:center;gap:7px;padding:4px 9px 4px 7px;border-radius:var(--radius-sm);cursor:pointer;user-select:none;border:1px solid transparent;}
@@ -298,16 +281,6 @@ body{padding-top:36px;box-sizing:border-box;}
     Find availability
   </button>
 
-  <!-- Prototype control: simulates the viewer's "Can view projects" access scope -->
-  <div class="scope-wrap">
-    <span class="scope-lbl">Can view projects</span>
-    <select class="scope-select" id="scope-select" onchange="setScope(this.value)">
-      <option value="all">All projects</option>
-      <option value="group" selected>Group</option>
-      <option value="participant">Participant</option>
-    </select>
-  </div>
-
   <div class="sub-toolbar-right">
     <div class="tgt-toggle" id="tgt-toggle" onclick="setTargetMode(!targetMode)" title="Compare each week's planned utilisation against the resolved target">
       <span class="tgt-sw"></span>
@@ -357,7 +330,7 @@ body{padding-top:36px;box-sizing:border-box;}
        tier 2 — org-wide visibility required
 ══════════════════════════════════════════════════════════ */
 const SCOPE_LEVEL = { participant:0, group:1, all:2 };
-let viewerScope = 'group';
+const viewerScope = 'group';   // was a prototype dropdown; fixed at its default
 
 const WEEKS = [
   {label:'10–16th'},{label:'17–23rd'},{label:'24–30th'},
@@ -406,15 +379,6 @@ function resolveTarget(m){
   const roleName = m.role.split('·')[0].trim();
   if(ROLE_TARGETS[roleName] != null) return { pct: ROLE_TARGETS[roleName], src:'role' };
   return { pct: TENANT_DEFAULT_TARGET, src:'default' };
-}
-
-/* Attainment bands, centred on 100% of target rather than 100% of capacity. */
-function attCls(att){
-  if(att >= 110) return 'att-over';
-  if(att >=  90) return 'att-on';
-  if(att >=  60) return 'att-near';
-  if(att >   0)  return 'att-under';
-  return 'att-zero';
 }
 
 const SRC_LABEL = { member:'Member', role:'Role', default:'Default' };
@@ -782,7 +746,7 @@ function renderBody(){
       // The hours stay the same either way — only the % changes meaning.
       const att  = Math.round(pct / tgt.pct * 100);
       const show = targetMode ? att : pct;
-      const cls  = targetMode ? attCls(att) : utilCls(pct);
+      const cls  = utilCls(show);
 
       const tip = targetMode
         ? `${fmtMins(mins)} of ${m.capHrs}h capacity = ${pct}% planned\nTarget ${tgt.pct}% (${SRC_LABEL[tgt.src]}) = ${fmtMins(Math.round(capMins*tgt.pct/100))}\n${pct}% ÷ ${tgt.pct}% = ${att}% of target`
@@ -887,11 +851,6 @@ function toggle(key){
   applyState();
 }
 
-function setScope(scope){
-  viewerScope = scope;
-  renderBody();
-}
-
 /* ── Target mode ──
    Flipping the toggle only changes what the cell's number is measured
    against; the grid, its hours, and the hierarchy below are unaffected. */
@@ -903,23 +862,17 @@ function setTargetMode(on){
   renderLegend();
 }
 
-const LEGEND_CAPACITY = [
+/* The same bands in both modes — only what the % is measured against moves. */
+const LEGEND_BANDS = [
   { sw:'var(--util-over-bg)',  t:'> 100%'   },
   { sw:'var(--util-full-bg)',  t:'81–100%'  },
   { sw:'var(--util-mid-bg)',   t:'51–80%'   },
   { sw:'var(--util-low-bg)',   t:'0–50%'    },
   { sw:'var(--util-zero-bg)',  t:'0%'       },
 ];
-const LEGEND_TARGET = [
-  { sw:'var(--util-over-bg)',  t:'≥ 110% of target' },
-  { sw:'var(--util-full-bg)',  t:'90–109% · on target' },
-  { sw:'var(--util-mid-bg)',   t:'60–89%'   },
-  { sw:'var(--util-low-bg)',   t:'1–59%'    },
-  { sw:'var(--util-zero-bg)',  t:'0%'       },
-];
 
 function renderLegend(){
-  const items = targetMode ? LEGEND_TARGET : LEGEND_CAPACITY;
+  const items = LEGEND_BANDS;
   const note  = targetMode
     ? 'Each % is planned utilisation ÷ target. Hours are unchanged.'
     : 'Each % is planned utilisation against capacity.';
