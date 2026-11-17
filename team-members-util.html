@@ -714,8 +714,6 @@ body{padding-top:36px;box-sizing:border-box;}
   .inner-table tbody td:first-child { padding-left: 24px; }
   .inner-table tbody td:last-child  { padding-right: 24px; }
 
-  .follows-role-main { font-size: 13px; color: var(--text-muted); }
-  .follows-role-val  { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
   .mode-label { font-size: 12.5px; color: var(--text-secondary); }
 
   .current-badge {
@@ -892,7 +890,7 @@ body{padding-top:36px;box-sizing:border-box;}
         </thead>
         <tbody id="member-table-body">
           <!-- Row: Paul -->
-          <tr data-member="Paul" data-role="Engineer" data-chip="chip-green" data-history='[{"util":"85%","mode":"Custom","from":"01 Sep 2026","to":null},{"util_follows":true,"role_pct":"80%","mode":"Follows role","from":"01 Jan 2026","to":"31 Aug 2026"}]' data-audit='[{"util":"85% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:15 AM"},{"util":"Follows role (80%)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:02 AM"}]'>
+          <tr data-member="Paul" data-role="Engineer" data-chip="chip-green" data-audit='[{"util":"85% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:15 AM"},{"util":"80% (Role)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:02 AM"}]'>
             <td>
               <div class="member-cell">
                 <div class="avatar avatar-paul">P</div>
@@ -920,7 +918,7 @@ body{padding-top:36px;box-sizing:border-box;}
           </tr>
 
           <!-- Row: Rachel -->
-          <tr data-member="Rachel" data-role="Customer success" data-chip="chip-purple" data-history='[{"util":"72%","mode":"Custom","from":"01 Sep 2026","to":null},{"util_follows":true,"role_pct":"70%","mode":"Follows role","from":"01 Jan 2026","to":"31 Aug 2026"}]' data-audit='[{"util":"72% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:20 AM"},{"util":"Follows role (70%)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:10 AM"}]'>
+          <tr data-member="Rachel" data-role="Customer success" data-chip="chip-purple" data-audit='[{"util":"72% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:20 AM"},{"util":"70% (Role)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:10 AM"}]'>
             <td>
               <div class="member-cell">
                 <div class="avatar avatar-rachel">R</div>
@@ -948,7 +946,7 @@ body{padding-top:36px;box-sizing:border-box;}
           </tr>
 
           <!-- Row: Vivek -->
-          <tr data-member="Vivek Shanmugasundaram" data-role="Project Manager" data-chip="chip-blue" data-history='[{"util":"90%","mode":"Custom","from":"01 Sep 2026","to":null},{"util_follows":true,"role_pct":"85%","mode":"Follows role","from":"01 Jan 2026","to":"31 Aug 2026"}]' data-audit='[{"util":"90% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:30 AM"},{"util":"Follows role (85%)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:15 AM"}]'>
+          <tr data-member="Vivek Shanmugasundaram" data-role="Project Manager" data-chip="chip-blue" data-audit='[{"util":"90% (Custom)","effective":"01 Sep 2026 onwards","by":"Vivek Shanmugasundaram","by_init":"VS","by_color":"#2563EB","when":"1 Sep 2026, 9:30 AM"},{"util":"85% (Role)","effective":"01 Jan 2026 onwards","by":"Srinath Srinivasarao","by_init":"SS","by_color":"#0891B2","when":"2 Jan 2026, 10:15 AM"}]'>
             <td>
               <div class="member-cell">
                 <div class="avatar avatar-vivek">VS</div>
@@ -1140,7 +1138,7 @@ body{padding-top:36px;box-sizing:border-box;}
   /* ══ Target utilisation — historized, as-of-date ══
 
      A member's target is a list of dated segments. A segment either sets an
-     explicit override or defers to the role ("Follows role"); resolution at
+     explicit override or defers to the role (mode "Role"); resolution at
      read time is Team Member override if set, else the Role's target.
 
      Saving never rewrites the past — it clips, splits or closes the segments
@@ -1402,14 +1400,11 @@ body{padding-top:36px;box-sizing:border-box;}
     const cur   = currentSeg(segs);
 
     tbody.innerHTML = segs.map(seg => {
-      const utilCell = seg.follows
-        ? `<div class="follows-role-main">Follows role</div>
-           <div class="follows-role-val">${seg.rolePct}%</div>`
-        : `<span style="font-weight:500;font-variant-numeric:tabular-nums">${seg.pct}%</span>`;
+      const pct = seg.follows ? seg.rolePct : seg.pct;
 
       return `<tr>
-        <td>${utilCell}</td>
-        <td><span class="mode-label">${seg.follows ? 'Follows role' : 'Custom'}</span></td>
+        <td><span style="font-weight:500;font-variant-numeric:tabular-nums">${pct}%</span></td>
+        <td><span class="mode-label">${seg.follows ? 'Role' : 'Custom'}</span></td>
         <td>
           <div class="effective-cell">
             <span>${fmtEffective(seg)}</span>
