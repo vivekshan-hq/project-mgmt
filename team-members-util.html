@@ -1007,9 +1007,9 @@ body{padding-top:36px;box-sizing:border-box;}
 <!-- ── Drawer ──────────────────────────────────────────────────── -->
 <aside class="drawer" id="drawer" aria-label="Target utilisation" role="complementary">
   <div class="drawer-header">
-    <div class="drawer-eyebrow" id="drawer-eyebrow">Paul</div>
+    <div class="drawer-eyebrow">Target utilisation</div>
     <div class="drawer-title-row">
-      <div class="drawer-title">Target utilisation</div>
+      <div class="drawer-title" id="drawer-subject">Paul</div>
       <button class="close-btn" id="drawer-close" aria-label="Close drawer">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
           <path d="M4 4l8 8M12 4l-8 8"/>
@@ -1338,10 +1338,10 @@ body{padding-top:36px;box-sizing:border-box;}
   /* ── Drawer ────────────────────────────────────────────────── */
   const drawer  = document.getElementById('drawer');
   const overlay = document.getElementById('overlay');
-  const eyebrow = document.getElementById('drawer-eyebrow');
+  const subject = document.getElementById('drawer-subject');
 
   function openDrawer(memberName) {
-    eyebrow.textContent = memberName;
+    subject.textContent = memberName;
     renderHistory(memberName);
     renderAudit(memberName);
     // Reset seg to history tab
@@ -1450,14 +1450,14 @@ body{padding-top:36px;box-sizing:border-box;}
       return;
     }
     pendingPct = pct;
-    openEffDialog(eyebrow.textContent, pct);
+    openEffDialog(subject.textContent, pct);
   });
 
   document.getElementById('drawer-cancel').addEventListener('click', closeDrawer);
 
   /* Write a dated override into the active member's history. */
   function commitMemberTarget(seg) {
-    const memberName = eyebrow.textContent;
+    const memberName = subject.textContent;
     memberHistory[memberName] = overlaySegments(memberHistory[memberName] || [], seg);
 
     const now = new Date();
