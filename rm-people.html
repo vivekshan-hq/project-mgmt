@@ -156,6 +156,55 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-1);background:
 .td-util[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% - 6px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10.5px;font-weight:500;line-height:1.5;padding:6px 9px;border-radius:5px;white-space:pre;opacity:0;pointer-events:none;transition:opacity .1s;z-index:40;box-shadow:0 4px 14px rgba(0,0,0,.18);text-align:left;}
 .td-util{position:relative;}
 
+/* ── Find availability dialog ──
+   The page's own --brand/--border tokens shadow the design system's, so the
+   dialog restores the DS meanings for the .sc-* components inside it. */
+.fa-overlay{z-index:300;--accent:oklch(0.97 0 0);--accent-foreground:oklch(0.205 0 0);--border:oklch(0.94 0 0);}
+.fa-overlay .sc-dialog{max-width:560px;gap:18px;}
+.fa-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;}
+.fa-field{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.fa-label{font-size:13px;font-weight:600;color:var(--text-1);}
+.fa-req{color:#DC2626;margin-right:2px;}
+.fa-dates{display:flex;align-items:center;gap:6px;}
+.fa-dates input{flex:1;min-width:0;}
+.fa-sfx{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-4);pointer-events:none;}
+.fa-hours{position:relative;}
+.fa-hours input{padding-right:72px;}
+.fa-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer;}
+.fa-check input{margin-top:2px;width:15px;height:15px;accent-color:var(--brand);flex-shrink:0;}
+.fa-check-main{font-size:13.5px;color:var(--text-1);display:block;}
+.fa-check-sub{font-size:12px;color:var(--text-3);line-height:1.5;display:block;margin-top:2px;}
+.fa-chipline{display:flex;flex-wrap:wrap;gap:8px;}
+.fa-skill{display:inline-block;padding:5px 10px;border-radius:5px;background:#FEF2F2;color:#B91C1C;font-size:12.5px;}
+.fa-link{color:var(--brand);font-size:13px;text-decoration:none;}
+.fa-link:hover{text-decoration:underline;}
+
+/* ── Focus mode chrome ── */
+.focus-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:var(--radius-sm);background:var(--brand-light);border:1px solid var(--brand-muted);font-size:12px;font-weight:500;color:var(--brand-dark);white-space:nowrap;}
+.focus-chip svg{width:12px;height:12px;flex-shrink:0;}
+.focus-chip .vs{padding:1px 6px;border-radius:3px;background:var(--brand);color:#fff;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.focus-x{border:none;background:none;cursor:pointer;color:var(--text-3);display:grid;place-items:center;padding:2px;border-radius:3px;}
+.focus-x:hover{background:var(--bg);color:var(--text-1);}
+.focus-x svg{width:12px;height:12px;}
+
+/* Weeks outside the searched window recede behind a hatch. */
+td.wk-out .util-block{background:transparent;}
+td.wk-out .util-pct{color:var(--text-4);font-weight:600;}
+td.wk-out .util-hrs{color:var(--text-4);}
+th.wk-out{color:var(--text-4);}
+td.wk-out{background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,var(--hatch-c) 4px,var(--hatch-c) 5px);}
+
+/* Banner spanning the searched weeks, as the product draws it. */
+.focus-banner{background:var(--brand);color:#fff;font-size:11.5px;font-weight:600;text-align:center;padding:4px 8px;white-space:nowrap;}
+
+/* Availability states inside the window. */
+.av-ok   .util-block{background:#DCFCE7;}
+.av-ok   .util-pct,.av-ok   .util-hrs{color:#15803D;}
+.av-over .util-block{background:#FEF3C7;}
+.av-over .util-pct,.av-over .util-hrs{color:#92400E;}
+.av-none .util-block{background:#F3F4F6;}
+.av-none .util-pct,.av-none .util-hrs{color:#9CA3AF;}
+
 /* Toggle in the toolbar */
 .tgt-toggle{display:inline-flex;align-items:center;gap:7px;padding:4px 9px 4px 7px;border-radius:var(--radius-sm);cursor:pointer;user-select:none;border:1px solid transparent;}
 .tgt-toggle:hover{background:var(--bg);}
@@ -276,10 +325,20 @@ body{padding-top:36px;box-sizing:border-box;}
   </div>
   <button class="icon-btn" title="Save view"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
   <button class="icon-btn" title="Clear"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-  <button class="find-avail-btn">
+  <button class="find-avail-btn" onclick="openFind()">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
     Find availability
   </button>
+
+  <!-- Appears once a search has run -->
+  <div class="focus-chip" id="focus-chip" style="display:none">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="7" cy="12" r="4"/><circle cx="17" cy="12" r="4"/></svg>
+    <span id="focus-chip-text"></span>
+    <span class="vs" id="focus-chip-vs" style="display:none">vs target</span>
+    <button class="focus-x" onclick="clearFocus()" title="Clear">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
 
   <div class="sub-toolbar-right">
     <div class="tgt-toggle" id="tgt-toggle" onclick="setTargetMode(!targetMode)" title="Compare each week's planned utilisation against the resolved target">
@@ -310,6 +369,67 @@ body{padding-top:36px;box-sizing:border-box;}
 
 <div class="legend" id="legend"></div>
 
+<!-- Find availability -->
+<div class="sc-dialog-overlay fa-overlay" id="fa-dialog" style="display:none">
+  <div class="sc-dialog" role="dialog" aria-modal="true" aria-labelledby="fa-title">
+    <div class="sc-dialog-header">
+      <div class="sc-dialog-title" id="fa-title">Find availability</div>
+    </div>
+
+    <div class="fa-grid">
+      <div class="fa-field">
+        <label class="fa-label"><span class="fa-req">*</span>Add start &amp; end date</label>
+        <div class="fa-dates">
+          <input class="sc-input" type="date" id="fa-from">
+          <input class="sc-input" type="date" id="fa-to">
+        </div>
+      </div>
+      <div class="fa-field">
+        <label class="fa-label" for="fa-hours"><span class="fa-req">*</span>Hours</label>
+        <div class="fa-hours">
+          <input class="sc-input" type="number" id="fa-hours" min="0.5" max="12" step="0.5" value="2">
+          <span class="fa-sfx">per day</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fa-field">
+      <label class="fa-label" for="fa-who">Team member or role</label>
+      <select class="sc-input" id="fa-who">
+        <option value="">Select…</option>
+        <option>Engineer</option>
+        <option>Project Manager</option>
+        <option>Solution Architect</option>
+      </select>
+    </div>
+
+    <label class="fa-check">
+      <input type="checkbox" id="fa-soft">
+      <span><span class="fa-check-main">Ignore soft allocations</span></span>
+    </label>
+
+    <!-- The target lens. Phrased as a constraint on the search, because it
+         changes who comes back, not merely how the results are drawn. -->
+    <label class="fa-check">
+      <input type="checkbox" id="fa-target" checked>
+      <span>
+        <span class="fa-check-main">Measure availability against target utilisation</span>
+        <span class="fa-check-sub">Treats each person's target as the ceiling instead of their full capacity, and flags anyone this booking would push past it.</span>
+      </span>
+    </label>
+
+    <div>
+      <div class="fa-chipline" style="margin-bottom:8px"><span class="fa-skill">Salesforce Integration is true</span></div>
+      <a class="fa-link" href="#" onclick="return false">Edit skills / fields</a>
+    </div>
+
+    <div class="sc-dialog-footer">
+      <button class="sc-btn sc-btn--outline sc-btn--size-default" id="fa-cancel" onclick="closeFind()">Cancel</button>
+      <button class="sc-btn sc-btn--default sc-btn--size-default" id="fa-find" onclick="runFind()">Find</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════════════════
    Hierarchy
@@ -332,10 +452,17 @@ body{padding-top:36px;box-sizing:border-box;}
 const SCOPE_LEVEL = { participant:0, group:1, all:2 };
 const viewerScope = 'group';   // was a prototype dropdown; fixed at its default
 
+/* Each week carries its real Monday so the Find availability date range can
+   be mapped onto columns rather than guessed at. */
 const WEEKS = [
-  {label:'10–16th'},{label:'17–23rd'},{label:'24–30th'},
-  {label:'31st–6th',today:true},
-  {label:'7–13th'},{label:'14–20th'},{label:'21–27th'},{label:'28th–4th'},
+  {label:'10–16th',  start:'2026-08-10'},
+  {label:'17–23rd',  start:'2026-08-17'},
+  {label:'24–30th',  start:'2026-08-24'},
+  {label:'31st–6th', start:'2026-08-31', today:true},
+  {label:'7–13th',   start:'2026-09-07'},
+  {label:'14–20th',  start:'2026-09-14'},
+  {label:'21–27th',  start:'2026-09-21'},
+  {label:'28th–4th', start:'2026-09-28'},
 ];
 const MONTHS = ["Aug '26","Sep '26"];
 const MONTH_COLS = [3,5];
@@ -354,6 +481,16 @@ const isWorkday = d => d % 7 < 5;   // day 0 of each week is Monday
    whatever target was active then — see the Roles and Team members screens
    for the history/audit UI that captures those segments. */
 let targetMode = false;
+
+/* ══ Find availability / Focus mode ══
+   Focus mode answers a different question from the grid behind it: not
+   "how loaded is this person" but "can they take this much work in this
+   window". Target changes that answer rather than just decorating it — if
+   the org runs to an 80% target, the 20% above it is not bookable, so a
+   person sitting at 85% of capacity is out of room even though capacity
+   says otherwise. That is why the choice lives in the Find dialog as a
+   search constraint, not as a display switch in the toolbar. */
+let focus = null;   // { from, to, hoursPerDay, vsTarget, w0, w1 }
 
 const TENANT_DEFAULT_TARGET = 75;
 
@@ -382,6 +519,84 @@ function resolveTarget(m){
 }
 
 const SRC_LABEL = { member:'Member', role:'Role', default:'Default' };
+
+/* ── Find availability ── */
+const MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const dayMon   = v => { const d = new Date(v+'T00:00:00'); return d.getDate() + ' ' + MON3[d.getMonth()]; };
+const dayMonYr = v => { const d = new Date(v+'T00:00:00'); return dayMon(v) + ' ' + String(d.getFullYear()).slice(2); };
+
+const weekEnd = i => { const d = new Date(WEEKS[i].start + 'T00:00:00'); d.setDate(d.getDate()+6); return d; };
+const weekStart = i => new Date(WEEKS[i].start + 'T00:00:00');
+
+function openFind(){
+  // Default to a window inside the visible range so the result is legible.
+  document.getElementById('fa-from').value = WEEKS[1].start;
+  document.getElementById('fa-to').value   = WEEKS[4].start;
+  document.getElementById('fa-dialog').style.display = 'flex';
+}
+function closeFind(){ document.getElementById('fa-dialog').style.display = 'none'; }
+
+function runFind(){
+  const from  = document.getElementById('fa-from').value;
+  const to    = document.getElementById('fa-to').value;
+  const hours = parseFloat(document.getElementById('fa-hours').value);
+  if(!from || !to || isNaN(hours) || hours <= 0) return;
+  if(new Date(to) < new Date(from)) return;
+
+  // Map the range onto whole week columns — the grid's smallest bucket.
+  let w0 = -1, w1 = -1;
+  WEEKS.forEach((w,i)=>{
+    if(weekEnd(i) >= new Date(from+'T00:00:00') && weekStart(i) <= new Date(to+'T00:00:00')){
+      if(w0 === -1) w0 = i;
+      w1 = i;
+    }
+  });
+  if(w0 === -1) return;   // range falls outside the visible window
+
+  focus = { from, to, hoursPerDay: hours, vsTarget: document.getElementById('fa-target').checked, w0, w1 };
+  closeFind();
+
+  document.getElementById('focus-chip-text').textContent =
+    `Available for ${hours}h/d from ${dayMon(from)} – ${dayMonYr(to)}`;
+  document.getElementById('focus-chip-vs').style.display = focus.vsTarget ? '' : 'none';
+  document.getElementById('focus-chip').style.display = '';
+
+  document.body.classList.toggle('tgt-on', targetMode || focus.vsTarget);
+  renderHeader(); renderBody(); renderLegend();
+  requestAnimationFrame(fixWeekTop);
+}
+
+function clearFocus(){
+  focus = null;
+  document.getElementById('focus-chip').style.display = 'none';
+  document.body.classList.toggle('tgt-on', targetMode);
+  renderHeader(); renderBody(); renderLegend();
+  requestAnimationFrame(fixWeekTop);
+}
+
+/* Can this person absorb the asked-for hours in this week?
+     ok   — yes, and still inside their target
+     over — yes against raw capacity, but it would push them past target
+     none — no room either way
+   With the target lens off, 'over' never arises: capacity is the only bar. */
+function availability(m, weekIdx, tgt){
+  const capHrs   = m.capHrs;
+  const allocHrs = m.projects.reduce((sum,p)=>sum+projWeekMins(p,weekIdx),0) / 60;
+  const askHrs   = focus.hoursPerDay * 5;           // working days in a week
+  const freeCap  = capHrs - allocHrs;
+  const tgtHrs   = capHrs * tgt.pct / 100;
+  const freeTgt  = tgtHrs - allocHrs;
+
+  if(focus.vsTarget){
+    if(freeTgt >= askHrs) return { state:'av-ok',   freeHrs:freeTgt };
+    if(freeCap >= askHrs) return { state:'av-over', freeHrs:freeTgt };
+    return { state:'av-none', freeHrs:freeTgt };
+  }
+  return freeCap >= askHrs ? { state:'av-ok', freeHrs:freeCap }
+                           : { state:'av-none', freeHrs:freeCap };
+}
+
+const fmtHrs = h => (Math.round(h*10)/10).toLocaleString('en-US') + 'h';
 
 /* Rows are described in whole days across the visible range.
      dur     — [firstDay, lastDay] the project/budget runs; the thin line
@@ -643,10 +858,23 @@ function renderHeader(){
     `<th class="th-month" colspan="${MONTH_COLS[i]}" style="border-right:${i<MONTHS.length-1?'1px solid var(--border)':'none'}">${m}</th>`
   ).join('');
   const weekRow = WEEKS.map((w,i)=>{
-    const cls   = w.today ? 'th-week today-hdr' : 'th-week';
+    const out   = focus && (i < focus.w0 || i > focus.w1);
+    const cls   = (w.today ? 'th-week today-hdr' : 'th-week') + (out ? ' wk-out' : '');
     const inner = w.today ? `<span class="today-pill">${w.label}</span>` : w.label;
     return `<th class="${cls}" style="border-right:${rightBorder(i)}">${inner}</th>`;
   }).join('');
+
+  // One banner cell spanning the searched weeks, flanked by empty cells.
+  let bannerRow = '';
+  if(focus){
+    const span = focus.w1 - focus.w0 + 1;
+    bannerRow = '<tr>' +
+      '<td></td><td></td>' +                      // under Team members + Allocated
+      (focus.w0 > 0 ? `<td colspan="${focus.w0}"></td>` : '') +
+      `<td colspan="${span}" class="focus-banner">Showing availability from ${dayMon(focus.from)} to ${dayMonYr(focus.to)}</td>` +
+      (focus.w1 < N-1 ? `<td colspan="${N-1-focus.w1}"></td>` : '') +
+      '</tr>';
+  }
 
   document.getElementById('rm-thead').innerHTML = `
     <tr>
@@ -656,7 +884,8 @@ function renderHeader(){
       <th class="th-alloc" rowspan="2" style="top:0;">Allocated</th>
       ${monthRow}
     </tr>
-    <tr>${weekRow}</tr>`;
+    <tr>${weekRow}</tr>
+    ${bannerRow}`;
 }
 
 /* ── Render: a budget leaf row ── */
@@ -746,8 +975,34 @@ function renderBody(){
       // The hours stay the same either way — only the % changes meaning.
       const att  = Math.round(pct / tgt.pct * 100);
       const show = targetMode ? att : pct;
-      const cls  = utilCls(show);
 
+      // Inside a search window the cell answers a different question, so it
+      // carries the room left rather than the load already on.
+      if(focus){
+        const out = i < focus.w0 || i > focus.w1;
+        if(out){
+          return `<td class="td-util wk-out" style="border-right:${rightBorder(i)}">
+                    <div class="util-block"><span class="util-pct">${show}%</span><span class="util-hrs">(${fmtMins(mins)})</span></div>
+                  </td>`;
+        }
+        const av  = availability(m, i, tgt);
+        const ask = focus.hoursPerDay * 5;
+        const ceiling = focus.vsTarget
+          ? `target ${tgt.pct}% = ${fmtHrs(m.capHrs*tgt.pct/100)}`
+          : `capacity ${m.capHrs}h`;
+        const verdict = av.state === 'av-ok'   ? `Fits the ${fmtHrs(ask)} asked for this week`
+                      : av.state === 'av-over' ? `Capacity allows it, but it would pass their target`
+                      :                          `No room for the ${fmtHrs(ask)} asked`;
+        const tipF = `${fmtMins(mins)} booked of ${ceiling}\n${fmtHrs(Math.max(av.freeHrs,0))} free · ${fmtHrs(ask)} needed\n${verdict}`;
+        return `<td class="td-util ${av.state}" style="border-right:${rightBorder(i)}" data-tip="${tipF}">
+                  <div class="util-block">
+                    <span class="util-pct">${show}%</span>
+                    <span class="util-hrs">${av.freeHrs > 0 ? fmtHrs(av.freeHrs)+' free' : 'full'}</span>
+                  </div>
+                </td>`;
+      }
+
+      const cls = utilCls(show);
       const tip = targetMode
         ? `${fmtMins(mins)} of ${m.capHrs}h capacity = ${pct}% planned\nTarget ${tgt.pct}% (${SRC_LABEL[tgt.src]}) = ${fmtMins(Math.round(capMins*tgt.pct/100))}\n${pct}% ÷ ${tgt.pct}% = ${att}% of target`
         : `${fmtMins(mins)} of ${m.capHrs}h capacity = ${pct}% planned`;
@@ -857,7 +1112,7 @@ function toggle(key){
 function setTargetMode(on){
   targetMode = on;
   document.getElementById('tgt-toggle').classList.toggle('on', on);
-  document.body.classList.toggle('tgt-on', on);
+  document.body.classList.toggle('tgt-on', on || !!(focus && focus.vsTarget));
   renderBody();
   renderLegend();
 }
@@ -871,7 +1126,24 @@ const LEGEND_BANDS = [
   { sw:'var(--util-zero-bg)',  t:'0%'       },
 ];
 
+const LEGEND_AVAIL = [
+  { sw:'#DCFCE7', t:'Fits within target' },
+  { sw:'#FEF3C7', t:'Fits, but passes target' },
+  { sw:'#F3F4F6', t:'No room' },
+];
+
 function renderLegend(){
+  if(focus){
+    const note = focus.vsTarget
+      ? `Room left before each person's target, for ${focus.hoursPerDay}h/day.`
+      : `Room left against full capacity, for ${focus.hoursPerDay}h/day.`;
+    const items = focus.vsTarget ? LEGEND_AVAIL : LEGEND_AVAIL.filter(i=>i.t!=='Fits, but passes target');
+    document.getElementById('legend').innerHTML =
+      `<span class="lg-note">${note}</span>` +
+      items.map(i=>`<span class="lg-item"><span class="lg-sw" style="background:${i.sw}"></span>${i.t}</span>`).join('');
+    return;
+  }
+
   const items = LEGEND_BANDS;
   const note  = targetMode
     ? 'Each % is planned utilisation ÷ target. Hours are unchanged.'
@@ -892,6 +1164,10 @@ function fixWeekTop(){
   const h = Math.ceil(thead.rows[0].getBoundingClientRect().height);
   thead.querySelectorAll('.th-week').forEach(th=>{ th.style.top = h+'px'; });
 }
+
+document.getElementById('fa-dialog').addEventListener('click', e => {
+  if(e.target.id === 'fa-dialog') closeFind();
+});
 
 renderHeader();
 // ?target=1 opens straight into target mode, so a link can share either view.
