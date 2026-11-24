@@ -3,6 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Target utilisation gate — reads the switch set in rm-settings.html -->
+<script>
+(function(){
+  var DEF = { enabled:false,
+              over:  {on:true,  value:100, unit:'target', colour:'#FEE2E2'},
+              under: {on:true,  value:75,  unit:'target', colour:'#FEF3C7'},
+              onTgt: {on:false,            colour:'#DCFCE7'} };
+  function read(){
+    try{
+      var raw = localStorage.getItem('rl.targetUtilisation');
+      if(!raw) return DEF;
+      var s = JSON.parse(raw);
+      return { enabled: !!s.enabled,
+               over:  Object.assign({}, DEF.over,  s.over  || {}),
+               under: Object.assign({}, DEF.under, s.under || {}),
+               onTgt: Object.assign({}, DEF.onTgt, s.onTgt || {}) };
+    }catch(e){ return DEF; }
+  }
+  window.TU = read();
+  /* Which band a week falls in, or null when nothing should be highlighted.
+     A threshold is read against the person's own target, or against raw
+     capacity when the rule says so. */
+  window.TU.bandFor = function(planned, target){
+    var c = window.TU;
+    if(!c.enabled || target == null) return null;
+    function m(rule){ return rule.unit === 'capacity' ? planned : Math.round(planned / target * 100); }
+    if(c.over.on  && m(c.over)  >  c.over.value)  return c.over;
+    if(c.under.on && m(c.under) <  c.under.value) return c.under;
+    if(c.onTgt.on) return c.onTgt;
+    return null;
+  };
+  function apply(){ document.body.classList.toggle('tu-off', !window.TU.enabled); }
+  if(document.body) apply(); else document.addEventListener('DOMContentLoaded', apply);
+  // Reflect a change made in another tab without a manual reload.
+  window.addEventListener('storage', function(e){ if(e.key === 'rl.targetUtilisation') location.reload(); });
+})();
+</script>
+
 <link rel="stylesheet" href="ds/styles.css">
 <title>RM People · Target always on</title>
 <style>
@@ -247,6 +285,13 @@ td.wk-out{background-image:repeating-linear-gradient(45deg,transparent,transpare
 }
 .lg-flag{width:0;height:0;border-top:10px solid #F59E0B;border-left:10px solid transparent;flex-shrink:0;}
 
+/* With target utilisation switched off in settings, the whole layer goes:
+   no chip under the name, no corner flag, no legend entry for it. */
+body.tu-off .tgt-chip{display:none !important;}
+body.tu-off .over-tgt .util-block::after{display:none;}
+body.tu-off .lg-flag{display:none;}
+body.tu-off .lg-item.lg-tgt{display:none;}
+
 /* The resolved target, shown on the member row so the resolution
    (member override → role → default) is legible while the toggle is on. */
 .tgt-chip{display:inline-flex;align-items:center;gap:4px;margin-top:3px;font-size:10.5px;font-weight:600;line-height:1;}
@@ -315,13 +360,14 @@ body{padding-top:36px;box-sizing:border-box;}
 </style>
 <div class="proto-nav">
   <span class="proto-nav-label">Target Utilisation</span>
+  <a href="rm-settings.html" id="nav-settings">Settings</a>
   <a href="roles-placeholders.html" id="nav-roles">Roles &amp; Placeholders</a>
   <a href="team-members-util.html" id="nav-members">Team Members</a>
   <a href="rm-people.html" id="nav-people">People grid</a>
   <a href="rm-people-target.html" id="nav-people-tgt">People grid · target</a>
   <a href="util-report.html" id="nav-report">Utilisation Report</a>
 </div>
-<script>(function(){var p=location.pathname.split("/").pop();var map={"roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","rm-people.html":"nav-people","rm-people-target.html":"nav-people-tgt","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
+<script>(function(){var p=location.pathname.split("/").pop();var map={"rm-settings.html":"nav-settings","roles-placeholders.html":"nav-roles","team-members-util.html":"nav-members","rm-people.html":"nav-people","rm-people-target.html":"nav-people-tgt","util-report.html":"nav-report"};var id=map[p];if(id){var el=document.getElementById(id);if(el)el.classList.add("active");}})();</script>
 
 
 <div class="top-header">
@@ -1251,7 +1297,7 @@ function renderLegend(){
   document.getElementById('legend').innerHTML =
     `<span class="lg-note">${note}</span>` +
     items.map(i=>`<span class="lg-item"><span class="lg-sw" style="background:${i.sw}"></span>${i.t}</span>`).join('') +
-    `<span class="lg-item"><span class="lg-flag"></span>Over target</span>` +
+    `<span class="lg-item lg-tgt"><span class="lg-flag"></span>Over target</span>` +
     `<span class="lg-item"><span class="lg-sw" style="background:#FDE68A"></span>Partners</span>` +
     `<span class="lg-item"><span class="lg-sw" style="background:#FFEDD5"></span>Placeholder</span>` +
     `<span class="lg-item"><span class="lg-sw" style="background:#DBEAFE"></span>Soft allocated</span>`;
