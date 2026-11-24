@@ -76,7 +76,7 @@ body{padding-top:36px;box-sizing:border-box;}
   --text-2:#4B5563;
   --text-3:#6B7280;
   --text-4:#9CA3AF;
-  --border:#E5E7EB;
+  --p-border:#E5E7EB;
   --border-2:#D8DBE0;
   --link:#2563EB;
   --cell-fill:#FDF6E3;      /* the product's tint on cells that carry a figure */
@@ -115,7 +115,7 @@ body{
 /* ── Toolbar ── */
 .toolbar{
   display:flex;align-items:center;gap:8px;
-  padding:0 22px 11px;border-bottom:1px solid var(--border);
+  padding:0 22px 11px;border-bottom:1px solid var(--p-border);
   flex-shrink:0;flex-wrap:wrap;
 }
 .tb-btn{
@@ -156,7 +156,7 @@ thead th{
   position:sticky;top:0;z-index:3;background:var(--bg);
   font-size:12px;font-weight:500;color:var(--text-2);
   text-align:left;padding:9px 16px;white-space:nowrap;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid var(--p-border);
 }
 /* The name column's header carries a fill in the product. */
 thead th.th-name{background:var(--head-fill);color:var(--text-1);}
@@ -168,7 +168,7 @@ body.tu-off .tu-col{display:none !important;}
 .col-period{width:205px;}
 
 tbody td{
-  padding:11px 16px;border-bottom:1px solid var(--border);
+  padding:11px 16px;border-bottom:1px solid var(--p-border);
   vertical-align:middle;
 }
 tbody tr:hover td{background:var(--bg-hover);}

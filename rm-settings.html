@@ -38,10 +38,10 @@ body{padding-top:36px;box-sizing:border-box;}
   --text-primary:#0D1117;
   --text-secondary:#5C6474;
   --text-muted:#9CA3AF;
-  --accent:#3B6FE0;
+  --p-accent:#3B6FE0;
   --accent-light:#EEF3FF;
-  --border:#E4E7EC;
-  --border-input:#D1D5DB;
+  --p-border:#E4E7EC;
+  --p-border-input:#D1D5DB;
   --rail-bg:#111827;
   --rail-icon:#9CA3AF;
 }
@@ -60,19 +60,19 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-primary);backg
 .rail-av{width:28px;height:28px;border-radius:50%;background:#3B6FE0;color:#fff;font-size:10px;font-weight:600;display:grid;place-items:center;}
 
 /* ── Sidebar ── */
-.sidebar{width:232px;flex-shrink:0;background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
-.sidebar-title{padding:16px 14px 12px;font-size:16px;font-weight:600;border-bottom:1px solid var(--border);}
-.sidebar-search{margin:10px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-primary);font-size:13px;font-family:inherit;outline:none;width:calc(100% - 20px);}
+.sidebar{width:232px;flex-shrink:0;background:var(--bg-sidebar);border-right:1px solid var(--p-border);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-title{padding:16px 14px 12px;font-size:16px;font-weight:600;border-bottom:1px solid var(--p-border);}
+.sidebar-search{margin:10px;padding:5px 10px;border:1px solid var(--p-border);border-radius:6px;background:var(--bg);color:var(--text-primary);font-size:13px;font-family:inherit;outline:none;width:calc(100% - 20px);}
 .nav-item{display:flex;align-items:center;gap:8px;padding:5px 10px;margin:1px 6px;border-radius:6px;font-size:13px;color:var(--text-secondary);cursor:pointer;user-select:none;text-decoration:none;}
 .nav-item:hover{background:var(--bg-hover);color:var(--text-primary);}
-.nav-item.active{background:var(--accent-light);color:var(--accent);font-weight:500;}
+.nav-item.active{background:var(--accent-light);color:var(--p-accent);font-weight:500;}
 .nav-icon{width:24px;height:24px;border-radius:5px;display:grid;place-items:center;font-size:12px;flex-shrink:0;}
 .nav-arrow{margin-left:auto;color:var(--text-muted);font-size:11px;}
 .sidebar-section{padding:10px 14px 4px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);}
 
 /* ── Main ── */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.page-header{padding:18px 28px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.page-header{padding:18px 28px 14px;border-bottom:1px solid var(--p-border);flex-shrink:0;}
 .page-title{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:600;}
 .page-title svg{width:17px;height:17px;color:var(--text-secondary);}
 .page-sub{font-size:12.5px;color:var(--text-secondary);margin-top:4px;padding-left:26px;}
@@ -80,59 +80,52 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-primary);backg
 .inner{max-width:760px;}
 
 /* ── Section card ── */
-.card{border:1px solid var(--border);border-radius:10px;margin-bottom:18px;overflow:hidden;}
+.card{border:1px solid var(--p-border);border-radius:10px;margin-bottom:18px;overflow:hidden;}
 .card-head{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;}
-.card-head.bordered{border-bottom:1px solid var(--border);}
+.card-head.bordered{border-bottom:1px solid var(--p-border);}
 .card-head-text{flex:1;min-width:0;}
 .card-title{font-size:14px;font-weight:600;}
 .card-desc{font-size:12.5px;color:var(--text-secondary);line-height:1.55;margin-top:3px;}
 .card-body{padding:16px 18px;}
-.card-note{padding:11px 18px;background:var(--bg-subtle);border-top:1px solid var(--border);font-size:12px;color:var(--text-secondary);line-height:1.55;}
+.card-note{padding:11px 18px;background:var(--bg-subtle);border-top:1px solid var(--p-border);font-size:12px;color:var(--text-secondary);line-height:1.55;}
 
-/* Switch */
-.sw{width:36px;height:20px;border-radius:999px;background:var(--border-input);position:relative;flex-shrink:0;cursor:pointer;border:none;padding:0;transition:background .14s;}
-.sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .14s;}
-.sw.on{background:var(--accent);}
-.sw.on::after{transform:translateX(16px);}
+/* The switch, inputs, buttons and table are design system components; only
+   the bits the system has no opinion about are styled here. */
+.sc-switch{flex-shrink:0;}
+.sidebar-search{margin:10px;width:calc(100% - 20px);height:30px;}
 
 /* ── Rules ── */
 .rules-intro{font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;}
-.rule{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-top:1px solid var(--border);}
+.rule{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-top:1px solid var(--p-border);}
 .rule:first-of-type{border-top:none;padding-top:0;}
-.rule-chk{width:15px;height:15px;margin-top:3px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
+.rule-chk{width:15px;height:15px;margin-top:3px;accent-color:var(--p-accent);flex-shrink:0;cursor:pointer;}
 .rule-main{flex:1;min-width:0;}
 .rule-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:13.5px;}
 .rule-name{font-weight:500;min-width:96px;}
-.rule-num{width:62px;padding:5px 8px;border:1px solid var(--border-input);border-radius:6px;font-family:inherit;font-size:13px;font-variant-numeric:tabular-nums;text-align:right;outline:none;}
-.rule-num:focus{border-color:var(--accent);}
-.rule-unit{padding:5px 8px;border:1px solid var(--border-input);border-radius:6px;font-family:inherit;font-size:12.5px;background:var(--bg);outline:none;cursor:pointer;}
+.rule-num{width:70px;text-align:right;font-variant-numeric:tabular-nums;}
+.rule-unit{width:auto;cursor:pointer;}
 .rule-sub{font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:5px;}
 .rule[data-off="true"] .rule-main{opacity:.45;}
 
 /* Colour choice */
 .swatches{display:inline-flex;gap:5px;margin-left:auto;flex-shrink:0;}
 .swatch{width:20px;height:20px;border-radius:5px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:0;position:relative;}
-.swatch.sel::after{content:'';position:absolute;inset:-3px;border:2px solid var(--accent);border-radius:7px;}
+.swatch.sel::after{content:'';position:absolute;inset:-3px;border:2px solid var(--p-accent);border-radius:7px;}
 
 /* ── Preview ── */
 .preview{margin-top:4px;}
 .preview-h{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:9px;}
-table{width:100%;border-collapse:collapse;}
-th{text-align:left;font-size:11.5px;font-weight:600;color:var(--text-muted);padding:0 10px 7px;white-space:nowrap;}
-th.num,td.num{text-align:right;}
-td{padding:8px 10px;border-top:1px solid var(--border);font-size:13px;vertical-align:middle;}
+.sc-th{font-size:11.5px;white-space:nowrap;}
+.sc-td{font-size:13px;}
+.num{text-align:right;}
 .pv-name{font-weight:500;}
 .pv-val{display:inline-block;min-width:62px;text-align:center;padding:4px 9px;border-radius:5px;font-weight:600;font-variant-numeric:tabular-nums;}
 .pv-verdict{font-size:12px;color:var(--text-secondary);}
 .pv-none{color:var(--text-muted);font-size:12px;}
 
 /* ── Footer ── */
-.footer{display:flex;align-items:center;gap:10px;padding:14px 28px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg);}
+.footer{display:flex;align-items:center;gap:10px;padding:14px 28px;border-top:1px solid var(--p-border);flex-shrink:0;background:var(--bg);}
 .footer-note{font-size:12px;color:var(--text-muted);margin-right:auto;}
-.btn-ghost{height:32px;padding:0 16px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg);font-family:inherit;font-size:13px;font-weight:500;color:var(--text-primary);cursor:pointer;}
-.btn-ghost:hover{background:var(--bg-hover);}
-.btn-primary{height:32px;padding:0 18px;border-radius:7px;border:none;background:#18181B;color:#fff;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;}
-.btn-primary:hover{background:#27272A;}
 
 /* Toast */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(10px);background:#18181B;color:#fff;font-size:13px;padding:10px 16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .16s,transform .16s;z-index:500;}
@@ -156,7 +149,7 @@ td{padding:8px 10px;border-top:1px solid var(--border);font-size:13px;vertical-a
 
   <nav class="sidebar">
     <div class="sidebar-title">Settings</div>
-    <input class="sidebar-search" type="text" placeholder="Search" />
+    <input class="sc-input sidebar-search" type="text" placeholder="Search" />
     <div class="nav-item"><span class="nav-icon" style="background:#F0F4FF">🏢</span>Out of office</div>
     <div class="nav-item"><span class="nav-icon" style="background:#F5F0FF">💳</span>Plans &amp; Billing</div>
     <a class="nav-item" href="team-members-util.html"><span class="nav-icon" style="background:#ECF0FF">👥</span>Team members</a>
@@ -199,7 +192,7 @@ td{padding:8px 10px;border-top:1px solid var(--border);font-size:13px;vertical-a
                 planned and actual utilisation against it across the product.
               </div>
             </div>
-            <button class="sw" id="sw-enabled" role="switch" aria-checked="false" aria-label="Enable target utilisation"></button>
+            <button class="sc-switch" id="sw-enabled" role="switch" aria-checked="false" aria-label="Enable target utilisation"><span class="sc-switch-thumb"></span></button>
           </div>
           <div class="card-note" id="master-note"></div>
         </div>
@@ -229,8 +222,8 @@ td{padding:8px 10px;border-top:1px solid var(--border);font-size:13px;vertical-a
                 <div class="rule-line">
                   <span class="rule-name">Above target</span>
                   <span>highlight over</span>
-                  <input class="rule-num" type="number" id="val-over" min="0" max="400" step="5" value="100">
-                  <select class="rule-unit" id="unit-over">
+                  <input class="sc-input rule-num" type="number" id="val-over" min="0" max="400" step="5" value="100">
+                  <select class="sc-input rule-unit" id="unit-over">
                     <option value="target">% of target</option>
                     <option value="capacity">% of capacity</option>
                   </select>
@@ -246,8 +239,8 @@ td{padding:8px 10px;border-top:1px solid var(--border);font-size:13px;vertical-a
                 <div class="rule-line">
                   <span class="rule-name">Below target</span>
                   <span>highlight under</span>
-                  <input class="rule-num" type="number" id="val-under" min="0" max="400" step="5" value="75">
-                  <select class="rule-unit" id="unit-under">
+                  <input class="sc-input rule-num" type="number" id="val-under" min="0" max="400" step="5" value="75">
+                  <select class="sc-input rule-unit" id="unit-under">
                     <option value="target">% of target</option>
                     <option value="capacity">% of capacity</option>
                   </select>
@@ -270,17 +263,17 @@ td{padding:8px 10px;border-top:1px solid var(--border);font-size:13px;vertical-a
             </div>
           </div>
 
-          <div class="card-body" style="border-top:1px solid var(--border)">
+          <div class="card-body" style="border-top:1px solid var(--p-border)">
             <div class="preview">
               <div class="preview-h">Preview</div>
-              <table>
-                <thead>
+              <table class="sc-table">
+                <thead class="sc-thead">
                   <tr>
-                    <th>Team member</th>
-                    <th class="num">Target</th>
-                    <th class="num">Planned</th>
-                    <th class="num">Of target</th>
-                    <th>How the week appears</th>
+                    <th class="sc-th">Team member</th>
+                    <th class="sc-th num">Target</th>
+                    <th class="sc-th num">Planned</th>
+                    <th class="sc-th num">Of target</th>
+                    <th class="sc-th">How the week appears</th>
                   </tr>
                 </thead>
                 <tbody id="pv-body"></tbody>
@@ -294,8 +287,8 @@ td{padding:8px 10px;border-top:1px solid var(--border);font-size:13px;vertical-a
 
     <div class="footer">
       <span class="footer-note" id="footer-note"></span>
-      <button class="btn-ghost" onclick="revert()">Cancel</button>
-      <button class="btn-primary" onclick="save()">Save</button>
+      <button class="sc-btn sc-btn--outline sc-btn--size-default" id="btn-cancel" onclick="revert()">Cancel</button>
+      <button class="sc-btn sc-btn--default sc-btn--size-default" id="btn-save" onclick="save()">Save</button>
     </div>
   </main>
 </div>
@@ -387,7 +380,7 @@ function ruleSub(rule, label){
 
 function render(){
   // Master
-  document.getElementById('sw-enabled').classList.toggle('on', cfg.enabled);
+  document.getElementById('sw-enabled').classList.toggle('sc-switch--on', cfg.enabled);
   document.getElementById('sw-enabled').setAttribute('aria-checked', cfg.enabled);
   document.getElementById('card-rules').classList.toggle('hidden', !cfg.enabled);
   document.getElementById('master-note').textContent = cfg.enabled
@@ -418,12 +411,12 @@ function render(){
     const att  = Math.round(s.planned / s.target * 100);
     const kind = classify(s.planned, s.target);
     const bg   = kind ? cfg[kind === 'onTgt' ? 'onTgt' : kind].colour : 'transparent';
-    return `<tr>
-      <td class="pv-name">${s.name}</td>
-      <td class="num">${s.target}%</td>
-      <td class="num">${s.planned}%</td>
-      <td class="num">${att}%</td>
-      <td>
+    return `<tr class="sc-tr">
+      <td class="sc-td pv-name">${s.name}</td>
+      <td class="sc-td num">${s.target}%</td>
+      <td class="sc-td num">${s.planned}%</td>
+      <td class="sc-td num">${att}%</td>
+      <td class="sc-td">
         <span class="pv-val" style="background:${bg}">${s.planned}%</span>
         ${kind ? `<span class="pv-verdict"> ${VERDICT[kind]}</span>`
                : `<span class="pv-none"> not highlighted</span>`}
