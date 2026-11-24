@@ -152,8 +152,35 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-1);background:
    Attainment = allocated util % ÷ target %, so the bands below are centred
    on 100% *of target* rather than 100% of capacity. The hours are untouched. */
 .util-block{position:relative;}
-.td-util[data-tip]:hover::after{opacity:1;}
-.td-util[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% - 6px);left:50%;transform:translateX(-50%);background:var(--tip-bg);color:var(--tip-text);font-size:10.5px;font-weight:500;line-height:1.5;padding:6px 9px;border-radius:5px;white-space:pre;opacity:0;pointer-events:none;transition:opacity .1s;z-index:40;box-shadow:0 4px 14px rgba(0,0,0,.18);text-align:left;}
+/* ── Cell tooltip ──
+   Keeps the product's panel: centred name, label/value rows, bullet
+   sub-rows, a --- rule, then the remaining figures with negatives in red.
+   Target rows are appended as a block of their own rather than threaded
+   through the capacity rows, so the existing lines read unchanged. */
+.tip{
+  position:fixed;z-index:200;left:0;top:0;
+  background:#232428;color:#fff;border-radius:10px;
+  padding:15px 18px 14px;min-width:244px;
+  font-size:13px;line-height:1.5;
+  box-shadow:0 10px 28px rgba(0,0,0,.30);
+  opacity:0;pointer-events:none;transition:opacity .1s;
+}
+.tip.on{opacity:1;}
+.tip-name{text-align:center;font-weight:600;font-size:14px;margin-bottom:13px;}
+.tip-row{display:grid;grid-template-columns:1fr auto;gap:22px;}
+.tip-row .v{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+.tip-row .l{white-space:nowrap;}
+.tip-row.sub .l{padding-left:14px;}
+.tip-row.sub .l .b{color:#9CA3AF;margin-right:7px;}
+.tip-gap{height:12px;}
+.tip-sep{color:#6B7280;letter-spacing:.08em;margin:2px 0 8px;}
+.tip-neg{color:#FCA5A5;}
+.tip-src{font-size:10px;font-weight:600;letter-spacing:.03em;color:#9CA3AF;margin-left:6px;}
+.tip-arrow{
+  position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;
+  border-top:8px solid #232428;
+}
 .td-util{position:relative;}
 
 /* ── Find availability dialog ──
@@ -368,6 +395,12 @@ body{padding-top:36px;box-sizing:border-box;}
 
 <div class="legend" id="legend"></div>
 
+<div class="tip" id="tip">
+  <div class="tip-name" id="tip-name"></div>
+  <div id="tip-body"></div>
+  <div class="tip-arrow"></div>
+</div>
+
 <!-- Find availability -->
 <div class="sc-dialog-overlay fa-overlay" id="fa-dialog" style="display:none">
   <div class="sc-dialog" role="dialog" aria-modal="true" aria-labelledby="fa-title">
@@ -517,6 +550,100 @@ function resolveTarget(m){
 }
 
 const SRC_LABEL = { member:'Member', role:'Role', default:'Default' };
+
+/* ══ Cell tooltip ══
+   The product's panel, with the target block appended. Capacity, allocations
+   and Remaining keep their existing wording and order; Target utilisation,
+   Target hours and Remaining to target sit alongside, so the reader can see
+   both ceilings and both headrooms without the rows being rearranged.
+
+   Prototype note: the seed data has no soft bookings, so Soft is always 0m
+   and Hard carries the whole allocation. */
+const tipEl = () => document.getElementById('tip');
+
+function tipRow(label, value, opts){
+  const o = opts || {};
+  return `<div class="tip-row${o.sub ? ' sub' : ''}">`
+       + `<span class="l">${o.sub ? '<span class="b">•</span>' : ''}${label}</span>`
+       + `<span class="v${o.neg ? ' tip-neg' : ''}">${value}</span></div>`;
+}
+
+/* Minutes, signed, in the product's h/m wording. */
+function fmtSigned(mins){
+  if(mins === 0) return '0m';
+  const sign = mins < 0 ? '-' : '';
+  const a = Math.abs(mins);
+  const h = Math.floor(a/60), mm = Math.round(a%60);
+  if(h === 0) return sign + mm + 'm';
+  return sign + h + 'h ' + String(mm).padStart(2,'0') + 'm';
+}
+
+function buildTip(member, weekIdx){
+  const m   = MEMBERS.find(x => x.id === member);
+  if(!m) return null;
+  const tgt = resolveTarget(m);
+
+  const capMins  = m.capHrs * 60;
+  const hardMins = m.projects.reduce((sum,p)=>sum+projWeekMins(p,weekIdx),0);
+  const softMins = 0;
+  const allocMins = hardMins + softMins;
+  const tgtMins  = Math.round(capMins * tgt.pct / 100);
+
+  const remaining      = capMins - allocMins;
+  const remainingToTgt = tgtMins - allocMins;
+
+  let body = '';
+  body += tipRow('Total capacity:', fmtSigned(capMins));
+  body += tipRow('Allocations:',    fmtSigned(allocMins));
+  body += tipRow('Hard:',           fmtSigned(hardMins), {sub:true});
+  body += tipRow('Soft:',           fmtSigned(softMins), {sub:true});
+
+  body += '<div class="tip-gap"></div>';
+  body += tipRow('Target utilisation:', tgt.pct + '%<span class="tip-src">' + SRC_LABEL[tgt.src].toUpperCase() + '</span>');
+  body += tipRow('Target hours:',       fmtSigned(tgtMins));
+
+  // In a search window the ask is the thing being tested, so it joins the block.
+  if(focus && weekIdx >= focus.w0 && weekIdx <= focus.w1){
+    body += tipRow('Needed:', fmtSigned(focus.hoursPerDay * 5 * 60));
+  }
+
+  body += '<div class="tip-gap"></div><div class="tip-sep">---</div>';
+  body += tipRow('Remaining:',           fmtSigned(remaining),      {neg: remaining < 0});
+  body += tipRow('Remaining to target:', fmtSigned(remainingToTgt), {neg: remainingToTgt < 0});
+
+  return { name: m.name, body };
+}
+
+function showTip(td){
+  const built = buildTip(td.dataset.m, +td.dataset.w);
+  if(!built) return;
+  const tip = tipEl();
+  document.getElementById('tip-name').textContent = built.name;
+  document.getElementById('tip-body').innerHTML = built.body;
+  tip.classList.add('on');
+
+  // Centred above the cell, nudged back inside the viewport at the edges.
+  const c = td.getBoundingClientRect();
+  const t = tip.getBoundingClientRect();
+  let left = c.left + c.width/2 - t.width/2;
+  left = Math.max(8, Math.min(left, window.innerWidth - t.width - 8));
+  let top = c.top - t.height - 10;
+  if(top < 8) top = c.bottom + 10;          // flip below when there is no room
+  tip.style.left = left + 'px';
+  tip.style.top  = top + 'px';
+}
+
+function hideTip(){ tipEl().classList.remove('on'); }
+
+document.addEventListener('mouseover', e => {
+  const td = e.target.closest ? e.target.closest('.td-util[data-m]') : null;
+  if(td) showTip(td);
+});
+document.addEventListener('mouseout', e => {
+  const td = e.target.closest ? e.target.closest('.td-util[data-m]') : null;
+  if(td) hideTip();
+});
+document.addEventListener('scroll', hideTip, true);
 
 /* ── Find availability ── */
 const MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -981,16 +1108,8 @@ function renderBody(){
                     <div class="util-block"><span class="util-pct">${show}%</span><span class="util-hrs">(${fmtMins(mins)})</span></div>
                   </td>`;
         }
-        const av  = availability(m, i, tgt);
-        const ask = focus.hoursPerDay * 5;
-        const ceiling = focus.vsTarget
-          ? `target ${tgt.pct}% = ${fmtHrs(m.capHrs*tgt.pct/100)}`
-          : `capacity ${m.capHrs}h`;
-        const verdict = av.state === 'av-ok'   ? `Fits the ${fmtHrs(ask)} asked for this week`
-                      : av.state === 'av-over' ? `Capacity allows it, but it would pass their target`
-                      :                          `No room for the ${fmtHrs(ask)} asked`;
-        const tipF = `${fmtMins(mins)} booked of ${ceiling}\n${fmtHrs(Math.max(av.freeHrs,0))} free · ${fmtHrs(ask)} needed\n${verdict}`;
-        return `<td class="td-util ${av.state}" style="border-right:${rightBorder(i)}" data-tip="${tipF}">
+        const av = availability(m, i, tgt);
+        return `<td class="td-util ${av.state}" style="border-right:${rightBorder(i)}" data-m="${m.id}" data-w="${i}">
                   <div class="util-block">
                     <span class="util-pct">${show}%</span>
                     <span class="util-hrs">${av.freeHrs > 0 ? fmtHrs(av.freeHrs)+' free' : 'full'}</span>
@@ -998,14 +1117,7 @@ function renderBody(){
                 </td>`;
       }
 
-      const tgtHrsTxt = fmtMins(Math.round(capMins * tgt.pct / 100));
-      const tip = `${fmtMins(mins)} of ${m.capHrs}h capacity = ${pct}% planned\n`
-                + `Target ${tgt.pct}% (${SRC_LABEL[tgt.src]}) = ${tgtHrsTxt}\n`
-                + (overTgt ? `${pct - tgt.pct} points over target`
-                           : pct === 0 ? `No allocation this week`
-                           : `${tgt.pct - pct} points under target`);
-
-      return `<td class="td-util ${utilCls(show)}${overTgt ? ' over-tgt' : ''}" style="border-right:${rightBorder(i)}" data-tip="${tip}">
+      return `<td class="td-util ${utilCls(show)}${overTgt ? ' over-tgt' : ''}" style="border-right:${rightBorder(i)}" data-m="${m.id}" data-w="${i}">
                 <div class="util-block"><span class="util-pct">${show}%</span><span class="util-hrs">(${fmtMins(mins)})</span></div>
               </td>`;
     }).join('');
