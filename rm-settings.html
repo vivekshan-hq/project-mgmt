@@ -253,12 +253,12 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-primary);backg
             <div class="rule" id="rule-on">
               <input class="rule-chk" type="checkbox" id="chk-on">
               <div class="rule-main">
-                <div class="rule-line">
-                  <span class="rule-name">On target</span>
-                  <span>highlight everything in between</span>
+                  <div class="rule-line">
+                  <span class="rule-name">Within range</span>
+                  <span>highlight whatever the other two rules leave</span>
                   <span class="swatches" id="sw-on"></span>
                 </div>
-                <div class="rule-sub">Off by default — leaving the middle band unhighlighted keeps reports quiet, so only the weeks that need attention carry colour.</div>
+                <div class="rule-sub" id="sub-on"></div>
               </div>
             </div>
           </div>
@@ -355,7 +355,7 @@ function classify(planned, target){
 const VERDICT = {
   over:  'Above target',
   under: 'Below target',
-  onTgt: 'On target',
+  onTgt: 'Within range',
 };
 
 function renderSwatches(id, selected, onPick){
@@ -376,6 +376,18 @@ function ruleSub(rule, label){
   const a = Math.round(80 * rule.value / 100);
   const b = Math.round(60 * rule.value / 100);
   return `${label} — at an 80% target that means ${a}% utilisation; at a 60% target, ${b}%.`;
+}
+
+/* This band is the remainder, not a rule of its own — it covers whatever the
+   other two do not claim. Say so in real numbers, because switching one of
+   them off silently widens this one, and a label alone would then be lying. */
+function remainderSub(){
+  const u = r => r.unit === 'capacity' ? '% of capacity' : '% of target';
+  const over = cfg.over.on, under = cfg.under.on;
+  if(over && under)  return `Everything from ${cfg.under.value}${u(cfg.under)} up to ${cfg.over.value}${u(cfg.over)}.`;
+  if(over && !under) return `Everything up to ${cfg.over.value}${u(cfg.over)} — including weeks far below target, because "Below target" is off.`;
+  if(!over && under) return `Everything from ${cfg.under.value}${u(cfg.under)} upwards, however far above target it goes.`;
+  return 'Every week, since neither threshold is switched on.';
 }
 
 function render(){
@@ -401,6 +413,7 @@ function render(){
 
   document.getElementById('sub-over').textContent  = ruleSub(cfg.over,  'Above target');
   document.getElementById('sub-under').textContent = ruleSub(cfg.under, 'Below target');
+  document.getElementById('sub-on').textContent    = remainderSub();
 
   renderSwatches('sw-over',  cfg.over.colour,  c => cfg.over.colour  = c);
   renderSwatches('sw-under', cfg.under.colour, c => cfg.under.colour = c);
