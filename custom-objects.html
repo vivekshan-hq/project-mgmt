@@ -1078,9 +1078,9 @@ function tabDetails(o){
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">Behaviour</span></div>
       <table class="co-table"><tbody>
-        ${row('Reports', o.reports !== false ? tag('On', 'green') : tag('Off'), 'Available in the report builder.')}
-        ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Field changes go to the audit log.')}
-        ${row('Search', o.search !== false ? tag('On', 'green') : tag('Off'), 'By Record Name.')}
+        ${row('Reports', o.reports !== false ? tag('On', 'green') : tag('Off'), 'Available in the custom report builder.')}
+        ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Field changes will be available in the audit logs.')}
+        ${row('Search', o.search !== false ? tag('On', 'green') : tag('Off'), 'Can be searched by Record Name.')}
       </tbody></table>
     </div>
 
@@ -1263,9 +1263,9 @@ function odRender(){
       ` : ''}
 
       ${secLabel('Behaviour')}
-      ${[['reports','Reports','Available in the report builder.'],
-         ['fieldHistory','Field history','Field changes go to the audit log.'],
-         ['search','Search','Found in global search by Record Name.']].map(([k,t,note]) => `
+      ${[['reports','Reports','Available in the custom report builder.'],
+         ['fieldHistory','Field history','Field changes will be available in the audit logs.'],
+         ['search','Search','Can be searched by Record Name.']].map(([k,t,note]) => `
         <div class="co-sw">
           <button class="sc-switch${d[k]?' sc-switch--on':''}" onclick="odSet('${k}', !od.d.${k}); odRender()"
                   role="switch" aria-checked="${!!d[k]}"><span class="sc-switch-thumb"></span></button>
