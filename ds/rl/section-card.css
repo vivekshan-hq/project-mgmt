@@ -1,0 +1,64 @@
+/* =========================================================
+   SectionCard — collapsible card used in the Task pane
+   ========================================================= */
+
+.rl-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.rl-section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+  border: 0;
+  border-bottom: 1px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.rl-section-header:hover {
+  background: color-mix(in oklab, var(--muted) 75%, transparent);
+}
+.rl-section.is-open .rl-section-header {
+  border-bottom-color: var(--border);
+}
+
+.rl-section-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--foreground);
+  letter-spacing: -0.005em;
+}
+
+.rl-section-info {
+  display: inline-flex;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+}
+.rl-section-info:hover { opacity: 1; }
+
+.rl-section-chevron {
+  display: inline-flex;
+  color: var(--muted-foreground);
+  transition: transform 160ms ease;
+  transform: rotate(-90deg);
+}
+.rl-section.is-open .rl-section-chevron {
+  transform: rotate(0deg);
+}
+
+.rl-section-body {
+  background: var(--card);
+  font-size: 14px;
+  color: var(--foreground);
+}
+.rl-section-body-padded {
+  padding: 14px 16px;
+}

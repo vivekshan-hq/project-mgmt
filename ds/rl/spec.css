@@ -1,0 +1,393 @@
+/* =========================================================
+   Component spec pages — shared chrome
+   Used by every file in ui_kits/rocketlane/components/
+   ========================================================= */
+
+html, body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 14px; }
+*, *::before, *::after { box-sizing: border-box; }
+button { font-family: inherit; border: none; background: transparent; color: inherit; cursor: pointer; padding: 0; }
+svg { display: block; }
+
+/* ---- Doc shell ---- */
+.cs-doc {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 40px 120px;
+  display: flex; flex-direction: column; gap: 48px;
+}
+
+/* ---- Top nav (back to index) ---- */
+.cs-topnav {
+  display: flex; align-items: center; gap: 12px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+.cs-topnav a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.cs-topnav a:hover { color: var(--foreground); }
+
+/* ---- Head ---- */
+.cs-head { display: flex; flex-direction: column; gap: 10px; }
+.cs-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground); }
+.cs-title { font-size: 32px; font-weight: 600; letter-spacing: -0.015em; margin: 0; }
+.cs-desc { color: var(--muted-foreground); max-width: 720px; line-height: 1.55; margin: 0; font-size: 15px; }
+
+/* ---- Section ---- */
+.cs-section { display: flex; flex-direction: column; gap: 16px; }
+.cs-section-head { display: flex; align-items: baseline; gap: 12px; }
+.cs-section-title { font-size: 16px; font-weight: 600; letter-spacing: -0.005em; margin: 0; }
+.cs-section-desc { color: var(--muted-foreground); font-size: 14px; margin: 0; }
+
+/* ---- State grid ---- */
+.cs-states {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.cs-state {
+  display: flex; flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  min-height: 120px;
+}
+.cs-state .cs-state-stage {
+  flex: 1;
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 20px;
+  background:
+    linear-gradient(45deg, color-mix(in oklab, var(--muted) 40%, transparent) 25%, transparent 25%),
+    linear-gradient(-45deg, color-mix(in oklab, var(--muted) 40%, transparent) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, color-mix(in oklab, var(--muted) 40%, transparent) 75%),
+    linear-gradient(-45deg, transparent 75%, color-mix(in oklab, var(--muted) 40%, transparent) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: var(--background);
+  min-height: 72px;
+}
+.cs-state .cs-state-stage.plain {
+  background: var(--background);
+}
+.cs-state .cs-state-stage.centered { justify-content: center; }
+.cs-state-label {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--muted-foreground);
+  background: var(--card);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.cs-state-label .meta { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted-foreground); opacity: 0.7; }
+.cs-state.full { grid-column: 1 / -1; }
+.cs-state.wide { grid-column: span 2; }
+
+/* ---- Live playground ---- */
+.cs-play {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  display: flex; flex-direction: column; gap: 24px;
+  min-height: 400px;
+}
+.cs-play-stage {
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px;
+  background:
+    linear-gradient(45deg, color-mix(in oklab, var(--muted) 40%, transparent) 25%, transparent 25%),
+    linear-gradient(-45deg, color-mix(in oklab, var(--muted) 40%, transparent) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, color-mix(in oklab, var(--muted) 40%, transparent) 75%),
+    linear-gradient(-45deg, transparent 75%, color-mix(in oklab, var(--muted) 40%, transparent) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: var(--background);
+  border-radius: var(--radius-md);
+  min-height: 240px;
+  position: relative;
+}
+.cs-play-hint {
+  font-size: 12px; color: var(--muted-foreground);
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0;
+}
+.cs-play-hint kbd {
+  font-family: var(--font-mono); font-size: 10.5px;
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--muted); border: 1px solid var(--border);
+  color: var(--muted-foreground);
+}
+
+/* ---- Prop row (lightweight API table) ---- */
+.cs-api {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.cs-api-row {
+  display: grid; grid-template-columns: 180px 220px 1fr;
+  gap: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.cs-api-row:last-child { border-bottom: 0; }
+.cs-api-row.header { background: var(--muted); color: var(--muted-foreground); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 16px; }
+.cs-api-row code { font-family: var(--font-mono); font-size: 12px; background: transparent; padding: 0; color: var(--foreground); }
+.cs-api-row .type { color: var(--muted-foreground); font-family: var(--font-mono); font-size: 12px; }
+
+/* ---- Do / Don't (not used in light mode but available) ---- */
+.cs-dodont { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* =========================================================
+   Atom styles — shared across all spec pages
+   (Same as all-tasks.css but isolated here so each spec page is self-contained)
+   ========================================================= */
+
+/* ---- Avatar ---- */
+.rl-avatar {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 999px;
+  font-size: 10px; font-weight: 600; color: #fff;
+  flex-shrink: 0;
+  background: var(--muted-foreground);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  overflow: visible;
+}
+.rl-avatar-img {
+  width: 100%; height: 100%; border-radius: inherit;
+  object-fit: cover; display: block;
+}
+/* sizes */
+.rl-avatar.xs  { width: 16px; height: 16px; font-size: 8px; }
+.rl-avatar.sm  { width: 20px; height: 20px; font-size: 9px; }
+.rl-avatar.md  { width: 24px; height: 24px; font-size: 10px; }
+.rl-avatar.lg  { width: 32px; height: 32px; font-size: 12px; letter-spacing: -0.01em; }
+.rl-avatar.xl  { width: 40px; height: 40px; font-size: 15px; letter-spacing: -0.01em; }
+.rl-avatar.xl2 { width: 56px; height: 56px; font-size: 20px; letter-spacing: -0.01em; font-weight: 600; }
+
+/* variants */
+.rl-avatar.v-pending {
+  background: transparent !important;
+  color: var(--primary);
+  border: 1.5px dashed color-mix(in oklab, var(--primary) 55%, var(--border));
+}
+.rl-avatar.v-unassigned {
+  background: transparent !important;
+  color: var(--muted-foreground);
+  border: 1.2px dashed color-mix(in oklab, var(--muted-foreground) 45%, var(--border));
+}
+.rl-avatar.v-team {
+  border-radius: 6px;
+}
+.rl-avatar.xs.v-team { border-radius: 4px; }
+.rl-avatar.sm.v-team { border-radius: 5px; }
+.rl-avatar.lg.v-team { border-radius: 7px; }
+.rl-avatar.xl.v-team { border-radius: 9px; }
+.rl-avatar.xl2.v-team { border-radius: 12px; }
+.rl-avatar.v-bot {
+  background: oklch(0.55 0.03 270) !important;
+  color: #fff;
+}
+.rl-avatar.v-deleted {
+  background: var(--muted) !important;
+  color: var(--muted-foreground);
+  position: relative;
+}
+.rl-avatar.v-deleted::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom right,
+    transparent calc(50% - 0.8px),
+    color-mix(in oklab, var(--muted-foreground) 70%, transparent) calc(50% - 0.8px),
+    color-mix(in oklab, var(--muted-foreground) 70%, transparent) calc(50% + 0.8px),
+    transparent calc(50% + 0.8px));
+  border-radius: inherit;
+}
+.rl-avatar.v-overflow {
+  background: var(--muted) !important;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+/* presence dot */
+.rl-avatar-presence {
+  position: absolute;
+  right: -1px; bottom: -1px;
+  width: 35%; height: 35%;
+  min-width: 6px; min-height: 6px;
+  border-radius: 999px;
+  background: var(--muted-foreground);
+  box-shadow: 0 0 0 1.5px var(--background);
+}
+.rl-avatar-presence.online  { background: oklch(0.65 0.18 145); }
+.rl-avatar-presence.away    { background: oklch(0.78 0.15 80); }
+.rl-avatar-presence.offline { background: var(--muted-foreground); }
+.rl-avatar.xs .rl-avatar-presence,
+.rl-avatar.sm .rl-avatar-presence { box-shadow: 0 0 0 1px var(--background); }
+
+/* stack */
+.rl-avatar-stack { display: inline-flex; }
+.rl-avatar-stack .rl-avatar { box-shadow: 0 0 0 2px var(--background); }
+.rl-avatar-stack .rl-avatar + .rl-avatar { margin-left: -6px; }
+.rl-avatar-stack .rl-avatar.xs + .rl-avatar.xs { margin-left: -4px; }
+.rl-avatar-stack .rl-avatar.sm + .rl-avatar.sm { margin-left: -5px; }
+.rl-avatar-stack .rl-avatar.lg + .rl-avatar.lg { margin-left: -8px; }
+.rl-avatar-stack .rl-avatar.xl + .rl-avatar.xl { margin-left: -10px; }
+
+/* ---- Cell chrome ---- */
+.rl-cell {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 8px;
+  border-radius: 6px;
+  max-width: 100%; min-width: 0;
+  cursor: pointer;
+  color: var(--foreground);
+  font-size: 14px;
+  user-select: none;
+}
+.rl-cell:hover { background: color-mix(in oklab, var(--muted) 70%, transparent); }
+.rl-cell.empty { color: var(--muted-foreground); }
+.rl-cell.open {
+  background: var(--background);
+  box-shadow: 0 0 0 1px var(--ring),
+              0 0 0 3px color-mix(in oklab, var(--ring) 25%, transparent);
+}
+.rl-cell .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.empty-dash { color: var(--muted-foreground); opacity: 0.6; }
+
+/* ---- Popover surface ---- */
+.rl-pop {
+  position: absolute;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.12),
+    0 2px 6px rgba(0,0,0,0.06);
+  z-index: 50;
+  min-width: 280px;
+  overflow: hidden;
+  animation: rl-pop-in 120ms ease;
+}
+@keyframes rl-pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* =========================================================
+   ASSIGNEE PICKER
+   ========================================================= */
+
+.ap { display: flex; flex-direction: column; min-width: 0; }
+
+/* Search */
+.ap-search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+}
+.ap-search-input {
+  flex: 1; border: 0; outline: 0; background: transparent;
+  font-family: inherit; font-size: 14px;
+  color: var(--foreground);
+  padding: 2px 0;
+  min-width: 0;
+}
+.ap-search-input::placeholder { color: var(--muted-foreground); }
+.ap-search-clear {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 4px;
+  color: var(--muted-foreground);
+}
+.ap-search-clear:hover { background: var(--muted); color: var(--foreground); }
+
+/* List */
+.ap-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+/* Groups */
+.ap-group { display: flex; flex-direction: column; }
+.ap-group + .ap-group { margin-top: 4px; }
+
+.ap-group-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted-foreground);
+  width: 100%;
+  background: transparent; border: 0; text-align: left;
+}
+.ap-group-head:hover { color: var(--foreground); }
+.ap-caret {
+  display: inline-flex; transition: transform 140ms ease;
+  transform: rotate(-90deg);
+}
+.ap-caret.open { transform: rotate(0); }
+.ap-group-label { flex: 1; }
+.ap-clear {
+  font-size: 14px; font-weight: 500; letter-spacing: 0;
+  color: var(--primary); text-transform: none;
+  padding: 2px 4px; border-radius: 4px;
+}
+.ap-clear:hover { background: color-mix(in oklab, var(--primary) 10%, transparent); }
+
+.ap-group-body { display: flex; flex-direction: column; gap: 2px; padding: 0 2px 4px; }
+
+/* Row */
+.ap-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 36px;
+}
+.ap-row:hover, .ap-row.active {
+  background: color-mix(in oklab, var(--muted) 70%, transparent);
+}
+.ap-row.selected {
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+.ap-row.selected:hover, .ap-row.selected.active {
+  background: color-mix(in oklab, var(--primary) 15%, transparent);
+}
+.ap-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ap-row-name {
+  font-size: 14px; color: var(--foreground);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  line-height: 1.25;
+}
+.ap-row-role {
+  font-size: 12px; color: var(--muted-foreground); line-height: 1.25;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ap-check {
+  display: inline-flex; color: var(--primary);
+  flex-shrink: 0;
+}
+
+.ap-empty {
+  padding: 16px 10px;
+  font-size: 12px; color: var(--muted-foreground);
+  text-align: center;
+}
+
+/* Done */
+.ap-done {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px; font-weight: 500;
+  color: var(--foreground);
+  background: var(--muted);
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+}
+.ap-done:hover { background: color-mix(in oklab, var(--muted) 60%, var(--border)); }

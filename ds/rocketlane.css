@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Rocketlane product UI kit — the `.rl-*` layer
+   ==========================================================================
+   A committed, URL-safe copy of ui_kits/rocketlane/components/*.css from
+   "Design System/rocketlane-x-shadcn/". Prototypes MUST link this path
+   (`ds/rocketlane.css`) and never the source folder: that folder is
+   untracked and its name contains a space, so it 404s on GitHub Pages.
+
+   This is the layer that makes a page read as Rocketlane rather than as
+   generic shadcn. `ds/styles.css` supplies the tokens and the `.sc-*`
+   primitives underneath it; load that FIRST, then this.
+
+       <link rel="stylesheet" href="ds/styles.css">
+       <link rel="stylesheet" href="ds/rocketlane.css">
+
+   Copied verbatim from source — do not "improve" these files here, or the
+   copy silently drifts from the design system it is mirroring.
+
+   Known defect carried over from source: tag.css is missing the
+   `.rl-tag-dot {` selector before its declarations, so that one rule block
+   is discarded by the CSS parser and tag dots render unstyled. Left as-is
+   so the mirror stays faithful; fix belongs upstream in the design system.
+   ========================================================================== */
+
+@import "rl/spec.css";              /* .rl-avatar, .rl-cell, .rl-pop */
+@import "rl/button.css";            /* .rl-btn */
+@import "rl/tag.css";               /* .rl-tag + the 10-hue palette tokens */
+@import "rl/app-shell.css";         /* .rl-app, .rl-sidebar, .rl-rail-*, .rl-page-header */
+@import "rl/tabs.css";              /* .rl-tabs, .rl-tab, .rl-subtab */
+@import "rl/drawer.css";            /* .rl-drawer-* */
+@import "rl/field-label-group.css"; /* .rl-field, .rl-field-shell */
+@import "rl/section-card.css";      /* .rl-section */

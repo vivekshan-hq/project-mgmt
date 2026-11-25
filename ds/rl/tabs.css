@@ -1,0 +1,145 @@
+/* =========================================================
+   Tabs — page section nav. Supports inline group subtabs.
+   ========================================================= */
+
+.rl-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-left: -12px; /* let the leftmost tab's padding align with the page edge */
+}
+
+/* ---- Tab button ---- */
+.rl-tab {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  height: 38px;
+  background: transparent;
+  border: 0;
+  font-size: 14px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+.rl-tab svg, .rl-tab i[data-lucide] { width: 15px; height: 15px; }
+.rl-tab:hover { color: var(--foreground); }
+.rl-tab.active {
+  color: var(--primary);
+  font-weight: 500;
+}
+.rl-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 10px; right: 10px; bottom: -1px;
+  height: 2px;
+  background: var(--primary);
+}
+
+/* ---- Group tab + inline subtabs ---- */
+.rl-tab.is-group .rl-tab-chev {
+  width: 14px; height: 14px;
+  margin-left: 2px;
+  transition: transform 160ms ease;
+}
+.rl-tab-group {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+}
+/* Active group: rotate chevron, drop the lone-tab underline,
+   draw a single rail across the whole group */
+.rl-tab-group.is-open .rl-tab.is-group .rl-tab-chev {
+  transform: rotate(180deg);
+}
+.rl-tab-group.is-active .rl-tab.is-group .rl-tab-chev {
+  color: var(--primary);
+}
+.rl-tab-group.is-active .rl-tab.is-group {
+  font-weight: 600;
+}
+.rl-tab-group.is-active .rl-tab.is-group::after {
+  display: none;
+}
+.rl-tab-group::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.rl-tab-group.is-active::after { opacity: 1; }
+
+/* Subtabs row — always mounted; animates open/close by growing the grid track 0fr → 1fr */
+.rl-subtabs {
+  display: inline-grid;
+  grid-template-columns: 0fr;
+  height: 38px;
+  transition: grid-template-columns 260ms cubic-bezier(.2,.7,.2,1);
+}
+.rl-subtabs.is-open { grid-template-columns: 1fr; }
+.rl-subtabs-inner {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 140ms ease, transform 200ms ease;
+}
+.rl-subtabs.is-open .rl-subtabs-inner {
+  opacity: 1;
+  transform: none;
+  transition: opacity 180ms ease 80ms, transform 240ms cubic-bezier(.2,.7,.2,1) 40ms;
+}
+.rl-tab-group::after { transition: opacity 200ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .rl-subtabs, .rl-subtabs-inner, .rl-tab-chev { transition: none !important; }
+}
+.rl-subtab {
+  position: relative;
+  display: inline-flex; align-items: center;
+  padding: 0 10px; height: 38px;
+  background: transparent;
+  border: 0;
+  font-size: 14px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+.rl-subtab:hover { color: var(--foreground); }
+.rl-subtab.active {
+  color: var(--foreground);
+  font-weight: 500;
+}
+/* Active subtab: soft filled pill (no outline) */
+.rl-subtab.active::before {
+  content: '';
+  position: absolute;
+  left: 3px; right: 3px; top: 6px; bottom: 6px;
+  background: var(--accent);
+  border-radius: var(--radius-md);
+  z-index: -1;
+  transition: background 140ms ease;
+}
+.rl-subtab:not(.active):hover::before {
+  content: '';
+  position: absolute;
+  left: 3px; right: 3px; top: 6px; bottom: 6px;
+  background: color-mix(in oklab, var(--accent) 55%, transparent);
+  border-radius: var(--radius-md);
+  z-index: -1;
+}
+
+/* ---- Sizes ---- */
+.rl-tabs.sz-sm .rl-tab { height: 32px; font-size: 14px; padding: 0 10px; }
+.rl-tabs.sz-sm .rl-subtab { height: 32px; font-size: 12.5px; }
+.rl-tabs.sz-sm .rl-subtabs { height: 32px; }
+.rl-subtabs-inner .rl-subtab:first-child { margin-left: 4px; }
+.rl-subtabs-inner .rl-subtab:last-child { margin-right: 4px; }
+.rl-tabs.sz-sm .rl-tab svg, .rl-tabs.sz-sm .rl-tab i[data-lucide] { width: 13px; height: 13px; }

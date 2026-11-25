@@ -4,324 +4,352 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Custom objects · Settings</title>
+
+<!-- The design system, in the order the kit requires: tokens and the shadcn
+     primitives first, then the Rocketlane product layer on top of them. -->
 <link rel="stylesheet" href="ds/styles.css">
+<link rel="stylesheet" href="ds/rocketlane.css">
+
 <style>
 /* ──────────────────────────────────────────────────────────────
    Custom objects — Settings › Advanced
 
    Phase 1 (create the object), Phase 3 (fields) and Phase 4
-   (relationships) from the Notion specs. Everything here is lookups:
-   there is no master-detail, and roll-ups ride on the lookup instead.
+   (relationships) from the Notion specs.
 
-   Page-local tokens are --p-* so they cannot shadow the design
-   system's --border / --accent / --radius and silently restyle
-   every .sc-* component on the page.
+   Chrome, buttons, tags, tabs, drawer and fields all come from the
+   Rocketlane kit (.rl-*). What is left here is only the handful of
+   things the kit has no component for: the data-type glyph, the type
+   picker, the relationship map, the picklist editor and the menu.
+   Two of them (.co-input, .co-table) deliberately mirror a kit spec —
+   each says which, so drift is visible.
    ────────────────────────────────────────────────────────────── */
-:root{
-  --p-bg:#FFFFFF;
-  --p-bg-sidebar:#F7F8FA;
-  --p-hover:#F1F3F7;
-  --p-subtle:#FAFBFC;
-  --p-text:#0D1117;
-  --p-text2:#5C6474;
-  --p-muted:#9CA3AF;
-  --p-accent:#3B6FE0;
-  --p-accent-light:#EEF3FF;
-  --p-border:#E4E7EC;
-  --p-border-input:#D1D5DB;
-  --p-rail-bg:#111827;
-  --p-rail-icon:#9CA3AF;
-  --p-amber:#B45309;
-  --p-amber-bg:#FFFBEB;
-  --p-amber-border:#FDE68A;
-  --p-green:#198038;
-  --p-green-bg:#F0FDF4;
-  --p-red:#DA1E28;
-  --p-red-bg:#FFF1F1;
+
+/* The kit's page chrome sets these on html/body; this page is not loading
+   page-chrome.css (it would duplicate app-shell.css), so set them here. */
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  background: var(--background); color: var(--foreground);
+  font-family: var(--font-sans); font-size: 14px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font-sans);font-size:13px;color:var(--p-text);background:var(--p-bg);height:100vh;overflow:hidden;}
-.shell{display:flex;height:100vh;overflow:hidden;}
-.hidden{display:none !important;}
+*, *::before, *::after { box-sizing: border-box; }
+button { font-family: inherit; border: none; background: transparent; color: inherit; cursor: pointer; padding: 0; }
+a { color: inherit; text-decoration: none; }
+.hidden { display: none !important; }
 
-/* ── Rail ── */
-.rail{width:48px;background:var(--p-rail-bg);display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;flex-shrink:0;gap:3px;}
-.rail-logo{width:30px;height:30px;border-radius:7px;background:#2F6FEB;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;margin-bottom:6px;}
-.rail-i{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;color:var(--p-rail-icon);cursor:pointer;border:none;background:none;}
-.rail-i:hover{background:#262830;color:#D5D8DD;}
-.rail-i.on{background:#2A2D36;color:#fff;}
-.rail-i svg{width:16px;height:16px;}
-.rail-sp{flex:1;}
-.rail-av{width:28px;height:28px;border-radius:50%;background:#3B6FE0;color:#fff;font-size:10px;font-weight:600;display:grid;place-items:center;}
+/* ── Native controls, styled to the FieldShell spec ──────────────
+   The kit's Select builds its trigger out of .rl-field-shell, but that
+   class starts with `all: unset`, which strips a native <input> of the
+   behaviour we want. So this mirrors FieldShell's visual spec —
+   32px min-height, 1px border, --radius-md, 14px, primary focus ring —
+   for real form controls. Keep the two in step. */
+.co-input {
+  display: block; width: 100%;
+  min-height: 32px; height: 32px; padding: 0 10px;
+  background: var(--card); color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: inherit; font-size: 14px; line-height: 1;
+  outline: none;
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+.co-input::placeholder { color: var(--muted-foreground); }
+.co-input:hover:not(:disabled):not(:focus) { border-color: color-mix(in oklab, var(--primary) 25%, var(--border)); }
+.co-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 15%, transparent);
+}
+.co-input:disabled { opacity: 0.55; cursor: not-allowed; background: color-mix(in oklab, var(--muted) 40%, var(--card)); }
+.co-input[aria-invalid="true"] { border-color: oklch(0.55 0.2 25); }
+textarea.co-input { height: auto; min-height: 64px; padding: 7px 10px; line-height: 1.5; resize: vertical; }
+select.co-input {
+  cursor: pointer; appearance: none; padding-right: 30px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23717179' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat; background-position: right 9px center; background-size: 14px;
+}
+.co-mono { font-family: var(--font-mono); }
 
-/* ── Sidebar ── */
-.sidebar{width:232px;flex-shrink:0;background:var(--p-bg-sidebar);border-right:1px solid var(--p-border);display:flex;flex-direction:column;overflow-y:auto;}
-.sidebar-title{padding:16px 14px 12px;font-size:16px;font-weight:600;border-bottom:1px solid var(--p-border);}
-.sc-input.sidebar-search{margin:10px;width:calc(100% - 20px);height:30px;}
-.nav-item{display:flex;align-items:center;gap:8px;padding:5px 10px;margin:1px 6px;border-radius:6px;font-size:13px;color:var(--p-text2);cursor:pointer;user-select:none;text-decoration:none;}
-.nav-item:hover{background:var(--p-hover);color:var(--p-text);}
-.nav-item.active{background:var(--p-accent-light);color:var(--p-accent);font-weight:500;}
-.nav-icon{width:24px;height:24px;border-radius:5px;display:grid;place-items:center;font-size:12px;flex-shrink:0;}
-.nav-arrow{margin-left:auto;color:var(--p-muted);font-size:11px;}
-.sidebar-section{padding:10px 14px 4px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--p-muted);}
+/* ── Table, mirroring the kit's accounts table spec ──────────────
+   36px header row at 12px/500 muted, 44px body rows, first column
+   padded to the 24px page gutter, --muted on row hover. */
+.co-table-wrap { overflow: auto; }
+.co-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 14px; }
+.co-table thead th {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding: 0 12px; height: 36px; text-align: left;
+  font-size: 12px; font-weight: 500; color: var(--muted-foreground);
+  white-space: nowrap; vertical-align: middle;
+}
+.co-table tbody td {
+  padding: 8px 12px; min-height: 44px;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  color: var(--foreground); vertical-align: middle;
+}
+.co-table tbody tr:last-child td { border-bottom: 0; }
+.co-table thead th.col-first, .co-table tbody td.col-first { padding-left: 24px; }
+.co-table thead th.col-last, .co-table tbody td.col-last { padding-right: 24px; }
+.co-table tbody tr.is-clickable { cursor: pointer; }
+.co-table tbody tr.is-clickable:hover td { background: var(--muted); }
+.co-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.co-table .is-empty { color: var(--muted-foreground); opacity: 0.55; }
 
-/* ── Main ── */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.page-header{padding:16px 28px 14px;border-bottom:1px solid var(--p-border);flex-shrink:0;}
-.crumbs{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--p-text2);margin-bottom:8px;}
-.crumbs a{color:var(--p-accent);text-decoration:none;cursor:pointer;}
-.crumbs a:hover{text-decoration:underline;}
-.page-head-row{display:flex;align-items:flex-start;gap:14px;}
-.page-title{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:600;min-width:0;}
-.page-title svg{width:17px;height:17px;color:var(--p-text2);flex-shrink:0;}
-.page-sub{font-size:12.5px;color:var(--p-text2);margin-top:4px;line-height:1.55;max-width:760px;}
-.page-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;align-items:center;}
-.content{flex:1;overflow-y:auto;padding:20px 28px 40px;}
-.inner{max-width:920px;}
-.inner-wide{max-width:1040px;}
+.co-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.co-api { font-family: var(--font-mono); font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
+.co-row-actions { display: flex; gap: 2px; justify-content: flex-end; opacity: 0; transition: opacity 100ms; }
+.co-table tbody tr:hover .co-row-actions { opacity: 1; }
 
-/* ── Section card ── */
-.card{border:1px solid var(--p-border);border-radius:10px;margin-bottom:18px;overflow:hidden;background:var(--p-bg);}
-.card-head{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;}
-.card-head.bordered{border-bottom:1px solid var(--p-border);}
-.card-head-text{flex:1;min-width:0;}
-.card-title{font-size:13.5px;font-weight:600;}
-.card-desc{font-size:12.5px;color:var(--p-text2);line-height:1.55;margin-top:3px;}
-.card-body{padding:16px 18px;}
-.card-note{padding:11px 18px;background:var(--p-subtle);border-top:1px solid var(--p-border);font-size:12px;color:var(--p-text2);line-height:1.55;}
+/* ── Data-type glyph ─────────────────────────────────────────────
+   A 24px mono chip rather than an icon. Lucide swaps <i data-lucide>
+   for a 24px SVG, which blows out a table cell; this cannot. */
+.co-glyph {
+  width: 24px; height: 24px; border-radius: var(--radius-sm);
+  display: grid; place-items: center; flex-shrink: 0;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: -0.02em;
+  background: var(--tag-bg-gray); color: var(--tag-fg-gray);
+}
+.co-glyph.g-text   { background: var(--tag-bg-blue);   color: var(--tag-fg-blue); }
+.co-glyph.g-num    { background: var(--tag-bg-green);  color: var(--tag-fg-green); }
+.co-glyph.g-choice { background: var(--tag-bg-orange); color: var(--tag-fg-orange); }
+.co-glyph.g-rel    { background: var(--tag-bg-purple); color: var(--tag-fg-purple); }
+.co-glyph.g-calc   { background: var(--tag-bg-pink);   color: var(--tag-fg-pink); }
+.co-glyph.g-sys    { background: var(--tag-bg-gray);   color: var(--tag-fg-gray); }
+.co-glyph.lg { width: 30px; height: 30px; font-size: 12px; border-radius: var(--radius-md); }
 
-/* ── Tables ── */
-.sc-table{font-size:13px;}
-.sc-th{font-size:11.5px;white-space:nowrap;letter-spacing:.02em;}
-.sc-td{padding:10px 12px;vertical-align:middle;}
-.sc-tr.clickable{cursor:pointer;}
-.t-name{font-weight:500;display:flex;align-items:center;gap:9px;min-width:0;}
-.t-sub{font-size:11.5px;color:var(--p-muted);font-family:var(--font-mono);margin-top:2px;}
-.num{text-align:right;font-variant-numeric:tabular-nums;}
-.muted-cell{color:var(--p-text2);}
-.row-actions{display:flex;gap:2px;justify-content:flex-end;opacity:0;transition:opacity .1s;}
-.sc-tr:hover .row-actions{opacity:1;}
-.icon-btn{width:26px;height:26px;border-radius:6px;border:none;background:none;color:var(--p-text2);cursor:pointer;display:grid;place-items:center;}
-.icon-btn:hover{background:var(--p-hover);color:var(--p-text);}
-.icon-btn svg{width:14px;height:14px;}
-.icon-btn.danger:hover{background:var(--p-red-bg);color:var(--p-red);}
+/* ── Page body padding ───────────────────────────────────────── */
+.co-body { padding: 20px 24px 40px; }
+/* The product's pages run full-bleed inside the 24px page gutter rather
+   than centring a column, so tables fill the main card. Prose blocks cap
+   their own width where reading length matters. */
+.co-inner { max-width: none; }
 
-/* ── Chips ── */
-.chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:500;line-height:17px;white-space:nowrap;border:1px solid transparent;}
-.chip.level-account{background:#EEF3FF;color:#2A52BE;border-color:#DCE5FF;}
-.chip.level-project{background:#F0FDF4;color:#15803D;border-color:#DCFCE7;}
-.chip.level-global{background:var(--p-amber-bg);color:var(--p-amber);border-color:var(--p-amber-border);}
-.chip.neutral{background:#F3F4F6;color:var(--p-text2);border-color:#E5E7EB;}
-.chip.attr{background:#fff;color:var(--p-text2);border-color:var(--p-border-input);font-family:var(--font-mono);font-size:10.5px;}
-.chip.open{background:var(--p-amber-bg);color:var(--p-amber);border-color:var(--p-amber-border);cursor:help;}
-.chip.new{background:#F5F0FF;color:#6D28D9;border-color:#E9D5FF;}
-.chip.later{background:#F3F4F6;color:var(--p-muted);border-color:#E5E7EB;}
+/* ── Section label ───────────────────────────────────────────── */
+.co-sec { display: flex; align-items: center; gap: 10px; margin: 22px 0 10px; }
+.co-sec:first-child { margin-top: 0; }
+.co-sec-t { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); }
+.co-sec-line { flex: 1; height: 1px; background: var(--border); }
 
-/* Data-type glyph. A 24px mono chip instead of an icon font — it stays
-   24px inside table cells and drawer rows, which lucide's 24px SVG swap
-   does not. */
-.glyph{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;
-  font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:-.02em;
-  background:#F3F4F6;color:var(--p-text2);border:1px solid #E9EBEF;}
-.glyph.g-text{background:#EEF3FF;color:#2A52BE;border-color:#DCE5FF;}
-.glyph.g-num{background:#F0FDF4;color:#15803D;border-color:#DCFCE7;}
-.glyph.g-choice{background:#FFF7ED;color:#C2410C;border-color:#FFEDD5;}
-.glyph.g-rel{background:#F5F0FF;color:#6D28D9;border-color:#E9D5FF;}
-.glyph.g-calc{background:#FFF0F5;color:#BE185D;border-color:#FCE7F3;}
-.glyph.g-sys{background:#F3F4F6;color:var(--p-muted);border-color:#E5E7EB;}
-.glyph-lg{width:30px;height:30px;font-size:12px;border-radius:7px;}
+/* ── Empty state ─────────────────────────────────────────────── */
+.co-empty {
+  border: 1px dashed var(--border); border-radius: var(--radius-lg);
+  padding: 48px 28px; text-align: center;
+  background: color-mix(in oklab, var(--muted) 35%, var(--background));
+}
+.co-empty-t { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.co-empty-d { font-size: 14px; color: var(--muted-foreground); line-height: 1.55; max-width: 460px; margin: 0 auto 18px; }
 
-/* ── Tabs (product's 2px underline tab) ── */
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--p-border);padding:0 28px;flex-shrink:0;background:var(--p-bg);}
-.tab{padding:9px 12px 8px;font-size:13px;color:var(--p-text2);cursor:pointer;border:none;background:none;font-family:inherit;
-  border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;}
-.tab:hover{color:var(--p-text);}
-.tab.active{color:var(--p-accent);border-bottom-color:var(--p-accent);font-weight:500;}
-.tab:disabled{color:var(--p-muted);cursor:not-allowed;}
-.tab:disabled:hover{color:var(--p-muted);}
+/* ── Callouts ────────────────────────────────────────────────── */
+.co-note {
+  display: flex; gap: 10px; padding: 11px 13px;
+  border-radius: var(--radius-md); font-size: 13px; line-height: 1.55;
+  border: 1px solid var(--border); background: color-mix(in oklab, var(--muted) 40%, var(--background));
+  color: var(--muted-foreground); margin-bottom: 16px;
+}
+.co-note b { color: var(--foreground); font-weight: 600; }
+.co-note { max-width: 940px; }
+.co-note.warn {
+  background: var(--tag-bg-yellow); border-color: color-mix(in oklab, var(--tag-fg-yellow) 25%, transparent);
+  color: var(--tag-fg-yellow);
+}
+.co-note.warn b { color: var(--tag-fg-yellow); }
+.co-note-ico { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; }
+.co-note-ico svg { width: 16px; height: 16px; display: block; }
 
-/* ── Section label ── */
-.sec{display:flex;align-items:center;gap:8px;margin:22px 0 10px;}
-.sec:first-child{margin-top:0;}
-.sec-t{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--p-muted);}
-.sec-line{flex:1;height:1px;background:var(--p-border);}
+/* ── Form layout inside the drawer ───────────────────────────── */
+.co-f { margin-bottom: 16px; }
+.co-f-row { display: flex; gap: 12px; }
+.co-f-row > .co-f { flex: 1; min-width: 0; }
+.rl-field-hint { margin-top: 5px; }
+.co-err { font-size: 11px; color: oklch(0.55 0.2 25); line-height: 1.35; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+.co-err svg { width: 12px; height: 12px; flex-shrink: 0; }
 
-/* ── Empty state ── */
-.empty{border:1px dashed var(--p-border-input);border-radius:10px;padding:44px 28px;text-align:center;background:var(--p-subtle);}
-.empty-t{font-size:14px;font-weight:600;margin-bottom:5px;}
-.empty-d{font-size:12.5px;color:var(--p-text2);line-height:1.6;max-width:430px;margin:0 auto 16px;}
+/* Radio cards */
+.co-cards { display: flex; gap: 10px; }
+.co-card {
+  flex: 1; text-align: left; font-family: inherit; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 10px 12px; background: var(--card);
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+.co-card:hover:not(:disabled) { border-color: color-mix(in oklab, var(--primary) 25%, var(--border)); background: color-mix(in oklab, var(--muted) 30%, var(--card)); }
+.co-card.sel { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 15%, transparent); background: var(--card); }
+.co-card:disabled { cursor: not-allowed; opacity: 0.7; background: color-mix(in oklab, var(--muted) 45%, var(--card)); }
+.co-card-t { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.co-card-d { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; margin-top: 4px; }
 
-/* ── Callouts ── */
-.callout{display:flex;gap:10px;padding:11px 13px;border-radius:8px;font-size:12.5px;line-height:1.55;border:1px solid;margin-bottom:16px;}
-.callout-ico{flex-shrink:0;width:16px;height:16px;margin-top:1px;}
-.callout-ico svg{width:16px;height:16px;display:block;}
-.callout.warn{background:var(--p-amber-bg);border-color:var(--p-amber-border);color:#92400E;}
-.callout.info{background:#F7F8FA;border-color:var(--p-border);color:var(--p-text2);}
-.callout b{font-weight:600;}
-
-/* ── Drawer ── */
-.scrim{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:200;opacity:0;pointer-events:none;transition:opacity .18s;}
-.scrim.on{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:560px;max-width:92vw;background:var(--p-bg);z-index:210;
-  box-shadow:-8px 0 32px rgba(15,23,42,.14);display:flex;flex-direction:column;
-  transform:translateX(100%);transition:transform .2s cubic-bezier(.4,0,.2,1);}
-.drawer.on{transform:translateX(0);}
-.drawer.wide{width:680px;}
-.dr-head{display:flex;align-items:flex-start;gap:10px;padding:16px 20px 14px;border-bottom:1px solid var(--p-border);flex-shrink:0;}
-.dr-back{width:26px;height:26px;border-radius:6px;border:none;background:none;color:var(--p-text2);cursor:pointer;display:grid;place-items:center;margin-left:-4px;}
-.dr-back:hover{background:var(--p-hover);}
-.dr-back svg{width:15px;height:15px;}
-.dr-title{font-size:15px;font-weight:600;}
-.dr-sub{font-size:12px;color:var(--p-text2);margin-top:3px;line-height:1.5;}
-.dr-x{margin-left:auto;}
-.dr-body{flex:1;overflow-y:auto;padding:18px 20px 24px;}
-.dr-foot{display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--p-border);flex-shrink:0;background:var(--p-bg);}
-.dr-foot-note{font-size:11.5px;color:var(--p-muted);margin-right:auto;line-height:1.45;max-width:260px;}
-
-/* ── Forms ── */
-.f{margin-bottom:16px;}
-.f-label{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;margin-bottom:5px;}
-.f-req{color:var(--p-red);}
-.f-hint{font-size:11.5px;color:var(--p-text2);line-height:1.5;margin-top:5px;}
-.f-err{font-size:11.5px;color:var(--p-red);line-height:1.5;margin-top:5px;display:flex;align-items:center;gap:4px;}
-.sc-input{font-size:13px;height:34px;}
-select.sc-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235C6474' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 9px center;background-size:14px;padding-right:30px;}
-textarea.sc-input{height:auto;min-height:62px;padding:8px 11px;line-height:1.5;resize:vertical;font-size:13px;}
-.f-row{display:flex;gap:12px;}
-.f-row > .f{flex:1;min-width:0;}
-.mono{font-family:var(--font-mono);}
-
-/* Radio cards for Level */
-.opt-cards{display:flex;gap:10px;}
-.opt-card{flex:1;border:1px solid var(--p-border-input);border-radius:9px;padding:11px 12px;cursor:pointer;background:var(--p-bg);text-align:left;font-family:inherit;position:relative;transition:border-color .1s,background .1s;}
-.opt-card:hover{border-color:var(--p-accent);}
-.opt-card.sel{border-color:var(--p-accent);background:var(--p-accent-light);box-shadow:0 0 0 1px var(--p-accent);}
-.opt-card:disabled{cursor:not-allowed;opacity:.75;background:var(--p-subtle);}
-.opt-card:disabled:hover{border-color:var(--p-border-input);}
-.opt-card-t{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;}
-.opt-card-d{font-size:11.5px;color:var(--p-text2);line-height:1.5;margin-top:4px;}
-
-/* Segmented control */
-.seg{display:inline-flex;padding:3px;background:#F3F4F6;border-radius:8px;gap:2px;}
-.seg-btn{border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:500;color:var(--p-text2);padding:5px 12px;border-radius:6px;cursor:pointer;}
-.seg-btn.on{background:var(--p-bg);color:var(--p-text);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+/* Segmented control — mirrors the kit's .view-switcher */
+.co-seg { display: inline-flex; align-items: center; background: var(--muted); border-radius: var(--radius-md); padding: 2px; }
+.co-seg button { height: 26px; padding: 0 12px; border-radius: calc(var(--radius-md) - 2px); font-size: 13px; font-weight: 500; color: var(--muted-foreground); }
+.co-seg button:hover { color: var(--foreground); }
+.co-seg button.active { background: var(--background); color: var(--foreground); box-shadow: var(--shadow-xs); }
 
 /* Checkbox / switch rows */
-.chk-row{display:flex;align-items:flex-start;gap:9px;padding:9px 0;cursor:pointer;}
-.chk-row + .chk-row{border-top:1px solid var(--p-border);}
-.chk-row .sc-check{margin-top:1px;flex-shrink:0;}
-.chk-t{font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:6px;}
-.chk-d{font-size:11.5px;color:var(--p-text2);line-height:1.5;margin-top:2px;}
-.chk-row.locked{cursor:default;opacity:.95;}
-.sw-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;}
-.sw-row + .sw-row{border-top:1px solid var(--p-border);}
-.sw-row .sc-switch{flex-shrink:0;margin-top:1px;}
-.sw-text{flex:1;min-width:0;}
+.co-check { display: flex; align-items: flex-start; gap: 9px; padding: 9px 0; cursor: pointer; }
+.co-check + .co-check, .co-sw + .co-sw, .co-check + .co-sw, .co-sw + .co-check { border-top: 1px solid var(--border); }
+.co-check .sc-check { margin-top: 1px; flex-shrink: 0; }
+.co-sw { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; }
+.co-sw .sc-switch { flex-shrink: 0; margin-top: 1px; }
+.co-ctl-t { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.co-ctl-d { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; margin-top: 3px; }
+.co-check.locked { cursor: default; }
 
-/* Preview strip inside the drawer */
-.prev{background:var(--p-subtle);border:1px solid var(--p-border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--p-text2);}
-.prev-val{font-family:var(--font-mono);font-size:12.5px;color:var(--p-text);background:var(--p-bg);border:1px solid var(--p-border);border-radius:5px;padding:2px 7px;}
+/* Inline preview strip */
+.co-prev {
+  display: flex; align-items: center; gap: 10px;
+  background: color-mix(in oklab, var(--muted) 40%, var(--background));
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 9px 11px; font-size: 12.5px; color: var(--muted-foreground);
+}
+.co-prev-val {
+  font-family: var(--font-mono); font-size: 13px; color: var(--foreground);
+  background: var(--background); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 2px 7px;
+}
 
 /* Type picker */
-.tp-group{margin-bottom:18px;}
-.tp-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-.tp{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border:1px solid var(--p-border);border-radius:8px;background:var(--p-bg);cursor:pointer;text-align:left;font-family:inherit;transition:border-color .1s,background .1s;}
-.tp:hover{border-color:var(--p-accent);background:var(--p-accent-light);}
-.tp:disabled{cursor:not-allowed;background:var(--p-subtle);opacity:.65;}
-.tp:disabled:hover{border-color:var(--p-border);background:var(--p-subtle);}
-.tp-t{font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.tp-d{font-size:11px;color:var(--p-text2);line-height:1.45;margin-top:2px;}
+.co-tp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.co-tp {
+  display: flex; align-items: flex-start; gap: 9px; text-align: left; font-family: inherit;
+  padding: 9px 10px; border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--card); cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.co-tp:hover:not(:disabled) { border-color: color-mix(in oklab, var(--primary) 25%, var(--border)); background: color-mix(in oklab, var(--muted) 30%, var(--card)); }
+.co-tp:disabled { cursor: not-allowed; opacity: 0.6; background: color-mix(in oklab, var(--muted) 40%, var(--card)); }
+.co-tp-t { font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.co-tp-d { font-size: 11.5px; color: var(--muted-foreground); line-height: 1.45; margin-top: 2px; }
 
-/* Picklist value editor */
-.pl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.pl-sw{width:26px;height:26px;border-radius:6px;border:1px solid rgba(0,0,0,.1);cursor:pointer;flex-shrink:0;padding:0;}
-.pl-row .sc-input{height:30px;font-size:12.5px;}
-.pl-drag{color:var(--p-muted);font-size:13px;cursor:grab;width:12px;text-align:center;flex-shrink:0;}
+/* Picklist editor */
+.co-pl { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.co-pl-grip { color: var(--muted-foreground); font-size: 13px; width: 12px; text-align: center; flex-shrink: 0; cursor: grab; }
+.co-pl-sw { width: 28px; height: 28px; border-radius: var(--radius-sm); border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); flex-shrink: 0; cursor: pointer; }
 
-/* Related-list / relationship cards */
-.rel-card{border:1px solid var(--p-border);border-radius:9px;padding:12px 14px;margin-bottom:9px;background:var(--p-bg);}
-.rel-top{display:flex;align-items:center;gap:9px;}
-.rel-t{font-size:13px;font-weight:500;}
-.rel-meta{font-size:11.5px;color:var(--p-text2);margin-top:5px;line-height:1.6;}
-.rel-arrow{color:var(--p-muted);font-size:12px;}
-.rel-empty{font-size:12.5px;color:var(--p-text2);padding:14px 0;}
+/* Relationship map */
+.co-map { display: flex; flex-direction: column; }
+.co-map-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; flex-wrap: wrap; }
+.co-node {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 6px 11px; background: var(--card); font-size: 13.5px; font-weight: 500;
+  box-shadow: var(--shadow-xs);
+}
+.co-node.me { border-color: color-mix(in oklab, var(--primary) 35%, var(--border)); background: var(--accent); }
+.co-node.sys { background: color-mix(in oklab, var(--muted) 50%, var(--card)); color: var(--muted-foreground); font-weight: 400; box-shadow: none; }
+.co-conn { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted-foreground); font-family: var(--font-mono); }
+.co-line { width: 26px; height: 1px; background: var(--border); position: relative; }
+.co-line::after { content: ''; position: absolute; right: 0; top: -3px; border-left: 5px solid var(--border); border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent; }
 
-/* Diagram */
-.map{display:flex;flex-direction:column;gap:0;padding:4px 0;}
-.map-row{display:flex;align-items:center;gap:10px;padding:8px 0;}
-.map-node{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--p-border);border-radius:8px;padding:7px 11px;background:var(--p-bg);font-size:12.5px;font-weight:500;box-shadow:var(--shadow-xs);}
-.map-node.me{border-color:var(--p-accent);background:var(--p-accent-light);color:#2A52BE;}
-.map-node.sys{background:var(--p-subtle);color:var(--p-text2);font-weight:400;}
-.map-conn{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--p-text2);font-family:var(--font-mono);}
-.map-line{width:26px;height:1px;background:var(--p-border-input);position:relative;}
-.map-line::after{content:'';position:absolute;right:0;top:-3px;border-left:5px solid var(--p-border-input);border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;}
+/* Relationship cards use the kit's SectionCard shell */
+.rl-section + .rl-section { margin-top: 9px; }
+.co-rel-head { display: flex; align-items: center; gap: 9px; }
+.co-rel-t { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; }
+.co-rel-meta { font-size: 12.5px; color: var(--muted-foreground); line-height: 1.65; }
+.co-rel-empty { font-size: 13.5px; color: var(--muted-foreground); padding: 14px 0; }
+
+/* Menu — mirrors the kit's rail flyout chrome */
+.co-menu {
+  position: absolute; min-width: 200px; padding: 6px;
+  background: var(--popover); color: var(--popover-foreground);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  z-index: 300;
+}
+.co-menu-i {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  height: 32px; padding: 0 10px; border-radius: var(--radius-md);
+  font-size: 14px; text-align: left; white-space: nowrap;
+}
+.co-menu-i:hover:not(:disabled) { background: var(--accent); }
+.co-menu-i.danger { color: oklch(0.55 0.2 25); }
+.co-menu-i.danger:hover { background: var(--tag-bg-red); }
+.co-menu-i:disabled { color: var(--muted-foreground); cursor: not-allowed; }
+.co-menu-sep { height: 1px; background: var(--border); margin: 4px 2px; }
+
+/* Icon button — the kit's outline icon button at a tighter 28px */
+.co-icon-btn {
+  width: 28px; height: 28px; border-radius: var(--radius-md);
+  display: grid; place-items: center; color: var(--muted-foreground);
+}
+.co-icon-btn:hover { background: var(--accent); color: var(--accent-foreground); }
+.co-icon-btn svg { width: 15px; height: 15px; }
+.co-icon-btn.danger:hover { background: var(--tag-bg-red); color: var(--tag-fg-red); }
 
 /* Toast */
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(10px);background:#18181B;color:#fff;font-size:13px;padding:10px 16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .16s,transform .16s;z-index:500;max-width:440px;}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.co-toast {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--foreground); color: var(--background);
+  font-size: 13.5px; padding: 10px 16px; border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .16s, transform .16s;
+  z-index: 500; max-width: 460px;
+}
+.co-toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Confirm dialog sits above the drawer — .sc-dialog-overlay ships z-index:50 */
-.sc-dialog-overlay{z-index:400;}
-.sc-dialog{max-width:440px;}
-
-/* Menu */
-.menu{position:absolute;min-width:190px;background:var(--p-bg);border:1px solid var(--p-border);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.14);z-index:300;padding:4px;}
-.menu-i{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:6px;font-size:12.5px;cursor:pointer;color:var(--p-text);border:none;background:none;width:100%;font-family:inherit;text-align:left;}
-.menu-i:hover{background:var(--p-hover);}
-.menu-i.danger{color:var(--p-red);}
-.menu-i.danger:hover{background:var(--p-red-bg);}
-.menu-i:disabled{color:var(--p-muted);cursor:not-allowed;}
-.menu-i:disabled:hover{background:none;}
-.menu-sep{height:1px;background:var(--p-border);margin:4px 0;}
+/* The shadcn dialog ships z-index:50, below the kit's drawer at 100. */
+.sc-dialog-overlay { z-index: 400; }
+.sc-dialog { max-width: 460px; }
 </style>
 </head>
 <body>
-<div class="shell">
 
-  <aside class="rail">
-    <div class="rail-logo">A</div>
-    <button class="rail-i"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
-    <button class="rail-i"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></button>
-    <button class="rail-i"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></button>
-    <button class="rail-i on"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6V4.5a2 2 0 114 0v.09A1.65 1.65 0 0015 4.6a1.65 1.65 0 001.82.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9V9a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
-    <div class="rail-sp"></div>
-    <div class="rail-av">VS</div>
+<div class="rl-app">
+
+  <!-- ══ Rail ══════════════════════════════════════════════════════
+       The kit's collapsed rail: transparent over the tinted canvas,
+       40px items, active item is a white card. Settings lives at the
+       bottom and opens a flyout — there is no second sidebar in this
+       product, so the settings sections are that flyout's contents. -->
+  <aside class="rl-sidebar">
+    <div class="rl-rail-brand"><img src="ds/assets/rocketlane-mark.svg" alt="Rocketlane"></div>
+
+    <div class="rl-rail-group">
+      <button class="rl-rail-item" data-tooltip="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      <button class="rl-rail-item" data-tooltip="Notifications"><span class="rl-rail-badge">5</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></button>
+      <button class="rl-rail-item" data-tooltip="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></button>
+    </div>
+    <div class="rl-rail-divider"></div>
+    <div class="rl-rail-group">
+      <button class="rl-rail-item" data-tooltip="Accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 012-2h7a2 2 0 012 2v16"/><path d="M15 9h3a2 2 0 012 2v10"/><path d="M2 21h20"/><path d="M8 7h2M8 11h2M8 15h2"/></svg></button>
+      <button class="rl-rail-item" data-tooltip="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></button>
+      <button class="rl-rail-item" data-tooltip="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg></button>
+      <button class="rl-rail-item" data-tooltip="Financials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 10h16M5 10L12 4l7 6M6 10v11M10 10v11M14 10v11M18 10v11"/></svg></button>
+    </div>
+    <div class="rl-rail-divider"></div>
+    <div class="rl-rail-group">
+      <button class="rl-rail-item" data-tooltip="Templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="7" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/><rect x="15" y="14" width="6" height="7" rx="1.5"/></svg></button>
+      <button class="rl-rail-item" data-tooltip="Agents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg></button>
+    </div>
+
+    <div class="rl-rail-group bottom">
+      <div class="rl-rail-item active has-flyout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6V4.5a2 2 0 114 0v.09A1.65 1.65 0 0015 4.6a1.65 1.65 0 001.82.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9V9a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <div class="rl-rail-flyout">
+          <div class="rl-rail-flyout-title">Settings</div>
+          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Profile</span></button>
+          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9.5" cy="7" r="4"/></svg><span>Team &amp; roles</span></button>
+          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2v6M15 2v6M7 8h10v5a5 5 0 01-10 0z"/><path d="M12 18v4"/></svg><span>Integrations</span></button>
+          <div class="rl-flyout-sep"></div>
+          <div class="rl-rail-flyout-title">Advanced</div>
+          <button class="rl-flyout-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg><span>Custom objects</span><span class="meta">3</span></button>
+          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M17 6l2 2M14 9l2 2"/></svg><span>API &amp; webhooks</span></button>
+          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><span>Audit log</span></button>
+          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"/></svg><span>Data import</span></button>
+        </div>
+      </div>
+      <div class="rl-rail-divider"></div>
+      <div class="rl-rail-avatar">VS</div>
+    </div>
   </aside>
 
-  <nav class="sidebar">
-    <div class="sidebar-title">Settings</div>
-    <input class="sc-input sidebar-search" type="text" placeholder="Search" />
-    <div class="nav-item"><span class="nav-icon" style="background:#F0F4FF">🏢</span>Out of office</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F5F0FF">💳</span>Plans &amp; Billing</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#ECF0FF">👥</span>Team members</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#FFF0F5">📊</span>Skills matrix</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#ECF0FF">👥</span>Groups</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#ECF0FF">📋</span>Roles &amp; Placeholders</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F0FFF4">🛡️</span>Permissions</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#ECF0FF">⚙️</span>Customer portal configuration</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F5F0FF">🤝</span>Partners</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F0FFF4">🔗</span>Integrations</div>
-    <div class="sidebar-section">Operations and financials</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#FFF7ED">⏱️</span>Time tracking</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F0FFF4">📅</span>Resource management</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F0FFF4">💰</span>Financial management</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#ECF0FF">💱</span>Currencies</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#FFF7ED">🪪</span>Rate cards</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F0FFF4">🧾</span>Invoicing</div>
-    <div class="sidebar-section">Advanced</div>
-    <div class="nav-item active"><span class="nav-icon" style="background:#F5F0FF">🧩</span>Custom objects<span class="nav-arrow">›</span></div>
-    <div class="nav-item"><span class="nav-icon" style="background:#ECF0FF">🔑</span>API &amp; webhooks</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#FFF7ED">📜</span>Audit log</div>
-    <div class="nav-item"><span class="nav-icon" style="background:#F0FFF4">⬇️</span>Data import</div>
-  </nav>
-
-  <main class="main" id="main"></main>
+  <!-- ══ Main column — the floating card on the canvas ══ -->
+  <div class="rl-main-col" id="main"></div>
 </div>
 
-<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
-<aside class="drawer" id="drawer" aria-hidden="true"></aside>
+<div id="drawer-host"></div>
 <div id="dialog-host"></div>
-<div class="toast" id="toast"></div>
+<div class="co-toast" id="toast"></div>
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════
@@ -335,9 +363,6 @@ textarea.sc-input{height:auto;min-height:62px;padding:8px 11px;line-height:1.5;r
    cannot exist without a parent" is expressed as a required lookup, and
    cascade delete is expressed as "block the delete". Roll-ups are a field
    type that rides on a lookup rather than a privilege of master-detail.
-
-   Anything the spec still lists as undecided is rendered as an amber
-   "Open question" chip instead of being quietly resolved in the mockup.
    ══════════════════════════════════════════════════════════════════════ */
 
 const STORE_KEY = 'rl.customObjects.v1';
@@ -379,9 +404,9 @@ const TYPE_GROUPS = [
 ];
 const NUMERIC = ['NUMBER','CURRENCY','PERCENT'];
 const LEVELS = {
-  ACCOUNT:{label:'Account', cls:'level-account'},
-  PROJECT:{label:'Project', cls:'level-project'},
-  GLOBAL :{label:'Global',  cls:'level-global'},
+  ACCOUNT:{label:'Account', hue:'blue'},
+  PROJECT:{label:'Project', hue:'green'},
+  GLOBAL :{label:'Global',  hue:'yellow'},
 };
 /* An object label cannot collide with a default object. */
 const RESERVED = ['project','task','phase','account','budget','time entry','form','document',
@@ -555,7 +580,12 @@ function toast(msg){
   clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('on'), 2600);
 }
 function typeMeta(t){ return TYPES[t] || {label:t, glyph:'?', cls:'g-sys'}; }
-function glyph(t, lg){ const m = typeMeta(t); return `<span class="glyph ${m.cls}${lg?' glyph-lg':''}">${esc(m.glyph)}</span>`; }
+function glyph(t, lg){ const m = typeMeta(t); return `<span class="co-glyph ${m.cls}${lg?' lg':''}">${esc(m.glyph)}</span>`; }
+
+/* Tag helper — the kit's atom, so every pill on the page is one component. */
+function tag(text, hue, size, title){
+  return `<span class="rl-tag ${size||'s-sm'} c-${hue||'gray'}"${title?` title="${esc(title)}"`:''}>${text}</span>`;
+}
 
 /* Lookup targets can be another custom object or a default object. */
 function targetLabel(t){
@@ -609,9 +639,9 @@ function systemFields(o){
   );
   return rows;
 }
-function openChip(title){
-  return `<span class="chip open" title="${esc(title)}">Open question</span>`;
-}
+/* Anything the specs still list as undecided is marked, not quietly
+   resolved in the mockup. */
+function openChip(title){ return tag('Open question', 'yellow', 's-sm', title); }
 const ICO = {
   plus:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
   back:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>',
@@ -625,97 +655,100 @@ const ICO = {
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>',
   lock:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/></svg>',
 };
-
 /* ══ Views ══════════════════════════════════════════════════════════ */
 function render(){
   const main = document.getElementById('main');
   main.innerHTML = route.view === 'list' ? viewList() : viewObject();
-  main.scrollTop = 0;
+  const body = main.querySelector('.rl-page-body');
+  if(body) body.scrollTop = 0;
 }
 function go(view, id, tab){ route = {view, id:id||null, tab:tab||'fields'}; render(); }
+
+function crumbs(parts){
+  return `<div class="rl-breadcrumb">${parts.map((p,i) => {
+    const sep = i ? '<span class="rl-crumb-sep">›</span>' : '';
+    return sep + (p.go
+      ? `<a class="rl-crumb link" onclick="${p.go}">${esc(p.label)}</a>`
+      : `<span class="rl-crumb${i === parts.length-1 ? ' current' : ''}">${esc(p.label)}</span>`);
+  }).join('')}</div>`;
+}
 
 /* ── Objects list ─────────────────────────────────────────────────── */
 function viewList(){
   const os = state.objects;
   const head = `
-    <div class="page-header">
-      <div class="page-head-row">
-        <div style="min-width:0">
-          <div class="page-title">
-            ${ICO.cube}
-            Custom objects
-          </div>
-          <div class="page-sub">
-            Objects your team defines, on top of the ones Rocketlane ships with. Each object has
-            its own fields, records, reports and automations, and can point at other objects and
-            at accounts and projects.
-          </div>
+    <div class="rl-page-header no-tabs">
+      ${crumbs([{label:'Settings'},{label:'Advanced'},{label:'Custom objects'}])}
+      <div class="rl-title-block">
+        <div class="rl-title-text">
+          <h1>Custom objects</h1>
+          <p class="rl-page-desc">
+            Objects your team defines, on top of the ones Rocketlane ships with. Each one has its own
+            fields, records, reports and automations, and can point at other objects and at accounts
+            and projects.
+          </p>
         </div>
-        <div class="page-actions">
-          <button class="icon-btn" onclick="pageMenu(event)" aria-label="More">${ICO.dots}</button>
-          <button class="sc-btn sc-btn--default sc-btn--size-default" onclick="openObjectDrawer()">
-            ${ICO.plus} New custom object
-          </button>
+        <div class="rl-title-actions">
+          <button class="rl-btn v-outline sz-md is-icon" onclick="pageMenu(event)" aria-label="More">${ICO.dots}</button>
+          <button class="rl-btn v-primary sz-md" onclick="openObjectDrawer()">${ICO.plus}<span class="rl-btn-label">New custom object</span></button>
         </div>
       </div>
     </div>`;
 
   if(!os.length){
-    return head + `<div class="content"><div class="inner-wide">
-      <div class="empty">
-        <div class="empty-t">No custom objects yet</div>
-        <div class="empty-d">
+    return head + `<div class="rl-page-body"><div class="co-body"><div class="co-inner">
+      <div class="co-empty">
+        <div class="co-empty-t">No custom objects yet</div>
+        <div class="co-empty-d">
           Create one when your business has something Rocketlane has no place for — a sales order
           between the account and the project, a change request inside a project, a product catalogue.
         </div>
-        <button class="sc-btn sc-btn--default sc-btn--size-default" onclick="openObjectDrawer()">${ICO.plus} New custom object</button>
+        <button class="rl-btn v-primary sz-md" onclick="openObjectDrawer()">${ICO.plus}<span class="rl-btn-label">New custom object</span></button>
       </div>
-    </div></div>`;
+    </div></div></div>`;
   }
 
   const rows = os.map(o => {
     const lv = LEVELS[o.level];
-    const nFields = o.fields.length;
     const nLookups = o.fields.filter(f => f.type === 'LOOKUP').length;
-    return `<tr class="sc-tr clickable" onclick="go('object','${o.id}','fields')">
-      <td class="sc-td">
-        <div class="t-name">${glyph(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}
-          <span>${esc(o.label)}</span></div>
-        <div class="t-sub" style="padding-left:33px">${esc(apiFromLabel(o.label))}</div>
+    return `<tr class="is-clickable" onclick="go('object','${o.id}','fields')">
+      <td class="col-first">
+        <div class="co-name">${glyph(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}
+          <div style="min-width:0">
+            <div style="font-weight:500">${esc(o.label)}</div>
+            <div class="co-api">${esc(apiFromLabel(o.label))}</div>
+          </div></div>
       </td>
-      <td class="sc-td"><span class="chip ${lv.cls}">${lv.label}</span>${o.levelOpen ? ' ' + openChip('Product has no account or project parent. Four options are on the table: account-level (duplicated per account), a picklist (cannot hold a price), an existing global list such as rate cards, or allowing global objects for reference lists only.') : ''}</td>
-      <td class="sc-td muted-cell">${esc(o.recordNameLabel)}${o.recordNameType === 'AUTONUMBER' ? ` <span class="chip attr">${esc(o.autoFormat)}</span>` : ''}</td>
-      <td class="sc-td num muted-cell">${nFields}${nLookups ? ` <span class="chip attr" title="${nLookups} lookup field${nLookups>1?'s':''}">${nLookups}&nbsp;↗</span>` : ''}</td>
-      <td class="sc-td num muted-cell">${o.records.toLocaleString()}</td>
-      <td class="sc-td muted-cell">${esc(o.updated)}</td>
-      <td class="sc-td" style="width:40px"><div class="row-actions">
-        <button class="icon-btn" onclick="event.stopPropagation();objectMenu(event,'${o.id}')">${ICO.dots}</button>
+      <td>${tag(lv.label, lv.hue)}${o.levelOpen ? ' ' + openChip('Product has no account or project parent. Four options are open: account-level and duplicated per account; a picklist, which cannot hold a price; an existing global list such as rate cards; or allowing global objects for reference lists only.') : ''}</td>
+      <td style="color:var(--muted-foreground)">${esc(o.recordNameLabel)}
+        ${o.recordNameType === 'AUTONUMBER' ? tag(`<span class="co-mono">${esc(o.autoFormat)}</span>`) : ''}</td>
+      <td class="num" style="color:var(--muted-foreground)">${o.fields.length}${nLookups ? ' ' + tag(`${nLookups}&nbsp;↗`, 'purple', 's-sm', `${nLookups} lookup field${nLookups>1?'s':''}`) : ''}</td>
+      <td class="num" style="color:var(--muted-foreground)">${o.records.toLocaleString()}</td>
+      <td style="color:var(--muted-foreground)">${esc(o.updated)}</td>
+      <td class="col-last" style="width:44px"><div class="co-row-actions">
+        <button class="co-icon-btn" onclick="event.stopPropagation();objectMenu(event,'${o.id}')" aria-label="More">${ICO.dots}</button>
       </div></td>
     </tr>`;
   }).join('');
 
-  return head + `<div class="content"><div class="inner-wide">
-    <div class="card" style="margin-bottom:14px">
-      <table class="sc-table">
-        <thead class="sc-thead"><tr>
-          <th class="sc-th">Object</th>
-          <th class="sc-th">Level</th>
-          <th class="sc-th">Record name</th>
-          <th class="sc-th num">Fields</th>
-          <th class="sc-th num">Records</th>
-          <th class="sc-th">Last updated</th>
-          <th class="sc-th"></th>
+  return head + `<div class="rl-page-body"><div class="co-body"><div class="co-inner">
+    <div class="rl-section" style="margin-bottom:16px">
+      <div class="co-table-wrap"><table class="co-table">
+        <thead><tr>
+          <th class="col-first">Object</th><th>Level</th><th>Record name</th>
+          <th class="num">Fields</th><th class="num">Records</th><th>Last updated</th>
+          <th class="col-last"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
-      </table>
+      </table></div>
     </div>
-    <div class="callout info">
-      <span class="callout-ico">${ICO.info}</span>
+    <div class="co-note">
+      <span class="co-note-ico">${ICO.info}</span>
       <div><b>Every link between objects is a lookup.</b> Master-detail relationships are not part of
       this release, so a child that must have a parent uses a <b>required</b> lookup, and cascade delete
       is replaced by <b>block the delete</b>. Totals come from roll-up fields that ride on the lookup.</div>
     </div>
-  </div></div>`;
+  </div></div></div>`;
 }
 
 /* ── Object detail ────────────────────────────────────────────────── */
@@ -731,114 +764,122 @@ function viewObject(){
   const later = [['Validation rules','Phase 6'],['Record types','Phase 7'],['Page layouts','Phase 8'],['Access','Phase 10'],['Automations','Phase 12']];
 
   const head = `
-    <div class="page-header">
-      <div class="crumbs"><a onclick="go('list')">Custom objects</a> <span>›</span> <span>${esc(o.label)}</span></div>
-      <div class="page-head-row">
-        <div style="min-width:0">
-          <div class="page-title">
+    <div class="rl-page-header">
+      ${crumbs([{label:'Settings'},{label:'Custom objects', go:"go('list')"},{label:o.label}])}
+      <div class="rl-title-block">
+        <div class="rl-title-text">
+          <h1 style="display:flex;align-items:center;gap:10px">
             ${glyph(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT', true)}
             ${esc(o.label)}
-            <span class="chip ${lv.cls}">${lv.label} level</span>
-            ${o.levelOpen ? openChip('Product has no account or project parent — the level for a global reference list is still open.') : ''}
-          </div>
-          <div class="page-sub">${esc(o.description) || '<span style="color:var(--p-muted)">No description</span>'}</div>
+            ${tag(lv.label + ' level', lv.hue, 's-md')}
+            ${o.levelOpen ? openChip('Product has no account or project parent — where a global reference list lives is still open.') : ''}
+          </h1>
+          <p class="rl-page-desc">${esc(o.description) || 'No description'}</p>
         </div>
-        <div class="page-actions">
-          <button class="icon-btn" onclick="objectMenu(event,'${o.id}')" aria-label="More">${ICO.dots}</button>
-          <button class="sc-btn sc-btn--outline sc-btn--size-default" onclick="openObjectDrawer('${o.id}')">Edit object</button>
-          ${route.tab === 'fields' ? `<button class="sc-btn sc-btn--default sc-btn--size-default" onclick="openFieldDrawer('${o.id}')">${ICO.plus} Add field</button>` : ''}
+        <div class="rl-title-actions">
+          <button class="rl-btn v-outline sz-md is-icon" onclick="objectMenu(event,'${o.id}')" aria-label="More">${ICO.dots}</button>
+          <button class="rl-btn v-outline sz-md" onclick="openObjectDrawer('${o.id}')"><span class="rl-btn-label">Edit object</span></button>
+          ${route.tab === 'fields' ? `<button class="rl-btn v-primary sz-md" onclick="openFieldDrawer('${o.id}')">${ICO.plus}<span class="rl-btn-label">Add field</span></button>` : ''}
         </div>
       </div>
-    </div>
-    <div class="tabs">
-      ${tabs.map(([k,t,n]) => `<button class="tab${route.tab===k?' active':''}" onclick="go('object','${o.id}','${k}')">${t}${n!==null?` <span class="chip neutral">${n}</span>`:''}</button>`).join('')}
-      ${later.map(([t,p]) => `<button class="tab" disabled title="${p} — not in this prototype yet">${t}</button>`).join('')}
+      <div class="rl-tabs">
+        ${tabs.map(([k,t,n]) => `<button class="rl-tab${route.tab===k?' active':''}" onclick="go('object','${o.id}','${k}')">${t}${n!==null?` ${tag(String(n))}`:''}</button>`).join('')}
+        ${later.map(([t,p]) => `<button class="rl-tab" disabled style="opacity:.45;cursor:not-allowed" title="${p} — not in this prototype yet">${t}</button>`).join('')}
+      </div>
     </div>`;
 
   const body = route.tab === 'fields' ? tabFields(o) : route.tab === 'rel' ? tabRel(o) : tabDetails(o);
-  return head + `<div class="content"><div class="inner-wide">${body}</div></div>`;
+  return head + `<div class="rl-page-body"><div class="co-body"><div class="co-inner">${body}</div></div></div>`;
 }
 
 /* ── Tab: fields ──────────────────────────────────────────────────── */
 function tabFields(o){
   const custom = o.fields.length ? o.fields.map(f => fieldRow(o, f)).join('') : `
-    <tr class="sc-tr"><td class="sc-td" colspan="5" style="color:var(--p-text2);padding:22px 12px">
+    <tr><td class="col-first" colspan="5" style="color:var(--muted-foreground);padding:22px 24px">
       No fields yet. Every object starts with its Record Name, its parent and the system fields below.
     </td></tr>`;
 
   const sys = systemFields(o).map(f => `
-    <tr class="sc-tr">
-      <td class="sc-td">
-        <div class="t-name" style="font-weight:400;color:var(--p-text2)">${glyph(f.type)}<span>${esc(f.label)}</span></div>
-        <div class="t-sub" style="padding-left:33px">${esc(f.api)}</div>
+    <tr>
+      <td class="col-first">
+        <div class="co-name">${glyph(f.type)}
+          <div style="min-width:0">
+            <div style="color:var(--muted-foreground)">${esc(f.label)}</div>
+            <div class="co-api">${esc(f.api)}</div>
+          </div></div>
       </td>
-      <td class="sc-td muted-cell">${esc(typeMeta(f.type).label)}</td>
-      <td class="sc-td"><span class="chip neutral">${ICO.lock.replace('<svg','<svg style="width:10px;height:10px"')} System</span></td>
-      <td class="sc-td muted-cell" style="font-size:12px">${esc(f.note)}</td>
-      <td class="sc-td" style="width:40px"></td>
+      <td style="color:var(--muted-foreground)">${esc(typeMeta(f.type).label)}</td>
+      <td>${tag('System')}</td>
+      <td class="col-last" style="color:var(--muted-foreground);font-size:12.5px">${esc(f.note)}</td>
     </tr>`).join('');
 
   return `
-    <div class="sec"><span class="sec-t">Fields on this object</span><span class="sec-line"></span></div>
-    <div class="card">
-      <table class="sc-table">
-        <thead class="sc-thead"><tr>
-          <th class="sc-th">Field</th>
-          <th class="sc-th">Type</th>
-          <th class="sc-th">Settings</th>
-          <th class="sc-th">Description</th>
-          <th class="sc-th"></th>
+    <div class="co-sec"><span class="co-sec-t">Fields on this object</span><span class="co-sec-line"></span></div>
+    <div class="rl-section">
+      <div class="co-table-wrap"><table class="co-table">
+        <thead><tr>
+          <th class="col-first">Field</th><th>Type</th><th>Settings</th><th>Description</th><th class="col-last"></th>
         </tr></thead>
         <tbody>${custom}</tbody>
-      </table>
+      </table></div>
     </div>
 
-    <div class="sec"><span class="sec-t">Created automatically</span><span class="sec-line"></span></div>
-    <div class="card">
-      <div class="card-head bordered"><div class="card-head-text">
-        <div class="card-desc">Rocketlane made these when the object was saved. The Record Name can be
-        relabelled; the rest are fixed. The system ID — not the Record Name — is what lookups, the API
-        and integrations store, so renaming a record never breaks a link.</div>
-      </div></div>
-      <table class="sc-table"><tbody>${sys}</tbody></table>
+    <div class="co-sec"><span class="co-sec-t">Created automatically</span><span class="co-sec-line"></span></div>
+    <div class="rl-section is-open">
+      <div class="rl-section-header" style="cursor:default">
+        <span class="rl-section-title" style="font-weight:400;font-size:12.5px;color:var(--muted-foreground);line-height:1.55">
+          Rocketlane made these when the object was saved. The Record Name can be relabelled; the rest are
+          fixed. The system ID — not the Record Name — is what lookups, the API and integrations store, so
+          renaming a record never breaks a link.
+        </span>
+      </div>
+      <div class="rl-section-body">
+        <div class="co-table-wrap"><table class="co-table"><tbody>${sys}</tbody></table></div>
+      </div>
     </div>`;
 }
 
 function fieldRow(o, f){
   const m = typeMeta(f.type);
   const bits = [];
-  if(f.required) bits.push('<span class="chip attr">Required</span>');
-  if(f.unique) bits.push('<span class="chip attr">Unique</span>');
-  if(f.extId) bits.push('<span class="chip attr">External ID</span>');
-  if(f.showInReports === false) bits.push('<span class="chip attr" title="Hidden from the report builder. This is clutter control, not security.">Not in reports</span>');
+  if(f.required) bits.push(tag('Required'));
+  if(f.unique) bits.push(tag('Unique'));
+  if(f.extId) bits.push(tag('External ID'));
+  if(f.showInReports === false) bits.push(tag('Not in reports', 'gray', 's-sm', 'Hidden from the report builder. Clutter control, not security.'));
   if(f.type === 'LOOKUP'){
-    bits.push(`<span class="chip attr">→ ${esc(targetLabel(f.settings.target))}</span>`);
-    bits.push(`<span class="chip attr" title="${f.settings.onDelete === 'BLOCK' ? 'The linked record cannot be deleted while records point at it.' : 'Deleting the linked record clears this value.'}">${f.settings.onDelete === 'BLOCK' ? 'Block delete' : 'Clear on delete'}</span>`);
+    bits.push(tag('→ ' + esc(targetLabel(f.settings.target)), 'purple'));
+    bits.push(f.settings.onDelete === 'BLOCK'
+      ? tag('Block delete', 'orange', 's-sm', 'The linked record cannot be deleted while records point at it.')
+      : tag('Clear on delete', 'gray', 's-sm', 'Deleting the linked record clears this value.'));
   }
   if(f.type === 'ROLLUP'){
     const c = obj(f.settings.child);
-    bits.push(`<span class="chip attr">${esc(f.settings.fn)}${f.settings.fn !== 'COUNT' && f.settings.aggField ? ' ' + esc(fieldLabel(f.settings.child, f.settings.aggField)) : ''}</span>`);
-    bits.push(`<span class="chip attr">of ${esc(c ? c.plural : f.settings.child)}</span>`);
-    bits.push('<span class="chip attr" title="Roll-up fields are read-only for users.">Read-only</span>');
+    bits.push(tag(esc(f.settings.fn) + (f.settings.fn !== 'COUNT' && f.settings.aggField ? ' ' + esc(fieldLabel(f.settings.child, f.settings.aggField)) : ''), 'pink'));
+    bits.push(tag('of ' + esc(c ? c.plural : f.settings.child)));
+    bits.push(tag('Read-only', 'gray', 's-sm', 'Roll-up fields cannot be edited by users.'));
   }
   if(f.type === 'FORMULA'){
-    bits.push(`<span class="chip attr mono" title="${esc(f.settings.expr)}">${esc(String(f.settings.expr||'').slice(0,26))}${String(f.settings.expr||'').length>26?'…':''}</span>`);
-    bits.push('<span class="chip attr">Read-only</span>');
+    const e = String(f.settings.expr || '');
+    bits.push(tag(`<span class="co-mono">${esc(e.slice(0,24))}${e.length>24?'…':''}</span>`, 'pink', 's-sm', e));
+    bits.push(tag('Read-only'));
   }
-  if(f.type === 'SELECT' || f.type === 'MULTISELECT') bits.push(`<span class="chip attr">${(f.settings.options||[]).length} values</span>`);
-  if(f.def) bits.push(`<span class="chip attr">Default ${esc(f.def)}</span>`);
+  if(f.type === 'SELECT' || f.type === 'MULTISELECT') bits.push(tag(`${(f.settings.options||[]).length} values`));
+  if(f.def) bits.push(tag('Default ' + esc(f.def)));
 
-  return `<tr class="sc-tr clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
-    <td class="sc-td">
-      <div class="t-name">${glyph(f.type)}<span>${esc(f.label)}</span></div>
-      <div class="t-sub" style="padding-left:33px">${esc(f.api)}</div>
+  return `<tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
+    <td class="col-first">
+      <div class="co-name">${glyph(f.type)}
+        <div style="min-width:0">
+          <div style="font-weight:500">${esc(f.label)}</div>
+          <div class="co-api">${esc(f.api)}</div>
+        </div></div>
     </td>
-    <td class="sc-td muted-cell">${esc(m.label)}${m.isNew ? ' <span class="chip new">New</span>' : ''}</td>
-    <td class="sc-td"><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:300px">${bits.join('')}</div></td>
-    <td class="sc-td muted-cell" style="font-size:12px;max-width:230px">${esc(f.description||'')}</td>
-    <td class="sc-td" style="width:40px"><div class="row-actions">
-      <button class="icon-btn" onclick="event.stopPropagation();openFieldDrawer('${o.id}','${f.id}')" aria-label="Edit">${ICO.pencil}</button>
-      <button class="icon-btn danger" onclick="event.stopPropagation();confirmDeleteField('${o.id}','${f.id}')" aria-label="Delete">${ICO.trash}</button>
+    <td style="color:var(--muted-foreground)">${esc(m.label)}${m.isNew ? ' ' + tag('New', 'purple') : ''}</td>
+    <td><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:300px">${bits.join('')}</div></td>
+    <td style="color:var(--muted-foreground);font-size:12.5px;max-width:230px;white-space:normal">${esc(f.description||'')}</td>
+    <td class="col-last" style="width:44px"><div class="co-row-actions">
+      <button class="co-icon-btn" onclick="event.stopPropagation();openFieldDrawer('${o.id}','${f.id}')" aria-label="Edit">${ICO.pencil}</button>
+      <button class="co-icon-btn danger" onclick="event.stopPropagation();confirmDeleteField('${o.id}','${f.id}')" aria-label="Delete">${ICO.trash}</button>
     </div></td>
   </tr>`;
 }
@@ -854,97 +895,94 @@ function tabRel(o){
   const inc = incoming(o.id);
   const rollups = o.fields.filter(f => f.type === 'ROLLUP');
 
+  const relCard = (glyphType, title, action, meta) => `
+    <div class="rl-section is-open">
+      <div class="rl-section-header" style="cursor:default">
+        <div class="co-rel-head" style="flex:1">
+          ${glyph(glyphType)}<span class="co-rel-t">${title}</span>
+        </div>
+        ${action}
+      </div>
+      <div class="rl-section-body rl-section-body-padded">
+        <div class="co-rel-meta">${meta}</div>
+      </div>
+    </div>`;
+
   const map = `
-    <div class="card"><div class="card-head bordered"><div class="card-head-text">
-      <div class="card-title">How ${esc(o.label)} sits in the model</div>
-      <div class="card-desc">Arrows are lookups, and each one stores the target's system ID.</div>
-    </div></div>
-    <div class="card-body"><div class="map">
-      ${o.level !== 'GLOBAL' ? `<div class="map-row">
-        <span class="map-node sys">${LEVELS[o.level].label}</span>
-        <span class="map-conn"><span class="map-line"></span>parent · required</span>
-        <span class="map-node me">${esc(o.label)}</span>
-      </div>` : `<div class="map-row">
-        <span class="map-node me">${esc(o.label)}</span>
-        <span class="map-conn">no parent — ${openChip('Where a global reference list lives is still open.')}</span>
-      </div>`}
-      ${out.map(f => `<div class="map-row" style="padding-left:${o.level!=='GLOBAL'?'0':'0'}">
-        <span class="map-node me">${esc(o.label)}</span>
-        <span class="map-conn"><span class="map-line"></span>${esc(f.label)}${f.required?' · required':''}</span>
-        <span class="map-node">${esc(targetLabel(f.settings.target))}</span>
-      </div>`).join('')}
-      ${inc.map(({obj:p, field:f}) => `<div class="map-row">
-        <span class="map-node">${esc(p.label)}</span>
-        <span class="map-conn"><span class="map-line"></span>${esc(f.label)}${f.required?' · required':''}</span>
-        <span class="map-node me">${esc(o.label)}</span>
-      </div>`).join('')}
-    </div></div></div>`;
-
-  const outHtml = out.length ? out.map(f => `
-    <div class="rel-card">
-      <div class="rel-top">${glyph('LOOKUP')}
-        <div style="flex:1;min-width:0">
-          <div class="rel-t">${esc(f.label)} <span class="rel-arrow">→</span> ${esc(targetLabel(f.settings.target))}</div>
+    <div class="rl-section is-open">
+      <div class="rl-section-header" style="cursor:default">
+        <span class="rl-section-title">How ${esc(o.label)} sits in the model</span>
+      </div>
+      <div class="rl-section-body rl-section-body-padded">
+        <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:6px">Arrows are lookups, and each one stores the target's system ID.</div>
+        <div class="co-map">
+          ${o.level !== 'GLOBAL' ? `<div class="co-map-row">
+            <span class="co-node sys">${LEVELS[o.level].label}</span>
+            <span class="co-conn"><span class="co-line"></span>parent · required</span>
+            <span class="co-node me">${esc(o.label)}</span>
+          </div>` : `<div class="co-map-row">
+            <span class="co-node me">${esc(o.label)}</span>
+            <span class="co-conn">no parent — </span>${openChip('Where a global reference list lives is still open.')}
+          </div>`}
+          ${out.map(f => `<div class="co-map-row">
+            <span class="co-node me">${esc(o.label)}</span>
+            <span class="co-conn"><span class="co-line"></span>${esc(f.label)}${f.required?' · required':''}</span>
+            <span class="co-node">${esc(targetLabel(f.settings.target))}</span>
+          </div>`).join('')}
+          ${inc.map(({obj:p, field:f}) => `<div class="co-map-row">
+            <span class="co-node">${esc(p.label)}</span>
+            <span class="co-conn"><span class="co-line"></span>${esc(f.label)}${f.required?' · required':''}</span>
+            <span class="co-node me">${esc(o.label)}</span>
+          </div>`).join('')}
         </div>
-        <button class="sc-btn sc-btn--outline sc-btn--size-sm" onclick="openFieldDrawer('${o.id}','${f.id}')">Edit</button>
       </div>
-      <div class="rel-meta">
-        ${f.required ? '<b>Required</b> — a record cannot save without one.' : 'Optional — the value can be empty.'}<br>
-        On the ${esc(targetLabel(f.settings.target))} record this appears as the related list
-        <b>${esc(f.settings.relatedListLabel)}</b>.<br>
-        If the ${esc(targetLabel(f.settings.target))} is deleted:
-        <b>${f.settings.onDelete === 'BLOCK' ? 'the delete is blocked while ' + esc(o.plural.toLowerCase()) + ' point at it' : 'this value is cleared'}</b>.
-        ${(f.settings.pickerFields||[]).length ? `<br>Picker shows: ${(f.settings.pickerFields||[]).map(x=>`<span class="chip attr">${esc(x)}</span>`).join(' ')}` : ''}
-      </div>
-    </div>`).join('') : `<div class="rel-empty">${esc(o.label)} does not point at any other object yet.</div>`;
+    </div>`;
 
-  const incHtml = inc.length ? inc.map(({obj:p, field:f}) => `
-    <div class="rel-card">
-      <div class="rel-top">${glyph('LOOKUP')}
-        <div style="flex:1;min-width:0">
-          <div class="rel-t">${esc(f.settings.relatedListLabel)} <span class="rel-arrow">·</span> ${esc(p.label)} records</div>
-        </div>
-        <button class="sc-btn sc-btn--outline sc-btn--size-sm" onclick="go('object','${p.id}','fields')">Open ${esc(p.label)}</button>
-      </div>
-      <div class="rel-meta">
-        Shown on every ${esc(o.label)} record, listing the ${esc(p.plural.toLowerCase())} whose
-        <b>${esc(f.label)}</b> points here. “Add new” creates one with the lookup already set.<br>
-        ${f.settings.onDelete === 'BLOCK'
-          ? `<b>Blocks deletion</b> — a ${esc(o.label)} with ${esc(p.plural.toLowerCase())} cannot be deleted.`
-          : `Deleting a ${esc(o.label)} clears <b>${esc(f.label)}</b> on its ${esc(p.plural.toLowerCase())}.`}
-      </div>
-    </div>`).join('') : `<div class="rel-empty">No other object points at ${esc(o.label)} yet.</div>`;
+  const outHtml = out.length ? out.map(f => relCard('LOOKUP',
+    `${esc(f.label)} <span style="color:var(--muted-foreground)">→</span> ${esc(targetLabel(f.settings.target))}`,
+    `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
+    `${f.required ? '<b>Required</b> — a record cannot save without one.' : 'Optional — the value can be empty.'}<br>
+     On the ${esc(targetLabel(f.settings.target))} record this appears as the related list
+     <b>${esc(f.settings.relatedListLabel)}</b>.<br>
+     If the ${esc(targetLabel(f.settings.target))} is deleted:
+     <b>${f.settings.onDelete === 'BLOCK' ? 'the delete is blocked while ' + esc(o.plural.toLowerCase()) + ' point at it' : 'this value is cleared'}</b>.
+     ${(f.settings.pickerFields||[]).length ? `<br>Picker shows: ${(f.settings.pickerFields||[]).map(x => tag(esc(x))).join(' ')}` : ''}`
+  )).join('') : `<div class="co-rel-empty">${esc(o.label)} does not point at any other object yet.</div>`;
+
+  const incHtml = inc.length ? inc.map(({obj:p, field:f}) => relCard('LOOKUP',
+    `${esc(f.settings.relatedListLabel)} <span style="color:var(--muted-foreground)">·</span> ${esc(p.label)} records`,
+    `<button class="rl-btn v-outline sz-sm" onclick="go('object','${p.id}','fields')"><span class="rl-btn-label">Open ${esc(p.label)}</span></button>`,
+    `Shown on every ${esc(o.label)} record, listing the ${esc(p.plural.toLowerCase())} whose
+     <b>${esc(f.label)}</b> points here. “Add new” creates one with the lookup already set.<br>
+     ${f.settings.onDelete === 'BLOCK'
+       ? `<b>Blocks deletion</b> — a ${esc(o.label)} with ${esc(p.plural.toLowerCase())} cannot be deleted.`
+       : `Deleting a ${esc(o.label)} clears <b>${esc(f.label)}</b> on its ${esc(p.plural.toLowerCase())}.`}`
+  )).join('') : `<div class="co-rel-empty">No other object points at ${esc(o.label)} yet.</div>`;
 
   const rollHtml = rollups.length ? rollups.map(f => {
     const c = obj(f.settings.child);
-    return `<div class="rel-card">
-      <div class="rel-top">${glyph('ROLLUP')}
-        <div style="flex:1;min-width:0"><div class="rel-t">${esc(f.label)}</div></div>
-        <button class="sc-btn sc-btn--outline sc-btn--size-sm" onclick="openFieldDrawer('${o.id}','${f.id}')">Edit</button>
-      </div>
-      <div class="rel-meta">
-        <b>${esc(f.settings.fn)}</b>${f.settings.fn !== 'COUNT' ? ' of <b>' + esc(fieldLabel(f.settings.child, f.settings.aggField)) + '</b>' : ''}
-        across ${esc(c ? c.plural : f.settings.child)} linked through
-        <b>${esc(c ? fieldLabel(c.id, f.settings.childLookup) : f.settings.childLookup)}</b>.
-        ${f.settings.filterField ? `<br>Only where <b>${esc(fieldLabel(f.settings.child, f.settings.filterField))}</b> ${f.settings.filterOp === 'neq' ? 'is not' : 'is'} <b>${esc(f.settings.filterValue)}</b>.` : ''}
-        <br>Recalculates when a child is created, changed or deleted — and on both sides when a child
-        is moved to another ${esc(o.label)}.
-      </div>
-    </div>`;
-  }).join('') : `<div class="rel-empty">No roll-ups on ${esc(o.label)} yet.</div>`;
+    return relCard('ROLLUP', esc(f.label),
+      `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
+      `<b>${esc(f.settings.fn)}</b>${f.settings.fn !== 'COUNT' ? ' of <b>' + esc(fieldLabel(f.settings.child, f.settings.aggField)) + '</b>' : ''}
+       across ${esc(c ? c.plural : f.settings.child)} linked through
+       <b>${esc(c ? fieldLabel(c.id, f.settings.childLookup) : f.settings.childLookup)}</b>.
+       ${f.settings.filterField ? `<br>Only where <b>${esc(fieldLabel(f.settings.child, f.settings.filterField))}</b> ${f.settings.filterOp === 'neq' ? 'is not' : 'is'} <b>${esc(f.settings.filterValue)}</b>.` : ''}
+       <br>Recalculates when a child is created, changed or deleted — and on both sides when a child
+       is moved to another ${esc(o.label)}.`);
+  }).join('') : `<div class="co-rel-empty">No roll-ups on ${esc(o.label)} yet.</div>`;
 
   return map + `
-    <div class="sec"><span class="sec-t">Points at (lookups on ${esc(o.label)})</span><span class="sec-line"></span></div>
+    <div class="co-sec" style="margin-top:20px"><span class="co-sec-t">Points at (lookups on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
     ${outHtml}
-    <div class="sec"><span class="sec-t">Referenced by (related lists on ${esc(o.label)})</span><span class="sec-line"></span></div>
+    <div class="co-sec"><span class="co-sec-t">Referenced by (related lists on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
     ${incHtml}
-    <div class="sec"><span class="sec-t">Roll-ups</span><span class="sec-line"></span>${openChip('Native roll-up on lookups is the recommendation, not a decision. Options 2 and 3 were automation-based totals and report-only totals.')}</div>
+    <div class="co-sec"><span class="co-sec-t">Roll-ups</span><span class="co-sec-line"></span>${openChip('A native roll-up on lookups is the recommendation, not a decision. The alternatives were automation-built totals, or totals that live only in reports.')}</div>
     ${rollHtml}
-    <div class="callout warn" style="margin-top:18px">
-      <span class="callout-ico">${ICO.warn}</span>
+    <div class="co-note warn" style="margin-top:18px">
+      <span class="co-note-ico">${ICO.warn}</span>
       <div><b>Reparenting is the case to watch.</b> Move a line to another order and both orders have to
       be recalculated — the old one without it, the new one with it. If the old parent keeps its number,
-      the same amount is counted twice across two records and every report and validation rule that
+      the same amount is counted twice across two records, and every report and validation rule that
       reads the total is wrong.</div>
     </div>`;
 }
@@ -952,76 +990,122 @@ function tabRel(o){
 /* ── Tab: details (the Phase 1 settings, after save) ──────────────── */
 function tabDetails(o){
   const row = (k, v, note) => `
-    <tr class="sc-tr">
-      <td class="sc-td" style="width:200px;color:var(--p-text2)">${k}</td>
-      <td class="sc-td" style="font-weight:500">${v}${note ? `<div style="font-weight:400;color:var(--p-text2);font-size:11.5px;margin-top:3px;line-height:1.5">${note}</div>` : ''}</td>
+    <tr>
+      <td class="col-first" style="width:200px;color:var(--muted-foreground);vertical-align:top;padding-top:12px">${k}</td>
+      <td class="col-last" style="white-space:normal">
+        <div style="font-weight:500">${v}</div>
+        ${note ? `<div style="color:var(--muted-foreground);font-size:12.5px;margin-top:3px;line-height:1.55;max-width:560px">${note}</div>` : ''}
+      </td>
     </tr>`;
   const lv = LEVELS[o.level];
   const next = autoPreview(o.autoFormat, o.autoNext);
 
   return `
-    <div class="sec"><span class="sec-t">Object</span><span class="sec-line"></span>
-      <button class="sc-btn sc-btn--outline sc-btn--size-sm" onclick="openObjectDrawer('${o.id}')">Edit</button></div>
-    <div class="card"><table class="sc-table"><tbody>
+    <div class="co-sec"><span class="co-sec-t">Object</span><span class="co-sec-line"></span>
+      <button class="rl-btn v-outline sz-sm" onclick="openObjectDrawer('${o.id}')"><span class="rl-btn-label">Edit</span></button></div>
+    <div class="rl-section"><div class="co-table-wrap"><table class="co-table"><tbody>
       ${row('Label', esc(o.label), 'Shows in navigation, page titles, lookups, reports and automations. Renaming is safe — the API name does not change.')}
-      ${row('API name', `<span class="mono">${esc(apiFromLabel(o.label))}</span>`)}
-      ${row('Level', `<span class="chip ${lv.cls}">${lv.label}</span> ${ICO.lock.replace('<svg','<svg style="width:12px;height:12px;vertical-align:-2px;color:var(--p-muted)"')}`,
+      ${row('API name', `<span class="co-mono">${esc(apiFromLabel(o.label))}</span>`)}
+      ${row('Level', tag(lv.label, lv.hue, 's-md') + ' ' + tag('Fixed', 'gray', 's-sm', 'Cannot change after save'),
         o.level === 'GLOBAL'
           ? 'A global reference list has no account or project parent. Where it should live is still open.'
           : `Every record hangs off an ${lv.label.toLowerCase()}. This cannot change after save — the records depend on it.`)}
-      ${row('Description', esc(o.description) || '<span style="color:var(--p-muted)">—</span>')}
+      ${row('Description', esc(o.description) || '<span style="color:var(--muted-foreground)">—</span>')}
       ${row('Record Name', esc(o.recordNameLabel), 'The human label for a record, shown in lists, lookups, search and notifications. It is not the unique identifier — the system ID is.')}
       ${row('Record Name type', typeMeta(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT').label,
         o.recordNameType === 'AUTONUMBER' ? 'The system numbers each record.' : 'The user types a name. Up to 80 characters, not necessarily unique.')}
       ${o.recordNameType === 'AUTONUMBER' ? row('Numbering',
-        `<span class="mono">${esc(o.autoFormat)}</span> → <span class="mono">${esc(next||'')}</span> next`,
-        'Changing the format affects new records only; old records keep their number. The starting number can only move up, and gaps are allowed — a deleted record’s number is not reused.') : ''}
-    </tbody></table></div>
+        `<span class="co-mono">${esc(o.autoFormat)}</span> → <span class="co-mono">${esc(next||'')}</span> next`,
+        'Changing the format affects new records only; old records keep their number. The starting number can only move up, and gaps are allowed — a deleted record’s number is never reused.') : ''}
+    </tbody></table></div></div>
 
-    <div class="sec"><span class="sec-t">Behaviour</span><span class="sec-line"></span></div>
-    <div class="card"><table class="sc-table"><tbody>
-      ${row('Reports', '<span class="chip neutral">Always on</span>', 'The object and its fields are available in the report builder. An object with no reports has little value, so there is no switch.')}
-      ${row('Field history', o.fieldHistory ? '<span class="chip level-project">On</span>' : '<span class="chip neutral">Off</span>', 'Every field change — old value, new value, who, when — is written to the global audit log.')}
-      ${row('Search', '<span class="chip neutral">Always on</span>', 'Records are found in global search by Record Name. Searching other text fields comes later.')}
-    </tbody></table></div>
+    <div class="co-sec"><span class="co-sec-t">Behaviour</span><span class="co-sec-line"></span></div>
+    <div class="rl-section"><div class="co-table-wrap"><table class="co-table"><tbody>
+      ${row('Reports', tag('Always on', 'green'), 'The object and its fields are available in the report builder. An object with no reports has little value, so there is no switch.')}
+      ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Every field change — old value, new value, who and when — is written to the global audit log.')}
+      ${row('Search', tag('Always on', 'green'), 'Records are found in global search by Record Name. Searching other text fields comes later.')}
+    </tbody></table></div></div>
 
-    <div class="sec"><span class="sec-t">Danger zone</span><span class="sec-line"></span></div>
-    <div class="card"><div class="card-head">
-      <div class="card-head-text">
-        <div class="card-title">Delete ${esc(o.label)}</div>
-        <div class="card-desc">Removes the object, its ${o.records.toLocaleString()} records and every field on it.
-        ${incoming(o.id).length ? `Blocked while ${incoming(o.id).map(x=>esc(x.obj.label)).join(' and ')} point at it.` : ''}</div>
+    <div class="co-sec"><span class="co-sec-t">Danger zone</span><span class="co-sec-line"></span></div>
+    <div class="rl-section is-open">
+      <div class="rl-section-header" style="cursor:default">
+        <div style="flex:1">
+          <div class="rl-section-title">Delete ${esc(o.label)}</div>
+        </div>
+        <button class="rl-btn v-danger sz-sm" onclick="confirmDeleteObject('${o.id}')"><span class="rl-btn-label">Delete</span></button>
       </div>
-      <button class="sc-btn sc-btn--outline sc-btn--size-default" style="color:var(--p-red);border-color:#FBD5D5" onclick="confirmDeleteObject('${o.id}')">Delete</button>
-    </div></div>`;
+      <div class="rl-section-body rl-section-body-padded">
+        <div style="font-size:12.5px;color:var(--muted-foreground);line-height:1.55">
+          Removes the object, its ${o.records.toLocaleString()} records and every field on it.
+          ${incoming(o.id).length ? `Blocked while ${incoming(o.id).map(x=>esc(x.obj.label)).join(' and ')} point at it.` : ''}
+        </div>
+      </div>
+    </div>`;
 }
 
-/* ══ Drawer plumbing ════════════════════════════════════════════════ */
+/* ══ Drawer plumbing — the kit's right-side sheet ═══════════════════ */
 let drawerKey = null;
-function showDrawer(html, wide, key){
-  const d = document.getElementById('drawer');
-  /* These drawers re-render whole on every structural change — a segmented
-     control, a radio card, a picklist row. Without this the reader is thrown
-     back to the top each time, away from the setting they just changed. */
-  const prev = d.querySelector('.dr-body');
-  const keep = (key && key === drawerKey && prev) ? prev.scrollTop : 0;
+
+function showDrawer(inner, width, key){
+  const host = document.getElementById('drawer-host');
+  const panel = host.querySelector('.rl-drawer-panel');
+  /* Re-rendering the same drawer swaps only the panel's contents: the
+     entrance animation stays a first-open event, and the reader keeps
+     their scroll position instead of being thrown back to the top by a
+     segmented control half way down the form. */
+  if(key && key === drawerKey && panel){
+    const prevTop = (host.querySelector('.rl-drawer-body') || {}).scrollTop || 0;
+    panel.style.width = (width || 560) + 'px';
+    panel.innerHTML = inner;
+    const b = host.querySelector('.rl-drawer-body');
+    if(b) b.scrollTop = prevTop;
+    return;
+  }
   drawerKey = key || null;
-  d.className = 'drawer on' + (wide ? ' wide' : '');
-  d.setAttribute('aria-hidden','false');
-  d.innerHTML = html;
-  document.getElementById('scrim').classList.add('on');
-  if(keep){ const body = d.querySelector('.dr-body'); if(body) body.scrollTop = keep; }
+  host.innerHTML = `
+    <div class="rl-drawer-root side-right" role="dialog" aria-modal="true">
+      <div class="rl-drawer-scrim" onclick="closeDrawer()"></div>
+      <div class="rl-drawer-panel" style="width:${width || 560}px">${inner}</div>
+    </div>`;
 }
 function closeDrawer(){
-  const d = document.getElementById('drawer');
-  d.classList.remove('on'); d.setAttribute('aria-hidden','true');
-  document.getElementById('scrim').classList.remove('on');
+  document.getElementById('drawer-host').innerHTML = '';
   od = null; fd = null; drawerKey = null;
-  setTimeout(()=>{ if(!d.classList.contains('on')) d.innerHTML = ''; }, 220);
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeMenu(); closeDrawer(); } });
 
-function fErr(key, store){ return store[key] ? `<div class="f-err">${ICO.warn.replace('<svg','<svg style="width:12px;height:12px"')} ${esc(store[key])}</div>` : ''; }
+function drawerHead(title, desc, backFn){
+  return `<div class="rl-drawer-header">
+    ${backFn ? `<button class="rl-drawer-close" onclick="${backFn}" aria-label="Back" style="margin-left:-4px">${ICO.back}</button>` : ''}
+    <div class="rl-drawer-titles">
+      <h2 class="rl-drawer-title">${title}</h2>
+      <p class="rl-drawer-description">${desc}</p>
+    </div>
+    <button class="rl-drawer-close" onclick="closeDrawer()" aria-label="Close">${ICO.x}</button>
+  </div>`;
+}
+function drawerFoot(note, confirmLabel, onConfirm){
+  return `<div class="rl-drawer-footer">
+    <span class="rl-drawer-footer-spacer" style="font-size:11.5px;color:var(--muted-foreground);line-height:1.4;max-width:260px">${note}</span>
+    <button class="rl-btn v-outline sz-md" onclick="closeDrawer()"><span class="rl-btn-label">Cancel</span></button>
+    <button class="rl-btn v-primary sz-md" onclick="${onConfirm}"><span class="rl-btn-label">${confirmLabel}</span></button>
+  </div>`;
+}
+/* Label + control + hint, using the kit's Field atom. */
+function field(label, required, control, hint, err){
+  return `<div class="co-f"><div class="rl-field">
+    <label class="rl-field-label">${label}${required?' <span class="rl-field-required">*</span>':''}</label>
+    ${control}
+    ${hint ? `<div class="rl-field-hint">${hint}</div>` : ''}
+    ${err || ''}
+  </div></div>`;
+}
+function fErr(key, store){
+  return store[key] ? `<div class="co-err">${ICO.warn} ${esc(store[key])}</div>` : '';
+}
+function secLabel(t, extra){
+  return `<div class="co-sec"><span class="co-sec-t">${t}</span><span class="co-sec-line"></span>${extra||''}</div>`;
+}
 
 /* ══ Object drawer — Phase 1 ════════════════════════════════════════ */
 let od = null;
@@ -1029,8 +1113,7 @@ let od = null;
 function openObjectDrawer(id){
   const o = id ? obj(id) : null;
   od = {
-    id: id || null,
-    err: {},
+    id: id || null, err: {},
     touchedPlural: !!o, touchedRecName: !!o,
     d: o ? JSON.parse(JSON.stringify({
         label:o.label, plural:o.plural, level:o.level, description:o.description,
@@ -1050,176 +1133,603 @@ function odRender(){
   const hasRecords = editing && o.records > 0;
   const recNamePlaceholder = d.label ? `${d.label} Name` : 'Sales Order Name';
 
-  const levelCard = (key, title, desc, disabled, extra) => `
-    <button class="opt-card${d.level===key?' sel':''}" ${disabled?'disabled':''}
-            onclick="odLevel('${key}')" type="button">
-      <div class="opt-card-t">${title}${extra||''}</div>
-      <div class="opt-card-d">${desc}</div>
+  const levelCard = (key, title, desc) => `
+    <button class="co-card${d.level===key?' sel':''}" type="button" onclick="odLevel('${key}')">
+      <div class="co-card-t">${title}</div>
+      <div class="co-card-d">${desc}</div>
     </button>`;
 
-  showDrawer(`
-    <div class="dr-head">
-      <div style="flex:1;min-width:0">
-        <div class="dr-title">${editing ? 'Edit ' + esc(o.label) : 'New custom object'}</div>
-        <div class="dr-sub">${editing
-          ? 'The level and, once records exist, the Record Name type are fixed — everything else can change.'
-          : 'Define the object itself. Fields and relationships come next, on the object’s own page.'}</div>
-      </div>
-      <button class="icon-btn dr-x" onclick="closeDrawer()" aria-label="Close">${ICO.x}</button>
-    </div>
+  showDrawer(
+    drawerHead(
+      editing ? 'Edit ' + esc(o.label) : 'New custom object',
+      editing ? 'The level and, once records exist, the Record Name type are fixed — everything else can change.'
+              : 'Define the object itself. Fields and relationships come next, on the object’s own page.'
+    ) + `
+    <div class="rl-drawer-body">
+      ${field('Label', true,
+        `<input class="co-input" id="od-label" value="${esc(d.label)}" placeholder="Sales Order" oninput="odSet('label', this.value)">`,
+        'What users see in navigation, page titles, lookups, reports and automations. Must be unique across every object, including the ones Rocketlane ships with.',
+        fErr('label', od.err))}
 
-    <div class="dr-body">
-      <div class="f">
-        <div class="f-label">Label <span class="f-req">*</span></div>
-        <input class="sc-input" id="od-label" value="${esc(d.label)}" placeholder="Sales Order"
-               oninput="odSet('label', this.value)" ${editing?'':'autofocus'}>
-        <div class="f-hint">What users see in navigation, page titles, lookups, reports and automations.
-          Must be unique across every object, including the ones Rocketlane ships with.</div>
-        ${fErr('label', od.err)}
-      </div>
+      ${field('Plural label', true,
+        `<input class="co-input" id="od-plural" value="${esc(d.plural)}" placeholder="${esc(pluralise(d.label)||'Sales Orders')}" oninput="odSet('plural', this.value); od.touchedPlural = true">`,
+        'Used for list views and as the default title of the related list this object creates on whatever points at it.')}
 
-      <div class="f">
-        <div class="f-label">Plural label <span class="f-req">*</span></div>
-        <input class="sc-input" id="od-plural" value="${esc(d.plural)}" placeholder="${esc(pluralise(d.label)||'Sales Orders')}"
-               oninput="odSet('plural', this.value); od.touchedPlural = true">
-        <div class="f-hint">Used for list views and as the default title of the related list this object
-          creates on whatever points at it.</div>
-      </div>
-
-      <div class="f">
-        <div class="f-label">Level <span class="f-req">*</span>
-          ${editing ? `<span class="chip neutral">${ICO.lock.replace('<svg','<svg style="width:10px;height:10px"')} Fixed after save</span>` : ''}</div>
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Level <span class="rl-field-required">*</span>
+          ${editing ? tag('Fixed after save', 'gray', 's-sm', 'Records depend on the level') : ''}</label>
         ${editing ? `
-          <div class="prev"><span class="chip ${LEVELS[d.level].cls}">${LEVELS[d.level].label}</span>
+          <div class="co-prev">${tag(LEVELS[d.level].label, LEVELS[d.level].hue, 's-md')}
             <span>Records depend on the level, so it cannot be changed. Create a new object to move levels.</span></div>
         ` : `
-          <div class="opt-cards">
+          <div class="co-cards">
             ${levelCard('ACCOUNT','Account','Lives on the account and can outlive any one project. Commercial data: orders, contracts, assets.')}
             ${levelCard('PROJECT','Project','Lives inside the project and ends with it. Delivery data: change requests, risks, environments.')}
           </div>
-          <button class="opt-card" style="margin-top:8px;width:100%" disabled type="button">
-            <div class="opt-card-t">Global ${openChip('A product catalogue has no account or project parent. Options: account-level and duplicated per account; a picklist, which cannot hold a price; an existing global list such as rate cards; or allowing global objects for reference lists only.')}</div>
-            <div class="opt-card-d">A reference list with no parent, such as a product catalogue. Not decided — the seeded Product object uses it so the question stays visible.</div>
+          <button class="co-card" style="margin-top:8px;width:100%" disabled type="button">
+            <div class="co-card-t">Global ${openChip('A product catalogue has no account or project parent. Options: account-level and duplicated per account; a picklist, which cannot hold a price; an existing global list such as rate cards; or allowing global objects for reference lists only.')}</div>
+            <div class="co-card-d">A reference list with no parent, such as a product catalogue. Not decided — the seeded Product object uses it so the question stays visible.</div>
           </button>
-          <div class="f-hint" style="margin-top:7px">This cannot be changed later.</div>
+          <div class="rl-field-hint">This cannot be changed later.</div>
         `}
-      </div>
+      </div></div>
 
-      <div class="f">
-        <div class="f-label">Description</div>
-        <textarea class="sc-input" rows="2" placeholder="Holds sales orders from Salesforce. One order can create one or more projects."
-                  oninput="odSet('description', this.value)">${esc(d.description)}</textarea>
-        <div class="f-hint">A note for other admins. Users never see it.</div>
-      </div>
+      ${field('Description', false,
+        `<textarea class="co-input" rows="2" placeholder="Holds sales orders from Salesforce. One order can create one or more projects." oninput="odSet('description', this.value)">${esc(d.description)}</textarea>`,
+        'A note for other admins. Users never see it.')}
 
-      <div class="sec"><span class="sec-t">Record name</span><span class="sec-line"></span></div>
-      <div class="callout info" style="margin-bottom:14px">
-        <span class="callout-ico">${ICO.info}</span>
+      ${secLabel('Record name')}
+      <div class="co-note">
+        <span class="co-note-ico">${ICO.info}</span>
         <div>The Record Name is how people recognise a record — in lists, lookups, search and
         notifications. It is <b>not</b> the identifier: every record also gets a system ID, and that is
         what lookups, the API and integrations store.</div>
       </div>
 
-      <div class="f">
-        <div class="f-label">Record Name label <span class="f-req">*</span></div>
-        <input class="sc-input" id="od-recname" value="${esc(d.recordNameLabel)}" placeholder="${esc(recNamePlaceholder)}"
-               oninput="odSet('recordNameLabel', this.value); od.touchedRecName = true">
-        <div class="f-hint">Example: “Order Number”. The field is always present and cannot be deleted.</div>
-        ${fErr('recordNameLabel', od.err)}
-      </div>
+      ${field('Record Name label', true,
+        `<input class="co-input" id="od-recname" value="${esc(d.recordNameLabel)}" placeholder="${esc(recNamePlaceholder)}" oninput="odSet('recordNameLabel', this.value); od.touchedRecName = true">`,
+        'Example: “Order Number”. The field is always present and cannot be deleted.',
+        fErr('recordNameLabel', od.err))}
 
-      <div class="f">
-        <div class="f-label">Record Name type <span class="f-req">*</span>
-          ${hasRecords ? `<span class="chip neutral">${ICO.lock.replace('<svg','<svg style="width:10px;height:10px"')} ${o.records.toLocaleString()} records exist</span>` : ''}</div>
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Record Name type <span class="rl-field-required">*</span>
+          ${hasRecords ? tag(o.records.toLocaleString() + ' records exist', 'gray', 's-sm') : ''}</label>
         ${hasRecords ? `
-          <div class="prev"><span class="prev-val">${esc(typeMeta(d.recordNameType==='AUTONUMBER'?'AUTONUMBER':'TEXT').label)}</span>
+          <div class="co-prev"><span class="co-prev-val">${esc(typeMeta(d.recordNameType==='AUTONUMBER'?'AUTONUMBER':'TEXT').label)}</span>
             <span>Changing this once records exist would renumber or blank every one of them.</span></div>
         ` : `
-          <div class="seg">
-            <button class="seg-btn${d.recordNameType==='TEXT'?' on':''}" onclick="odNameType('TEXT')" type="button">Text</button>
-            <button class="seg-btn${d.recordNameType==='AUTONUMBER'?' on':''}" onclick="odNameType('AUTONUMBER')" type="button">Auto Number</button>
+          <div class="co-seg">
+            <button class="${d.recordNameType==='TEXT'?'active':''}" onclick="odNameType('TEXT')" type="button">Text</button>
+            <button class="${d.recordNameType==='AUTONUMBER'?'active':''}" onclick="odNameType('AUTONUMBER')" type="button">Auto Number</button>
           </div>
-          <div class="f-hint">${d.recordNameType === 'TEXT'
+          <div class="rl-field-hint">${d.recordNameType === 'TEXT'
             ? 'The user types a name — up to 80 characters, and not necessarily unique. Good when records have a natural name: “H&amp;M Europe Q3 Rollout”.'
             : 'Rocketlane numbers each record. Good when there is no natural name: “LI-000231”.'}</div>
         `}
-      </div>
+      </div></div>
 
       ${d.recordNameType === 'AUTONUMBER' ? `
-        <div class="f-row">
-          <div class="f">
-            <div class="f-label">Format <span class="f-req">*</span></div>
-            <input class="sc-input mono" value="${esc(d.autoFormat)}" placeholder="SO-{0000000}"
-                   oninput="odSet('autoFormat', this.value); odPreview()">
-            <div class="f-hint">Prefix plus a number token. The zeros set the minimum width; the number
-              grows past it when it has to.</div>
-            ${fErr('autoFormat', od.err)}
-          </div>
-          <div class="f" style="max-width:150px">
-            <div class="f-label">Starting number</div>
-            <input class="sc-input mono" type="number" min="1" value="${esc(d.autoStart)}"
+        <div class="co-f-row">
+          ${field('Format', true,
+            `<input class="co-input co-mono" value="${esc(d.autoFormat)}" placeholder="SO-{0000000}" oninput="odSet('autoFormat', this.value); odPreview()">`,
+            'Prefix plus a number token. The zeros set the minimum width; the number grows past it when it has to.',
+            fErr('autoFormat', od.err))}
+          <div class="co-f" style="max-width:150px"><div class="rl-field">
+            <label class="rl-field-label">Starting number</label>
+            <input class="co-input co-mono" type="number" min="1" value="${esc(d.autoStart)}"
                    oninput="odSet('autoStart', parseInt(this.value||'1',10)); odPreview()">
-            <div class="f-hint">${editing ? 'Can only move up.' : 'Start at 10000 to carry on from an older system.'}</div>
+            <div class="rl-field-hint">${editing ? 'Can only move up.' : 'Start at 10000 to carry on from an older system.'}</div>
             ${fErr('autoStart', od.err)}
-          </div>
+          </div></div>
         </div>
-        <div class="prev" style="margin-bottom:16px">
-          <span>First record</span><span class="prev-val" id="od-preview">${esc(autoPreview(d.autoFormat, d.autoStart) || '—')}</span>
+        <div class="co-prev" style="margin-bottom:16px">
+          <span>First record</span><span class="co-prev-val" id="od-preview">${esc(autoPreview(d.autoFormat, d.autoStart) || '—')}</span>
           <span style="margin-left:auto">Gaps are allowed — a deleted record’s number is never reused.</span>
         </div>
       ` : ''}
 
-      <div class="sec"><span class="sec-t">Behaviour</span><span class="sec-line"></span></div>
-      <div class="sw-row">
+      ${secLabel('Behaviour')}
+      <div class="co-sw">
         <button class="sc-switch sc-switch--on" disabled style="opacity:.55;cursor:default"><span class="sc-switch-thumb"></span></button>
-        <div class="sw-text">
-          <div class="chk-t">Reports <span class="chip neutral">Always on</span></div>
-          <div class="chk-d">The object and its fields show up in the report builder. An object you cannot
+        <div style="flex:1">
+          <div class="co-ctl-t">Reports ${tag('Always on', 'green')}</div>
+          <div class="co-ctl-d">The object and its fields show up in the report builder. An object you cannot
             report on has little value, so there is no switch to turn off.</div>
         </div>
       </div>
-      <div class="sw-row">
+      <div class="co-sw">
         <button class="sc-switch${d.fieldHistory?' sc-switch--on':''}" onclick="odSet('fieldHistory', !od.d.fieldHistory); odRender()"
                 role="switch" aria-checked="${d.fieldHistory}"><span class="sc-switch-thumb"></span></button>
-        <div class="sw-text">
-          <div class="chk-t">Field history</div>
-          <div class="chk-d">Record every field change — old value, new value, who and when — in the global
+        <div style="flex:1">
+          <div class="co-ctl-t">Field history</div>
+          <div class="co-ctl-d">Record every field change — old value, new value, who and when — in the global
             audit log. ${openChip('Track every field, or only the ones an admin selects? All fields is simpler for customers but costs storage; Salesforce tracks a selected subset with a per-object limit.')}</div>
         </div>
       </div>
-      <div class="sw-row">
+      <div class="co-sw">
         <button class="sc-switch sc-switch--on" disabled style="opacity:.55;cursor:default"><span class="sc-switch-thumb"></span></button>
-        <div class="sw-text">
-          <div class="chk-t">Search <span class="chip neutral">Always on</span></div>
-          <div class="chk-d">Records are found in global search by Record Name. Searching other text fields comes later.</div>
+        <div style="flex:1">
+          <div class="co-ctl-t">Search ${tag('Always on', 'green')}</div>
+          <div class="co-ctl-d">Records are found in global search by Record Name. Searching other text fields comes later.</div>
         </div>
       </div>
 
       ${editing ? '' : `
-        <div class="sec"><span class="sec-t">What Rocketlane creates on save</span><span class="sec-line"></span></div>
-        <div class="card" style="margin-bottom:0"><div class="card-body" style="padding:12px 14px">
-          <div style="font-size:12.5px;color:var(--p-text2);line-height:1.85">
-            <b style="color:var(--p-text)">System ID</b> on every record, hidden from users and used by lookups and the API<br>
-            <b style="color:var(--p-text)">${esc(d.recordNameLabel || recNamePlaceholder)}</b> as the Record Name field<br>
-            <b style="color:var(--p-text)">${LEVELS[d.level].label}</b> — a required lookup to the parent<br>
-            <b style="color:var(--p-text)">Created by / at, Updated by / at</b><br>
-            A default <b style="color:var(--p-text)">detail view</b> and <b style="color:var(--p-text)">list view</b><br>
-            A navigation entry, visible to <b style="color:var(--p-text)">admins only</b> until access is set
+        ${secLabel('What Rocketlane creates on save')}
+        <div class="rl-section"><div class="rl-section-body rl-section-body-padded">
+          <div style="font-size:13px;color:var(--muted-foreground);line-height:1.9">
+            <b style="color:var(--foreground)">System ID</b> on every record, hidden from users and used by lookups and the API<br>
+            <b style="color:var(--foreground)">${esc(d.recordNameLabel || recNamePlaceholder)}</b> as the Record Name field<br>
+            <b style="color:var(--foreground)">${LEVELS[d.level].label}</b> — a required lookup to the parent<br>
+            <b style="color:var(--foreground)">Created by / at, Updated by / at</b><br>
+            A default <b style="color:var(--foreground)">detail view</b> and <b style="color:var(--foreground)">list view</b><br>
+            A navigation entry, visible to <b style="color:var(--foreground)">admins only</b> until access is set
           </div>
         </div></div>
       `}
-    </div>
+    </div>` +
+    drawerFoot(
+      editing ? 'Renaming is safe — the API name does not change.' : 'You can add fields straight after saving.',
+      editing ? 'Save changes' : 'Create object', 'odSave()'),
+    560, 'obj:' + (od.id || 'new'));
 
-    <div class="dr-foot">
-      <span class="dr-foot-note">${editing ? 'Renaming is safe — the API name does not change.' : 'You can add fields straight after saving.'}</span>
-      <button class="sc-btn sc-btn--outline sc-btn--size-default" onclick="closeDrawer()">Cancel</button>
-      <button class="sc-btn sc-btn--default sc-btn--size-default" onclick="odSave()">${editing ? 'Save changes' : 'Create object'}</button>
-    </div>
-  `, false, 'obj:' + (od.id || 'new'));
   const el = document.getElementById('od-label');
   if(el && !od.id && !od.focused){ od.focused = true; setTimeout(()=>el.focus(), 60); }
 }
 
+/* ══ Field drawer — Phases 3 and 4 ══════════════════════════════════ */
+let fd = null;
+
+/* ── Step 1: pick the data type ───────────────────────────────────── */
+function fdRenderType(){
+  const o = obj(fd.objId);
+  const q = (fd.q||'').toLowerCase();
+  const groups = TYPE_GROUPS.map(g => {
+    const items = Object.entries(TYPES)
+      .filter(([k,t]) => t.group === g.key)
+      .filter(([k,t]) => !q || t.label.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
+    if(!items.length) return '';
+    const later = g.key === 'later';
+    return `<div style="margin-bottom:18px">
+      ${secLabel(g.title)}
+      <div class="co-tp-grid">
+        ${items.map(([k,t]) => `
+          <button class="co-tp" type="button" ${later?'disabled title="Not in release 1"':`onclick="fdPickType('${k}')"`}>
+            ${glyph(k)}
+            <div style="min-width:0">
+              <div class="co-tp-t">${esc(t.label)}
+                ${t.isNew?tag('New','purple'):''}
+                ${t.proposal?openChip('A native roll-up field on lookups is the recommendation. The alternatives were automation-built totals, or totals that live only in reports.'):''}
+                ${later?tag('Later'):''}</div>
+              <div class="co-tp-d">${esc(t.desc)}</div>
+            </div>
+          </button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  showDrawer(
+    drawerHead(`Add a field to ${esc(o.label)}`, 'Start with the data type — it cannot be changed after the field is saved.') + `
+    <div class="rl-drawer-body">
+      <input class="co-input" placeholder="Search data types" value="${esc(fd.q)}" style="margin-bottom:16px"
+             oninput="fd.q = this.value; fdRenderType()">
+      ${groups || '<div class="co-rel-empty">No data type matches that.</div>'}
+    </div>`,
+    680, 'field:type');
+}
+
+/* ── Step 2: the field form ───────────────────────────────────────── */
+function fdRenderForm(){
+  const o = obj(fd.objId);
+  const d = fd.d;
+  const m = typeMeta(d.type);
+  const editing = !!fd.fieldId;
+  const canUnique = !!m.unique;
+  const calculated = d.type === 'FORMULA' || d.type === 'ROLLUP';
+
+  showDrawer(
+    drawerHead(
+      editing ? 'Edit field' : 'New ' + esc(m.label.toLowerCase()) + ' field',
+      `On ${esc(o.label)} · ${esc(m.label)}${editing ? ' · the data type cannot change' : ''}`,
+      editing ? null : "fd.step='type';fdRender()"
+    ) + `
+    <div class="rl-drawer-body">
+      <div class="co-prev" style="margin-bottom:16px">
+        ${glyph(d.type, true)}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:600;color:var(--foreground)">${esc(m.label)}</div>
+          <div style="font-size:12px;margin-top:2px">${esc(m.desc)}</div>
+        </div>
+        ${editing ? tag('Fixed', 'gray', 's-sm', 'A field’s data type cannot change after save. Create a new field and move the data.')
+                  : `<button class="rl-btn v-outline sz-sm" onclick="fd.step='type';fdRender()"><span class="rl-btn-label">Change</span></button>`}
+      </div>
+
+      ${field('Label', true,
+        `<input class="co-input" id="fd-label" value="${esc(d.label)}" placeholder="Order Date" oninput="fdSetLabel(this.value)">`,
+        '', fErr('label', fd.err))}
+
+      ${field('API name', false,
+        `<input class="co-input co-mono" id="fd-api" value="${esc(d.api)}" placeholder="order_date" oninput="fd.d.api = this.value; fd.touchedApi = true" ${editing?'disabled':''}>`,
+        editing ? 'Frozen after save. Renaming the label is safe precisely because reports, automations and integrations hold on to this.'
+                : 'Derived from the label. Reports, automations and the API use it, so it never changes again once saved.')}
+
+      <div class="co-f-row">
+        ${field('Description', false, `<input class="co-input" value="${esc(d.description)}" placeholder="A note for admins" oninput="fd.d.description = this.value">`)}
+        ${field('Help text', false, `<input class="co-input" value="${esc(d.help)}" placeholder="Shown to users on an info icon" oninput="fd.d.help = this.value">`)}
+      </div>
+
+      ${fdTypeSettings(o, d)}
+
+      ${secLabel('Behaviour')}
+      ${calculated ? `
+        <div class="co-note">
+          <span class="co-note-ico">${ICO.info}</span>
+          <div>${d.type === 'ROLLUP'
+            ? 'Roll-ups are read-only and always recalculated, so they cannot be required and cannot carry a default.'
+            : 'Formula fields are read-only and derived on read, so they cannot be required and cannot carry a default.'}</div>
+        </div>
+      ` : `
+        <div class="co-check" onclick="fd.d.required = !fd.d.required; fdRender()">
+          <span class="sc-check${d.required?' sc-check--on':''}">${d.required?ICO.check:''}</span>
+          <div><div class="co-ctl-t">Required</div>
+            <div class="co-ctl-d">The record cannot save without a value — on the form, on import, through the
+              API and on sync alike.${editing?' Records that already have no value stay as they are until someone next edits them.':''}</div></div>
+        </div>
+        ${canUnique ? `
+          <div class="co-check" onclick="fd.d.unique = !fd.d.unique; fdRender()">
+            <span class="sc-check${d.unique?' sc-check--on':''}">${d.unique?ICO.check:''}</span>
+            <div><div class="co-ctl-t">Unique</div>
+              <div class="co-ctl-d">No two records can hold the same value. This is a field setting rather than a
+                validation rule, because it has to look across every record, not just the one being saved.</div></div>
+          </div>
+          <div class="co-check" onclick="fd.d.extId = !fd.d.extId; fdRender()">
+            <span class="sc-check${d.extId?' sc-check--on':''}">${d.extId?ICO.check:''}</span>
+            <div><div class="co-ctl-t">External ID</div>
+              <div class="co-ctl-d">Marks this as an identifier from another system, so imports and sync can find
+                and update the right record. It is indexed, but it does not block duplicates on its own —
+                tick Unique as well for a sync key.</div></div>
+          </div>
+        ` : `
+          <div class="co-check locked">
+            <span class="sc-check" style="opacity:.4"></span>
+            <div><div class="co-ctl-t" style="color:var(--muted-foreground)">Unique and External ID</div>
+              <div class="co-ctl-d">Available on Text and Number only${editing?'':' — and on Email, when that type arrives'}.</div></div>
+          </div>
+        `}
+        ${fdDefaultValue(d)}
+      `}
+      <div class="co-sw" style="border-top:1px solid var(--border)">
+        <button class="sc-switch${d.showInReports!==false?' sc-switch--on':''}"
+                onclick="fd.d.showInReports = fd.d.showInReports === false; fdRender()"
+                role="switch" aria-checked="${d.showInReports!==false}"><span class="sc-switch-thumb"></span></button>
+        <div style="flex:1">
+          <div class="co-ctl-t">Show in reports</div>
+          <div class="co-ctl-d">Keeps the report builder uncluttered — turn it off for sync keys and fields only
+            formulas use. It is <b>not</b> security: hiding sensitive data is an access rule.</div>
+        </div>
+      </div>
+    </div>` +
+    drawerFoot(
+      editing ? 'Changes apply to new and existing records.' : 'The field is live in records, list views, reports, automations and the API as soon as you save.',
+      editing ? 'Save field' : 'Create field', 'fdSave()'),
+    560, 'field:' + (fd.fieldId || 'new'));
+
+  const el = document.getElementById('fd-label');
+  if(el && !editing && !fd.focused){ fd.focused = true; setTimeout(()=>el.focus(), 60); }
+}
+
+/* Default value, for the types where a generic control makes sense.
+   Date, checkbox and user carry theirs in the type-specific block. */
+function fdDefaultValue(d){
+  const t = d.type;
+  if(['DATE','CHECKBOX','USER','LOOKUP','MULTISELECT'].includes(t)) return '';
+  let control;
+  if(t === 'SELECT'){
+    const opts = (d.settings.options||[]).filter(o => o.label);
+    control = `<select class="co-input" onchange="fd.d.def = this.value">
+      <option value="">No default</option>
+      ${opts.map(o => `<option ${d.def===o.label?'selected':''}>${esc(o.label)}</option>`).join('')}
+    </select>`;
+  }else if(NUMERIC.includes(t)){
+    control = `<input class="co-input" type="number" value="${esc(d.def)}" placeholder="No default" oninput="fd.d.def = this.value">`;
+  }else{
+    control = `<input class="co-input" value="${esc(d.def)}" placeholder="No default" oninput="fd.d.def = this.value">`;
+  }
+  return `<div style="padding-top:14px;border-top:1px solid var(--border);margin-top:4px">
+    ${field('Default value', false, control, 'Applied to new records only. Existing records are left alone.')}
+  </div>`;
+}
+
+/* ── Type-specific settings ───────────────────────────────────────── */
+function fdTypeSettings(o, d){
+  const s = d.settings;
+  const dec = (max, hint) => `<div class="co-f" style="max-width:190px"><div class="rl-field">
+      <label class="rl-field-label">Decimal places</label>
+      <select class="co-input" onchange="fd.d.settings.decimals = parseInt(this.value,10)">
+        ${Array.from({length:max+1},(_,i)=>`<option value="${i}" ${s.decimals===i?'selected':''}>${i}</option>`).join('')}
+      </select>
+      ${hint ? `<div class="rl-field-hint">${hint}</div>` : ''}
+    </div></div>`;
+
+  switch(d.type){
+    case 'TEXT': return secLabel('Text settings') + `<div class="co-f" style="max-width:190px">${field('Maximum length', false,
+      `<input class="co-input" type="number" min="1" max="255" value="${esc(s.maxLength)}" oninput="fd.d.settings.maxLength = parseInt(this.value||'255',10)">`,
+      'Up to 255 characters.')}</div>`;
+
+    case 'MULTILINE': return secLabel('Text settings') + `<div class="co-f" style="max-width:190px">${field('Maximum length', false,
+      `<input class="co-input" type="number" min="1" max="32000" value="${esc(s.maxLength)}" oninput="fd.d.settings.maxLength = parseInt(this.value||'32000',10)">`,
+      'Up to 32,000 characters. Reports can show it as a column but cannot filter or group on it.')}</div>`;
+
+    case 'NUMBER': return secLabel('Number settings') + dec(6, 'A blank value stays blank. It is not 0.');
+
+    case 'CURRENCY': return secLabel('Currency settings') + dec(4) + `
+      <div class="co-note warn">
+        <span class="co-note-ico">${ICO.warn}</span>
+        <div><b>Which currency?</b> ${openChip('Three options: one workspace currency for every currency field; a Currency field on the record that all its currency fields follow; or a currency code stored on each value.')}
+        The proposal is a Currency field on the record that every currency field on it follows — it matches
+        “currency is required before handoff”, and budgets and invoices can inherit it.</div>
+      </div>`;
+
+    case 'PERCENT': return secLabel('Percent settings') + dec(4, 'Stored as a number — 15% is 15, not 0.15.');
+
+    case 'DATE': return secLabel('Date settings') + `<div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Default value</label>
+        <div class="co-seg">
+          <button class="${s.dateDefault!=='today'?'active':''}" type="button" onclick="fd.d.settings.dateDefault='blank';fdRender()">Blank</button>
+          <button class="${s.dateDefault==='today'?'active':''}" type="button" onclick="fd.d.settings.dateDefault='today';fdRender()">Today</button>
+        </div>
+      </div></div>`;
+
+    case 'CHECKBOX': return secLabel('Checkbox settings') + `<div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Default value</label>
+        <div class="co-seg">
+          <button class="${!s.checkDefault?'active':''}" type="button" onclick="fd.d.settings.checkDefault=false;fdRender()">Unchecked</button>
+          <button class="${s.checkDefault?'active':''}" type="button" onclick="fd.d.settings.checkDefault=true;fdRender()">Checked</button>
+        </div>
+        <div class="rl-field-hint">A checkbox is never blank — it is true or false.</div>
+      </div></div>`;
+
+    case 'SELECT':
+    case 'MULTISELECT': return secLabel('Values') + `
+      <div class="co-f">
+        ${(s.options||[]).map((opt,i) => `
+          <div class="co-pl">
+            <span class="co-pl-grip">⠿</span>
+            <button class="co-pl-sw" style="background:${esc(opt.color)}" type="button" title="Change colour" onclick="fdCycleColour(${i})"></button>
+            <input class="co-input" value="${esc(opt.label)}" placeholder="Value ${i+1}" oninput="fd.d.settings.options[${i}].label = this.value">
+            <button class="co-icon-btn danger" onclick="fdRemoveOption(${i})" aria-label="Remove">${ICO.trash}</button>
+          </div>`).join('')}
+        <button class="rl-btn v-outline sz-sm" style="margin-top:4px" onclick="fdAddOption()">${ICO.plus}<span class="rl-btn-label">Add value</span></button>
+        ${fErr('options', fd.err)}
+      </div>
+      <div class="co-f-row">
+        ${field('Sort order', false, `<select class="co-input" onchange="fd.d.settings.sort = this.value">
+          <option value="entered" ${s.sort==='entered'?'selected':''}>As entered</option>
+          <option value="alpha" ${s.sort==='alpha'?'selected':''}>Alphabetical</option>
+        </select>`)}
+        <div class="co-f"></div>
+      </div>
+      <div class="co-note">
+        <span class="co-note-ico">${ICO.info}</span>
+        <div><b>Restricted to this list, always.</b> Imports and the API cannot introduce a value that is not
+        here. Renaming a value updates every record; deleting one asks you what the records holding it should
+        say instead; deactivating one hides it from new records but leaves the old ones — and reports — intact.
+        ${d.type==='MULTISELECT'?'<br>In reports a multi select filters with “includes”, not “equals”.':''}</div>
+      </div>`;
+
+    case 'USER': return secLabel('User settings') + `
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">How many</label>
+        <div class="co-seg">
+          <button class="${s.userMode!=='multiple'?'active':''}" type="button" onclick="fd.d.settings.userMode='single';fdRender()">One user</button>
+          <button class="${s.userMode==='multiple'?'active':''}" type="button" onclick="fd.d.settings.userMode='multiple';fdRender()">Several users</button>
+        </div>
+      </div></div>
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Default value</label>
+        <div class="co-seg">
+          <button class="${s.userDefault!=='current'?'active':''}" type="button" onclick="fd.d.settings.userDefault='blank';fdRender()">Blank</button>
+          <button class="${s.userDefault==='current'?'active':''}" type="button" onclick="fd.d.settings.userDefault='current';fdRender()">The current user</button>
+        </div>
+      </div></div>`;
+
+    case 'LOOKUP': return fdLookupSettings(o, d);
+    case 'FORMULA': return fdFormulaSettings(o, d);
+    case 'ROLLUP': return fdRollupSettings(o, d);
+    default: return '';
+  }
+}
+
+/* ── Lookup ───────────────────────────────────────────────────────── */
+function fdLookupSettings(o, d){
+  const s = d.settings;
+  const customs = state.objects.filter(x => x.id !== o.id);
+  const picks = targetFieldLabels(s.target);
+  const chosen = s.pickerFields || [];
+
+  return secLabel('What it points at') + `
+    <div class="co-f"><div class="rl-field">
+      <label class="rl-field-label">Related object <span class="rl-field-required">*</span>
+        ${fd.fieldId ? tag('Fixed after save') : ''}</label>
+      <select class="co-input" ${fd.fieldId?'disabled':''} onchange="fdSetTarget(this.value)">
+        <option value="">Select an object…</option>
+        <optgroup label="Custom objects">
+          ${customs.map(c => `<option value="${c.id}" ${s.target===c.id?'selected':''}>${esc(c.label)}</option>`).join('')}
+        </optgroup>
+        <optgroup label="Rocketlane objects">
+          <option value="ACCOUNT" ${s.target==='ACCOUNT'?'selected':''}>Account</option>
+          <option value="PROJECT" ${s.target==='PROJECT'?'selected':''}>Project</option>
+        </optgroup>
+        <optgroup label="Still to decide — not in this release">
+          <option disabled>Budget</option><option disabled>Task</option>
+          <option disabled>Phase</option><option disabled>${esc(o.label)} (itself)</option>
+        </optgroup>
+      </select>
+      <div class="rl-field-hint">The lookup stores the target's <b>system ID</b>, never its name — so renaming the
+        linked record never breaks the link. For a user, use the User data type instead.</div>
+      ${fErr('target', fd.err)}
+    </div></div>
+
+    ${s.target ? `
+      ${field('Related list label', true,
+        `<input class="co-input" value="${esc(s.relatedListLabel)}" placeholder="${esc(o.plural)}" oninput="fd.d.settings.relatedListLabel = this.value; fd.touchedRLL = true">`,
+        `The title of the list this creates on the ${esc(targetLabel(s.target))} record — where its ${esc(o.plural.toLowerCase())} are shown, with an “Add new” that pre-fills this lookup.`)}
+
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">When the ${esc(targetLabel(s.target))} is deleted <span class="rl-field-required">*</span></label>
+        <div class="co-cards">
+          <button class="co-card${s.onDelete!=='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='CLEAR';fdRender()">
+            <div class="co-card-t">Clear the value</div>
+            <div class="co-card-d">The ${esc(o.label)} survives with an empty ${esc(d.label||'lookup')}.</div>
+          </button>
+          <button class="co-card${s.onDelete==='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='BLOCK';fdRender()">
+            <div class="co-card-t">Block the delete</div>
+            <div class="co-card-d">The ${esc(targetLabel(s.target))} cannot be deleted while any ${esc(o.label)} points at it.</div>
+          </button>
+        </div>
+        <div class="rl-field-hint">There is no cascade delete — it belongs to master-detail, which is not in this
+          release. “Block the delete”, paired with a required lookup, covers what cascade was protecting.</div>
+      </div></div>
+
+      ${secLabel('The picker users see')}
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Extra fields under the name ${tag(chosen.length + '/3')}</label>
+        <div class="rl-field-hint" style="margin:0 0 8px">Record names repeat — two orders can both be “H&amp;M Europe”.
+          Up to three extra fields help a user pick the right one. Search is by Record Name.</div>
+        ${picks.length ? picks.map(p => {
+          const on = chosen.includes(p);
+          const full = !on && chosen.length >= 3;
+          return `<div class="co-check${full?' locked':''}" ${full?'':`onclick="fdTogglePicker('${esc(p).replace(/'/g,"\\'")}')"`}>
+            <span class="sc-check${on?' sc-check--on':''}" style="${full?'opacity:.4':''}">${on?ICO.check:''}</span>
+            <div><div class="co-ctl-t" style="${full?'color:var(--muted-foreground)':''}">${esc(p)}</div></div>
+          </div>`;
+        }).join('') : '<div class="co-rel-empty">That object has no fields to show yet.</div>'}
+      </div></div>
+      <div class="co-note">
+        <span class="co-note-ico">${ICO.info}</span>
+        <div><b>Lookup filters come later.</b> In this release the picker shows every record the user can
+        access. Until filters arrive, a rule like “the line and its order must share an account” is a
+        validation rule, not a filter.</div>
+      </div>
+    ` : ''}`;
+}
+
+/* ── Formula (Phase 5 — enough of it to model a line's net extension) ── */
+function fdFormulaSettings(o, d){
+  const s = d.settings;
+  const usable = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
+  return secLabel('Formula', tag('Phase 5')) + `
+    ${field('Returns', false, `<select class="co-input" style="max-width:220px" onchange="fd.d.settings.returns = this.value; fdRender()">
+      ${['NUMBER','CURRENCY','PERCENT','TEXT','DATE','CHECKBOX'].map(t =>
+        `<option value="${t}" ${s.returns===t?'selected':''}>${esc(typeMeta(t).label)}</option>`).join('')}
+    </select>`)}
+    <div class="co-f"><div class="rl-field">
+      <label class="rl-field-label">Expression <span class="rl-field-required">*</span></label>
+      <textarea class="co-input co-mono" rows="2" placeholder="quantity * unit_price" oninput="fd.d.settings.expr = this.value">${esc(s.expr)}</textarea>
+      ${fErr('expr', fd.err)}
+      <div class="rl-field-hint" style="margin-top:8px">Insert a field:</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
+        ${usable.map(f => `<button class="rl-tag s-sm c-gray interactive" type="button" onclick="fdInsertToken('${f.api}')"><span class="co-mono">${esc(f.api)}</span></button>`).join('')
+          || '<span class="co-rel-empty">No other fields yet.</span>'}
+      </div>
+    </div></div>`;
+}
+
+/* ── Roll-up (Part C) ─────────────────────────────────────────────── */
+function fdRollupSettings(o, d){
+  const s = d.settings;
+  /* Only objects that already point at this one can be rolled up — the
+     lookup is what the roll-up walks. */
+  const children = state.objects.filter(c => c.fields.some(f => f.type === 'LOOKUP' && f.settings.target === o.id));
+  const child = obj(s.child);
+  const lookups = child ? child.fields.filter(f => f.type === 'LOOKUP' && f.settings.target === o.id) : [];
+  const numericIsh = f => NUMERIC.includes(f.type) || (f.type === 'FORMULA' && NUMERIC.includes(f.settings.returns));
+  const aggCandidates = child ? child.fields.filter(f =>
+      s.fn === 'MIN' || s.fn === 'MAX' ? (numericIsh(f) || f.type === 'DATE') : numericIsh(f)) : [];
+  const filterCandidates = child ? child.fields.filter(f => ['SELECT','CHECKBOX','TEXT'].includes(f.type)) : [];
+  const filterField = child && s.filterField ? child.fields.find(f => f.id === s.filterField) : null;
+
+  if(!children.length){
+    return secLabel('Roll-up') + `
+      <div class="co-note warn">
+        <span class="co-note-ico">${ICO.warn}</span>
+        <div>Nothing points at ${esc(o.label)} yet. A roll-up walks a lookup, so first add a lookup to
+        ${esc(o.label)} on the object you want to aggregate.</div>
+      </div>`;
+  }
+
+  return secLabel('What it aggregates') + `
+    <div class="co-f"><div class="rl-field">
+      <label class="rl-field-label">Child object <span class="rl-field-required">*</span>
+        ${fd.fieldId ? tag('Fixed after save') : ''}</label>
+      <select class="co-input" ${fd.fieldId?'disabled':''} onchange="fdSetRollupChild(this.value)">
+        <option value="">Select an object…</option>
+        ${children.map(c => `<option value="${c.id}" ${s.child===c.id?'selected':''}>${esc(c.plural)}</option>`).join('')}
+      </select>
+      ${fErr('child', fd.err)}
+    </div></div>
+
+    ${child ? `
+      ${lookups.length > 1 ? field('Follow which lookup', true,
+        `<select class="co-input" onchange="fd.d.settings.childLookup = this.value; fdRender()">
+          ${lookups.map(f => `<option value="${f.id}" ${s.childLookup===f.id?'selected':''}>${esc(f.label)}</option>`).join('')}
+        </select>`,
+        `${esc(child.label)} points at ${esc(o.label)} ${lookups.length} different ways, and they mean different
+         things. Rocketlane cannot guess which one you mean — a contract's “customer account” and “partner
+         account” give two different, equally correct counts.`)
+      : `<div class="co-prev" style="margin-bottom:16px">
+          <span>Follows</span><span class="co-prev-val">${esc(lookups[0] ? lookups[0].label : '—')}</span>
+          <span>the only lookup from ${esc(child.label)} to ${esc(o.label)}, so there is nothing to choose.</span>
+        </div>`}
+
+      <div class="co-f-row">
+        ${field('Function', true, `<select class="co-input" onchange="fd.d.settings.fn = this.value; fdRender()">
+          ${['COUNT','SUM','MIN','MAX'].map(fn => `<option value="${fn}" ${s.fn===fn?'selected':''}>${fn}</option>`).join('')}
+          <option disabled>AVERAGE — still to decide</option>
+        </select>`)}
+        ${field(s.fn === 'COUNT' ? 'Field' : 'Field to aggregate', s.fn !== 'COUNT',
+          s.fn === 'COUNT'
+            ? `<input class="co-input" value="Not needed — COUNT counts records" disabled>`
+            : `<select class="co-input" onchange="fd.d.settings.aggField = this.value">
+                 <option value="">Select a field…</option>
+                 ${aggCandidates.map(f => `<option value="${f.id}" ${s.aggField===f.id?'selected':''}>${esc(f.label)}</option>`).join('')}
+               </select>`,
+          '', fErr('aggField', fd.err))}
+      </div>
+
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Only include children where <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <div style="display:flex;gap:8px">
+          <select class="co-input" style="flex:1.2" onchange="fd.d.settings.filterField = this.value; fd.d.settings.filterValue=''; fdRender()">
+            <option value="">No filter — include every child</option>
+            ${filterCandidates.map(f => `<option value="${f.id}" ${s.filterField===f.id?'selected':''}>${esc(f.label)}</option>`).join('')}
+          </select>
+          ${s.filterField ? `
+            <select class="co-input" style="flex:0 0 94px" onchange="fd.d.settings.filterOp = this.value">
+              <option value="eq" ${s.filterOp==='eq'?'selected':''}>is</option>
+              <option value="neq" ${s.filterOp==='neq'?'selected':''}>is not</option>
+            </select>
+            ${filterField && filterField.type === 'SELECT'
+              ? `<select class="co-input" style="flex:1" onchange="fd.d.settings.filterValue = this.value">
+                   <option value="">Select…</option>
+                   ${(filterField.settings.options||[]).map(opt => `<option ${s.filterValue===opt.label?'selected':''}>${esc(opt.label)}</option>`).join('')}
+                 </select>`
+              : `<input class="co-input" style="flex:1" value="${esc(s.filterValue)}" placeholder="Value" oninput="fd.d.settings.filterValue = this.value">`}
+          ` : ''}
+        </div>
+      </div></div>
+
+      <div class="co-note">
+        <span class="co-note-ico">${ICO.info}</span>
+        <div><b>Counts every child, including ones the viewer cannot see</b> — otherwise two people open the
+        same record and read two different totals. Blanks are skipped by SUM, MIN and MAX; no children at all
+        gives 0 for COUNT and SUM, and blank for MIN and MAX. The value is read-only and recalculated before
+        the parent's validation rules run, so a rule never reads a stale total.</div>
+      </div>
+    ` : ''}`;
+}
+
+/* ══ Field + object logic (unchanged from the first build) ═════════ */
 function odSet(k, v){
   od.d[k] = v;
   delete od.err[k];
@@ -1232,6 +1742,7 @@ function odSet(k, v){
     if(r && !od.touchedRecName){ r.value = od.d.recordNameLabel; r.placeholder = (v||'Sales Order') + ' Name'; }
   }
 }
+
 function odLevel(l){ od.d.level = l; odRender(); }
 function odNameType(t){
   od.d.recordNameType = t;
@@ -1241,6 +1752,7 @@ function odNameType(t){
   }
   odRender();
 }
+
 function odPreview(){
   const el = document.getElementById('od-preview');
   if(el) el.textContent = autoPreview(od.d.autoFormat, od.d.autoStart) || '—';
@@ -1285,8 +1797,14 @@ function odSave(){
   }
 }
 
-/* ══ Field drawer — Phases 3 and 4 ══════════════════════════════════ */
-let fd = null;
+function fdSetLabel(v){
+  fd.d.label = v; delete fd.err.label;
+  if(!fd.touchedApi){
+    fd.d.api = apiFromLabel(v);
+    const el = document.getElementById('fd-api');
+    if(el){ el.value = fd.d.api; el.placeholder = apiFromLabel(v) || 'order_date'; }
+  }
+}
 
 /* Default settings per type. These are the proposals in A4, not invented
    numbers: 255 for text, 32,000 for multi-line, 2 decimals for currency. */
@@ -1326,49 +1844,6 @@ function openFieldDrawer(objId, fieldId){
 
 function fdRender(){ fd.step === 'type' ? fdRenderType() : fdRenderForm(); }
 
-/* ── Step 1: pick the data type ───────────────────────────────────── */
-function fdRenderType(){
-  const o = obj(fd.objId);
-  const q = (fd.q||'').toLowerCase();
-  const groups = TYPE_GROUPS.map(g => {
-    const items = Object.entries(TYPES)
-      .filter(([k,t]) => t.group === g.key)
-      .filter(([k,t]) => !q || t.label.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
-    if(!items.length) return '';
-    const later = g.key === 'later';
-    return `<div class="tp-group">
-      <div class="sec" style="margin-top:0"><span class="sec-t">${g.title}</span><span class="sec-line"></span></div>
-      <div class="tp-grid">
-        ${items.map(([k,t]) => `
-          <button class="tp" type="button" ${later?'disabled title="Not in release 1"':`onclick="fdPickType('${k}')"`}>
-            ${glyph(k)}
-            <div style="min-width:0">
-              <div class="tp-t">${esc(t.label)}
-                ${t.isNew?'<span class="chip new">New</span>':''}
-                ${t.proposal?openChip('A native roll-up field on lookups is the recommendation. The alternatives were automation-built totals, or totals that live only in reports.'):''}
-                ${later?'<span class="chip later">Later</span>':''}</div>
-              <div class="tp-d">${esc(t.desc)}</div>
-            </div>
-          </button>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
-
-  showDrawer(`
-    <div class="dr-head">
-      <div style="flex:1;min-width:0">
-        <div class="dr-title">Add a field to ${esc(o.label)}</div>
-        <div class="dr-sub">Start with the data type — it cannot be changed after the field is saved.</div>
-      </div>
-      <button class="icon-btn dr-x" onclick="closeDrawer()" aria-label="Close">${ICO.x}</button>
-    </div>
-    <div class="dr-body">
-      <input class="sc-input" placeholder="Search data types" value="${esc(fd.q)}" style="margin-bottom:16px"
-             oninput="fd.q = this.value; fdRenderType()" autofocus>
-      ${groups || '<div class="rel-empty">No data type matches that.</div>'}
-    </div>
-  `, true, 'field:type');
-}
 
 function fdPickType(t){
   fd.d.type = t;
@@ -1378,277 +1853,6 @@ function fdPickType(t){
   fdRender();
 }
 
-/* ── Step 2: the field form ───────────────────────────────────────── */
-function fdRenderForm(){
-  const o = obj(fd.objId);
-  const d = fd.d;
-  const m = typeMeta(d.type);
-  const editing = !!fd.fieldId;
-  const canUnique = !!m.unique;
-  const calculated = d.type === 'FORMULA' || d.type === 'ROLLUP';
-
-  showDrawer(`
-    <div class="dr-head">
-      ${editing ? '' : `<button class="dr-back" onclick="fd.step='type';fdRender()" aria-label="Back">${ICO.back}</button>`}
-      <div style="flex:1;min-width:0">
-        <div class="dr-title">${editing ? 'Edit field' : 'New ' + esc(m.label.toLowerCase()) + ' field'}</div>
-        <div class="dr-sub">On ${esc(o.label)} · ${esc(m.label)}${editing ? ' · the data type cannot change' : ''}</div>
-      </div>
-      <button class="icon-btn dr-x" onclick="closeDrawer()" aria-label="Close">${ICO.x}</button>
-    </div>
-
-    <div class="dr-body">
-      <div class="prev" style="margin-bottom:16px">
-        ${glyph(d.type, true)}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:600;color:var(--p-text)">${esc(m.label)}</div>
-          <div style="font-size:11.5px;margin-top:2px">${esc(m.desc)}</div>
-        </div>
-        ${editing ? `<span class="chip neutral" title="A field's data type cannot change after save. Create a new field and move the data.">${ICO.lock.replace('<svg','<svg style="width:10px;height:10px"')} Fixed</span>`
-                  : `<button class="sc-btn sc-btn--outline sc-btn--size-sm" onclick="fd.step='type';fdRender()">Change</button>`}
-      </div>
-
-      <div class="f">
-        <div class="f-label">Label <span class="f-req">*</span></div>
-        <input class="sc-input" id="fd-label" value="${esc(d.label)}" placeholder="Order Date"
-               oninput="fdSetLabel(this.value)">
-        ${fErr('label', fd.err)}
-      </div>
-
-      <div class="f">
-        <div class="f-label">API name</div>
-        <input class="sc-input mono" id="fd-api" value="${esc(d.api)}" placeholder="order_date"
-               oninput="fd.d.api = this.value; fd.touchedApi = true" ${editing?'disabled':''}>
-        <div class="f-hint">${editing
-          ? 'Frozen after save. Renaming the label is safe precisely because reports, automations and integrations hold on to this.'
-          : 'Derived from the label. Reports, automations and the API use it, so it never changes again once saved.'}</div>
-      </div>
-
-      <div class="f-row">
-        <div class="f">
-          <div class="f-label">Description</div>
-          <input class="sc-input" value="${esc(d.description)}" placeholder="A note for admins"
-                 oninput="fd.d.description = this.value">
-        </div>
-        <div class="f">
-          <div class="f-label">Help text</div>
-          <input class="sc-input" value="${esc(d.help)}" placeholder="Shown to users on an info icon"
-                 oninput="fd.d.help = this.value">
-        </div>
-      </div>
-
-      ${fdTypeSettings(o, d)}
-
-      <div class="sec"><span class="sec-t">Behaviour</span><span class="sec-line"></span></div>
-      ${calculated ? `
-        <div class="callout info">
-          <span class="callout-ico">${ICO.info}</span>
-          <div>${d.type === 'ROLLUP'
-            ? 'Roll-ups are read-only and always recalculated, so they cannot be required and cannot carry a default.'
-            : 'Formula fields are read-only and derived on read, so they cannot be required and cannot carry a default.'}</div>
-        </div>
-      ` : `
-        <div class="chk-row" onclick="fd.d.required = !fd.d.required; fdRender()">
-          <span class="sc-check${d.required?' sc-check--on':''}">${d.required?ICO.check:''}</span>
-          <div><div class="chk-t">Required</div>
-            <div class="chk-d">The record cannot save without a value — on the form, on import, through the
-              API and on sync alike.${editing?' Records that already have no value stay as they are until someone next edits them.':''}</div></div>
-        </div>
-        ${canUnique ? `
-          <div class="chk-row" onclick="fd.d.unique = !fd.d.unique; fdRender()">
-            <span class="sc-check${d.unique?' sc-check--on':''}">${d.unique?ICO.check:''}</span>
-            <div><div class="chk-t">Unique</div>
-              <div class="chk-d">No two records can hold the same value. This is a field setting rather than a
-                validation rule, because it has to look across every record, not just the one being saved.</div></div>
-          </div>
-          <div class="chk-row" onclick="fd.d.extId = !fd.d.extId; fdRender()">
-            <span class="sc-check${d.extId?' sc-check--on':''}">${d.extId?ICO.check:''}</span>
-            <div><div class="chk-t">External ID</div>
-              <div class="chk-d">Marks this as an identifier from another system, so imports and sync can find
-                and update the right record. It is indexed, but it does not block duplicates on its own —
-                tick Unique as well for a sync key.</div></div>
-          </div>
-        ` : `
-          <div class="chk-row locked">
-            <span class="sc-check" style="opacity:.4"></span>
-            <div><div class="chk-t" style="color:var(--p-muted)">Unique and External ID</div>
-              <div class="chk-d">Available on Text and Number only${editing?'':' — and on Email, when that type arrives'}.</div></div>
-          </div>
-        `}
-        ${fdDefaultValue(d)}
-      `}
-      <div class="sw-row" style="border-top:1px solid var(--p-border)">
-        <button class="sc-switch${d.showInReports!==false?' sc-switch--on':''}"
-                onclick="fd.d.showInReports = fd.d.showInReports === false; fdRender()"
-                role="switch" aria-checked="${d.showInReports!==false}"><span class="sc-switch-thumb"></span></button>
-        <div class="sw-text">
-          <div class="chk-t">Show in reports</div>
-          <div class="chk-d">Keeps the report builder uncluttered — turn it off for sync keys and fields only
-            formulas use. It is <b>not</b> security: hiding sensitive data is an access rule.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="dr-foot">
-      <span class="dr-foot-note">${editing ? 'Changes apply to new and existing records.' : 'The field is live in records, list views, reports, automations and the API as soon as you save.'}</span>
-      <button class="sc-btn sc-btn--outline sc-btn--size-default" onclick="closeDrawer()">Cancel</button>
-      <button class="sc-btn sc-btn--default sc-btn--size-default" onclick="fdSave()">${editing ? 'Save field' : 'Create field'}</button>
-    </div>
-  `, false, 'field:' + (fd.fieldId || 'new'));
-  const el = document.getElementById('fd-label');
-  if(el && !editing && !fd.focused){ fd.focused = true; setTimeout(()=>el.focus(), 60); }
-}
-
-function fdSetLabel(v){
-  fd.d.label = v; delete fd.err.label;
-  if(!fd.touchedApi){
-    fd.d.api = apiFromLabel(v);
-    const el = document.getElementById('fd-api');
-    if(el){ el.value = fd.d.api; el.placeholder = apiFromLabel(v) || 'order_date'; }
-  }
-}
-
-/* Default value, for the types where a generic control makes sense.
-   Date, checkbox and user carry theirs in the type-specific block. */
-function fdDefaultValue(d){
-  const t = d.type;
-  if(['DATE','CHECKBOX','USER','LOOKUP','MULTISELECT'].includes(t)) return '';
-  let control;
-  if(t === 'SELECT'){
-    const opts = (d.settings.options||[]).filter(o => o.label);
-    control = `<select class="sc-input" onchange="fd.d.def = this.value">
-      <option value="">No default</option>
-      ${opts.map(o => `<option ${d.def===o.label?'selected':''}>${esc(o.label)}</option>`).join('')}
-    </select>`;
-  }else if(NUMERIC.includes(t)){
-    control = `<input class="sc-input" type="number" value="${esc(d.def)}" placeholder="No default" oninput="fd.d.def = this.value">`;
-  }else{
-    control = `<input class="sc-input" value="${esc(d.def)}" placeholder="No default" oninput="fd.d.def = this.value">`;
-  }
-  return `<div class="f" style="padding-top:14px;border-top:1px solid var(--p-border);margin-top:4px">
-    <div class="f-label">Default value</div>
-    ${control}
-    <div class="f-hint">Applied to new records only. Existing records are left alone.</div>
-  </div>`;
-}
-
-/* ── Type-specific settings ───────────────────────────────────────── */
-function fdTypeSettings(o, d){
-  const s = d.settings;
-  const sec = t => `<div class="sec"><span class="sec-t">${t}</span><span class="sec-line"></span></div>`;
-  const dec = (max, hint) => `
-    <div class="f" style="max-width:190px">
-      <div class="f-label">Decimal places</div>
-      <select class="sc-input" onchange="fd.d.settings.decimals = parseInt(this.value,10)">
-        ${Array.from({length:max+1},(_,i)=>`<option value="${i}" ${s.decimals===i?'selected':''}>${i}</option>`).join('')}
-      </select>
-      ${hint ? `<div class="f-hint">${hint}</div>` : ''}
-    </div>`;
-
-  switch(d.type){
-    case 'TEXT': return sec('Text settings') + `
-      <div class="f" style="max-width:190px">
-        <div class="f-label">Maximum length</div>
-        <input class="sc-input" type="number" min="1" max="255" value="${esc(s.maxLength)}"
-               oninput="fd.d.settings.maxLength = parseInt(this.value||'255',10)">
-        <div class="f-hint">Up to 255 characters.</div>
-      </div>`;
-
-    case 'MULTILINE': return sec('Text settings') + `
-      <div class="f" style="max-width:190px">
-        <div class="f-label">Maximum length</div>
-        <input class="sc-input" type="number" min="1" max="32000" value="${esc(s.maxLength)}"
-               oninput="fd.d.settings.maxLength = parseInt(this.value||'32000',10)">
-        <div class="f-hint">Up to 32,000 characters. Reports can show it as a column but cannot filter or group on it.</div>
-      </div>`;
-
-    case 'NUMBER': return sec('Number settings') + dec(6, 'A blank value stays blank. It is not 0.');
-
-    case 'CURRENCY': return sec('Currency settings') + dec(4) + `
-      <div class="callout warn">
-        <span class="callout-ico">${ICO.warn}</span>
-        <div><b>Which currency?</b> ${openChip('Three options: one workspace currency for every currency field; a Currency field on the record that all its currency fields follow; or a currency code stored on each value.')}
-        The proposal is a Currency field on the record that every currency field on it follows — it matches
-        “currency is required before handoff”, and budgets and invoices can inherit it.</div>
-      </div>`;
-
-    case 'PERCENT': return sec('Percent settings') + dec(4, 'Stored as a number — 15% is 15, not 0.15.');
-
-    case 'DATE': return sec('Date settings') + `
-      <div class="f">
-        <div class="f-label">Default value</div>
-        <div class="seg">
-          <button class="seg-btn${s.dateDefault!=='today'?' on':''}" type="button" onclick="fd.d.settings.dateDefault='blank';fdRender()">Blank</button>
-          <button class="seg-btn${s.dateDefault==='today'?' on':''}" type="button" onclick="fd.d.settings.dateDefault='today';fdRender()">Today</button>
-        </div>
-      </div>`;
-
-    case 'CHECKBOX': return sec('Checkbox settings') + `
-      <div class="f">
-        <div class="f-label">Default value</div>
-        <div class="seg">
-          <button class="seg-btn${!s.checkDefault?' on':''}" type="button" onclick="fd.d.settings.checkDefault=false;fdRender()">Unchecked</button>
-          <button class="seg-btn${s.checkDefault?' on':''}" type="button" onclick="fd.d.settings.checkDefault=true;fdRender()">Checked</button>
-        </div>
-        <div class="f-hint">A checkbox is never blank — it is true or false.</div>
-      </div>`;
-
-    case 'SELECT':
-    case 'MULTISELECT': return sec('Values') + `
-      <div class="f">
-        ${(s.options||[]).map((opt,i) => `
-          <div class="pl-row">
-            <span class="pl-drag">⠿</span>
-            <button class="pl-sw" style="background:${esc(opt.color)}" type="button"
-                    title="Change colour" onclick="fdCycleColour(${i})"></button>
-            <input class="sc-input" value="${esc(opt.label)}" placeholder="Value ${i+1}"
-                   oninput="fd.d.settings.options[${i}].label = this.value">
-            <button class="icon-btn danger" onclick="fdRemoveOption(${i})" aria-label="Remove">${ICO.trash}</button>
-          </div>`).join('')}
-        <button class="sc-btn sc-btn--outline sc-btn--size-sm" style="margin-top:4px" onclick="fdAddOption()">${ICO.plus} Add value</button>
-        ${fErr('options', fd.err)}
-      </div>
-      <div class="f-row">
-        <div class="f">
-          <div class="f-label">Sort order</div>
-          <select class="sc-input" onchange="fd.d.settings.sort = this.value">
-            <option value="entered" ${s.sort==='entered'?'selected':''}>As entered</option>
-            <option value="alpha" ${s.sort==='alpha'?'selected':''}>Alphabetical</option>
-          </select>
-        </div>
-        <div class="f"></div>
-      </div>
-      <div class="callout info">
-        <span class="callout-ico">${ICO.info}</span>
-        <div><b>Restricted to this list, always.</b> Imports and the API cannot introduce a value that is not
-        here. Renaming a value updates every record; deleting one asks you what the records holding it should
-        say instead; deactivating one hides it from new records but leaves the old ones — and reports — intact.
-        ${d.type==='MULTISELECT'?'<br>In reports a multi select filters with “includes”, not “equals”.':''}</div>
-      </div>`;
-
-    case 'USER': return sec('User settings') + `
-      <div class="f">
-        <div class="f-label">How many</div>
-        <div class="seg">
-          <button class="seg-btn${s.userMode!=='multiple'?' on':''}" type="button" onclick="fd.d.settings.userMode='single';fdRender()">One user</button>
-          <button class="seg-btn${s.userMode==='multiple'?' on':''}" type="button" onclick="fd.d.settings.userMode='multiple';fdRender()">Several users</button>
-        </div>
-      </div>
-      <div class="f">
-        <div class="f-label">Default value</div>
-        <div class="seg">
-          <button class="seg-btn${s.userDefault!=='current'?' on':''}" type="button" onclick="fd.d.settings.userDefault='blank';fdRender()">Blank</button>
-          <button class="seg-btn${s.userDefault==='current'?' on':''}" type="button" onclick="fd.d.settings.userDefault='current';fdRender()">The current user</button>
-        </div>
-      </div>`;
-
-    case 'LOOKUP': return fdLookupSettings(o, d);
-    case 'FORMULA': return fdFormulaSettings(o, d);
-    case 'ROLLUP': return fdRollupSettings(o, d);
-    default: return '';
-  }
-}
-
 function fdAddOption(){ fd.d.settings.options.push({label:'', color:PALETTE[fd.d.settings.options.length % PALETTE.length]}); delete fd.err.options; fdRender(); }
 function fdRemoveOption(i){
   const opts = fd.d.settings.options;
@@ -1656,6 +1860,7 @@ function fdRemoveOption(i){
   opts.splice(i,1); if(!opts.length) opts.push({label:'', color:PALETTE[0]});
   fdRender();
 }
+
 function fdCycleColour(i){
   const opt = fd.d.settings.options[i];
   opt.color = PALETTE[(PALETTE.indexOf(opt.color) + 1) % PALETTE.length];
@@ -1671,85 +1876,6 @@ function targetFieldLabels(target){
   return [parent, ...t.fields.filter(f => f.type !== 'ROLLUP').map(f => f.label), 'Created at'].filter(Boolean);
 }
 
-function fdLookupSettings(o, d){
-  const s = d.settings;
-  const customs = state.objects.filter(x => x.id !== o.id);
-  const picks = targetFieldLabels(s.target);
-  const chosen = s.pickerFields || [];
-
-  return `<div class="sec"><span class="sec-t">What it points at</span><span class="sec-line"></span></div>
-    <div class="f">
-      <div class="f-label">Related object <span class="f-req">*</span>
-        ${fd.fieldId ? `<span class="chip neutral">${ICO.lock.replace('<svg','<svg style="width:10px;height:10px"')} Fixed after save</span>` : ''}</div>
-      <select class="sc-input" ${fd.fieldId?'disabled':''} onchange="fdSetTarget(this.value)">
-        <option value="">Select an object…</option>
-        <optgroup label="Custom objects">
-          ${customs.map(c => `<option value="${c.id}" ${s.target===c.id?'selected':''}>${esc(c.label)}</option>`).join('')}
-        </optgroup>
-        <optgroup label="Rocketlane objects">
-          <option value="ACCOUNT" ${s.target==='ACCOUNT'?'selected':''}>Account</option>
-          <option value="PROJECT" ${s.target==='PROJECT'?'selected':''}>Project</option>
-        </optgroup>
-        <optgroup label="Still to decide — not in this release">
-          <option disabled>Budget</option>
-          <option disabled>Task</option>
-          <option disabled>Phase</option>
-          <option disabled>${esc(o.label)} (itself)</option>
-        </optgroup>
-      </select>
-      <div class="f-hint">The lookup stores the target's <b>system ID</b>, never its name — so renaming the
-        linked record never breaks the link. For a user, use the User data type instead.</div>
-      ${fErr('target', fd.err)}
-    </div>
-
-    ${s.target ? `
-      <div class="f">
-        <div class="f-label">Related list label <span class="f-req">*</span></div>
-        <input class="sc-input" value="${esc(s.relatedListLabel)}" placeholder="${esc(o.plural)}"
-               oninput="fd.d.settings.relatedListLabel = this.value; fd.touchedRLL = true">
-        <div class="f-hint">The title of the list this creates on the ${esc(targetLabel(s.target))} record —
-          where its ${esc(o.plural.toLowerCase())} are shown, with an “Add new” that pre-fills this lookup.</div>
-      </div>
-
-      <div class="f">
-        <div class="f-label">When the ${esc(targetLabel(s.target))} is deleted <span class="f-req">*</span></div>
-        <div class="opt-cards">
-          <button class="opt-card${s.onDelete!=='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='CLEAR';fdRender()">
-            <div class="opt-card-t">Clear the value</div>
-            <div class="opt-card-d">The ${esc(o.label)} survives with an empty ${esc(d.label||'lookup')}.</div>
-          </button>
-          <button class="opt-card${s.onDelete==='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='BLOCK';fdRender()">
-            <div class="opt-card-t">Block the delete</div>
-            <div class="opt-card-d">The ${esc(targetLabel(s.target))} cannot be deleted while any ${esc(o.label)} points at it.</div>
-          </button>
-        </div>
-        <div class="f-hint">There is no cascade delete — it belongs to master-detail, which is not in this
-          release. “Block the delete”, paired with a required lookup, covers what cascade was protecting.</div>
-      </div>
-
-      <div class="sec"><span class="sec-t">The picker users see</span><span class="sec-line"></span></div>
-      <div class="f">
-        <div class="f-label">Extra fields under the name <span class="chip neutral">${chosen.length}/3</span></div>
-        <div class="f-hint" style="margin:0 0 8px">Record names repeat — two orders can both be “H&amp;M Europe”.
-          Up to three extra fields help a user pick the right one. Search is by Record Name.</div>
-        ${picks.length ? picks.map(p => {
-          const on = chosen.includes(p);
-          const full = !on && chosen.length >= 3;
-          return `<div class="chk-row${full?' locked':''}" ${full?'':`onclick="fdTogglePicker('${esc(p).replace(/'/g,"\\'")}')"`}>
-            <span class="sc-check${on?' sc-check--on':''}" style="${full?'opacity:.4':''}">${on?ICO.check:''}</span>
-            <div><div class="chk-t" style="${full?'color:var(--p-muted)':''}">${esc(p)}</div></div>
-          </div>`;
-        }).join('') : '<div class="rel-empty">That object has no fields to show yet.</div>'}
-      </div>
-      <div class="callout info">
-        <span class="callout-ico">${ICO.info}</span>
-        <div><b>Lookup filters come later.</b> In this release the picker shows every record the user can
-        access. Until filters arrive, a rule like “the line and its order must share an account” is a
-        validation rule, not a filter.</div>
-      </div>
-    ` : ''}`;
-}
-
 function fdSetTarget(v){
   fd.d.settings.target = v;
   fd.d.settings.pickerFields = v
@@ -1759,6 +1885,7 @@ function fdSetTarget(v){
   delete fd.err.target;
   fdRender();
 }
+
 function fdTogglePicker(label){
   const arr = fd.d.settings.pickerFields || (fd.d.settings.pickerFields = []);
   const i = arr.indexOf(label);
@@ -1766,140 +1893,11 @@ function fdTogglePicker(label){
   fdRender();
 }
 
-/* ── Formula (Phase 5 — enough of it to model a line's net extension) ── */
-function fdFormulaSettings(o, d){
-  const s = d.settings;
-  const usable = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
-  return `<div class="sec"><span class="sec-t">Formula</span><span class="sec-line"></span>
-      <span class="chip later">Phase 5</span></div>
-    <div class="f" style="max-width:220px">
-      <div class="f-label">Returns</div>
-      <select class="sc-input" onchange="fd.d.settings.returns = this.value; fdRender()">
-        ${['NUMBER','CURRENCY','PERCENT','TEXT','DATE','CHECKBOX'].map(t =>
-          `<option value="${t}" ${s.returns===t?'selected':''}>${esc(typeMeta(t).label)}</option>`).join('')}
-      </select>
-    </div>
-    <div class="f">
-      <div class="f-label">Expression <span class="f-req">*</span></div>
-      <textarea class="sc-input mono" rows="2" placeholder="quantity * unit_price"
-                oninput="fd.d.settings.expr = this.value">${esc(s.expr)}</textarea>
-      ${fErr('expr', fd.err)}
-      <div class="f-hint" style="margin-top:8px">Insert a field:</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
-        ${usable.map(f => `<button class="chip attr" style="cursor:pointer" type="button"
-          onclick="fdInsertToken('${f.api}')">${esc(f.api)}</button>`).join('') || '<span class="rel-empty">No other fields yet.</span>'}
-      </div>
-    </div>`;
-}
 function fdInsertToken(api){
   fd.d.settings.expr = (fd.d.settings.expr ? fd.d.settings.expr.trimEnd() + ' ' : '') + api;
   fdRender();
 }
 
-/* ── Roll-up (Part C) ─────────────────────────────────────────────── */
-function fdRollupSettings(o, d){
-  const s = d.settings;
-  /* Only objects that already point at this one can be rolled up — the
-     lookup is what the roll-up walks. */
-  const children = state.objects.filter(c => c.fields.some(f => f.type === 'LOOKUP' && f.settings.target === o.id));
-  const child = obj(s.child);
-  const lookups = child ? child.fields.filter(f => f.type === 'LOOKUP' && f.settings.target === o.id) : [];
-  const numericIsh = f => NUMERIC.includes(f.type) || (f.type === 'FORMULA' && NUMERIC.includes(f.settings.returns));
-  const aggCandidates = child ? child.fields.filter(f =>
-      s.fn === 'MIN' || s.fn === 'MAX' ? (numericIsh(f) || f.type === 'DATE') : numericIsh(f)) : [];
-  const filterCandidates = child ? child.fields.filter(f => ['SELECT','CHECKBOX','TEXT'].includes(f.type)) : [];
-  const filterField = child && s.filterField ? child.fields.find(f => f.id === s.filterField) : null;
-
-  if(!children.length){
-    return `<div class="sec"><span class="sec-t">Roll-up</span><span class="sec-line"></span></div>
-      <div class="callout warn">
-        <span class="callout-ico">${ICO.warn}</span>
-        <div>Nothing points at ${esc(o.label)} yet. A roll-up walks a lookup, so first add a lookup to
-        ${esc(o.label)} on the object you want to aggregate.</div>
-      </div>`;
-  }
-
-  return `<div class="sec"><span class="sec-t">What it aggregates</span><span class="sec-line"></span></div>
-    <div class="f">
-      <div class="f-label">Child object <span class="f-req">*</span>
-        ${fd.fieldId ? `<span class="chip neutral">${ICO.lock.replace('<svg','<svg style="width:10px;height:10px"')} Fixed after save</span>` : ''}</div>
-      <select class="sc-input" ${fd.fieldId?'disabled':''} onchange="fdSetRollupChild(this.value)">
-        <option value="">Select an object…</option>
-        ${children.map(c => `<option value="${c.id}" ${s.child===c.id?'selected':''}>${esc(c.plural)}</option>`).join('')}
-      </select>
-      ${fErr('child', fd.err)}
-    </div>
-
-    ${child ? `
-      ${lookups.length > 1 ? `
-        <div class="f">
-          <div class="f-label">Follow which lookup <span class="f-req">*</span></div>
-          <select class="sc-input" onchange="fd.d.settings.childLookup = this.value; fdRender()">
-            ${lookups.map(f => `<option value="${f.id}" ${s.childLookup===f.id?'selected':''}>${esc(f.label)}</option>`).join('')}
-          </select>
-          <div class="f-hint">${esc(child.label)} points at ${esc(o.label)} ${lookups.length} different ways, and
-            they mean different things. Rocketlane cannot guess which one you mean — a contract's “customer
-            account” and “partner account” give two different, equally correct counts.</div>
-        </div>
-      ` : `
-        <div class="prev" style="margin-bottom:16px">
-          <span>Follows</span><span class="prev-val">${esc(lookups[0] ? lookups[0].label : '—')}</span>
-          <span>the only lookup from ${esc(child.label)} to ${esc(o.label)}, so there is nothing to choose.</span>
-        </div>
-      `}
-
-      <div class="f-row">
-        <div class="f">
-          <div class="f-label">Function <span class="f-req">*</span></div>
-          <select class="sc-input" onchange="fd.d.settings.fn = this.value; fdRender()">
-            ${['COUNT','SUM','MIN','MAX'].map(fn => `<option value="${fn}" ${s.fn===fn?'selected':''}>${fn}</option>`).join('')}
-            <option disabled>AVERAGE — still to decide</option>
-          </select>
-        </div>
-        <div class="f">
-          <div class="f-label">${s.fn === 'COUNT' ? 'Field' : 'Field to aggregate'} ${s.fn==='COUNT'?'':'<span class="f-req">*</span>'}</div>
-          ${s.fn === 'COUNT'
-            ? `<input class="sc-input" value="Not needed — COUNT counts records" disabled>`
-            : `<select class="sc-input" onchange="fd.d.settings.aggField = this.value">
-                 <option value="">Select a field…</option>
-                 ${aggCandidates.map(f => `<option value="${f.id}" ${s.aggField===f.id?'selected':''}>${esc(f.label)}</option>`).join('')}
-               </select>`}
-          ${fErr('aggField', fd.err)}
-        </div>
-      </div>
-
-      <div class="f">
-        <div class="f-label">Only include children where <span style="font-weight:400;color:var(--p-muted)">(optional)</span></div>
-        <div style="display:flex;gap:8px">
-          <select class="sc-input" style="flex:1.2" onchange="fd.d.settings.filterField = this.value; fd.d.settings.filterValue=''; fdRender()">
-            <option value="">No filter — include every child</option>
-            ${filterCandidates.map(f => `<option value="${f.id}" ${s.filterField===f.id?'selected':''}>${esc(f.label)}</option>`).join('')}
-          </select>
-          ${s.filterField ? `
-            <select class="sc-input" style="flex:0 0 94px" onchange="fd.d.settings.filterOp = this.value">
-              <option value="eq" ${s.filterOp==='eq'?'selected':''}>is</option>
-              <option value="neq" ${s.filterOp==='neq'?'selected':''}>is not</option>
-            </select>
-            ${filterField && filterField.type === 'SELECT'
-              ? `<select class="sc-input" style="flex:1" onchange="fd.d.settings.filterValue = this.value">
-                   <option value="">Select…</option>
-                   ${(filterField.settings.options||[]).map(opt => `<option ${s.filterValue===opt.label?'selected':''}>${esc(opt.label)}</option>`).join('')}
-                 </select>`
-              : `<input class="sc-input" style="flex:1" value="${esc(s.filterValue)}" placeholder="Value"
-                        oninput="fd.d.settings.filterValue = this.value">`}
-          ` : ''}
-        </div>
-      </div>
-
-      <div class="callout info">
-        <span class="callout-ico">${ICO.info}</span>
-        <div><b>Counts every child, including ones the viewer cannot see</b> — otherwise two people open the
-        same record and read two different totals. Blanks are skipped by SUM, MIN and MAX; no children at all
-        gives 0 for COUNT and SUM, and blank for MIN and MAX. The value is read-only and recalculated before
-        the parent's validation rules run, so a rule never reads a stale total.</div>
-      </div>
-    ` : ''}`;
-}
 function fdSetRollupChild(v){
   const s = fd.d.settings;
   s.child = v; s.aggField = ''; s.filterField = ''; s.filterValue = '';
@@ -1959,16 +1957,16 @@ document.addEventListener('click', e => { if(menuEl && !menuEl.contains(e.target
 function showMenu(ev, items){
   ev.stopPropagation(); closeMenu();
   const el = document.createElement('div');
-  el.className = 'menu';
-  el.innerHTML = items.map(i => i === '-' ? '<div class="menu-sep"></div>'
-    : `<button class="menu-i${i.danger?' danger':''}" ${i.disabled?'disabled':''} ${i.title?`title="${esc(i.title)}"`:''}>${esc(i.label)}</button>`).join('');
+  el.className = 'co-menu';
+  el.innerHTML = items.map(i => i === '-' ? '<div class="co-menu-sep"></div>'
+    : `<button class="co-menu-i${i.danger?' danger':''}" ${i.disabled?'disabled':''} ${i.title?`title="${esc(i.title)}"`:''}>${esc(i.label)}</button>`).join('');
   document.body.appendChild(el);
   const r = ev.currentTarget.getBoundingClientRect();
   el.style.top = Math.min(r.bottom + 4, window.innerHeight - el.offsetHeight - 10) + 'px';
   el.style.left = Math.max(10, r.right - el.offsetWidth) + 'px';
   let n = 0;
   items.forEach(i => { if(i === '-') return;
-    const btn = el.querySelectorAll('.menu-i')[n++];
+    const btn = el.querySelectorAll('.co-menu-i')[n++];
     if(!i.disabled) btn.onclick = () => { closeMenu(); i.fn(); };
   });
   menuEl = el;
@@ -1976,11 +1974,11 @@ function showMenu(ev, items){
 function pageMenu(ev){
   showMenu(ev, [
     {label:'Restore sample data', fn:resetData},
-    {label:'Remove every object (see the empty state)', danger:true, fn:clearData},
+    {label:'Remove every object', danger:true, fn:clearData},
   ]);
 }
 function objectMenu(ev, id){
-  const o = obj(id), blockers = incoming(id);
+  const blockers = incoming(id);
   showMenu(ev, [
     {label:'Open', fn:()=>go('object', id, 'fields')},
     {label:'Add field', fn:()=>{ go('object', id, 'fields'); openFieldDrawer(id); }},
@@ -1995,8 +1993,7 @@ function objectMenu(ev, id){
 
 /* ══ Confirm dialogs ════════════════════════════════════════════════ */
 function dialog({title, body, confirm, danger, onConfirm, blocked}){
-  const host = document.getElementById('dialog-host');
-  host.innerHTML = `
+  document.getElementById('dialog-host').innerHTML = `
     <div class="sc-dialog-overlay" onclick="if(event.target===this) closeDialog()">
       <div class="sc-dialog" role="dialog" aria-modal="true">
         <div class="sc-dialog-header">
@@ -2004,8 +2001,8 @@ function dialog({title, body, confirm, danger, onConfirm, blocked}){
           <div class="sc-dialog-desc">${body}</div>
         </div>
         <div class="sc-dialog-footer">
-          <button class="sc-btn sc-btn--outline sc-btn--size-default" onclick="closeDialog()">${blocked ? 'Close' : 'Cancel'}</button>
-          ${blocked ? '' : `<button class="sc-btn ${danger?'sc-btn--destructive':'sc-btn--default'} sc-btn--size-default" id="dlg-ok">${confirm}</button>`}
+          <button class="rl-btn v-outline sz-md" onclick="closeDialog()"><span class="rl-btn-label">${blocked ? 'Close' : 'Cancel'}</span></button>
+          ${blocked ? '' : `<button class="rl-btn ${danger?'v-danger':'v-primary'} sz-md" id="dlg-ok"><span class="rl-btn-label">${confirm}</span></button>`}
         </div>
       </div>
     </div>`;

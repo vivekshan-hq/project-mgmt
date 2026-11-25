@@ -1,0 +1,115 @@
+/* =========================================================
+   FieldLabelGroup / Field / FieldShell — labeled input row
+   ========================================================= */
+
+/* ---- Group container ---- */
+.rl-field-group {
+  display: grid;
+  width: 100%;
+}
+
+/* ---- Field (label + control) ---- */
+.rl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* allow truncation inside */
+}
+
+.rl-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.rl-field-required {
+  color: oklch(0.55 0.2 25);
+  font-weight: 700;
+}
+.rl-field-hint {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  line-height: 1.3;
+}
+
+/* ---- FieldShell (pill chrome) ---- */
+.rl-field-shell {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 10px;
+  box-sizing: border-box;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--foreground);
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  cursor: default;
+}
+.rl-field-shell.is-interactive {
+  cursor: pointer;
+}
+.rl-field-shell.is-interactive:hover {
+  border-color: color-mix(in oklab, var(--primary) 25%, var(--border));
+  background: color-mix(in oklab, var(--muted) 30%, var(--card));
+}
+.rl-field-shell.is-focus,
+.rl-field-shell:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 15%, transparent);
+  outline: none;
+}
+.rl-field-shell.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.rl-field-shell.is-muted .rl-field-shell-body {
+  color: var(--muted-foreground);
+}
+
+.rl-field-shell-leading,
+.rl-field-shell-trailing {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+}
+.rl-field-shell-body {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---- Loading skeleton ---- */
+.rl-field-shell-skeleton {
+  display: block;
+  height: 12px;
+  width: 70%;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--muted) 80%, transparent) 0%,
+    color-mix(in oklab, var(--muted) 40%, transparent) 50%,
+    color-mix(in oklab, var(--muted) 80%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: rl-field-shimmer 1.2s linear infinite;
+}
+@keyframes rl-field-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

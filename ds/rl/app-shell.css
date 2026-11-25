@@ -1,0 +1,261 @@
+/* =========================================================
+   AppShell + Sidebar + PageShell
+   The standard Rocketlane workspace chrome.
+
+   Aesthetic: floating-island content. The rail sits edge-to-edge
+   anchoring the left side; the main column becomes a rounded card
+   on a softly-tinted canvas, with a diffused shadow.
+   ========================================================= */
+
+/* ---------------- App layout ---------------- */
+.rl-app {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  grid-template-rows: 100vh;
+  height: 100vh;
+  min-height: 0;
+  /* Tinted canvas — shows through the rail too, so it feels seamless. */
+  background: oklch(0.96 0 0);
+}
+.rl-app .rl-main-col {
+  display: flex; flex-direction: column;
+  min-height: 0; min-width: 0;
+  /* Float: card on the canvas. Tight 4px gap. */
+  margin: 4px 4px 4px 0;
+  background: var(--background);
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.025),
+    0 6px 16px -6px oklch(0 0 0 / 0.04);
+  overflow: hidden; /* keep rounded corners on inner sticky chrome */
+}
+
+/* ---------------- Sidebar (collapsed rail with flyouts) ---------------- */
+.rl-sidebar {
+  /* Transparent — the canvas tint shows through so rail feels seamless
+     with the surround. */
+  background: transparent;
+  color: var(--sidebar-foreground);
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 4px;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Brand mark at top */
+.rl-rail-brand {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.rl-rail-brand img { width: 20px; height: 20px; filter: brightness(0) invert(1); }
+
+/* Rail groups */
+.rl-rail-group {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 100%;
+}
+.rl-rail-group.bottom { margin-top: auto; }
+.rl-rail-divider {
+  width: 24px; height: 1px;
+  background: var(--sidebar-border, var(--border));
+  margin: 4px 0;
+}
+
+/* Rail item — icon button */
+.rl-rail-item {
+  position: relative;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--sidebar-foreground);
+  flex-shrink: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.rl-rail-item svg, .rl-rail-item i[data-lucide] { width: 18px; height: 18px; }
+.rl-rail-item:hover { background: var(--sidebar-accent, var(--accent)); }
+.rl-rail-item.active {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+/* Tooltip (for items without a flyout) */
+.rl-rail-item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; left: calc(100% + 10px); top: 50%;
+  transform: translateY(-50%);
+  padding: 5px 9px; border-radius: var(--radius-md);
+  background: var(--popover, var(--foreground));
+  color: var(--popover-foreground, var(--background));
+  border: 1px solid var(--border);
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 120ms ease 100ms;
+  z-index: 60;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.rl-rail-item[data-tooltip]:hover::after { opacity: 1; }
+
+/* Flyout menu */
+.rl-rail-flyout {
+  position: absolute; left: calc(100% + 8px); top: 50%;
+  transform: translateY(-50%) translateX(-6px);
+  min-width: 220px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  padding: 6px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+  z-index: 60;
+}
+.rl-rail-item.has-flyout:hover .rl-rail-flyout,
+.rl-rail-flyout:hover {
+  opacity: 1; pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+/* Bottom-anchored items (Settings, avatar): flyout opens UPWARD so it
+   stays inside the viewport. */
+.rl-rail-group.bottom .rl-rail-item.has-flyout .rl-rail-flyout {
+  top: auto; bottom: 0;
+  transform: translateY(0) translateX(-6px);
+}
+.rl-rail-group.bottom .rl-rail-item.has-flyout:hover .rl-rail-flyout,
+.rl-rail-group.bottom .rl-rail-flyout:hover {
+  transform: translateY(0) translateX(0);
+}
+/* Invisible bridge so cursor can travel rail -> flyout without dropping */
+.rl-rail-item.has-flyout::before {
+  content: ''; position: absolute; left: 100%; top: 0;
+  width: 12px; height: 100%;
+}
+.rl-rail-flyout-title {
+  padding: 6px 10px 8px; font-size: 11px; font-weight: 500;
+  color: var(--muted-foreground);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.rl-flyout-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 0 10px; height: 32px;
+  border-radius: var(--radius-md);
+  font-size: 14px; color: var(--popover-foreground);
+  text-align: left;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.rl-flyout-item:hover { background: var(--accent); }
+.rl-flyout-item.active { background: var(--accent); font-weight: 500; color: var(--primary); }
+.rl-flyout-item svg, .rl-flyout-item i[data-lucide] { width: 15px; height: 15px; flex-shrink: 0; color: var(--muted-foreground); }
+.rl-flyout-item.active svg, .rl-flyout-item.active i[data-lucide] { color: var(--primary); }
+.rl-flyout-item .meta { margin-left: auto; font-size: 11px; color: var(--muted-foreground); font-family: var(--font-mono); }
+.rl-flyout-sep { height: 1px; background: var(--border); margin: 4px 2px; }
+
+/* Notification badge + status dot */
+.rl-rail-badge {
+  position: absolute; top: 4px; right: 4px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 8px;
+  background: oklch(0.62 0.22 25);
+  color: white;
+  font-size: 10px; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 2px solid var(--sidebar);
+}
+.rl-rail-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: oklch(0.62 0.22 25);
+  border: 2px solid var(--sidebar);
+}
+
+/* Avatar at bottom of rail */
+.rl-rail-avatar {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  background: oklch(0.55 0.18 255); color: white;
+  font-size: 12px; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.rl-rail-avatar:hover { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* ---------------- Page header ---------------- */
+.rl-page-header {
+  padding: 14px 24px 0;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.rl-page-header.no-tabs { padding-bottom: 14px; }
+
+.rl-breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.rl-crumb { white-space: nowrap; color: var(--muted-foreground); }
+.rl-crumb.link { color: var(--primary); }
+.rl-crumb.link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.rl-crumb.current { color: var(--foreground); }
+.rl-crumb-sep { color: var(--muted-foreground); user-select: none; }
+
+.rl-title-block { display: flex; align-items: flex-start; gap: 16px; }
+.rl-title-block .rl-title-text { flex: 1; min-width: 0; }
+.rl-title-block h1 {
+  margin: 0;
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+.rl-title-block .rl-page-desc {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--muted-foreground);
+  line-height: 1.45;
+}
+.rl-title-actions {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Tabs row sits inside the page header. The Tabs component supplies
+   its own top spacing via its container; we add the gap here. */
+.rl-page-header .rl-tabs { margin-top: 14px; }
+
+/* ---------------- Toolbar (secondary bar) ---------------- */
+.rl-toolbar {
+  display: flex; align-items: center;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+  min-width: 0;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.rl-toolbar .rl-toolbar-divider { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.rl-toolbar .rl-toolbar-spacer { flex: 1; }
+
+/* ---------------- Page body ---------------- */
+.rl-page-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  background: var(--background);
+}
