@@ -14,337 +14,410 @@
 /* ──────────────────────────────────────────────────────────────
    Custom objects — Settings › Advanced
 
-   Phase 1 (create the object), Phase 3 (fields) and Phase 4
-   (relationships) from the Notion specs.
+   Built to match the real Settings screen (the "Time entry fields"
+   page), not the design system's app-shell: the shipping product's
+   Settings has a 56px rail, a ~300px settings sidebar and a plain
+   white content area. The kit models a different shell — a 60px rail
+   on a tinted canvas with the page as a floating card — and has no
+   settings sidebar at all, so that part is built here.
 
-   Chrome, buttons, tags, tabs, drawer and fields all come from the
-   Rocketlane kit (.rl-*). What is left here is only the handful of
-   things the kit has no component for: the data-type glyph, the type
-   picker, the relationship map, the picklist editor and the menu.
-   Two of them (.co-input, .co-table) deliberately mirror a kit spec —
-   each says which, so drift is visible.
+   Everything the kit DOES cover is still the kit: tokens, .rl-btn,
+   .rl-drawer-*, .rl-field, .rl-section, .sc-check, and the tag colour
+   palette. Page-local names are --co-* / .co-* so they can never
+   shadow a design system token.
    ────────────────────────────────────────────────────────────── */
-
-/* The kit's page chrome sets these on html/body; this page is not loading
-   page-chrome.css (it would duplicate app-shell.css), so set them here. */
+:root{
+  --co-blue:#0F62FE;             /* the product's accent — toggles, active nav, links */
+  --co-nav-active:#EDF2F9;
+  --co-rail-hover:#F1F3F7;
+  --co-border:#E6E8EC;
+  --co-border-soft:#EFF1F4;
+  --co-band:#F8F9FB;             /* section band behind "General information" */
+  --co-thead:#F1F5FA;            /* column header row */
+  --co-check-off:#D7DAE0;
+  --co-check-on:#C3C7CF;
+}
 html, body {
-  margin: 0; height: 100%; overflow: hidden;
-  background: var(--background); color: var(--foreground);
-  font-family: var(--font-sans); font-size: 14px;
+  margin:0; height:100%; overflow:hidden;
+  background:var(--background); color:var(--foreground);
+  font-family:var(--font-sans); font-size:14px;
 }
-*, *::before, *::after { box-sizing: border-box; }
-button { font-family: inherit; border: none; background: transparent; color: inherit; cursor: pointer; padding: 0; }
-a { color: inherit; text-decoration: none; }
-.hidden { display: none !important; }
+*,*::before,*::after{ box-sizing:border-box; }
+button{ font-family:inherit; border:none; background:transparent; color:inherit; cursor:pointer; padding:0; }
+a{ color:inherit; text-decoration:none; }
+.hidden{ display:none !important; }
 
-/* ── Native controls, styled to the FieldShell spec ──────────────
-   The kit's Select builds its trigger out of .rl-field-shell, but that
-   class starts with `all: unset`, which strips a native <input> of the
-   behaviour we want. So this mirrors FieldShell's visual spec —
-   32px min-height, 1px border, --radius-md, 14px, primary focus ring —
-   for real form controls. Keep the two in step. */
-.co-input {
-  display: block; width: 100%;
-  min-height: 32px; height: 32px; padding: 0 10px;
-  background: var(--card); color: var(--foreground);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-family: inherit; font-size: 14px; line-height: 1;
-  outline: none;
-  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+/* ══ Shell ══ */
+.co-shell{ display:flex; height:100vh; overflow:hidden; }
+
+/* ── Rail: 56px, white, dark icons. Active item is a soft grey square. ── */
+.co-rail{
+  width:56px; flex-shrink:0; background:var(--background);
+  border-right:1px solid var(--co-border-soft);
+  display:flex; flex-direction:column; align-items:center;
+  padding:10px 0 12px; gap:2px; overflow:visible;
 }
-.co-input::placeholder { color: var(--muted-foreground); }
-.co-input:hover:not(:disabled):not(:focus) { border-color: color-mix(in oklab, var(--primary) 25%, var(--border)); }
-.co-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 15%, transparent);
+.co-rail-logo{
+  width:30px; height:30px; border-radius:8px; background:var(--co-blue);
+  color:#fff; display:grid; place-items:center; font-size:13px; font-weight:700;
+  flex-shrink:0; margin-bottom:4px;
 }
-.co-input:disabled { opacity: 0.55; cursor: not-allowed; background: color-mix(in oklab, var(--muted) 40%, var(--card)); }
-.co-input[aria-invalid="true"] { border-color: oklch(0.55 0.2 25); }
-textarea.co-input { height: auto; min-height: 64px; padding: 7px 10px; line-height: 1.5; resize: vertical; }
-select.co-input {
-  cursor: pointer; appearance: none; padding-right: 30px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23717179' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
-  background-repeat: no-repeat; background-position: right 9px center; background-size: 14px;
+.co-rail-i{
+  width:34px; height:34px; border-radius:8px; display:grid; place-items:center;
+  color:#4A5260; flex-shrink:0; position:relative;
 }
-.co-mono { font-family: var(--font-mono); }
-
-/* ── Table, mirroring the kit's accounts table spec ──────────────
-   36px header row at 12px/500 muted, 44px body rows, first column
-   padded to the 24px page gutter, --muted on row hover. */
-.co-table-wrap { overflow: auto; }
-.co-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 14px; }
-.co-table thead th {
-  position: sticky; top: 0; z-index: 5;
-  background: var(--background);
-  border-bottom: 1px solid var(--border);
-  padding: 0 12px; height: 36px; text-align: left;
-  font-size: 12px; font-weight: 500; color: var(--muted-foreground);
-  white-space: nowrap; vertical-align: middle;
+.co-rail-i:hover{ background:var(--co-rail-hover); }
+.co-rail-i.on{ background:var(--co-rail-hover); color:#111827; }
+.co-rail-i svg{ width:19px; height:19px; }
+.co-rail-sp{ flex:1; }
+.co-rail-dot{
+  position:absolute; top:6px; right:7px; width:7px; height:7px;
+  border-radius:50%; background:#E5484D; border:1.5px solid var(--background);
 }
-.co-table tbody td {
-  padding: 8px 12px; min-height: 44px;
-  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
-  color: var(--foreground); vertical-align: middle;
+.co-rail-badge{
+  position:absolute; top:3px; right:3px; min-width:16px; height:16px; padding:0 4px;
+  border-radius:8px; background:#E5484D; color:#fff; font-size:10px; font-weight:600;
+  display:grid; place-items:center; border:1.5px solid var(--background);
 }
-.co-table tbody tr:last-child td { border-bottom: 0; }
-.co-table thead th.col-first, .co-table tbody td.col-first { padding-left: 24px; }
-.co-table thead th.col-last, .co-table tbody td.col-last { padding-right: 24px; }
-.co-table tbody tr.is-clickable { cursor: pointer; }
-.co-table tbody tr.is-clickable:hover td { background: var(--muted); }
-.co-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.co-table .is-empty { color: var(--muted-foreground); opacity: 0.55; }
-
-.co-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.co-api { font-family: var(--font-mono); font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
-.co-row-actions { display: flex; gap: 2px; justify-content: flex-end; opacity: 0; transition: opacity 100ms; }
-.co-table tbody tr:hover .co-row-actions { opacity: 1; }
-
-/* ── Data-type glyph ─────────────────────────────────────────────
-   A 24px mono chip rather than an icon. Lucide swaps <i data-lucide>
-   for a 24px SVG, which blows out a table cell; this cannot. */
-.co-glyph {
-  width: 24px; height: 24px; border-radius: var(--radius-sm);
-  display: grid; place-items: center; flex-shrink: 0;
-  font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: -0.02em;
-  background: var(--tag-bg-gray); color: var(--tag-fg-gray);
-}
-.co-glyph.g-text   { background: var(--tag-bg-blue);   color: var(--tag-fg-blue); }
-.co-glyph.g-num    { background: var(--tag-bg-green);  color: var(--tag-fg-green); }
-.co-glyph.g-choice { background: var(--tag-bg-orange); color: var(--tag-fg-orange); }
-.co-glyph.g-rel    { background: var(--tag-bg-purple); color: var(--tag-fg-purple); }
-.co-glyph.g-calc   { background: var(--tag-bg-pink);   color: var(--tag-fg-pink); }
-.co-glyph.g-sys    { background: var(--tag-bg-gray);   color: var(--tag-fg-gray); }
-.co-glyph.lg { width: 30px; height: 30px; font-size: 12px; border-radius: var(--radius-md); }
-
-/* ── Page body padding ───────────────────────────────────────── */
-.co-body { padding: 20px 24px 40px; }
-/* The product's pages run full-bleed inside the 24px page gutter rather
-   than centring a column, so tables fill the main card. Prose blocks cap
-   their own width where reading length matters. */
-.co-inner { max-width: none; }
-
-/* ── Section label ───────────────────────────────────────────── */
-.co-sec { display: flex; align-items: center; gap: 10px; margin: 22px 0 10px; }
-.co-sec:first-child { margin-top: 0; }
-.co-sec-t { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); }
-.co-sec-line { flex: 1; height: 1px; background: var(--border); }
-
-/* ── Empty state ─────────────────────────────────────────────── */
-.co-empty {
-  border: 1px dashed var(--border); border-radius: var(--radius-lg);
-  padding: 48px 28px; text-align: center;
-  background: color-mix(in oklab, var(--muted) 35%, var(--background));
-}
-.co-empty-t { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-.co-empty-d { font-size: 14px; color: var(--muted-foreground); line-height: 1.55; max-width: 460px; margin: 0 auto 18px; }
-
-/* ── Callouts ────────────────────────────────────────────────── */
-.co-note {
-  display: flex; gap: 10px; padding: 11px 13px;
-  border-radius: var(--radius-md); font-size: 13px; line-height: 1.55;
-  border: 1px solid var(--border); background: color-mix(in oklab, var(--muted) 40%, var(--background));
-  color: var(--muted-foreground); margin-bottom: 16px;
-}
-.co-note b { color: var(--foreground); font-weight: 600; }
-.co-note { max-width: 940px; }
-.co-note.warn {
-  background: var(--tag-bg-yellow); border-color: color-mix(in oklab, var(--tag-fg-yellow) 25%, transparent);
-  color: var(--tag-fg-yellow);
-}
-.co-note.warn b { color: var(--tag-fg-yellow); }
-.co-note-ico { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; }
-.co-note-ico svg { width: 16px; height: 16px; display: block; }
-
-/* ── Form layout inside the drawer ───────────────────────────── */
-.co-f { margin-bottom: 16px; }
-.co-f-row { display: flex; gap: 12px; }
-.co-f-row > .co-f { flex: 1; min-width: 0; }
-.rl-field-hint { margin-top: 5px; }
-.co-err { font-size: 11px; color: oklch(0.55 0.2 25); line-height: 1.35; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
-.co-err svg { width: 12px; height: 12px; flex-shrink: 0; }
-
-/* Radio cards */
-.co-cards { display: flex; gap: 10px; }
-.co-card {
-  flex: 1; text-align: left; font-family: inherit; cursor: pointer;
-  border: 1px solid var(--border); border-radius: var(--radius-md);
-  padding: 10px 12px; background: var(--card);
-  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
-}
-.co-card:hover:not(:disabled) { border-color: color-mix(in oklab, var(--primary) 25%, var(--border)); background: color-mix(in oklab, var(--muted) 30%, var(--card)); }
-.co-card.sel { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 15%, transparent); background: var(--card); }
-.co-card:disabled { cursor: not-allowed; opacity: 0.7; background: color-mix(in oklab, var(--muted) 45%, var(--card)); }
-.co-card-t { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.co-card-d { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; margin-top: 4px; }
-
-/* Segmented control — mirrors the kit's .view-switcher */
-.co-seg { display: inline-flex; align-items: center; background: var(--muted); border-radius: var(--radius-md); padding: 2px; }
-.co-seg button { height: 26px; padding: 0 12px; border-radius: calc(var(--radius-md) - 2px); font-size: 13px; font-weight: 500; color: var(--muted-foreground); }
-.co-seg button:hover { color: var(--foreground); }
-.co-seg button.active { background: var(--background); color: var(--foreground); box-shadow: var(--shadow-xs); }
-
-/* Checkbox / switch rows */
-.co-check { display: flex; align-items: flex-start; gap: 9px; padding: 9px 0; cursor: pointer; }
-.co-check + .co-check, .co-sw + .co-sw, .co-check + .co-sw, .co-sw + .co-check { border-top: 1px solid var(--border); }
-.co-check .sc-check { margin-top: 1px; flex-shrink: 0; }
-.co-sw { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; }
-.co-sw .sc-switch { flex-shrink: 0; margin-top: 1px; }
-.co-ctl-t { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.co-ctl-d { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; margin-top: 3px; }
-.co-check.locked { cursor: default; }
-
-/* Inline preview strip */
-.co-prev {
-  display: flex; align-items: center; gap: 10px;
-  background: color-mix(in oklab, var(--muted) 40%, var(--background));
-  border: 1px solid var(--border); border-radius: var(--radius-md);
-  padding: 9px 11px; font-size: 12.5px; color: var(--muted-foreground);
-}
-.co-prev-val {
-  font-family: var(--font-mono); font-size: 13px; color: var(--foreground);
-  background: var(--background); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 2px 7px;
+.co-rail-av{
+  width:30px; height:30px; border-radius:50%; background:var(--co-blue); color:#fff;
+  font-size:11px; font-weight:600; display:grid; place-items:center; flex-shrink:0;
 }
 
-/* Type picker */
-.co-tp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.co-tp {
-  display: flex; align-items: flex-start; gap: 9px; text-align: left; font-family: inherit;
-  padding: 9px 10px; border: 1px solid var(--border); border-radius: var(--radius-md);
-  background: var(--card); cursor: pointer;
-  transition: border-color 120ms ease, background 120ms ease;
+/* ── Settings sidebar ── */
+.co-side{
+  width:300px; flex-shrink:0; background:var(--background);
+  border-right:1px solid var(--co-border); display:flex; flex-direction:column;
+  overflow-y:auto;
 }
-.co-tp:hover:not(:disabled) { border-color: color-mix(in oklab, var(--primary) 25%, var(--border)); background: color-mix(in oklab, var(--muted) 30%, var(--card)); }
-.co-tp:disabled { cursor: not-allowed; opacity: 0.6; background: color-mix(in oklab, var(--muted) 40%, var(--card)); }
-.co-tp-t { font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-.co-tp-d { font-size: 11.5px; color: var(--muted-foreground); line-height: 1.45; margin-top: 2px; }
-
-/* Picklist editor */
-.co-pl { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.co-pl-grip { color: var(--muted-foreground); font-size: 13px; width: 12px; text-align: center; flex-shrink: 0; cursor: grab; }
-.co-pl-sw { width: 28px; height: 28px; border-radius: var(--radius-sm); border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); flex-shrink: 0; cursor: pointer; }
-
-/* Relationship map */
-.co-map { display: flex; flex-direction: column; }
-.co-map-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; flex-wrap: wrap; }
-.co-node {
-  display: inline-flex; align-items: center; gap: 8px;
-  border: 1px solid var(--border); border-radius: var(--radius-md);
-  padding: 6px 11px; background: var(--card); font-size: 13.5px; font-weight: 500;
-  box-shadow: var(--shadow-xs);
+.co-side-title{ padding:20px 20px 14px; font-size:22px; font-weight:600; letter-spacing:-0.015em; }
+.co-side-search{ padding:0 20px 12px; }
+.co-nav{ padding:0 12px; }
+.co-nav-i{
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:7px 8px; border-radius:8px; font-size:14px; color:#2B313B;
+  text-align:left; margin-bottom:1px; line-height:1.35;
 }
-.co-node.me { border-color: color-mix(in oklab, var(--primary) 35%, var(--border)); background: var(--accent); }
-.co-node.sys { background: color-mix(in oklab, var(--muted) 50%, var(--card)); color: var(--muted-foreground); font-weight: 400; box-shadow: none; }
-.co-conn { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted-foreground); font-family: var(--font-mono); }
-.co-line { width: 26px; height: 1px; background: var(--border); position: relative; }
-.co-line::after { content: ''; position: absolute; right: 0; top: -3px; border-left: 5px solid var(--border); border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent; }
-
-/* Relationship cards use the kit's SectionCard shell */
-.rl-section + .rl-section { margin-top: 9px; }
-.co-rel-head { display: flex; align-items: center; gap: 9px; }
-.co-rel-t { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; }
-.co-rel-meta { font-size: 12.5px; color: var(--muted-foreground); line-height: 1.65; }
-.co-rel-empty { font-size: 13.5px; color: var(--muted-foreground); padding: 14px 0; }
-
-/* Menu — mirrors the kit's rail flyout chrome */
-.co-menu {
-  position: absolute; min-width: 200px; padding: 6px;
-  background: var(--popover); color: var(--popover-foreground);
-  border: 1px solid var(--border); border-radius: var(--radius-lg);
-  box-shadow: 0 10px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
-  z-index: 300;
+.co-nav-i:hover{ background:var(--co-rail-hover); }
+.co-nav-i.on{ background:var(--co-nav-active); color:#11325E; font-weight:500; }
+.co-nav-i.on .co-nav-arrow{ opacity:1; }
+.co-nav-ico{
+  width:24px; height:24px; border-radius:6px; display:grid; place-items:center;
+  flex-shrink:0; font-size:12px; line-height:1;
 }
-.co-menu-i {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  height: 32px; padding: 0 10px; border-radius: var(--radius-md);
-  font-size: 14px; text-align: left; white-space: nowrap;
-}
-.co-menu-i:hover:not(:disabled) { background: var(--accent); }
-.co-menu-i.danger { color: oklch(0.55 0.2 25); }
-.co-menu-i.danger:hover { background: var(--tag-bg-red); }
-.co-menu-i:disabled { color: var(--muted-foreground); cursor: not-allowed; }
-.co-menu-sep { height: 1px; background: var(--border); margin: 4px 2px; }
+.co-nav-ico svg{ width:14px; height:14px; }
+.co-nav-arrow{ margin-left:auto; opacity:0; color:#5B6472; flex-shrink:0; }
+.co-nav-arrow svg{ width:14px; height:14px; }
+.co-nav-label{ padding:16px 20px 6px; font-size:13px; font-weight:600; color:#6B7280; }
+.co-side-div{ height:1px; background:var(--co-border-soft); margin:12px 20px; }
 
-/* Icon button — the kit's outline icon button at a tighter 28px */
-.co-icon-btn {
-  width: 28px; height: 28px; border-radius: var(--radius-md);
-  display: grid; place-items: center; color: var(--muted-foreground);
-}
-.co-icon-btn:hover { background: var(--accent); color: var(--accent-foreground); }
-.co-icon-btn svg { width: 15px; height: 15px; }
-.co-icon-btn.danger:hover { background: var(--tag-bg-red); color: var(--tag-fg-red); }
+/* ── Content ── */
+.co-main{ flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; background:var(--background); }
+.co-head{ padding:20px 28px 16px; flex-shrink:0; border-bottom:1px solid var(--co-border-soft); }
+.co-crumb{ display:flex; align-items:center; gap:6px; font-size:13px; color:#6B7280; margin-bottom:8px; }
+.co-crumb a{ color:var(--co-blue); cursor:pointer; }
+.co-crumb a:hover{ text-decoration:underline; text-underline-offset:3px; }
+.co-title{ display:flex; align-items:center; gap:10px; font-size:21px; font-weight:600; letter-spacing:-0.015em; min-width:0; }
+.co-title > svg{ width:19px; height:19px; color:#5B6472; flex-shrink:0; }
+.co-desc{ font-size:13.5px; color:var(--muted-foreground); line-height:1.5; margin-top:6px; max-width:860px; }
+.co-scroll{ flex:1; overflow-y:auto; padding:18px 28px 48px; }
+.co-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px; }
 
-/* Toast */
-.co-toast {
-  position: fixed; bottom: 22px; left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: var(--foreground); color: var(--background);
-  font-size: 13.5px; padding: 10px 16px; border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0,0,0,.25);
-  opacity: 0; pointer-events: none; transition: opacity .16s, transform .16s;
-  z-index: 500; max-width: 460px;
+/* Tabs — the 2px underline tab from the kit */
+.co-tabs{ display:flex; gap:0; margin:14px -12px -17px; }
+.co-tab{
+  position:relative; padding:0 12px; height:38px; font-size:14px;
+  color:var(--muted-foreground); display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
 }
-.co-toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.co-tab:hover:not(:disabled){ color:var(--foreground); }
+.co-tab.on{ color:var(--co-blue); font-weight:500; }
+.co-tab.on::after{ content:''; position:absolute; left:10px; right:10px; bottom:0; height:2px; background:var(--co-blue); }
+.co-tab:disabled{ opacity:.45; cursor:not-allowed; }
+
+/* ══ Card + table — the "Time entry fields" pattern ══ */
+.co-card{ border:1px solid var(--co-border); border-radius:10px; overflow:hidden; background:var(--background); margin-bottom:18px; }
+.co-band{
+  display:flex; align-items:center; gap:10px; padding:13px 20px;
+  background:var(--co-band); border-bottom:1px solid var(--co-border);
+}
+.co-band-t{ font-size:15px; font-weight:500; }
+.co-band-n{ margin-left:auto; font-size:13.5px; color:var(--muted-foreground); font-variant-numeric:tabular-nums; }
+.co-band-d{ font-size:12.5px; color:var(--muted-foreground); line-height:1.55; padding:11px 20px; background:var(--co-band); border-bottom:1px solid var(--co-border); }
+
+.co-table{ width:100%; border-collapse:separate; border-spacing:0; font-size:14px; }
+.co-table thead th{
+  background:var(--co-thead); border-bottom:1px solid var(--co-border);
+  padding:0 12px; height:40px; text-align:left;
+  font-size:13px; font-weight:600; color:#2B313B; white-space:nowrap;
+}
+.co-table tbody td{ padding:9px 12px; border-bottom:1px solid var(--co-border-soft); vertical-align:middle; }
+.co-table tbody tr:last-child td{ border-bottom:0; }
+.co-table tbody tr.is-clickable{ cursor:pointer; }
+.co-table tbody tr.is-clickable:hover td{ background:#FAFBFC; }
+.co-table .col-grip{ width:34px; padding-left:16px; padding-right:0; }
+.co-table .col-menu{ width:44px; text-align:right; padding-right:14px; }
+.co-table .num{ text-align:right; font-variant-numeric:tabular-nums; }
+.co-grip{ color:#B6BAC2; font-size:13px; cursor:grab; user-select:none; }
+.co-fname{ font-weight:400; }
+.co-api{ font-family:var(--font-mono); font-size:11.5px; color:#9AA0AA; margin-top:2px; }
+
+/* Field-type cell: a line icon plus the type name, as the product shows it. */
+.co-type{ display:inline-flex; align-items:center; gap:8px; color:var(--foreground); }
+.co-type-ico{ width:17px; height:17px; flex-shrink:0; color:#7B818C; display:grid; place-items:center;
+  font-family:var(--font-mono); font-size:10px; font-weight:600; }
+.co-type-ico svg{ width:15px; height:15px; }
+
+/* The product's settings tags are rounded rectangles, not the kit's
+   999px pills — colours still come from the kit's tag palette. */
+.co-tag{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 9px; border-radius:6px; font-size:12.5px; font-weight:500;
+  line-height:1.35; white-space:nowrap;
+  background:var(--tag-bg-gray); color:var(--tag-fg-gray);
+}
+.co-tag.c-blue{ background:var(--tag-bg-blue); color:var(--tag-fg-blue); }
+.co-tag.c-teal{ background:var(--tag-bg-teal); color:var(--tag-fg-teal); }
+.co-tag.c-green{ background:var(--tag-bg-green); color:var(--tag-fg-green); }
+.co-tag.c-yellow{ background:var(--tag-bg-yellow); color:var(--tag-fg-yellow); }
+.co-tag.c-orange{ background:var(--tag-bg-orange); color:var(--tag-fg-orange); }
+.co-tag.c-purple{ background:var(--tag-bg-purple); color:var(--tag-fg-purple); }
+.co-tag.c-pink{ background:var(--tag-bg-pink); color:var(--tag-fg-pink); }
+.co-tag.c-red{ background:var(--tag-bg-red); color:var(--tag-fg-red); }
+.co-tag.sm{ padding:2px 7px; font-size:11.5px; }
+.co-tag.mono{ font-family:var(--font-mono); font-size:11.5px; }
+button.co-tag{ cursor:pointer; }
+button.co-tag:hover{ filter:brightness(0.97); }
+
+/* Read-only mandatory indicator, matching the product's muted checkbox. */
+.co-box{
+  width:16px; height:16px; border-radius:4px; border:1px solid var(--co-check-off);
+  background:var(--background); display:inline-grid; place-items:center;
+}
+.co-box.on{ background:var(--co-check-on); border-color:var(--co-check-on); }
+.co-box svg{ width:11px; height:11px; color:#fff; }
+
+/* The product's toggle is blue, where the kit's switch is near-black. */
+.sc-switch--on{ background:var(--co-blue); }
+
+.co-menu-btn{ width:28px; height:28px; border-radius:7px; display:inline-grid; place-items:center; color:#7B818C; }
+.co-menu-btn:hover{ background:var(--co-rail-hover); color:var(--foreground); }
+.co-menu-btn svg{ width:15px; height:15px; }
+
+/* ══ Native controls, to the kit's FieldShell spec ══
+   FieldShell starts with `all: unset`, which strips a native <input> of
+   what we need, so this mirrors its visual spec — 32px, 1px border,
+   --radius-md, 14px, primary focus ring. Keep the two in step. */
+.co-input{
+  display:block; width:100%; height:32px; padding:0 10px;
+  background:var(--card); color:var(--foreground);
+  border:1px solid var(--border); border-radius:var(--radius-md);
+  font-family:inherit; font-size:14px; line-height:1; outline:none;
+  transition:border-color 120ms ease, box-shadow 120ms ease;
+}
+.co-input::placeholder{ color:var(--muted-foreground); }
+.co-input:hover:not(:disabled):not(:focus){ border-color:color-mix(in oklab, var(--primary) 25%, var(--border)); }
+.co-input:focus{ border-color:var(--co-blue); box-shadow:0 0 0 3px color-mix(in oklab, var(--co-blue) 15%, transparent); }
+.co-input:disabled{ opacity:.55; cursor:not-allowed; background:color-mix(in oklab, var(--muted) 40%, var(--card)); }
+textarea.co-input{ height:auto; min-height:64px; padding:7px 10px; line-height:1.5; resize:vertical; }
+select.co-input{
+  cursor:pointer; appearance:none; padding-right:30px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23717179' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat; background-position:right 9px center; background-size:14px;
+}
+.co-search{ height:38px; border-radius:8px; font-size:14px; }
+.co-mono{ font-family:var(--font-mono); }
+
+/* ══ Bits the kit has no component for ══ */
+.co-sec{ display:flex; align-items:center; gap:10px; margin:22px 0 10px; }
+.co-sec:first-child{ margin-top:0; }
+.co-sec-t{ font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-foreground); }
+.co-sec-line{ flex:1; height:1px; background:var(--border); }
+
+.co-empty{ border:1px dashed var(--co-border); border-radius:10px; padding:48px 28px; text-align:center; background:var(--co-band); }
+.co-empty-t{ font-size:15px; font-weight:600; margin-bottom:6px; }
+.co-empty-d{ font-size:14px; color:var(--muted-foreground); line-height:1.55; max-width:460px; margin:0 auto 18px; }
+
+.co-note{
+  display:flex; gap:10px; padding:11px 13px; border-radius:8px;
+  font-size:13px; line-height:1.55; border:1px solid var(--co-border);
+  background:var(--co-band); color:var(--muted-foreground);
+  margin-bottom:16px; max-width:940px;
+}
+.co-note b{ color:var(--foreground); font-weight:600; }
+.co-note.warn{ background:var(--tag-bg-yellow); border-color:color-mix(in oklab, var(--tag-fg-yellow) 25%, transparent); color:var(--tag-fg-yellow); }
+.co-note.warn b{ color:var(--tag-fg-yellow); }
+.co-note-ico{ flex-shrink:0; width:16px; height:16px; margin-top:1px; }
+.co-note-ico svg{ width:16px; height:16px; display:block; }
+
+.co-f{ margin-bottom:16px; }
+.co-f-row{ display:flex; gap:12px; }
+.co-f-row > .co-f{ flex:1; min-width:0; }
+.rl-field-hint{ margin-top:5px; }
+.co-err{ font-size:11px; color:var(--tag-fg-red); line-height:1.35; margin-top:5px; display:flex; align-items:center; gap:4px; }
+.co-err svg{ width:12px; height:12px; flex-shrink:0; }
+
+.co-cards{ display:flex; gap:10px; }
+.co-card-opt{
+  flex:1; text-align:left; font-family:inherit; cursor:pointer;
+  border:1px solid var(--border); border-radius:var(--radius-md);
+  padding:10px 12px; background:var(--card);
+  transition:border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+.co-card-opt:hover:not(:disabled){ border-color:color-mix(in oklab, var(--co-blue) 35%, var(--border)); }
+.co-card-opt.sel{ border-color:var(--co-blue); box-shadow:0 0 0 3px color-mix(in oklab, var(--co-blue) 15%, transparent); }
+.co-card-opt:disabled{ cursor:not-allowed; opacity:.7; background:var(--co-band); }
+.co-card-t{ font-size:14px; font-weight:500; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.co-card-d{ font-size:12px; color:var(--muted-foreground); line-height:1.5; margin-top:4px; }
+
+.co-seg{ display:inline-flex; align-items:center; background:var(--muted); border-radius:var(--radius-md); padding:2px; }
+.co-seg button{ height:26px; padding:0 12px; border-radius:calc(var(--radius-md) - 2px); font-size:13px; font-weight:500; color:var(--muted-foreground); }
+.co-seg button:hover{ color:var(--foreground); }
+.co-seg button.active{ background:var(--background); color:var(--foreground); box-shadow:var(--shadow-xs); }
+
+.co-check{ display:flex; align-items:flex-start; gap:9px; padding:9px 0; cursor:pointer; }
+.co-check + .co-check, .co-sw + .co-sw, .co-check + .co-sw, .co-sw + .co-check{ border-top:1px solid var(--border); }
+.co-check .sc-check{ margin-top:1px; flex-shrink:0; }
+.co-sw{ display:flex; align-items:flex-start; gap:12px; padding:10px 0; }
+.co-sw .sc-switch{ flex-shrink:0; margin-top:1px; }
+.co-ctl-t{ font-size:14px; font-weight:500; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.co-ctl-d{ font-size:12px; color:var(--muted-foreground); line-height:1.5; margin-top:3px; }
+.co-check.locked{ cursor:default; }
+
+.co-prev{
+  display:flex; align-items:center; gap:10px; background:var(--co-band);
+  border:1px solid var(--co-border); border-radius:8px; padding:9px 11px;
+  font-size:12.5px; color:var(--muted-foreground);
+}
+.co-prev-val{
+  font-family:var(--font-mono); font-size:13px; color:var(--foreground);
+  background:var(--background); border:1px solid var(--co-border);
+  border-radius:5px; padding:2px 7px;
+}
+
+.co-tp-grid{ display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.co-tp{
+  display:flex; align-items:flex-start; gap:9px; text-align:left; font-family:inherit;
+  padding:9px 10px; border:1px solid var(--border); border-radius:var(--radius-md);
+  background:var(--card); cursor:pointer; transition:border-color 120ms ease, background 120ms ease;
+}
+.co-tp:hover:not(:disabled){ border-color:color-mix(in oklab, var(--co-blue) 35%, var(--border)); background:var(--co-band); }
+.co-tp:disabled{ cursor:not-allowed; opacity:.6; background:var(--co-band); }
+.co-tp-t{ font-size:13.5px; font-weight:500; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.co-tp-d{ font-size:11.5px; color:var(--muted-foreground); line-height:1.45; margin-top:2px; }
+
+.co-pl{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.co-pl-grip{ color:#B6BAC2; font-size:13px; width:12px; text-align:center; flex-shrink:0; cursor:grab; }
+.co-pl-sw{ width:28px; height:28px; border-radius:6px; border:1px solid rgba(0,0,0,.08); flex-shrink:0; cursor:pointer; }
+
+.co-map{ display:flex; flex-direction:column; }
+.co-map-row{ display:flex; align-items:center; gap:10px; padding:7px 0; flex-wrap:wrap; }
+.co-node{
+  display:inline-flex; align-items:center; gap:8px; border:1px solid var(--co-border);
+  border-radius:8px; padding:6px 11px; background:var(--background);
+  font-size:13.5px; font-weight:500; box-shadow:var(--shadow-xs);
+}
+.co-node.me{ border-color:color-mix(in oklab, var(--co-blue) 35%, var(--co-border)); background:var(--co-nav-active); color:#11325E; }
+.co-node.sys{ background:var(--co-band); color:var(--muted-foreground); font-weight:400; box-shadow:none; }
+.co-conn{ display:inline-flex; align-items:center; gap:7px; font-size:11.5px; color:var(--muted-foreground); font-family:var(--font-mono); }
+.co-line{ width:26px; height:1px; background:var(--co-border); position:relative; }
+.co-line::after{ content:''; position:absolute; right:0; top:-3px; border-left:5px solid var(--co-border); border-top:3.5px solid transparent; border-bottom:3.5px solid transparent; }
+
+.co-rel-head{ display:flex; align-items:center; gap:9px; }
+.co-rel-t{ flex:1; min-width:0; font-size:14px; font-weight:500; }
+.co-rel-meta{ font-size:12.5px; color:var(--muted-foreground); line-height:1.65; }
+.co-rel-empty{ font-size:13.5px; color:var(--muted-foreground); padding:14px 0; }
+.rl-section + .rl-section{ margin-top:9px; }
+
+.co-menu{
+  position:absolute; min-width:200px; padding:6px; background:var(--popover);
+  border:1px solid var(--co-border); border-radius:10px;
+  box-shadow:0 10px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04); z-index:300;
+}
+.co-menu-i{ display:flex; align-items:center; gap:10px; width:100%; height:32px; padding:0 10px; border-radius:7px; font-size:14px; text-align:left; white-space:nowrap; }
+.co-menu-i:hover:not(:disabled){ background:var(--co-rail-hover); }
+.co-menu-i.danger{ color:var(--tag-fg-red); }
+.co-menu-i.danger:hover{ background:var(--tag-bg-red); }
+.co-menu-i:disabled{ color:var(--muted-foreground); cursor:not-allowed; }
+.co-menu-sep{ height:1px; background:var(--co-border); margin:4px 2px; }
+
+.co-toast{
+  position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(10px);
+  background:var(--foreground); color:var(--background); font-size:13.5px;
+  padding:10px 16px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.25);
+  opacity:0; pointer-events:none; transition:opacity .16s, transform .16s; z-index:500; max-width:460px;
+}
+.co-toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* The shadcn dialog ships z-index:50, below the kit's drawer at 100. */
-.sc-dialog-overlay { z-index: 400; }
-.sc-dialog { max-width: 460px; }
+.sc-dialog-overlay{ z-index:400; }
+.sc-dialog{ max-width:460px; }
 </style>
 </head>
 <body>
 
-<div class="rl-app">
+<div class="co-shell">
 
-  <!-- ══ Rail ══════════════════════════════════════════════════════
-       The kit's collapsed rail: transparent over the tinted canvas,
-       40px items, active item is a white card. Settings lives at the
-       bottom and opens a flyout — there is no second sidebar in this
-       product, so the settings sections are that flyout's contents. -->
-  <aside class="rl-sidebar">
-    <div class="rl-rail-brand"><img src="ds/assets/rocketlane-mark.svg" alt="Rocketlane"></div>
-
-    <div class="rl-rail-group">
-      <button class="rl-rail-item" data-tooltip="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
-      <button class="rl-rail-item" data-tooltip="Notifications"><span class="rl-rail-badge">5</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></button>
-      <button class="rl-rail-item" data-tooltip="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></button>
-    </div>
-    <div class="rl-rail-divider"></div>
-    <div class="rl-rail-group">
-      <button class="rl-rail-item" data-tooltip="Accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 012-2h7a2 2 0 012 2v16"/><path d="M15 9h3a2 2 0 012 2v10"/><path d="M2 21h20"/><path d="M8 7h2M8 11h2M8 15h2"/></svg></button>
-      <button class="rl-rail-item" data-tooltip="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></button>
-      <button class="rl-rail-item" data-tooltip="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg></button>
-      <button class="rl-rail-item" data-tooltip="Financials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 10h16M5 10L12 4l7 6M6 10v11M10 10v11M14 10v11M18 10v11"/></svg></button>
-    </div>
-    <div class="rl-rail-divider"></div>
-    <div class="rl-rail-group">
-      <button class="rl-rail-item" data-tooltip="Templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="7" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/><rect x="15" y="14" width="6" height="7" rx="1.5"/></svg></button>
-      <button class="rl-rail-item" data-tooltip="Agents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg></button>
-    </div>
-
-    <div class="rl-rail-group bottom">
-      <div class="rl-rail-item active has-flyout">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6V4.5a2 2 0 114 0v.09A1.65 1.65 0 0015 4.6a1.65 1.65 0 001.82.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9V9a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        <div class="rl-rail-flyout">
-          <div class="rl-rail-flyout-title">Settings</div>
-          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Profile</span></button>
-          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9.5" cy="7" r="4"/></svg><span>Team &amp; roles</span></button>
-          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2v6M15 2v6M7 8h10v5a5 5 0 01-10 0z"/><path d="M12 18v4"/></svg><span>Integrations</span></button>
-          <div class="rl-flyout-sep"></div>
-          <div class="rl-rail-flyout-title">Advanced</div>
-          <button class="rl-flyout-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg><span>Custom objects</span><span class="meta">3</span></button>
-          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M17 6l2 2M14 9l2 2"/></svg><span>API &amp; webhooks</span></button>
-          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><span>Audit log</span></button>
-          <button class="rl-flyout-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"/></svg><span>Data import</span></button>
-        </div>
-      </div>
-      <div class="rl-rail-divider"></div>
-      <div class="rl-rail-avatar">VS</div>
-    </div>
+  <!-- ══ Rail ══ -->
+  <aside class="co-rail">
+    <div class="co-rail-logo">A</div>
+    <button class="co-rail-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
+    <button class="co-rail-i" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+    <button class="co-rail-i" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span class="co-rail-dot"></span></button>
+    <button class="co-rail-i on" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></button>
+    <button class="co-rail-i" title="Assets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5L5 19"/></svg></button>
+    <button class="co-rail-i" title="Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M16 2v5M8 2v5M3 10h18"/></svg></button>
+    <button class="co-rail-i" title="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></button>
+    <button class="co-rail-i" title="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+    <button class="co-rail-i" title="Resources"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button>
+    <button class="co-rail-i" title="Apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+    <button class="co-rail-i" title="Agents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg></button>
+    <button class="co-rail-i" title="Reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></button>
+    <button class="co-rail-i" title="Financials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 10h16M5 10L12 4l7 6M6 10v11M10 10v11M14 10v11M18 10v11"/></svg></button>
+    <div class="co-rail-sp"></div>
+    <button class="co-rail-i" title="What's new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 110-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 100-5C13 2 12 7 12 7z"/></svg><span class="co-rail-badge">4</span></button>
+    <button class="co-rail-i" title="Support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.4 8.4 0 013.8-.9h.5a8.5 8.5 0 018 8z"/></svg></button>
+    <div class="co-rail-av">VS</div>
   </aside>
 
-  <!-- ══ Main column — the floating card on the canvas ══ -->
-  <div class="rl-main-col" id="main"></div>
+  <!-- ══ Settings sidebar ══
+       The shipping product keeps Settings in a ~300px sidebar with
+       colour-chipped icons, not in a rail flyout. -->
+  <nav class="co-side">
+    <div class="co-side-title">Settings</div>
+    <div class="co-side-search"><input class="co-input co-search" type="text" placeholder="Search"></div>
+    <div class="co-nav">
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span><span>Team member fields</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#CCFBF1;color:#0D9488"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></span><span>Time entry fields</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DBEAFE;color:#2563EB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg></span><span>Allocation fields</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DCFCE7;color:#16A34A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span>Expense fields</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#FCE7F3;color:#DB2777"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span><span>Invoice &amp; Credit notes custom fields</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DBEAFE;color:#2563EB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 012-2h7a2 2 0 012 2v16"/><path d="M15 9h3a2 2 0 012 2v10M2 21h20M8 7h2M8 11h2M8 15h2"/></svg></span><span>Account fields</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9.5" cy="7" r="4"/></svg></span><span>Customer team member fields</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#CCFBF1;color:#0D9488"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.9 1.2 5.7L12 15.8 7 18.5l1.2-5.7L4 8.9l5.6-.6z"/></svg></span><span>Skills</span></button>
+    </div>
+    <div class="co-side-div"></div>
+    <div class="co-nav-label">Advanced</div>
+    <div class="co-nav">
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DBEAFE;color:#2563EB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18 15 15 0 010-18"/></svg></span><span>Custom domain</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#E2E8F0;color:#475569"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4.5" width="20" height="15" rx="2"/><path d="M2.5 6.5L12 13l9.5-6.5"/></svg></span><span>Email configuration</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DCFCE7;color:#16A34A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.4 8.3-8 9-4.6-.7-8-4-8-9V6z"/></svg></span><span>Security</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span>Audit logs</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DCFCE7;color:#16A34A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.4 8.3-8 9-4.6-.7-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span>SCIM</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DBEAFE;color:#2563EB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M17 6l2 2M14 9l2 2"/></svg></span><span>API</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#CCFBF1;color:#0D9488"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9a3 3 0 115.2 2L17 16"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/><path d="M9 17.5h6"/></svg></span><span>Webhooks</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#FEF3C7;color:#D97706"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.5L21 9l-5 4.2 1.6 6.8L12 16.5 6.4 20 8 13.2 3 9l6.6-.5z"/></svg></span><span>Key events &amp; Intervals</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#DCFCE7;color:#16A34A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h10M9 3v2M11 5c0 5-3 9-7 10M7 9c0 3 3 6 7 7"/><path d="M13 21l4-10 4 10M14.5 18h5"/></svg></span><span>Language Configurations</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#E2E8F0;color:#475569"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span>Custom apps</span></button>
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12z"/></svg></span><span>Automations</span><span class="co-nav-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span></button>
+      <button class="co-nav-i on" onclick="go('list')"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg></span><span>Custom objects</span><span class="co-nav-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span></button>
+    </div>
+    <div class="co-side-div"></div>
+    <div class="co-nav" style="padding-bottom:18px">
+      <button class="co-nav-i"><span class="co-nav-ico" style="background:#E2E8F0;color:#475569"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg></span><span>Archived projects</span></button>
+    </div>
+  </nav>
+
+  <main class="co-main" id="main"></main>
 </div>
 
 <div id="drawer-host"></div>
@@ -581,10 +654,43 @@ function toast(msg){
 }
 function typeMeta(t){ return TYPES[t] || {label:t, glyph:'?', cls:'g-sys'}; }
 function glyph(t, lg){ const m = typeMeta(t); return `<span class="co-glyph ${m.cls}${lg?' lg':''}">${esc(m.glyph)}</span>`; }
+const ICON_CUBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>';
 
-/* Tag helper — the kit's atom, so every pill on the page is one component. */
+/* Tag — the Settings screen uses rounded rectangles rather than the kit's
+   999px pills, so this follows the product. Colours are still the kit's
+   10-hue tag palette. */
 function tag(text, hue, size, title){
-  return `<span class="rl-tag ${size||'s-sm'} c-${hue||'gray'}"${title?` title="${esc(title)}"`:''}>${text}</span>`;
+  return `<span class="co-tag${hue?' c-'+hue:''}${size==='sm'?' sm':''}"${title?` title="${esc(title)}"`:''}>${text}</span>`;
+}
+
+/* Field-type icon: the product shows a small grey mark plus the type name
+   (abc, #, a calendar, a radio dot). Mono glyphs where the product uses
+   letters, line icons otherwise — both stay 17px inside a table cell. */
+const TYPE_ICON = {
+  TEXT:'abc', NUMBER:'#', CURRENCY:'$', PERCENT:'%', FORMULA:'fx', ROLLUP:'\u03a3', AUTONUMBER:'123',
+  MULTILINE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  DATE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg>',
+  CHECKBOX:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="7" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg>',
+  SELECT:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6" fill="currentColor" stroke="none"/></svg>',
+  MULTISELECT:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l2 2 3-3M3 13l2 2 3-3M3 20l2 2 3-3M12 7h9M12 14h9M12 21h9"/></svg>',
+  USER:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  LOOKUP:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>',
+  EMAIL:'@', URL:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7L11.8 5"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7L12.2 19"/></svg>',
+  PHONE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>',
+  DATETIME:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  RICHTEXT:'B', FILE:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>',
+};
+function typeIcon(t){
+  const g = TYPE_ICON[t] || '?';
+  return `<span class="co-type-ico">${g}</span>`;
+}
+/* The product's "Value Assignment" column, mapped onto what this feature
+   actually defines: a formula or a roll-up computes its own value, and
+   everything else is typed in. */
+function valueAssignment(f){
+  if(f.type === 'FORMULA') return tag('Formula', 'teal');
+  if(f.type === 'ROLLUP')  return tag('Roll-up', 'pink');
+  return tag('Manual input', 'blue');
 }
 
 /* Lookup targets can be another custom object or a default object. */
@@ -641,7 +747,7 @@ function systemFields(o){
 }
 /* Anything the specs still list as undecided is marked, not quietly
    resolved in the mockup. */
-function openChip(title){ return tag('Open question', 'yellow', 's-sm', title); }
+function openChip(title){ return tag('Open question', 'yellow', 'sm', title); }
 const ICO = {
   plus:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
   back:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>',
@@ -659,88 +765,85 @@ const ICO = {
 function render(){
   const main = document.getElementById('main');
   main.innerHTML = route.view === 'list' ? viewList() : viewObject();
-  const body = main.querySelector('.rl-page-body');
-  if(body) body.scrollTop = 0;
+  const sc = main.querySelector('.co-scroll');
+  if(sc) sc.scrollTop = 0;
 }
 function go(view, id, tab){ route = {view, id:id||null, tab:tab||'fields'}; render(); }
 
-function crumbs(parts){
-  return `<div class="rl-breadcrumb">${parts.map((p,i) => {
-    const sep = i ? '<span class="rl-crumb-sep">›</span>' : '';
-    return sep + (p.go
-      ? `<a class="rl-crumb link" onclick="${p.go}">${esc(p.label)}</a>`
-      : `<span class="rl-crumb${i === parts.length-1 ? ' current' : ''}">${esc(p.label)}</span>`);
-  }).join('')}</div>`;
+const ICO_GRIP = '<span class="co-grip">⠿</span>';
+const ICO_CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M9 18l6-6-6-6"/></svg>';
+
+/* Read-only mandatory marker — the product shows a muted box in the list
+   and keeps the editing in the field editor. */
+function mandatoryBox(on){
+  return `<span class="co-box${on?' on':''}">${on?ICO.check:''}</span>`;
 }
 
 /* ── Objects list ─────────────────────────────────────────────────── */
 function viewList(){
   const os = state.objects;
   const head = `
-    <div class="rl-page-header no-tabs">
-      ${crumbs([{label:'Settings'},{label:'Advanced'},{label:'Custom objects'}])}
-      <div class="rl-title-block">
-        <div class="rl-title-text">
-          <h1>Custom objects</h1>
-          <p class="rl-page-desc">
+    <div class="co-head">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="flex:1;min-width:0">
+          <div class="co-title">${ICON_CUBE} Custom objects</div>
+          <div class="co-desc">
             Objects your team defines, on top of the ones Rocketlane ships with. Each one has its own
             fields, records, reports and automations, and can point at other objects and at accounts
             and projects.
-          </p>
-        </div>
-        <div class="rl-title-actions">
-          <button class="rl-btn v-outline sz-md is-icon" onclick="pageMenu(event)" aria-label="More">${ICO.dots}</button>
-          <button class="rl-btn v-primary sz-md" onclick="openObjectDrawer()">${ICO.plus}<span class="rl-btn-label">New custom object</span></button>
+          </div>
         </div>
       </div>
     </div>`;
 
   if(!os.length){
-    return head + `<div class="rl-page-body"><div class="co-body"><div class="co-inner">
+    return head + `<div class="co-scroll">
       <div class="co-empty">
         <div class="co-empty-t">No custom objects yet</div>
         <div class="co-empty-d">
           Create one when your business has something Rocketlane has no place for — a sales order
           between the account and the project, a change request inside a project, a product catalogue.
         </div>
-        <button class="rl-btn v-primary sz-md" onclick="openObjectDrawer()">${ICO.plus}<span class="rl-btn-label">New custom object</span></button>
+        <button class="rl-btn v-primary sz-md" onclick="openObjectDrawer()"><span class="rl-btn-label">New object</span>${ICO.plus}</button>
       </div>
-    </div></div></div>`;
+    </div>`;
   }
 
   const rows = os.map(o => {
     const lv = LEVELS[o.level];
     const nLookups = o.fields.filter(f => f.type === 'LOOKUP').length;
     return `<tr class="is-clickable" onclick="go('object','${o.id}','fields')">
-      <td class="col-first">
-        <div class="co-name">${glyph(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}
-          <div style="min-width:0">
-            <div style="font-weight:500">${esc(o.label)}</div>
-            <div class="co-api">${esc(apiFromLabel(o.label))}</div>
-          </div></div>
+      <td class="col-grip">${ICO_GRIP}</td>
+      <td>
+        <div class="co-fname">${esc(o.label)}</div>
+        <div class="co-api">${esc(apiFromLabel(o.label))}</div>
       </td>
       <td>${tag(lv.label, lv.hue)}${o.levelOpen ? ' ' + openChip('Product has no account or project parent. Four options are open: account-level and duplicated per account; a picklist, which cannot hold a price; an existing global list such as rate cards; or allowing global objects for reference lists only.') : ''}</td>
-      <td style="color:var(--muted-foreground)">${esc(o.recordNameLabel)}
-        ${o.recordNameType === 'AUTONUMBER' ? tag(`<span class="co-mono">${esc(o.autoFormat)}</span>`) : ''}</td>
-      <td class="num" style="color:var(--muted-foreground)">${o.fields.length}${nLookups ? ' ' + tag(`${nLookups}&nbsp;↗`, 'purple', 's-sm', `${nLookups} lookup field${nLookups>1?'s':''}`) : ''}</td>
+      <td>
+        <span class="co-type">${typeIcon(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}${esc(o.recordNameLabel)}</span>
+        ${o.recordNameType === 'AUTONUMBER' ? ' ' + tag(esc(o.autoFormat), '', 'sm') : ''}
+      </td>
+      <td class="num" style="color:var(--muted-foreground)">${o.fields.length}${nLookups ? ' ' + tag(nLookups + '&nbsp;↗', 'purple', 'sm', nLookups + ' lookup field' + (nLookups>1?'s':'')) : ''}</td>
       <td class="num" style="color:var(--muted-foreground)">${o.records.toLocaleString()}</td>
       <td style="color:var(--muted-foreground)">${esc(o.updated)}</td>
-      <td class="col-last" style="width:44px"><div class="co-row-actions">
-        <button class="co-icon-btn" onclick="event.stopPropagation();objectMenu(event,'${o.id}')" aria-label="More">${ICO.dots}</button>
-      </div></td>
+      <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();objectMenu(event,'${o.id}')" aria-label="More">${ICO.dots}</button></td>
     </tr>`;
   }).join('');
 
-  return head + `<div class="rl-page-body"><div class="co-body"><div class="co-inner">
-    <div class="rl-section" style="margin-bottom:16px">
-      <div class="co-table-wrap"><table class="co-table">
+  return head + `<div class="co-scroll">
+    <div class="co-actions">
+      <button class="rl-btn v-outline sz-lg" onclick="pageMenu(event)"><span class="rl-btn-label">Manage sample data</span></button>
+      <button class="rl-btn v-primary sz-lg" onclick="openObjectDrawer()"><span class="rl-btn-label">New object</span>${ICO.plus}</button>
+    </div>
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">All custom objects</span><span class="co-band-n">(${os.length})</span></div>
+      <table class="co-table">
         <thead><tr>
-          <th class="col-first">Object</th><th>Level</th><th>Record name</th>
-          <th class="num">Fields</th><th class="num">Records</th><th>Last updated</th>
-          <th class="col-last"></th>
+          <th class="col-grip"></th><th>Object</th><th>Level</th><th>Record name</th>
+          <th class="num">Fields</th><th class="num">Records</th><th>Last updated</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
-      </table></div>
+      </table>
     </div>
     <div class="co-note">
       <span class="co-note-ico">${ICO.info}</span>
@@ -748,7 +851,7 @@ function viewList(){
       this release, so a child that must have a parent uses a <b>required</b> lookup, and cascade delete
       is replaced by <b>block the delete</b>. Totals come from roll-up fields that ride on the lookup.</div>
     </div>
-  </div></div></div>`;
+  </div>`;
 }
 
 /* ── Object detail ────────────────────────────────────────────────── */
@@ -764,123 +867,110 @@ function viewObject(){
   const later = [['Validation rules','Phase 6'],['Record types','Phase 7'],['Page layouts','Phase 8'],['Access','Phase 10'],['Automations','Phase 12']];
 
   const head = `
-    <div class="rl-page-header">
-      ${crumbs([{label:'Settings'},{label:'Custom objects', go:"go('list')"},{label:o.label}])}
-      <div class="rl-title-block">
-        <div class="rl-title-text">
-          <h1 style="display:flex;align-items:center;gap:10px">
-            ${glyph(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT', true)}
-            ${esc(o.label)}
-            ${tag(lv.label + ' level', lv.hue, 's-md')}
+    <div class="co-head">
+      <div class="co-crumb"><a onclick="go('list')">Custom objects</a><span>›</span><span>${esc(o.label)}</span></div>
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="flex:1;min-width:0">
+          <div class="co-title">${ICON_CUBE} ${esc(o.label)}
+            ${tag(lv.label + ' level', lv.hue)}
             ${o.levelOpen ? openChip('Product has no account or project parent — where a global reference list lives is still open.') : ''}
-          </h1>
-          <p class="rl-page-desc">${esc(o.description) || 'No description'}</p>
-        </div>
-        <div class="rl-title-actions">
-          <button class="rl-btn v-outline sz-md is-icon" onclick="objectMenu(event,'${o.id}')" aria-label="More">${ICO.dots}</button>
-          <button class="rl-btn v-outline sz-md" onclick="openObjectDrawer('${o.id}')"><span class="rl-btn-label">Edit object</span></button>
-          ${route.tab === 'fields' ? `<button class="rl-btn v-primary sz-md" onclick="openFieldDrawer('${o.id}')">${ICO.plus}<span class="rl-btn-label">Add field</span></button>` : ''}
+          </div>
+          <div class="co-desc">${esc(o.description) || 'No description'}</div>
         </div>
       </div>
-      <div class="rl-tabs">
-        ${tabs.map(([k,t,n]) => `<button class="rl-tab${route.tab===k?' active':''}" onclick="go('object','${o.id}','${k}')">${t}${n!==null?` ${tag(String(n))}`:''}</button>`).join('')}
-        ${later.map(([t,p]) => `<button class="rl-tab" disabled style="opacity:.45;cursor:not-allowed" title="${p} — not in this prototype yet">${t}</button>`).join('')}
+      <div class="co-tabs">
+        ${tabs.map(([k,t,n]) => `<button class="co-tab${route.tab===k?' on':''}" onclick="go('object','${o.id}','${k}')">${t}${n!==null?' <span style="color:var(--muted-foreground);font-variant-numeric:tabular-nums">'+n+'</span>':''}</button>`).join('')}
+        ${later.map(([t,p]) => `<button class="co-tab" disabled title="${p} — not in this prototype yet">${t}</button>`).join('')}
       </div>
     </div>`;
 
   const body = route.tab === 'fields' ? tabFields(o) : route.tab === 'rel' ? tabRel(o) : tabDetails(o);
-  return head + `<div class="rl-page-body"><div class="co-body"><div class="co-inner">${body}</div></div></div>`;
+  return head + `<div class="co-scroll">${body}</div>`;
 }
 
 /* ── Tab: fields ──────────────────────────────────────────────────── */
 function tabFields(o){
   const custom = o.fields.length ? o.fields.map(f => fieldRow(o, f)).join('') : `
-    <tr><td class="col-first" colspan="5" style="color:var(--muted-foreground);padding:22px 24px">
+    <tr><td colspan="7" style="color:var(--muted-foreground);padding:22px 20px">
       No fields yet. Every object starts with its Record Name, its parent and the system fields below.
     </td></tr>`;
 
   const sys = systemFields(o).map(f => `
     <tr>
-      <td class="col-first">
-        <div class="co-name">${glyph(f.type)}
-          <div style="min-width:0">
-            <div style="color:var(--muted-foreground)">${esc(f.label)}</div>
-            <div class="co-api">${esc(f.api)}</div>
-          </div></div>
+      <td class="col-grip"></td>
+      <td>
+        <div class="co-fname" style="color:var(--muted-foreground)">${esc(f.label)}</div>
+        <div class="co-api">${esc(f.api)}</div>
       </td>
-      <td style="color:var(--muted-foreground)">${esc(typeMeta(f.type).label)}</td>
+      <td><span class="co-type" style="color:var(--muted-foreground)">${typeIcon(f.type)}${esc(typeMeta(f.type).label)}</span></td>
       <td>${tag('System')}</td>
-      <td class="col-last" style="color:var(--muted-foreground);font-size:12.5px">${esc(f.note)}</td>
+      <td>${mandatoryBox(f.api === 'name' || f.api === o.level.toLowerCase())}</td>
+      <td style="color:var(--muted-foreground);font-size:12.5px">${esc(f.note)}</td>
+      <td class="col-menu"></td>
     </tr>`).join('');
 
   return `
-    <div class="co-sec"><span class="co-sec-t">Fields on this object</span><span class="co-sec-line"></span></div>
-    <div class="rl-section">
-      <div class="co-table-wrap"><table class="co-table">
-        <thead><tr>
-          <th class="col-first">Field</th><th>Type</th><th>Settings</th><th>Description</th><th class="col-last"></th>
-        </tr></thead>
-        <tbody>${custom}</tbody>
-      </table></div>
+    <div class="co-actions">
+      <button class="rl-btn v-outline sz-lg" onclick="objectMenu(event,'${o.id}')"><span class="rl-btn-label">Object actions</span></button>
+      <button class="rl-btn v-outline sz-lg" onclick="openObjectDrawer('${o.id}')"><span class="rl-btn-label">Edit object</span></button>
+      <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}')"><span class="rl-btn-label">New field</span>${ICO.plus}</button>
     </div>
 
-    <div class="co-sec"><span class="co-sec-t">Created automatically</span><span class="co-sec-line"></span></div>
-    <div class="rl-section is-open">
-      <div class="rl-section-header" style="cursor:default">
-        <span class="rl-section-title" style="font-weight:400;font-size:12.5px;color:var(--muted-foreground);line-height:1.55">
-          Rocketlane made these when the object was saved. The Record Name can be relabelled; the rest are
-          fixed. The system ID — not the Record Name — is what lookups, the API and integrations store, so
-          renaming a record never breaks a link.
-        </span>
-      </div>
-      <div class="rl-section-body">
-        <div class="co-table-wrap"><table class="co-table"><tbody>${sys}</tbody></table></div>
-      </div>
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Fields on this object</span><span class="co-band-n">(${o.fields.length})</span></div>
+      <table class="co-table">
+        <thead><tr>
+          <th class="col-grip"></th><th>Field name</th><th>Field type</th>
+          <th>Value assignment</th><th>Is mandatory</th><th>Settings</th><th class="col-menu"></th>
+        </tr></thead>
+        <tbody>${custom}</tbody>
+      </table>
+    </div>
+
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Created automatically</span><span class="co-band-n">(${systemFields(o).length})</span></div>
+      <div class="co-band-d">Rocketlane made these when the object was saved. The Record Name can be relabelled;
+        the rest are fixed. The system ID — not the Record Name — is what lookups, the API and integrations
+        store, so renaming a record never breaks a link.</div>
+      <table class="co-table"><tbody>${sys}</tbody></table>
     </div>`;
 }
 
 function fieldRow(o, f){
   const m = typeMeta(f.type);
   const bits = [];
-  if(f.required) bits.push(tag('Required'));
   if(f.unique) bits.push(tag('Unique'));
   if(f.extId) bits.push(tag('External ID'));
-  if(f.showInReports === false) bits.push(tag('Not in reports', 'gray', 's-sm', 'Hidden from the report builder. Clutter control, not security.'));
+  if(f.showInReports === false) bits.push(tag('Not in reports', '', 'sm', 'Hidden from the report builder. Clutter control, not security.'));
   if(f.type === 'LOOKUP'){
     bits.push(tag('→ ' + esc(targetLabel(f.settings.target)), 'purple'));
     bits.push(f.settings.onDelete === 'BLOCK'
-      ? tag('Block delete', 'orange', 's-sm', 'The linked record cannot be deleted while records point at it.')
-      : tag('Clear on delete', 'gray', 's-sm', 'Deleting the linked record clears this value.'));
+      ? tag('Block delete', 'orange', 'sm', 'The linked record cannot be deleted while records point at it.')
+      : tag('Clear on delete', '', 'sm', 'Deleting the linked record clears this value.'));
   }
   if(f.type === 'ROLLUP'){
     const c = obj(f.settings.child);
-    bits.push(tag(esc(f.settings.fn) + (f.settings.fn !== 'COUNT' && f.settings.aggField ? ' ' + esc(fieldLabel(f.settings.child, f.settings.aggField)) : ''), 'pink'));
-    bits.push(tag('of ' + esc(c ? c.plural : f.settings.child)));
-    bits.push(tag('Read-only', 'gray', 's-sm', 'Roll-up fields cannot be edited by users.'));
+    bits.push(tag(esc(f.settings.fn) + (f.settings.fn !== 'COUNT' && f.settings.aggField ? ' ' + esc(fieldLabel(f.settings.child, f.settings.aggField)) : ''), 'pink', 'sm'));
+    bits.push(tag('of ' + esc(c ? c.plural : f.settings.child), '', 'sm'));
   }
   if(f.type === 'FORMULA'){
     const e = String(f.settings.expr || '');
-    bits.push(tag(`<span class="co-mono">${esc(e.slice(0,24))}${e.length>24?'…':''}</span>`, 'pink', 's-sm', e));
-    bits.push(tag('Read-only'));
+    bits.push(`<span class="co-tag c-teal sm mono" title="${esc(e)}">${esc(e.slice(0,22))}${e.length>22?'…':''}</span>`);
   }
-  if(f.type === 'SELECT' || f.type === 'MULTISELECT') bits.push(tag(`${(f.settings.options||[]).length} values`));
-  if(f.def) bits.push(tag('Default ' + esc(f.def)));
+  if(f.type === 'SELECT' || f.type === 'MULTISELECT') bits.push(tag(`${(f.settings.options||[]).length} values`, '', 'sm'));
+  if(f.def) bits.push(tag('Default ' + esc(f.def), '', 'sm'));
 
   return `<tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
-    <td class="col-first">
-      <div class="co-name">${glyph(f.type)}
-        <div style="min-width:0">
-          <div style="font-weight:500">${esc(f.label)}</div>
-          <div class="co-api">${esc(f.api)}</div>
-        </div></div>
+    <td class="col-grip">${ICO_GRIP}</td>
+    <td>
+      <div class="co-fname">${esc(f.label)}</div>
+      <div class="co-api">${esc(f.api)}</div>
     </td>
-    <td style="color:var(--muted-foreground)">${esc(m.label)}${m.isNew ? ' ' + tag('New', 'purple') : ''}</td>
-    <td><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:300px">${bits.join('')}</div></td>
-    <td style="color:var(--muted-foreground);font-size:12.5px;max-width:230px;white-space:normal">${esc(f.description||'')}</td>
-    <td class="col-last" style="width:44px"><div class="co-row-actions">
-      <button class="co-icon-btn" onclick="event.stopPropagation();openFieldDrawer('${o.id}','${f.id}')" aria-label="Edit">${ICO.pencil}</button>
-      <button class="co-icon-btn danger" onclick="event.stopPropagation();confirmDeleteField('${o.id}','${f.id}')" aria-label="Delete">${ICO.trash}</button>
-    </div></td>
+    <td><span class="co-type">${typeIcon(f.type)}${esc(m.label)}</span>${m.isNew ? ' ' + tag('New', 'purple', 'sm') : ''}</td>
+    <td>${valueAssignment(f)}</td>
+    <td>${mandatoryBox(!!f.required)}</td>
+    <td><div style="display:flex;gap:5px;flex-wrap:wrap;max-width:330px">${bits.join('')}</div></td>
+    <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')" aria-label="More">${ICO.dots}</button></td>
   </tr>`;
 }
 function fieldLabel(objId, fieldId){
@@ -895,25 +985,19 @@ function tabRel(o){
   const inc = incoming(o.id);
   const rollups = o.fields.filter(f => f.type === 'ROLLUP');
 
-  const relCard = (glyphType, title, action, meta) => `
-    <div class="rl-section is-open">
-      <div class="rl-section-header" style="cursor:default">
-        <div class="co-rel-head" style="flex:1">
-          ${glyph(glyphType)}<span class="co-rel-t">${title}</span>
-        </div>
-        ${action}
+  const card = (title, action, meta) => `
+    <div class="co-card">
+      <div class="co-band">
+        <span class="co-band-t">${title}</span>
+        <span style="margin-left:auto">${action}</span>
       </div>
-      <div class="rl-section-body rl-section-body-padded">
-        <div class="co-rel-meta">${meta}</div>
-      </div>
+      <div style="padding:14px 20px"><div class="co-rel-meta">${meta}</div></div>
     </div>`;
 
   const map = `
-    <div class="rl-section is-open">
-      <div class="rl-section-header" style="cursor:default">
-        <span class="rl-section-title">How ${esc(o.label)} sits in the model</span>
-      </div>
-      <div class="rl-section-body rl-section-body-padded">
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">How ${esc(o.label)} sits in the model</span></div>
+      <div style="padding:14px 20px">
         <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:6px">Arrows are lookups, and each one stores the target's system ID.</div>
         <div class="co-map">
           ${o.level !== 'GLOBAL' ? `<div class="co-map-row">
@@ -938,19 +1022,19 @@ function tabRel(o){
       </div>
     </div>`;
 
-  const outHtml = out.length ? out.map(f => relCard('LOOKUP',
-    `${esc(f.label)} <span style="color:var(--muted-foreground)">→</span> ${esc(targetLabel(f.settings.target))}`,
+  const outHtml = out.length ? out.map(f => card(
+    `${esc(f.label)} <span style="color:var(--muted-foreground);font-weight:400">→ ${esc(targetLabel(f.settings.target))}</span>`,
     `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
     `${f.required ? '<b>Required</b> — a record cannot save without one.' : 'Optional — the value can be empty.'}<br>
      On the ${esc(targetLabel(f.settings.target))} record this appears as the related list
      <b>${esc(f.settings.relatedListLabel)}</b>.<br>
      If the ${esc(targetLabel(f.settings.target))} is deleted:
      <b>${f.settings.onDelete === 'BLOCK' ? 'the delete is blocked while ' + esc(o.plural.toLowerCase()) + ' point at it' : 'this value is cleared'}</b>.
-     ${(f.settings.pickerFields||[]).length ? `<br>Picker shows: ${(f.settings.pickerFields||[]).map(x => tag(esc(x))).join(' ')}` : ''}`
+     ${(f.settings.pickerFields||[]).length ? `<br>Picker shows: ${(f.settings.pickerFields||[]).map(x => tag(esc(x), '', 'sm')).join(' ')}` : ''}`
   )).join('') : `<div class="co-rel-empty">${esc(o.label)} does not point at any other object yet.</div>`;
 
-  const incHtml = inc.length ? inc.map(({obj:p, field:f}) => relCard('LOOKUP',
-    `${esc(f.settings.relatedListLabel)} <span style="color:var(--muted-foreground)">·</span> ${esc(p.label)} records`,
+  const incHtml = inc.length ? inc.map(({obj:p, field:f}) => card(
+    `${esc(f.settings.relatedListLabel)} <span style="color:var(--muted-foreground);font-weight:400">· ${esc(p.label)} records</span>`,
     `<button class="rl-btn v-outline sz-sm" onclick="go('object','${p.id}','fields')"><span class="rl-btn-label">Open ${esc(p.label)}</span></button>`,
     `Shown on every ${esc(o.label)} record, listing the ${esc(p.plural.toLowerCase())} whose
      <b>${esc(f.label)}</b> points here. “Add new” creates one with the lookup already set.<br>
@@ -961,7 +1045,7 @@ function tabRel(o){
 
   const rollHtml = rollups.length ? rollups.map(f => {
     const c = obj(f.settings.child);
-    return relCard('ROLLUP', esc(f.label),
+    return card(esc(f.label),
       `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
       `<b>${esc(f.settings.fn)}</b>${f.settings.fn !== 'COUNT' ? ' of <b>' + esc(fieldLabel(f.settings.child, f.settings.aggField)) + '</b>' : ''}
        across ${esc(c ? c.plural : f.settings.child)} linked through
@@ -972,7 +1056,7 @@ function tabRel(o){
   }).join('') : `<div class="co-rel-empty">No roll-ups on ${esc(o.label)} yet.</div>`;
 
   return map + `
-    <div class="co-sec" style="margin-top:20px"><span class="co-sec-t">Points at (lookups on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
+    <div class="co-sec"><span class="co-sec-t">Points at (lookups on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
     ${outHtml}
     <div class="co-sec"><span class="co-sec-t">Referenced by (related lists on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
     ${incHtml}
@@ -991,54 +1075,56 @@ function tabRel(o){
 function tabDetails(o){
   const row = (k, v, note) => `
     <tr>
-      <td class="col-first" style="width:200px;color:var(--muted-foreground);vertical-align:top;padding-top:12px">${k}</td>
-      <td class="col-last" style="white-space:normal">
-        <div style="font-weight:500">${v}</div>
-        ${note ? `<div style="color:var(--muted-foreground);font-size:12.5px;margin-top:3px;line-height:1.55;max-width:560px">${note}</div>` : ''}
+      <td style="width:210px;color:var(--muted-foreground);vertical-align:top;padding-left:20px;padding-top:13px">${k}</td>
+      <td style="padding-right:20px">
+        <div>${v}</div>
+        ${note ? `<div style="color:var(--muted-foreground);font-size:12.5px;margin-top:3px;line-height:1.55;max-width:620px">${note}</div>` : ''}
       </td>
     </tr>`;
   const lv = LEVELS[o.level];
   const next = autoPreview(o.autoFormat, o.autoNext);
 
   return `
-    <div class="co-sec"><span class="co-sec-t">Object</span><span class="co-sec-line"></span>
-      <button class="rl-btn v-outline sz-sm" onclick="openObjectDrawer('${o.id}')"><span class="rl-btn-label">Edit</span></button></div>
-    <div class="rl-section"><div class="co-table-wrap"><table class="co-table"><tbody>
-      ${row('Label', esc(o.label), 'Shows in navigation, page titles, lookups, reports and automations. Renaming is safe — the API name does not change.')}
-      ${row('API name', `<span class="co-mono">${esc(apiFromLabel(o.label))}</span>`)}
-      ${row('Level', tag(lv.label, lv.hue, 's-md') + ' ' + tag('Fixed', 'gray', 's-sm', 'Cannot change after save'),
-        o.level === 'GLOBAL'
-          ? 'A global reference list has no account or project parent. Where it should live is still open.'
-          : `Every record hangs off an ${lv.label.toLowerCase()}. This cannot change after save — the records depend on it.`)}
-      ${row('Description', esc(o.description) || '<span style="color:var(--muted-foreground)">—</span>')}
-      ${row('Record Name', esc(o.recordNameLabel), 'The human label for a record, shown in lists, lookups, search and notifications. It is not the unique identifier — the system ID is.')}
-      ${row('Record Name type', typeMeta(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT').label,
-        o.recordNameType === 'AUTONUMBER' ? 'The system numbers each record.' : 'The user types a name. Up to 80 characters, not necessarily unique.')}
-      ${o.recordNameType === 'AUTONUMBER' ? row('Numbering',
-        `<span class="co-mono">${esc(o.autoFormat)}</span> → <span class="co-mono">${esc(next||'')}</span> next`,
-        'Changing the format affects new records only; old records keep their number. The starting number can only move up, and gaps are allowed — a deleted record’s number is never reused.') : ''}
-    </tbody></table></div></div>
+    <div class="co-actions">
+      <button class="rl-btn v-outline sz-lg" onclick="openObjectDrawer('${o.id}')"><span class="rl-btn-label">Edit object</span></button>
+    </div>
 
-    <div class="co-sec"><span class="co-sec-t">Behaviour</span><span class="co-sec-line"></span></div>
-    <div class="rl-section"><div class="co-table-wrap"><table class="co-table"><tbody>
-      ${row('Reports', tag('Always on', 'green'), 'The object and its fields are available in the report builder. An object with no reports has little value, so there is no switch.')}
-      ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Every field change — old value, new value, who and when — is written to the global audit log.')}
-      ${row('Search', tag('Always on', 'green'), 'Records are found in global search by Record Name. Searching other text fields comes later.')}
-    </tbody></table></div></div>
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Object</span></div>
+      <table class="co-table"><tbody>
+        ${row('Label', esc(o.label), 'Shows in navigation, page titles, lookups, reports and automations. Renaming is safe — the API name does not change.')}
+        ${row('API name', `<span class="co-mono">${esc(apiFromLabel(o.label))}</span>`)}
+        ${row('Level', tag(lv.label, lv.hue) + ' ' + tag('Fixed', '', 'sm', 'Cannot change after save'),
+          o.level === 'GLOBAL'
+            ? 'A global reference list has no account or project parent. Where it should live is still open.'
+            : `Every record hangs off an ${lv.label.toLowerCase()}. This cannot change after save — the records depend on it.`)}
+        ${row('Description', esc(o.description) || '<span style="color:var(--muted-foreground)">—</span>')}
+        ${row('Record Name', esc(o.recordNameLabel), 'The human label for a record, shown in lists, lookups, search and notifications. It is not the unique identifier — the system ID is.')}
+        ${row('Record Name type', `<span class="co-type">${typeIcon(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}${typeMeta(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT').label}</span>`,
+          o.recordNameType === 'AUTONUMBER' ? 'The system numbers each record.' : 'The user types a name. Up to 80 characters, not necessarily unique.')}
+        ${o.recordNameType === 'AUTONUMBER' ? row('Numbering',
+          `<span class="co-mono">${esc(o.autoFormat)}</span> → <span class="co-mono">${esc(next||'')}</span> next`,
+          'Changing the format affects new records only; old records keep their number. The starting number can only move up, and gaps are allowed — a deleted record’s number is never reused.') : ''}
+      </tbody></table>
+    </div>
 
-    <div class="co-sec"><span class="co-sec-t">Danger zone</span><span class="co-sec-line"></span></div>
-    <div class="rl-section is-open">
-      <div class="rl-section-header" style="cursor:default">
-        <div style="flex:1">
-          <div class="rl-section-title">Delete ${esc(o.label)}</div>
-        </div>
-        <button class="rl-btn v-danger sz-sm" onclick="confirmDeleteObject('${o.id}')"><span class="rl-btn-label">Delete</span></button>
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Behaviour</span></div>
+      <table class="co-table"><tbody>
+        ${row('Reports', tag('Always on', 'green'), 'The object and its fields are available in the report builder. An object with no reports has little value, so there is no switch.')}
+        ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Every field change — old value, new value, who and when — is written to the global audit log.')}
+        ${row('Search', tag('Always on', 'green'), 'Records are found in global search by Record Name. Searching other text fields comes later.')}
+      </tbody></table>
+    </div>
+
+    <div class="co-card">
+      <div class="co-band">
+        <span class="co-band-t">Delete ${esc(o.label)}</span>
+        <span style="margin-left:auto"><button class="rl-btn v-danger sz-sm" onclick="confirmDeleteObject('${o.id}')"><span class="rl-btn-label">Delete</span></button></span>
       </div>
-      <div class="rl-section-body rl-section-body-padded">
-        <div style="font-size:12.5px;color:var(--muted-foreground);line-height:1.55">
-          Removes the object, its ${o.records.toLocaleString()} records and every field on it.
-          ${incoming(o.id).length ? `Blocked while ${incoming(o.id).map(x=>esc(x.obj.label)).join(' and ')} point at it.` : ''}
-        </div>
+      <div style="padding:13px 20px;font-size:12.5px;color:var(--muted-foreground);line-height:1.55">
+        Removes the object, its ${o.records.toLocaleString()} records and every field on it.
+        ${incoming(o.id).length ? `Blocked while ${incoming(o.id).map(x=>esc(x.obj.label)).join(' and ')} point at it.` : ''}
       </div>
     </div>`;
 }
@@ -1970,6 +2056,13 @@ function showMenu(ev, items){
     if(!i.disabled) btn.onclick = () => { closeMenu(); i.fn(); };
   });
   menuEl = el;
+}
+function fieldMenu(ev, objId, fieldId){
+  showMenu(ev, [
+    {label:'Edit field', fn:()=>openFieldDrawer(objId, fieldId)},
+    '-',
+    {label:'Delete field', danger:true, fn:()=>confirmDeleteField(objId, fieldId)},
+  ]);
 }
 function pageMenu(ev){
   showMenu(ev, [
