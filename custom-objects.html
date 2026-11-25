@@ -1074,9 +1074,9 @@ function tabDetails(o){
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">Behaviour</span></div>
       <table class="co-table"><tbody>
-        ${row('Reports', tag('Always on', 'green'))}
+        ${row('Reports', o.reports !== false ? tag('On', 'green') : tag('Off'), 'Available in the report builder.')}
         ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Field changes go to the audit log.')}
-        ${row('Search', tag('Always on', 'green'), 'By Record Name.')}
+        ${row('Search', o.search !== false ? tag('On', 'green') : tag('Off'), 'By Record Name.')}
       </tbody></table>
     </div>
 
@@ -1163,14 +1163,16 @@ function openObjectDrawer(id){
   const o = id ? obj(id) : null;
   od = {
     id: id || null, err: {},
-    touchedPlural: !!o, touchedRecName: !!o,
+    touchedRecName: !!o,
     d: o ? JSON.parse(JSON.stringify({
         label:o.label, plural:o.plural, level:o.level, description:o.description,
         recordNameLabel:o.recordNameLabel, recordNameType:o.recordNameType,
-        autoFormat:o.autoFormat, autoStart:o.autoStart, fieldHistory:o.fieldHistory,
+        autoFormat:o.autoFormat, autoStart:o.autoStart,
+        reports:o.reports !== false, fieldHistory:o.fieldHistory, search:o.search !== false,
       }))
       : {label:'', plural:'', level:'ACCOUNT', description:'', recordNameLabel:'',
-         recordNameType:'TEXT', autoFormat:'', autoStart:1, fieldHistory:true},
+         recordNameType:'TEXT', autoFormat:'', autoStart:1,
+         reports:true, fieldHistory:true, search:true},
   };
   odRender();
 }
@@ -1196,12 +1198,8 @@ function odRender(){
     ) + `
     <div class="rl-drawer-body">
       ${field('Label', true,
-        `<input class="co-input" id="od-label" value="${esc(d.label)}" placeholder="Sales Order" oninput="odSet('label', this.value)">`,
+        `<input class="co-input" id="od-label" value="${esc(d.label)}" placeholder="Enter label" oninput="odSet('label', this.value)">`,
         'Must be unique across all objects.', fErr('label', od.err))}
-
-      ${field('Plural label', true,
-        `<input class="co-input" id="od-plural" value="${esc(d.plural)}" placeholder="${esc(pluralise(d.label)||'Sales Orders')}" oninput="odSet('plural', this.value); od.touchedPlural = true">`,
-        'Used in list views and related lists.')}
 
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Level <span class="rl-field-required">*</span>
@@ -1222,8 +1220,7 @@ function odRender(){
       </div></div>
 
       ${field('Description', false,
-        `<textarea class="co-input" rows="2" placeholder="Holds sales orders from Salesforce. One order can create one or more projects." oninput="odSet('description', this.value)">${esc(d.description)}</textarea>`,
-        'Admins only.')}
+        `<textarea class="co-input" rows="2" placeholder="Enter description" oninput="odSet('description', this.value)">${esc(d.description)}</textarea>`)}
 
       ${secLabel('Record name')}
       ${field('Record Name label', true,
@@ -1262,40 +1259,21 @@ function odRender(){
         </div>
         <div class="co-prev" style="margin-bottom:16px">
           <span>First record</span><span class="co-prev-val" id="od-preview">${esc(autoPreview(d.autoFormat, d.autoStart) || '—')}</span>
-          <span style="margin-left:auto">Gaps are allowed.</span>
         </div>
       ` : ''}
 
       ${secLabel('Behaviour')}
-      <div class="co-sw">
-        <button class="sc-switch sc-switch--on" disabled style="opacity:.55;cursor:default"><span class="sc-switch-thumb"></span></button>
-        <div style="flex:1">
-          <div class="co-ctl-t">Reports ${tag('Always on', 'green')}</div>
-        </div>
-      </div>
-      <div class="co-sw">
-        <button class="sc-switch${d.fieldHistory?' sc-switch--on':''}" onclick="odSet('fieldHistory', !od.d.fieldHistory); odRender()"
-                role="switch" aria-checked="${d.fieldHistory}"><span class="sc-switch-thumb"></span></button>
-        <div style="flex:1">
-          <div class="co-ctl-t">Field history</div>
-          <div class="co-ctl-d">Field changes go to the audit log. ${openChip('Every field, or only selected ones?')}</div>
-        </div>
-      </div>
-      <div class="co-sw">
-        <button class="sc-switch sc-switch--on" disabled style="opacity:.55;cursor:default"><span class="sc-switch-thumb"></span></button>
-        <div style="flex:1">
-          <div class="co-ctl-t">Search ${tag('Always on', 'green')}</div>
-          <div class="co-ctl-d">By Record Name.</div>
-        </div>
-      </div>
-
-      ${editing ? '' : `
-        ${secLabel('Created on save')}
-        <div style="font-size:13px;color:var(--muted-foreground);line-height:1.8">
-          System ID · ${esc(d.recordNameLabel || recNamePlaceholder)} · ${LEVELS[d.level].label} lookup ·
-          Created and Updated by / at · a list and detail view · a nav entry, admins only
-        </div>
-      `}
+      ${[['reports','Reports','Available in the report builder.'],
+         ['fieldHistory','Field history','Field changes go to the audit log.'],
+         ['search','Search','Found in global search by Record Name.']].map(([k,t,note]) => `
+        <div class="co-sw">
+          <button class="sc-switch${d[k]?' sc-switch--on':''}" onclick="odSet('${k}', !od.d.${k}); odRender()"
+                  role="switch" aria-checked="${!!d[k]}"><span class="sc-switch-thumb"></span></button>
+          <div style="flex:1">
+            <div class="co-ctl-t">${t}</div>
+            <div class="co-ctl-d">${note}</div>
+          </div>
+        </div>`).join('')}
     </div>` +
     drawerFoot('', editing ? 'Save changes' : 'Create object', 'odSave()'),
     560, 'obj:' + (od.id || 'new'));
@@ -1718,10 +1696,10 @@ function odSet(k, v){
   od.d[k] = v;
   delete od.err[k];
   if(k === 'label'){
-    if(!od.touchedPlural) od.d.plural = pluralise(v);
+    /* Plural is no longer a field — it is derived from the label and used
+       for list views and as the default related-list title. */
+    od.d.plural = pluralise(v);
     if(!od.touchedRecName) od.d.recordNameLabel = v ? v + ' Name' : '';
-    const p = document.getElementById('od-plural');
-    if(p && !od.touchedPlural){ p.value = od.d.plural; p.placeholder = pluralise(v) || 'Sales Orders'; }
     const r = document.getElementById('od-recname');
     if(r && !od.touchedRecName){ r.value = od.d.recordNameLabel; r.placeholder = (v||'Sales Order') + ' Name'; }
   }
@@ -1764,7 +1742,8 @@ function odSave(){
     Object.assign(o, {
       label, plural:(d.plural||pluralise(label)).trim(), description:d.description,
       recordNameLabel:d.recordNameLabel.trim(), recordNameType:d.recordNameType,
-      autoFormat:d.autoFormat, autoStart:d.autoStart, fieldHistory:d.fieldHistory,
+      autoFormat:d.autoFormat, autoStart:d.autoStart,
+      reports:d.reports, fieldHistory:d.fieldHistory, search:d.search,
       updated:'Just now',
     });
     if(d.recordNameType === 'AUTONUMBER' && o.autoNext < d.autoStart) o.autoNext = d.autoStart;
@@ -1774,7 +1753,8 @@ function odSave(){
       id: uid('o'), label, plural:(d.plural||pluralise(label)).trim(), level:d.level,
       description:d.description, recordNameLabel:d.recordNameLabel.trim(),
       recordNameType:d.recordNameType, autoFormat:d.autoFormat, autoStart:d.autoStart,
-      autoNext:d.autoStart, fieldHistory:d.fieldHistory, records:0, updated:'Just now', fields:[],
+      autoNext:d.autoStart, reports:d.reports, fieldHistory:d.fieldHistory, search:d.search,
+      records:0, updated:'Just now', fields:[],
     };
     state.objects.push(o); save(); closeDrawer(); go('object', o.id, 'fields');
     toast(`${label} created. Record Name, parent and system fields are in place — add your own fields next.`);
