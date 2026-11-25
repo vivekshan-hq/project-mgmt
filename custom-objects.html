@@ -784,11 +784,7 @@ function viewList(){
       <div style="display:flex;align-items:flex-start;gap:14px">
         <div style="flex:1;min-width:0">
           <div class="co-title">${ICON_CUBE} Custom objects</div>
-          <div class="co-desc">
-            Objects your team defines, on top of the ones Rocketlane ships with. Each one has its own
-            fields, records, reports and automations, and can point at other objects and at accounts
-            and projects.
-          </div>
+          <div class="co-desc">Objects your team defines, with their own fields, records and automations.</div>
         </div>
       </div>
     </div>`;
@@ -797,10 +793,7 @@ function viewList(){
     return head + `<div class="co-scroll">
       <div class="co-empty">
         <div class="co-empty-t">No custom objects yet</div>
-        <div class="co-empty-d">
-          Create one when your business has something Rocketlane has no place for — a sales order
-          between the account and the project, a change request inside a project, a product catalogue.
-        </div>
+        <div class="co-empty-d">For things Rocketlane has no place for — a sales order, a change request, a product catalogue.</div>
         <button class="rl-btn v-primary sz-md" onclick="openObjectDrawer()"><span class="rl-btn-label">New object</span>${ICO.plus}</button>
       </div>
     </div>`;
@@ -814,7 +807,7 @@ function viewList(){
       <td>
         <div class="co-fname">${esc(o.label)}</div>
       </td>
-      <td>${tag(lv.label, lv.hue)}${o.levelOpen ? ' ' + openChip('Product has no account or project parent. Four options are open: account-level and duplicated per account; a picklist, which cannot hold a price; an existing global list such as rate cards; or allowing global objects for reference lists only.') : ''}</td>
+      <td>${tag(lv.label, lv.hue)}${o.levelOpen ? ' ' + openChip('Where a global reference list lives is undecided.') : ''}</td>
       <td>
         <span class="co-type">${typeIcon(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}${esc(o.recordNameLabel)}</span>
         ${o.recordNameType === 'AUTONUMBER' ? ' ' + tag(esc(o.autoFormat), '', 'sm') : ''}
@@ -841,12 +834,7 @@ function viewList(){
         <tbody>${rows}</tbody>
       </table>
     </div>
-    <div class="co-note">
-      <span class="co-note-ico">${ICO.info}</span>
-      <div><b>Every link between objects is a lookup.</b> Master-detail relationships are not part of
-      this release, so a child that must have a parent uses a <b>required</b> lookup, and cascade delete
-      is replaced by <b>block the delete</b>. Totals come from roll-up fields that ride on the lookup.</div>
-    </div>
+
   </div>`;
 }
 
@@ -869,7 +857,7 @@ function viewObject(){
         <div style="flex:1;min-width:0">
           <div class="co-title">${ICON_CUBE} ${esc(o.label)}
             ${tag(lv.label + ' level', lv.hue)}
-            ${o.levelOpen ? openChip('Product has no account or project parent — where a global reference list lives is still open.') : ''}
+            ${o.levelOpen ? openChip('Where a global reference list lives is undecided.') : ''}
           </div>
           <div class="co-desc">${esc(o.description) || 'No description'}</div>
         </div>
@@ -924,9 +912,7 @@ function tabFields(o){
 
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">Created automatically</span><span class="co-band-n">(${systemFields(o).length})</span></div>
-      <div class="co-band-d">Rocketlane made these when the object was saved. The Record Name can be relabelled;
-        the rest are fixed. The system ID — not the Record Name — is what lookups, the API and integrations
-        store, so renaming a record never breaks a link.</div>
+      <div class="co-band-d">Created with the object. Only the Record Name can be relabelled.</div>
       <table class="co-table"><tbody>${sys}</tbody></table>
     </div>`;
 }
@@ -992,7 +978,7 @@ function tabRel(o){
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">How ${esc(o.label)} sits in the model</span></div>
       <div style="padding:14px 20px">
-        <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:6px">Arrows are lookups, and each one stores the target's system ID.</div>
+        <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:6px">Arrows are lookups.</div>
         <div class="co-map">
           ${o.level !== 'GLOBAL' ? `<div class="co-map-row">
             <span class="co-node sys">${LEVELS[o.level].label}</span>
@@ -1000,7 +986,7 @@ function tabRel(o){
             <span class="co-node me">${esc(o.label)}</span>
           </div>` : `<div class="co-map-row">
             <span class="co-node me">${esc(o.label)}</span>
-            <span class="co-conn">no parent — </span>${openChip('Where a global reference list lives is still open.')}
+            <span class="co-conn">no parent — </span>${openChip('Undecided.')}
           </div>`}
           ${out.map(f => `<div class="co-map-row">
             <span class="co-node me">${esc(o.label)}</span>
@@ -1019,22 +1005,18 @@ function tabRel(o){
   const outHtml = out.length ? out.map(f => card(
     `${esc(f.label)} <span style="color:var(--muted-foreground);font-weight:400">→ ${esc(targetLabel(f.settings.target))}</span>`,
     `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
-    `${f.required ? '<b>Required</b> — a record cannot save without one.' : 'Optional — the value can be empty.'}<br>
-     On the ${esc(targetLabel(f.settings.target))} record this appears as the related list
-     <b>${esc(f.settings.relatedListLabel)}</b>.<br>
-     If the ${esc(targetLabel(f.settings.target))} is deleted:
-     <b>${f.settings.onDelete === 'BLOCK' ? 'the delete is blocked while ' + esc(o.plural.toLowerCase()) + ' point at it' : 'this value is cleared'}</b>.
-     ${(f.settings.pickerFields||[]).length ? `<br>Picker shows: ${(f.settings.pickerFields||[]).map(x => tag(esc(x), '', 'sm')).join(' ')}` : ''}`
+    `${f.required ? '<b>Required</b>' : 'Optional'} · related list <b>${esc(f.settings.relatedListLabel)}</b> on ${esc(targetLabel(f.settings.target))} ·
+     ${f.settings.onDelete === 'BLOCK' ? '<b>blocks delete</b>' : 'clears on delete'}
+     ${(f.settings.pickerFields||[]).length ? `<br>Picker: ${(f.settings.pickerFields||[]).map(x => tag(esc(x), '', 'sm')).join(' ')}` : ''}`
   )).join('') : `<div class="co-rel-empty">${esc(o.label)} does not point at any other object yet.</div>`;
 
   const incHtml = inc.length ? inc.map(({obj:p, field:f}) => card(
     `${esc(f.settings.relatedListLabel)} <span style="color:var(--muted-foreground);font-weight:400">· ${esc(p.label)} records</span>`,
     `<button class="rl-btn v-outline sz-sm" onclick="go('object','${p.id}','fields')"><span class="rl-btn-label">Open ${esc(p.label)}</span></button>`,
-    `Shown on every ${esc(o.label)} record, listing the ${esc(p.plural.toLowerCase())} whose
-     <b>${esc(f.label)}</b> points here. “Add new” creates one with the lookup already set.<br>
+    `Lists the ${esc(p.plural.toLowerCase())} whose <b>${esc(f.label)}</b> points here.
      ${f.settings.onDelete === 'BLOCK'
-       ? `<b>Blocks deletion</b> — a ${esc(o.label)} with ${esc(p.plural.toLowerCase())} cannot be deleted.`
-       : `Deleting a ${esc(o.label)} clears <b>${esc(f.label)}</b> on its ${esc(p.plural.toLowerCase())}.`}`
+       ? `<b>Blocks deletion</b> of this ${esc(o.label)}.`
+       : `Cleared if this ${esc(o.label)} is deleted.`}`
   )).join('') : `<div class="co-rel-empty">No other object points at ${esc(o.label)} yet.</div>`;
 
   const rollHtml = rollups.length ? rollups.map(f => {
@@ -1042,11 +1024,9 @@ function tabRel(o){
     return card(esc(f.label),
       `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
       `<b>${esc(f.settings.fn)}</b>${f.settings.fn !== 'COUNT' ? ' of <b>' + esc(fieldLabel(f.settings.child, f.settings.aggField)) + '</b>' : ''}
-       across ${esc(c ? c.plural : f.settings.child)} linked through
+       across ${esc(c ? c.plural : f.settings.child)}, through
        <b>${esc(c ? fieldLabel(c.id, f.settings.childLookup) : f.settings.childLookup)}</b>.
-       ${f.settings.filterField ? `<br>Only where <b>${esc(fieldLabel(f.settings.child, f.settings.filterField))}</b> ${f.settings.filterOp === 'neq' ? 'is not' : 'is'} <b>${esc(f.settings.filterValue)}</b>.` : ''}
-       <br>Recalculates when a child is created, changed or deleted — and on both sides when a child
-       is moved to another ${esc(o.label)}.`);
+       ${f.settings.filterField ? ` Only where <b>${esc(fieldLabel(f.settings.child, f.settings.filterField))}</b> ${f.settings.filterOp === 'neq' ? 'is not' : 'is'} <b>${esc(f.settings.filterValue)}</b>.` : ''}`);
   }).join('') : `<div class="co-rel-empty">No roll-ups on ${esc(o.label)} yet.</div>`;
 
   return map + `
@@ -1054,15 +1034,8 @@ function tabRel(o){
     ${outHtml}
     <div class="co-sec"><span class="co-sec-t">Referenced by (related lists on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
     ${incHtml}
-    <div class="co-sec"><span class="co-sec-t">Roll-ups</span><span class="co-sec-line"></span>${openChip('A native roll-up on lookups is the recommendation, not a decision. The alternatives were automation-built totals, or totals that live only in reports.')}</div>
-    ${rollHtml}
-    <div class="co-note warn" style="margin-top:18px">
-      <span class="co-note-ico">${ICO.warn}</span>
-      <div><b>Reparenting is the case to watch.</b> Move a line to another order and both orders have to
-      be recalculated — the old one without it, the new one with it. If the old parent keeps its number,
-      the same amount is counted twice across two records, and every report and validation rule that
-      reads the total is wrong.</div>
-    </div>`;
+    <div class="co-sec"><span class="co-sec-t">Roll-ups</span><span class="co-sec-line"></span>${openChip('Recommended, not decided.')}</div>
+    ${rollHtml}`;
 }
 
 /* ── Tab: details (the Phase 1 settings, after save) ──────────────── */
@@ -1086,27 +1059,24 @@ function tabDetails(o){
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">Object</span></div>
       <table class="co-table"><tbody>
-        ${row('Label', esc(o.label), 'Shows in navigation, page titles, lookups, reports and automations. Renaming it is safe — reports, automations and integrations keep working.')}
+        ${row('Label', esc(o.label))}
         ${row('Level', tag(lv.label, lv.hue) + ' ' + tag('Fixed', '', 'sm', 'Cannot change after save'),
-          o.level === 'GLOBAL'
-            ? 'A global reference list has no account or project parent. Where it should live is still open.'
-            : `Every record hangs off an ${lv.label.toLowerCase()}. This cannot change after save — the records depend on it.`)}
+          o.level === 'GLOBAL' ? 'No account or project parent.' : 'Records depend on it.')}
         ${row('Description', esc(o.description) || '<span style="color:var(--muted-foreground)">—</span>')}
-        ${row('Record Name', esc(o.recordNameLabel), 'The human label for a record, shown in lists, lookups, search and notifications. It is not the unique identifier — the system ID is.')}
-        ${row('Record Name type', `<span class="co-type">${typeIcon(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}${typeMeta(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT').label}</span>`,
-          o.recordNameType === 'AUTONUMBER' ? 'The system numbers each record.' : 'The user types a name. Up to 80 characters, not necessarily unique.')}
+        ${row('Record Name', esc(o.recordNameLabel), 'Shown in lists, lookups and search.')}
+        ${row('Record Name type', `<span class="co-type">${typeIcon(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}${typeMeta(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT').label}</span>`)}
         ${o.recordNameType === 'AUTONUMBER' ? row('Numbering',
           `<span class="co-mono">${esc(o.autoFormat)}</span> → <span class="co-mono">${esc(next||'')}</span> next`,
-          'Changing the format affects new records only; old records keep their number. The starting number can only move up, and gaps are allowed — a deleted record’s number is never reused.') : ''}
+          'Format applies to new records only.') : ''}
       </tbody></table>
     </div>
 
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">Behaviour</span></div>
       <table class="co-table"><tbody>
-        ${row('Reports', tag('Always on', 'green'), 'The object and its fields are available in the report builder. An object with no reports has little value, so there is no switch.')}
-        ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Every field change — old value, new value, who and when — is written to the global audit log.')}
-        ${row('Search', tag('Always on', 'green'), 'Records are found in global search by Record Name. Searching other text fields comes later.')}
+        ${row('Reports', tag('Always on', 'green'))}
+        ${row('Field history', o.fieldHistory ? tag('On', 'green') : tag('Off'), 'Field changes go to the audit log.')}
+        ${row('Search', tag('Always on', 'green'), 'By Record Name.')}
       </tbody></table>
     </div>
 
@@ -1116,7 +1086,7 @@ function tabDetails(o){
         <span style="margin-left:auto"><button class="rl-btn v-danger sz-sm" onclick="confirmDeleteObject('${o.id}')"><span class="rl-btn-label">Delete</span></button></span>
       </div>
       <div style="padding:13px 20px;font-size:12.5px;color:var(--muted-foreground);line-height:1.55">
-        Removes the object, its ${o.records.toLocaleString()} records and every field on it.
+        Removes ${o.records.toLocaleString()} records and ${o.fields.length} fields.
         ${incoming(o.id).length ? `Blocked while ${incoming(o.id).map(x=>esc(x.obj.label)).join(' and ')} point at it.` : ''}
       </div>
     </div>`;
@@ -1213,7 +1183,7 @@ function odRender(){
   const recNamePlaceholder = d.label ? `${d.label} Name` : 'Sales Order Name';
 
   const levelCard = (key, title, desc) => `
-    <button class="co-card${d.level===key?' sel':''}" type="button" onclick="odLevel('${key}')">
+    <button class="co-card-opt${d.level===key?' sel':''}" type="button" onclick="odLevel('${key}')">
       <div class="co-card-t">${title}</div>
       <div class="co-card-d">${desc}</div>
     </button>`;
@@ -1221,33 +1191,31 @@ function odRender(){
   showDrawer(
     drawerHead(
       editing ? 'Edit ' + esc(o.label) : 'New custom object',
-      editing ? 'The level and, once records exist, the Record Name type are fixed — everything else can change.'
-              : 'Define the object itself. Fields and relationships come next, on the object’s own page.'
+      editing ? 'Level is fixed. Everything else can change.'
+              : 'Fields come next, on the object’s page.'
     ) + `
     <div class="rl-drawer-body">
       ${field('Label', true,
         `<input class="co-input" id="od-label" value="${esc(d.label)}" placeholder="Sales Order" oninput="odSet('label', this.value)">`,
-        'What users see in navigation, page titles, lookups, reports and automations. Must be unique across every object, including the ones Rocketlane ships with.',
-        fErr('label', od.err))}
+        'Must be unique across all objects.', fErr('label', od.err))}
 
       ${field('Plural label', true,
         `<input class="co-input" id="od-plural" value="${esc(d.plural)}" placeholder="${esc(pluralise(d.label)||'Sales Orders')}" oninput="odSet('plural', this.value); od.touchedPlural = true">`,
-        'Used for list views and as the default title of the related list this object creates on whatever points at it.')}
+        'Used in list views and related lists.')}
 
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Level <span class="rl-field-required">*</span>
           ${editing ? tag('Fixed after save', 'gray', 's-sm', 'Records depend on the level') : ''}</label>
         ${editing ? `
-          <div class="co-prev">${tag(LEVELS[d.level].label, LEVELS[d.level].hue, 's-md')}
-            <span>Records depend on the level, so it cannot be changed. Create a new object to move levels.</span></div>
+          <div class="co-prev">${tag(LEVELS[d.level].label, LEVELS[d.level].hue)}<span>Records depend on it.</span></div>
         ` : `
           <div class="co-cards">
-            ${levelCard('ACCOUNT','Account','Lives on the account and can outlive any one project. Commercial data: orders, contracts, assets.')}
-            ${levelCard('PROJECT','Project','Lives inside the project and ends with it. Delivery data: change requests, risks, environments.')}
+            ${levelCard('ACCOUNT','Account','Outlives any one project. Orders, contracts, assets.')}
+            ${levelCard('PROJECT','Project','Ends with the project. Change requests, risks.')}
           </div>
-          <button class="co-card" style="margin-top:8px;width:100%" disabled type="button">
-            <div class="co-card-t">Global ${openChip('A product catalogue has no account or project parent. Options: account-level and duplicated per account; a picklist, which cannot hold a price; an existing global list such as rate cards; or allowing global objects for reference lists only.')}</div>
-            <div class="co-card-d">A reference list with no parent, such as a product catalogue. Not decided — the seeded Product object uses it so the question stays visible.</div>
+          <button class="co-card-opt" style="margin-top:8px;width:100%" disabled type="button">
+            <div class="co-card-t">Global ${openChip('Undecided — a catalogue has no account or project parent.')}</div>
+            <div class="co-card-d">A reference list with no parent, such as a product catalogue.</div>
           </button>
           <div class="rl-field-hint">This cannot be changed later.</div>
         `}
@@ -1255,35 +1223,27 @@ function odRender(){
 
       ${field('Description', false,
         `<textarea class="co-input" rows="2" placeholder="Holds sales orders from Salesforce. One order can create one or more projects." oninput="odSet('description', this.value)">${esc(d.description)}</textarea>`,
-        'A note for other admins. Users never see it.')}
+        'Admins only.')}
 
       ${secLabel('Record name')}
-      <div class="co-note">
-        <span class="co-note-ico">${ICO.info}</span>
-        <div>The Record Name is how people recognise a record — in lists, lookups, search and
-        notifications. It is <b>not</b> the identifier: every record also gets a system ID, and that is
-        what lookups, the API and integrations store.</div>
-      </div>
-
       ${field('Record Name label', true,
         `<input class="co-input" id="od-recname" value="${esc(d.recordNameLabel)}" placeholder="${esc(recNamePlaceholder)}" oninput="odSet('recordNameLabel', this.value); od.touchedRecName = true">`,
-        'Example: “Order Number”. The field is always present and cannot be deleted.',
-        fErr('recordNameLabel', od.err))}
+        'How people recognise a record. Always present.', fErr('recordNameLabel', od.err))}
 
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Record Name type <span class="rl-field-required">*</span>
           ${hasRecords ? tag(o.records.toLocaleString() + ' records exist', 'gray', 's-sm') : ''}</label>
         ${hasRecords ? `
           <div class="co-prev"><span class="co-prev-val">${esc(typeMeta(d.recordNameType==='AUTONUMBER'?'AUTONUMBER':'TEXT').label)}</span>
-            <span>Changing this once records exist would renumber or blank every one of them.</span></div>
+            <span>Fixed once records exist.</span></div>
         ` : `
           <div class="co-seg">
             <button class="${d.recordNameType==='TEXT'?'active':''}" onclick="odNameType('TEXT')" type="button">Text</button>
             <button class="${d.recordNameType==='AUTONUMBER'?'active':''}" onclick="odNameType('AUTONUMBER')" type="button">Auto Number</button>
           </div>
           <div class="rl-field-hint">${d.recordNameType === 'TEXT'
-            ? 'The user types a name — up to 80 characters, and not necessarily unique. Good when records have a natural name: “H&amp;M Europe Q3 Rollout”.'
-            : 'Rocketlane numbers each record. Good when there is no natural name: “LI-000231”.'}</div>
+            ? 'Typed by the user. Up to 80 characters.'
+            : 'Numbered by Rocketlane.'}</div>
         `}
       </div></div>
 
@@ -1291,19 +1251,18 @@ function odRender(){
         <div class="co-f-row">
           ${field('Format', true,
             `<input class="co-input co-mono" value="${esc(d.autoFormat)}" placeholder="SO-{0000000}" oninput="odSet('autoFormat', this.value); odPreview()">`,
-            'Prefix plus a number token. The zeros set the minimum width; the number grows past it when it has to.',
-            fErr('autoFormat', od.err))}
+            'Zeros set the minimum width.', fErr('autoFormat', od.err))}
           <div class="co-f" style="max-width:150px"><div class="rl-field">
             <label class="rl-field-label">Starting number</label>
             <input class="co-input co-mono" type="number" min="1" value="${esc(d.autoStart)}"
                    oninput="odSet('autoStart', parseInt(this.value||'1',10)); odPreview()">
-            <div class="rl-field-hint">${editing ? 'Can only move up.' : 'Start at 10000 to carry on from an older system.'}</div>
+            <div class="rl-field-hint">${editing ? 'Can only move up.' : ''}</div>
             ${fErr('autoStart', od.err)}
           </div></div>
         </div>
         <div class="co-prev" style="margin-bottom:16px">
           <span>First record</span><span class="co-prev-val" id="od-preview">${esc(autoPreview(d.autoFormat, d.autoStart) || '—')}</span>
-          <span style="margin-left:auto">Gaps are allowed — a deleted record’s number is never reused.</span>
+          <span style="margin-left:auto">Gaps are allowed.</span>
         </div>
       ` : ''}
 
@@ -1312,8 +1271,6 @@ function odRender(){
         <button class="sc-switch sc-switch--on" disabled style="opacity:.55;cursor:default"><span class="sc-switch-thumb"></span></button>
         <div style="flex:1">
           <div class="co-ctl-t">Reports ${tag('Always on', 'green')}</div>
-          <div class="co-ctl-d">The object and its fields show up in the report builder. An object you cannot
-            report on has little value, so there is no switch to turn off.</div>
         </div>
       </div>
       <div class="co-sw">
@@ -1321,35 +1278,26 @@ function odRender(){
                 role="switch" aria-checked="${d.fieldHistory}"><span class="sc-switch-thumb"></span></button>
         <div style="flex:1">
           <div class="co-ctl-t">Field history</div>
-          <div class="co-ctl-d">Record every field change — old value, new value, who and when — in the global
-            audit log. ${openChip('Track every field, or only the ones an admin selects? All fields is simpler for customers but costs storage; Salesforce tracks a selected subset with a per-object limit.')}</div>
+          <div class="co-ctl-d">Field changes go to the audit log. ${openChip('Every field, or only selected ones?')}</div>
         </div>
       </div>
       <div class="co-sw">
         <button class="sc-switch sc-switch--on" disabled style="opacity:.55;cursor:default"><span class="sc-switch-thumb"></span></button>
         <div style="flex:1">
           <div class="co-ctl-t">Search ${tag('Always on', 'green')}</div>
-          <div class="co-ctl-d">Records are found in global search by Record Name. Searching other text fields comes later.</div>
+          <div class="co-ctl-d">By Record Name.</div>
         </div>
       </div>
 
       ${editing ? '' : `
-        ${secLabel('What Rocketlane creates on save')}
-        <div class="rl-section"><div class="rl-section-body rl-section-body-padded">
-          <div style="font-size:13px;color:var(--muted-foreground);line-height:1.9">
-            <b style="color:var(--foreground)">System ID</b> on every record, hidden from users and used by lookups and the API<br>
-            <b style="color:var(--foreground)">${esc(d.recordNameLabel || recNamePlaceholder)}</b> as the Record Name field<br>
-            <b style="color:var(--foreground)">${LEVELS[d.level].label}</b> — a required lookup to the parent<br>
-            <b style="color:var(--foreground)">Created by / at, Updated by / at</b><br>
-            A default <b style="color:var(--foreground)">detail view</b> and <b style="color:var(--foreground)">list view</b><br>
-            A navigation entry, visible to <b style="color:var(--foreground)">admins only</b> until access is set
-          </div>
-        </div></div>
+        ${secLabel('Created on save')}
+        <div style="font-size:13px;color:var(--muted-foreground);line-height:1.8">
+          System ID · ${esc(d.recordNameLabel || recNamePlaceholder)} · ${LEVELS[d.level].label} lookup ·
+          Created and Updated by / at · a list and detail view · a nav entry, admins only
+        </div>
       `}
     </div>` +
-    drawerFoot(
-      editing ? 'Renaming is safe — reports and automations keep working.' : 'You can add fields straight after saving.',
-      editing ? 'Save changes' : 'Create object', 'odSave()'),
+    drawerFoot('', editing ? 'Save changes' : 'Create object', 'odSave()'),
     560, 'obj:' + (od.id || 'new'));
 
   const el = document.getElementById('od-label');
@@ -1378,7 +1326,7 @@ function fdRenderType(){
             <div style="min-width:0">
               <div class="co-tp-t">${esc(t.label)}
                 ${t.isNew?tag('New','purple'):''}
-                ${t.proposal?openChip('A native roll-up field on lookups is the recommendation. The alternatives were automation-built totals, or totals that live only in reports.'):''}
+                ${t.proposal?openChip('Recommended, not decided.'):''}
                 ${later?tag('Later'):''}</div>
               <div class="co-tp-d">${esc(t.desc)}</div>
             </div>
@@ -1438,36 +1386,30 @@ function fdRenderForm(){
       ${calculated ? `
         <div class="co-note">
           <span class="co-note-ico">${ICO.info}</span>
-          <div>${d.type === 'ROLLUP'
-            ? 'Roll-ups are read-only and always recalculated, so they cannot be required and cannot carry a default.'
-            : 'Formula fields are read-only and derived on read, so they cannot be required and cannot carry a default.'}</div>
+          <div>Read-only. Cannot be required or carry a default.</div>
         </div>
       ` : `
         <div class="co-check" onclick="fd.d.required = !fd.d.required; fdRender()">
           <span class="sc-check${d.required?' sc-check--on':''}">${d.required?ICO.check:''}</span>
           <div><div class="co-ctl-t">Required</div>
-            <div class="co-ctl-d">The record cannot save without a value — on the form, on import, through the
-              API and on sync alike.${editing?' Records that already have no value stay as they are until someone next edits them.':''}</div></div>
+            <div class="co-ctl-d">Applies on the form, import and sync.</div></div>
         </div>
         ${canUnique ? `
           <div class="co-check" onclick="fd.d.unique = !fd.d.unique; fdRender()">
             <span class="sc-check${d.unique?' sc-check--on':''}">${d.unique?ICO.check:''}</span>
             <div><div class="co-ctl-t">Unique</div>
-              <div class="co-ctl-d">No two records can hold the same value. This is a field setting rather than a
-                validation rule, because it has to look across every record, not just the one being saved.</div></div>
+              <div class="co-ctl-d">No two records share a value.</div></div>
           </div>
           <div class="co-check" onclick="fd.d.extId = !fd.d.extId; fdRender()">
             <span class="sc-check${d.extId?' sc-check--on':''}">${d.extId?ICO.check:''}</span>
             <div><div class="co-ctl-t">External ID</div>
-              <div class="co-ctl-d">Marks this as an identifier from another system, so imports and sync can find
-                and update the right record. It is indexed, but it does not block duplicates on its own —
-                tick Unique as well for a sync key.</div></div>
+              <div class="co-ctl-d">Matches records on import and sync. Tick Unique too for a sync key.</div></div>
           </div>
         ` : `
           <div class="co-check locked">
             <span class="sc-check" style="opacity:.4"></span>
             <div><div class="co-ctl-t" style="color:var(--muted-foreground)">Unique and External ID</div>
-              <div class="co-ctl-d">Available on Text and Number only${editing?'':' — and on Email, when that type arrives'}.</div></div>
+              <div class="co-ctl-d">Text and Number only.</div></div>
           </div>
         `}
         ${fdDefaultValue(d)}
@@ -1478,14 +1420,11 @@ function fdRenderForm(){
                 role="switch" aria-checked="${d.showInReports!==false}"><span class="sc-switch-thumb"></span></button>
         <div style="flex:1">
           <div class="co-ctl-t">Show in reports</div>
-          <div class="co-ctl-d">Keeps the report builder uncluttered — turn it off for sync keys and fields only
-            formulas use. It is <b>not</b> security: hiding sensitive data is an access rule.</div>
+          <div class="co-ctl-d">Off hides it from the report builder. Not security.</div>
         </div>
       </div>
     </div>` +
-    drawerFoot(
-      editing ? 'Changes apply to new and existing records.' : 'The field is live in records, list views, reports, automations and the API as soon as you save.',
-      editing ? 'Save field' : 'Create field', 'fdSave()'),
+    drawerFoot('', editing ? 'Save field' : 'Create field', 'fdSave()'),
     560, 'field:' + (fd.fieldId || 'new'));
 
   const el = document.getElementById('fd-label');
@@ -1510,7 +1449,7 @@ function fdDefaultValue(d){
     control = `<input class="co-input" value="${esc(d.def)}" placeholder="No default" oninput="fd.d.def = this.value">`;
   }
   return `<div style="padding-top:14px;border-top:1px solid var(--border);margin-top:4px">
-    ${field('Default value', false, control, 'Applied to new records only. Existing records are left alone.')}
+    ${field('Default value', false, control, 'New records only.')}
   </div>`;
 }
 
@@ -1532,19 +1471,13 @@ function fdTypeSettings(o, d){
 
     case 'MULTILINE': return secLabel('Text settings') + `<div class="co-f" style="max-width:190px">${field('Maximum length', false,
       `<input class="co-input" type="number" min="1" max="32000" value="${esc(s.maxLength)}" oninput="fd.d.settings.maxLength = parseInt(this.value||'32000',10)">`,
-      'Up to 32,000 characters. Reports can show it as a column but cannot filter or group on it.')}</div>`;
+      'Up to 32,000 characters.')}</div>`;
 
-    case 'NUMBER': return secLabel('Number settings') + dec(6, 'A blank value stays blank. It is not 0.');
+    case 'NUMBER': return secLabel('Number settings') + dec(6, 'Blank is not 0.');
 
-    case 'CURRENCY': return secLabel('Currency settings') + dec(4) + `
-      <div class="co-note warn">
-        <span class="co-note-ico">${ICO.warn}</span>
-        <div><b>Which currency?</b> ${openChip('Three options: one workspace currency for every currency field; a Currency field on the record that all its currency fields follow; or a currency code stored on each value.')}
-        The proposal is a Currency field on the record that every currency field on it follows — it matches
-        “currency is required before handoff”, and budgets and invoices can inherit it.</div>
-      </div>`;
+    case 'CURRENCY': return secLabel('Currency settings', openChip('One workspace currency, a Currency field on the record, or a code per value? Proposal: a Currency field on the record.')) + dec(4);
 
-    case 'PERCENT': return secLabel('Percent settings') + dec(4, 'Stored as a number — 15% is 15, not 0.15.');
+    case 'PERCENT': return secLabel('Percent settings') + dec(4, '15% is stored as 15.');
 
     case 'DATE': return secLabel('Date settings') + `<div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Default value</label>
@@ -1560,7 +1493,6 @@ function fdTypeSettings(o, d){
           <button class="${!s.checkDefault?'active':''}" type="button" onclick="fd.d.settings.checkDefault=false;fdRender()">Unchecked</button>
           <button class="${s.checkDefault?'active':''}" type="button" onclick="fd.d.settings.checkDefault=true;fdRender()">Checked</button>
         </div>
-        <div class="rl-field-hint">A checkbox is never blank — it is true or false.</div>
       </div></div>`;
 
     case 'SELECT':
@@ -1583,13 +1515,7 @@ function fdTypeSettings(o, d){
         </select>`)}
         <div class="co-f"></div>
       </div>
-      <div class="co-note">
-        <span class="co-note-ico">${ICO.info}</span>
-        <div><b>Restricted to this list, always.</b> Imports and the API cannot introduce a value that is not
-        here. Renaming a value updates every record; deleting one asks you what the records holding it should
-        say instead; deactivating one hides it from new records but leaves the old ones — and reports — intact.
-        ${d.type==='MULTISELECT'?'<br>In reports a multi select filters with “includes”, not “equals”.':''}</div>
-      </div>`;
+      <div style="font-size:12px;color:var(--muted-foreground)">Values are restricted to this list. Deleting one asks what replaces it.</div>`;
 
     case 'USER': return secLabel('User settings') + `
       <div class="co-f"><div class="rl-field">
@@ -1639,37 +1565,34 @@ function fdLookupSettings(o, d){
           <option disabled>Phase</option><option disabled>${esc(o.label)} (itself)</option>
         </optgroup>
       </select>
-      <div class="rl-field-hint">The lookup stores the target's <b>system ID</b>, never its name — so renaming the
-        linked record never breaks the link. For a user, use the User data type instead.</div>
+      <div class="rl-field-hint">Stores the record's ID, so renaming it is safe.</div>
       ${fErr('target', fd.err)}
     </div></div>
 
     ${s.target ? `
       ${field('Related list label', true,
         `<input class="co-input" value="${esc(s.relatedListLabel)}" placeholder="${esc(o.plural)}" oninput="fd.d.settings.relatedListLabel = this.value; fd.touchedRLL = true">`,
-        `The title of the list this creates on the ${esc(targetLabel(s.target))} record — where its ${esc(o.plural.toLowerCase())} are shown, with an “Add new” that pre-fills this lookup.`)}
+        `Shown on the ${esc(targetLabel(s.target))} record.`)}
 
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">When the ${esc(targetLabel(s.target))} is deleted <span class="rl-field-required">*</span></label>
         <div class="co-cards">
-          <button class="co-card${s.onDelete!=='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='CLEAR';fdRender()">
+          <button class="co-card-opt${s.onDelete!=='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='CLEAR';fdRender()">
             <div class="co-card-t">Clear the value</div>
-            <div class="co-card-d">The ${esc(o.label)} survives with an empty ${esc(d.label||'lookup')}.</div>
+            <div class="co-card-d">Keeps the ${esc(o.label)}, empties the field.</div>
           </button>
-          <button class="co-card${s.onDelete==='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='BLOCK';fdRender()">
+          <button class="co-card-opt${s.onDelete==='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='BLOCK';fdRender()">
             <div class="co-card-t">Block the delete</div>
-            <div class="co-card-d">The ${esc(targetLabel(s.target))} cannot be deleted while any ${esc(o.label)} points at it.</div>
+            <div class="co-card-d">Stops deletion while ${esc(o.plural.toLowerCase())} point at it.</div>
           </button>
         </div>
-        <div class="rl-field-hint">There is no cascade delete — it belongs to master-detail, which is not in this
-          release. “Block the delete”, paired with a required lookup, covers what cascade was protecting.</div>
+
       </div></div>
 
       ${secLabel('The picker users see')}
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Extra fields under the name ${tag(chosen.length + '/3')}</label>
-        <div class="rl-field-hint" style="margin:0 0 8px">Record names repeat — two orders can both be “H&amp;M Europe”.
-          Up to three extra fields help a user pick the right one. Search is by Record Name.</div>
+        <div class="rl-field-hint" style="margin:0 0 8px">Record names repeat. Up to three extra fields help tell them apart.</div>
         ${picks.length ? picks.map(p => {
           const on = chosen.includes(p);
           const full = !on && chosen.length >= 3;
@@ -1679,12 +1602,6 @@ function fdLookupSettings(o, d){
           </div>`;
         }).join('') : '<div class="co-rel-empty">That object has no fields to show yet.</div>'}
       </div></div>
-      <div class="co-note">
-        <span class="co-note-ico">${ICO.info}</span>
-        <div><b>Lookup filters come later.</b> In this release the picker shows every record the user can
-        access. Until filters arrive, a rule like “the line and its order must share an account” is a
-        validation rule, not a filter.</div>
-      </div>
     ` : ''}`;
 }
 
@@ -1727,8 +1644,7 @@ function fdRollupSettings(o, d){
     return secLabel('Roll-up') + `
       <div class="co-note warn">
         <span class="co-note-ico">${ICO.warn}</span>
-        <div>Nothing points at ${esc(o.label)} yet. A roll-up walks a lookup, so first add a lookup to
-        ${esc(o.label)} on the object you want to aggregate.</div>
+        <div>Nothing points at ${esc(o.label)} yet. Add a lookup on the object you want to aggregate first.</div>
       </div>`;
   }
 
@@ -1748,12 +1664,10 @@ function fdRollupSettings(o, d){
         `<select class="co-input" onchange="fd.d.settings.childLookup = this.value; fdRender()">
           ${lookups.map(f => `<option value="${f.id}" ${s.childLookup===f.id?'selected':''}>${esc(f.label)}</option>`).join('')}
         </select>`,
-        `${esc(child.label)} points at ${esc(o.label)} ${lookups.length} different ways, and they mean different
-         things. Rocketlane cannot guess which one you mean — a contract's “customer account” and “partner
-         account” give two different, equally correct counts.`)
+        `${esc(child.label)} points at ${esc(o.label)} ${lookups.length} ways, and they mean different things.`)
       : `<div class="co-prev" style="margin-bottom:16px">
           <span>Follows</span><span class="co-prev-val">${esc(lookups[0] ? lookups[0].label : '—')}</span>
-          <span>the only lookup from ${esc(child.label)} to ${esc(o.label)}, so there is nothing to choose.</span>
+          <span>the only lookup to ${esc(o.label)}.</span>
         </div>`}
 
       <div class="co-f-row">
@@ -1793,12 +1707,8 @@ function fdRollupSettings(o, d){
         </div>
       </div></div>
 
-      <div class="co-note">
-        <span class="co-note-ico">${ICO.info}</span>
-        <div><b>Counts every child, including ones the viewer cannot see</b> — otherwise two people open the
-        same record and read two different totals. Blanks are skipped by SUM, MIN and MAX; no children at all
-        gives 0 for COUNT and SUM, and blank for MIN and MAX. The value is read-only and recalculated before
-        the parent's validation rules run, so a rule never reads a stale total.</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:-4px">
+        Counts every child, including ones the viewer cannot see. Blanks are skipped.
       </div>
     ` : ''}`;
 }
