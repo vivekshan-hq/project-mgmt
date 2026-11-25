@@ -159,7 +159,6 @@ a{ color:inherit; text-decoration:none; }
 .co-table .num{ text-align:right; font-variant-numeric:tabular-nums; }
 .co-grip{ color:#B6BAC2; font-size:13px; cursor:grab; user-select:none; }
 .co-fname{ font-weight:400; }
-.co-api{ font-family:var(--font-mono); font-size:11.5px; color:#9AA0AA; margin-top:2px; }
 
 /* Field-type cell: a line icon plus the type name, as the product shows it. */
 .co-type{ display:inline-flex; align-items:center; gap:8px; color:var(--foreground); }
@@ -497,45 +496,45 @@ function seed(){
       autoFormat:'SO-{0000000}', autoStart:1, autoNext:1043,
       fieldHistory:true, records:1042, updated:'21 Nov 2026',
       fields:[
-        {id:'so_sfid', label:'Salesforce Opportunity ID', api:'salesforce_opportunity_id', type:'TEXT',
+        {id:'so_sfid', label:'Salesforce Opportunity ID', type:'TEXT',
          description:'Sync key. Matches the Opportunity record in Salesforce.', help:'', required:false,
          unique:true, extId:true, showInReports:false, settings:{maxLength:255}},
-        {id:'so_status', label:'Status', api:'status', type:'SELECT', description:'', help:'Moves forward only.',
+        {id:'so_status', label:'Status', type:'SELECT', description:'', help:'Moves forward only.',
          required:true, showInReports:true, def:'Draft',
          settings:{options:[{label:'Draft',color:'#F3F4F6'},{label:'Signed',color:'#DBEAFE'},
            {label:'Handed to Delivery',color:'#FEF3C7'},{label:'Kicked Off',color:'#DCFCE7'},
            {label:'Invoiced',color:'#E0F2FE'},{label:'Closed',color:'#F3E8FF'}], sort:'entered'}},
-        {id:'so_type', label:'Order Type', api:'order_type', type:'SELECT',
+        {id:'so_type', label:'Order Type', type:'SELECT',
          description:'Drives resourcing and revenue logic.', help:'', required:true, showInReports:true,
          settings:{options:[{label:'Services',color:'#DBEAFE'},{label:'License',color:'#FFEDD5'},
            {label:'Hybrid',color:'#DCFCE7'}], sort:'entered'}},
-        {id:'so_signed', label:'Signed Date', api:'signed_date', type:'DATE', description:'', help:'',
+        {id:'so_signed', label:'Signed Date', type:'DATE', description:'', help:'',
          required:false, showInReports:true, settings:{dateDefault:'blank'}},
-        {id:'so_start', label:'Contract Start Date', api:'contract_start_date', type:'DATE', description:'', help:'',
+        {id:'so_start', label:'Contract Start Date', type:'DATE', description:'', help:'',
          required:false, showInReports:true, settings:{dateDefault:'blank'}},
-        {id:'so_end', label:'Contract End Date', api:'contract_end_date', type:'DATE', description:'', help:'',
+        {id:'so_end', label:'Contract End Date', type:'DATE', description:'', help:'',
          required:false, showInReports:true, settings:{dateDefault:'blank'}},
-        {id:'so_tcv', label:'Total Contract Value', api:'total_contract_value', type:'CURRENCY',
+        {id:'so_tcv', label:'Total Contract Value', type:'CURRENCY',
          description:'Comes from the CRM sync, not from the line items.', help:'', required:false,
          showInReports:true, settings:{decimals:2}},
-        {id:'so_owner', label:'Delivery Owner', api:'delivery_owner', type:'USER', description:'', help:'',
+        {id:'so_owner', label:'Delivery Owner', type:'USER', description:'', help:'',
          required:false, showInReports:true, settings:{userMode:'single', userDefault:'blank'}},
-        {id:'so_regions', label:'Regions', api:'regions', type:'MULTISELECT', description:'', help:'',
+        {id:'so_regions', label:'Regions', type:'MULTISELECT', description:'', help:'',
          required:false, showInReports:true,
          settings:{options:[{label:'EMEA',color:'#DBEAFE'},{label:'Americas',color:'#DCFCE7'},
            {label:'APAC',color:'#FEF3C7'}], sort:'entered'}},
-        {id:'so_exc', label:'Exception Approved', api:'exception_approved', type:'CHECKBOX',
+        {id:'so_exc', label:'Exception Approved', type:'CHECKBOX',
          description:'Required when margin is below 20%.', help:'', required:false, showInReports:true,
          settings:{checkDefault:false}},
-        {id:'so_proj', label:'Project', api:'project', type:'LOOKUP',
+        {id:'so_proj', label:'Project', type:'LOOKUP',
          description:'Set when delivery creates the project.', help:'', required:false, showInReports:true,
          settings:{target:'PROJECT', relatedListLabel:'Sales Orders', onDelete:'CLEAR',
            pickerFields:['Account','Created at']}},
-        {id:'so_total', label:'Total Sales Value', api:'total_sales_value', type:'ROLLUP',
+        {id:'so_total', label:'Total Sales Value', type:'ROLLUP',
          description:'Sum of every live line on this order.', help:'', showInReports:true,
          settings:{child:'li', childLookup:'li_so', fn:'SUM', aggField:'li_net',
            filterField:'li_status', filterOp:'neq', filterValue:'Cancelled'}},
-        {id:'so_count', label:'Line Item Count', api:'line_item_count', type:'ROLLUP',
+        {id:'so_count', label:'Line Item Count', type:'ROLLUP',
          description:'Used by the handoff rule — an order cannot be handed over with no lines.',
          help:'', showInReports:true,
          settings:{child:'li', childLookup:'li_so', fn:'COUNT', aggField:'', filterField:'', filterOp:'eq', filterValue:''}},
@@ -548,38 +547,38 @@ function seed(){
       autoFormat:'LI-{000000}', autoStart:1, autoNext:4871,
       fieldHistory:true, records:4870, updated:'21 Nov 2026',
       fields:[
-        {id:'li_so', label:'Sales Order', api:'sales_order', type:'LOOKUP',
+        {id:'li_so', label:'Sales Order', type:'LOOKUP',
          description:'The order this line belongs to.', help:'', required:true, showInReports:true,
          settings:{target:'so', relatedListLabel:'Line Items', onDelete:'BLOCK',
            pickerFields:['Account','Status','Contract Start Date']}},
-        {id:'li_prod', label:'Product', api:'product', type:'LOOKUP',
+        {id:'li_prod', label:'Product', type:'LOOKUP',
          description:'A line with no product has no price.', help:'', required:true, showInReports:true,
          settings:{target:'prod', relatedListLabel:'Line Items', onDelete:'BLOCK',
            pickerFields:['Product Code','Default Price']}},
-        {id:'li_qty', label:'Quantity', api:'quantity', type:'NUMBER', description:'', help:'Must be more than 0.',
+        {id:'li_qty', label:'Quantity', type:'NUMBER', description:'', help:'Must be more than 0.',
          required:true, showInReports:true, settings:{decimals:0}},
-        {id:'li_price', label:'Unit Price', api:'unit_price', type:'CURRENCY',
+        {id:'li_price', label:'Unit Price', type:'CURRENCY',
          description:'Defaults from the product, and the team can override it on the line.',
          help:'', required:false, showInReports:true, settings:{decimals:2}},
-        {id:'li_disc', label:'Discount', api:'discount', type:'PERCENT', description:'', help:'0 to 100.',
+        {id:'li_disc', label:'Discount', type:'PERCENT', description:'', help:'0 to 100.',
          required:false, showInReports:true, settings:{decimals:2}},
-        {id:'li_net', label:'Net Extension', api:'net_extension', type:'FORMULA',
+        {id:'li_net', label:'Net Extension', type:'FORMULA',
          description:'What this line is actually worth.', help:'', showInReports:true,
-         settings:{returns:'CURRENCY', expr:'quantity * unit_price * (1 - discount / 100)'}},
-        {id:'li_hours', label:'Estimated Hours', api:'estimated_hours', type:'NUMBER',
+         settings:{returns:'CURRENCY', expr:'{Quantity} * {Unit Price} * (1 - {Discount} / 100)'}},
+        {id:'li_hours', label:'Estimated Hours', type:'NUMBER',
          description:'Service lines only. License lines leave this blank.', help:'', required:false,
          showInReports:true, settings:{decimals:2}},
-        {id:'li_billing', label:'Billing Type', api:'billing_type', type:'SELECT', description:'', help:'',
+        {id:'li_billing', label:'Billing Type', type:'SELECT', description:'', help:'',
          required:false, showInReports:true,
          settings:{options:[{label:'Fixed fee',color:'#DBEAFE'},{label:'Time and materials',color:'#FEF3C7'},
            {label:'Milestone',color:'#DCFCE7'}], sort:'entered'}},
-        {id:'li_status', label:'Line Status', api:'line_status', type:'SELECT', description:'', help:'',
+        {id:'li_status', label:'Line Status', type:'SELECT', description:'', help:'',
          required:false, showInReports:true, def:'Active',
          settings:{options:[{label:'Active',color:'#DCFCE7'},{label:'Cancelled',color:'#FEE2E2'}], sort:'entered'}},
-        {id:'li_from', label:'Line Start Date', api:'line_start_date', type:'DATE',
+        {id:'li_from', label:'Line Start Date', type:'DATE',
          description:'Must sit inside the order’s contract period.', help:'', required:false,
          showInReports:true, settings:{dateDefault:'blank'}},
-        {id:'li_to', label:'Line End Date', api:'line_end_date', type:'DATE', description:'', help:'',
+        {id:'li_to', label:'Line End Date', type:'DATE', description:'', help:'',
          required:false, showInReports:true, settings:{dateDefault:'blank'}},
       ],
     },
@@ -590,17 +589,17 @@ function seed(){
       autoFormat:'', autoStart:1, autoNext:1,
       fieldHistory:true, records:80, updated:'4 Nov 2026',
       fields:[
-        {id:'pr_code', label:'Product Code', api:'product_code', type:'TEXT', description:'', help:'',
+        {id:'pr_code', label:'Product Code', type:'TEXT', description:'', help:'',
          required:true, unique:true, extId:true, showInReports:true, settings:{maxLength:40}},
-        {id:'pr_price', label:'Default Price', api:'default_price', type:'CURRENCY',
+        {id:'pr_price', label:'Default Price', type:'CURRENCY',
          description:'Copied onto a new line item, where it can be overridden.', help:'', required:false,
          showInReports:true, settings:{decimals:2}},
-        {id:'pr_billing', label:'Allowed Billing Types', api:'allowed_billing_types', type:'MULTISELECT',
+        {id:'pr_billing', label:'Allowed Billing Types', type:'MULTISELECT',
          description:'A licence product cannot be billed time and materials.', help:'', required:false,
          showInReports:true,
          settings:{options:[{label:'Fixed fee',color:'#DBEAFE'},{label:'Time and materials',color:'#FEF3C7'},
            {label:'Milestone',color:'#DCFCE7'}], sort:'entered'}},
-        {id:'pr_active', label:'Active', api:'active', type:'CHECKBOX', description:'', help:'',
+        {id:'pr_active', label:'Active', type:'CHECKBOX', description:'', help:'',
          required:false, showInReports:true, settings:{checkDefault:true}},
       ],
     },
@@ -628,11 +627,6 @@ const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<'
 const obj = id => state.objects.find(o => o.id === id);
 const uid = p => p + '_' + Math.random().toString(36).slice(2,8);
 
-/* snake_case API name. Derived from the label, then frozen: renaming the
-   label later must not break reports, automations or integrations. */
-function apiFromLabel(l){
-  return String(l||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40) || 'field';
-}
 function pluralise(l){
   const s = String(l||'').trim(); if(!s) return '';
   if(/(s|x|z|ch|sh)$/i.test(s)) return s + 'es';
@@ -718,7 +712,7 @@ function usages(o, f){
   const out = [];
   o.fields.forEach(g => {
     if(g.id === f.id) return;
-    if(g.type === 'FORMULA' && g.settings.expr && g.settings.expr.includes(f.api)) out.push(`Formula field "${g.label}"`);
+    if(g.type === 'FORMULA' && g.settings.expr && g.settings.expr.includes('{' + f.label + '}')) out.push(`Formula field "${g.label}"`);
     if(g.type === 'ROLLUP' && g.settings.childLookup === f.id) out.push(`Roll-up field "${g.label}"`);
   });
   state.objects.forEach(p => p.fields.forEach(g => {
@@ -728,20 +722,23 @@ function usages(o, f){
   return out;
 }
 function systemFields(o){
+  /* `supplied` marks the two a person actually fills in. The rest are
+     written by Rocketlane, so the mandatory column stays empty for them. */
   const parent = o.level === 'GLOBAL' ? null
-    : {label:o.level === 'ACCOUNT' ? 'Account' : 'Project', api:o.level.toLowerCase(), type:'LOOKUP',
-       note:'Required lookup, created from the object’s level.'};
+    : {label:o.level === 'ACCOUNT' ? 'Account' : 'Project', type:'LOOKUP', supplied:true,
+       note:'Required lookup, created from the object\u2019s level.'};
   const rows = [
-    {label:o.recordNameLabel, api:'name', type:o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT',
+    {label:o.recordNameLabel, type:o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT',
+     supplied:o.recordNameType !== 'AUTONUMBER',
      note:'Record Name. Always present and cannot be deleted.'},
   ];
   if(parent) rows.push(parent);
   rows.push(
-    {label:'Record ID', api:'id', type:'TEXT', note:'System ID. Used by lookups, the API and integrations.'},
-    {label:'Created by', api:'created_by', type:'USER', note:''},
-    {label:'Created at', api:'created_at', type:'DATETIME', note:''},
-    {label:'Updated by', api:'updated_by', type:'USER', note:''},
-    {label:'Updated at', api:'updated_at', type:'DATETIME', note:''},
+    {label:'Record ID', type:'TEXT', note:'System ID. Used by lookups, reports and integrations.'},
+    {label:'Created by', type:'USER', note:''},
+    {label:'Created at', type:'DATETIME', note:''},
+    {label:'Updated by', type:'USER', note:''},
+    {label:'Updated at', type:'DATETIME', note:''},
   );
   return rows;
 }
@@ -816,7 +813,6 @@ function viewList(){
       <td class="col-grip">${ICO_GRIP}</td>
       <td>
         <div class="co-fname">${esc(o.label)}</div>
-        <div class="co-api">${esc(apiFromLabel(o.label))}</div>
       </td>
       <td>${tag(lv.label, lv.hue)}${o.levelOpen ? ' ' + openChip('Product has no account or project parent. Four options are open: account-level and duplicated per account; a picklist, which cannot hold a price; an existing global list such as rate cards; or allowing global objects for reference lists only.') : ''}</td>
       <td>
@@ -900,11 +896,10 @@ function tabFields(o){
       <td class="col-grip"></td>
       <td>
         <div class="co-fname" style="color:var(--muted-foreground)">${esc(f.label)}</div>
-        <div class="co-api">${esc(f.api)}</div>
       </td>
       <td><span class="co-type" style="color:var(--muted-foreground)">${typeIcon(f.type)}${esc(typeMeta(f.type).label)}</span></td>
       <td>${tag('System')}</td>
-      <td>${mandatoryBox(f.api === 'name' || f.api === o.level.toLowerCase())}</td>
+      <td>${mandatoryBox(!!f.supplied)}</td>
       <td style="color:var(--muted-foreground);font-size:12.5px">${esc(f.note)}</td>
       <td class="col-menu"></td>
     </tr>`).join('');
@@ -964,7 +959,6 @@ function fieldRow(o, f){
     <td class="col-grip">${ICO_GRIP}</td>
     <td>
       <div class="co-fname">${esc(f.label)}</div>
-      <div class="co-api">${esc(f.api)}</div>
     </td>
     <td><span class="co-type">${typeIcon(f.type)}${esc(m.label)}</span>${m.isNew ? ' ' + tag('New', 'purple', 'sm') : ''}</td>
     <td>${valueAssignment(f)}</td>
@@ -1092,8 +1086,7 @@ function tabDetails(o){
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">Object</span></div>
       <table class="co-table"><tbody>
-        ${row('Label', esc(o.label), 'Shows in navigation, page titles, lookups, reports and automations. Renaming is safe — the API name does not change.')}
-        ${row('API name', `<span class="co-mono">${esc(apiFromLabel(o.label))}</span>`)}
+        ${row('Label', esc(o.label), 'Shows in navigation, page titles, lookups, reports and automations. Renaming it is safe — reports, automations and integrations keep working.')}
         ${row('Level', tag(lv.label, lv.hue) + ' ' + tag('Fixed', '', 'sm', 'Cannot change after save'),
           o.level === 'GLOBAL'
             ? 'A global reference list has no account or project parent. Where it should live is still open.'
@@ -1355,7 +1348,7 @@ function odRender(){
       `}
     </div>` +
     drawerFoot(
-      editing ? 'Renaming is safe — the API name does not change.' : 'You can add fields straight after saving.',
+      editing ? 'Renaming is safe — reports and automations keep working.' : 'You can add fields straight after saving.',
       editing ? 'Save changes' : 'Create object', 'odSave()'),
     560, 'obj:' + (od.id || 'new'));
 
@@ -1433,11 +1426,6 @@ function fdRenderForm(){
       ${field('Label', true,
         `<input class="co-input" id="fd-label" value="${esc(d.label)}" placeholder="Order Date" oninput="fdSetLabel(this.value)">`,
         '', fErr('label', fd.err))}
-
-      ${field('API name', false,
-        `<input class="co-input co-mono" id="fd-api" value="${esc(d.api)}" placeholder="order_date" oninput="fd.d.api = this.value; fd.touchedApi = true" ${editing?'disabled':''}>`,
-        editing ? 'Frozen after save. Renaming the label is safe precisely because reports, automations and integrations hold on to this.'
-                : 'Derived from the label. Reports, automations and the API use it, so it never changes again once saved.')}
 
       <div class="co-f-row">
         ${field('Description', false, `<input class="co-input" value="${esc(d.description)}" placeholder="A note for admins" oninput="fd.d.description = this.value">`)}
@@ -1711,11 +1699,11 @@ function fdFormulaSettings(o, d){
     </select>`)}
     <div class="co-f"><div class="rl-field">
       <label class="rl-field-label">Expression <span class="rl-field-required">*</span></label>
-      <textarea class="co-input co-mono" rows="2" placeholder="quantity * unit_price" oninput="fd.d.settings.expr = this.value">${esc(s.expr)}</textarea>
+      <textarea class="co-input co-mono" rows="2" placeholder="{Quantity} * {Unit Price}" oninput="fd.d.settings.expr = this.value">${esc(s.expr)}</textarea>
       ${fErr('expr', fd.err)}
       <div class="rl-field-hint" style="margin-top:8px">Insert a field:</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
-        ${usable.map(f => `<button class="rl-tag s-sm c-gray interactive" type="button" onclick="fdInsertToken('${f.api}')"><span class="co-mono">${esc(f.api)}</span></button>`).join('')
+        ${usable.map(f => `<button class="co-tag sm" type="button" onclick="fdInsertToken('${esc(f.label).replace(/'/g,"\\'")}')">${esc(f.label)}</button>`).join('')
           || '<span class="co-rel-empty">No other fields yet.</span>'}
       </div>
     </div></div>`;
@@ -1883,14 +1871,7 @@ function odSave(){
   }
 }
 
-function fdSetLabel(v){
-  fd.d.label = v; delete fd.err.label;
-  if(!fd.touchedApi){
-    fd.d.api = apiFromLabel(v);
-    const el = document.getElementById('fd-api');
-    if(el){ el.value = fd.d.api; el.placeholder = apiFromLabel(v) || 'order_date'; }
-  }
-}
+function fdSetLabel(v){ fd.d.label = v; delete fd.err.label; }
 
 /* Default settings per type. These are the proposals in A4, not invented
    numbers: 255 for text, 32,000 for multi-line, 2 decimals for currency. */
@@ -1919,10 +1900,10 @@ function openFieldDrawer(objId, fieldId){
   fd = {
     objId, fieldId: fieldId || null, q:'',
     step: f ? 'form' : 'type',
-    touchedApi: !!f, touchedRLL: !!f,
+    touchedRLL: !!f,
     err:{},
     d: f ? JSON.parse(JSON.stringify(f))
-         : {label:'', api:'', type:'', description:'', help:'', required:false, unique:false,
+         : {label:'', type:'', description:'', help:'', required:false, unique:false,
             extId:false, def:'', showInReports:true, settings:{}},
   };
   fdRender();
@@ -1979,8 +1960,8 @@ function fdTogglePicker(label){
   fdRender();
 }
 
-function fdInsertToken(api){
-  fd.d.settings.expr = (fd.d.settings.expr ? fd.d.settings.expr.trimEnd() + ' ' : '') + api;
+function fdInsertToken(label){
+  fd.d.settings.expr = (fd.d.settings.expr ? fd.d.settings.expr.trimEnd() + ' ' : '') + '{' + label + '}';
   fdRender();
 }
 
@@ -2018,7 +1999,6 @@ function fdSave(){
   if(d.type === 'SELECT' || d.type === 'MULTISELECT')
     d.settings.options = d.settings.options.filter(x => x.label.trim());
   d.label = label;
-  d.api = (d.api || apiFromLabel(label)).trim();
 
   if(fd.fieldId){
     const i = o.fields.findIndex(f => f.id === fd.fieldId);
