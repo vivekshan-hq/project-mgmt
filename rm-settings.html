@@ -94,22 +94,41 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-primary);backg
 .sc-switch{flex-shrink:0;}
 .sidebar-search{margin:10px;width:calc(100% - 20px);height:30px;}
 
-/* ── Rules ── */
+/* ── Bands ── */
 .rules-intro{font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;}
-.rule{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-top:1px solid var(--p-border);}
-.rule:first-of-type{border-top:none;padding-top:0;}
-.rule-chk{width:15px;height:15px;margin-top:3px;accent-color:var(--p-accent);flex-shrink:0;cursor:pointer;}
-.rule-main{flex:1;min-width:0;}
-.rule-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:13.5px;}
-.rule-name{font-weight:500;min-width:96px;}
-.rule-num{width:70px;text-align:right;font-variant-numeric:tabular-nums;}
-.rule-unit{width:auto;cursor:pointer;}
-.rule-sub{font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:5px;}
-.rule[data-off="true"] .rule-main{opacity:.45;}
+.band-unit{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.band-unit .sc-input{width:auto;cursor:pointer;}
 
-/* Colour choice */
-.swatches{display:inline-flex;gap:5px;margin-left:auto;flex-shrink:0;}
+/* The strip is the whole model made visible: edges you drag, bands derived
+   from them. Because the segments are computed from the edges they cannot
+   leave a gap or overlap, which is the failure the old three-rule shape had. */
+.strip-wrap{position:relative;margin:0 8px 30px;}
+.strip{display:flex;height:34px;border-radius:7px;overflow:hidden;border:1px solid var(--p-border);}
+.strip-seg{display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--text-secondary);min-width:0;overflow:hidden;white-space:nowrap;}
+.strip-seg.none{background-image:repeating-linear-gradient(45deg,#fff,#fff 5px,#F3F4F6 5px,#F3F4F6 10px);}
+.handles{position:absolute;left:0;right:0;top:0;height:34px;pointer-events:none;}
+.handle{position:absolute;top:-5px;height:44px;width:16px;margin-left:-8px;cursor:ew-resize;pointer-events:auto;touch-action:none;}
+.handle::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:#111827;}
+.handle::after{content:'';position:absolute;left:3px;top:50%;margin-top:-5px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #111827;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.handle:hover::after,.handle.drag::after{background:#111827;}
+.axis{position:absolute;left:0;right:0;top:40px;height:14px;}
+.axis span{position:absolute;transform:translateX(-50%);font-size:10.5px;color:var(--text-muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+.bands{display:flex;flex-direction:column;}
+.band{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--p-border);}
+.band:first-child{border-top:none;}
+.band-chip{width:22px;height:22px;border-radius:5px;border:1px solid rgba(0,0,0,.1);flex-shrink:0;}
+.band-chip.none{background-image:repeating-linear-gradient(45deg,#fff,#fff 4px,#E5E7EB 4px,#E5E7EB 8px);}
+.band-range{display:flex;align-items:center;gap:6px;font-size:13.5px;min-width:168px;}
+.band-edge{width:64px;text-align:right;font-variant-numeric:tabular-nums;}
+.band-label{font-size:12.5px;color:var(--text-secondary);min-width:104px;}
+.band-sw{display:inline-flex;gap:5px;margin-left:auto;flex-shrink:0;}
+
+/* Colour choice. "No highlight" is a first-class option: with contiguous
+   bands every week would otherwise carry colour, and a report where
+   everything is coloured says nothing. */
 .swatch{width:20px;height:20px;border-radius:5px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:0;position:relative;}
+.swatch.none{background-image:repeating-linear-gradient(45deg,#fff,#fff 4px,#E5E7EB 4px,#E5E7EB 8px);}
 .swatch.sel::after{content:'';position:absolute;inset:-3px;border:2px solid var(--p-accent);border-radius:7px;}
 
 /* ── Preview ── */
@@ -211,56 +230,26 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-primary);backg
 
           <div class="card-body">
             <div class="rules-intro">
-              Thresholds are measured against each person's <strong>own target</strong>, so one rule
-              covers a 60% target and a 90% target alike. Switch the unit to
-              <em>% of capacity</em> for a fixed band that ignores the target.
+              Bands are measured against each person's <strong>own target</strong>, so one set covers
+              a 60% target and a 90% target alike. Drag an edge or type a number — the bands
+              between them follow, so they always meet and never overlap.
             </div>
 
-            <div class="rule" id="rule-over">
-              <input class="rule-chk" type="checkbox" id="chk-over" checked>
-              <div class="rule-main">
-                <div class="rule-line">
-                  <span class="rule-name">Above target</span>
-                  <span>highlight over</span>
-                  <input class="sc-input rule-num" type="number" id="val-over" min="0" max="400" step="5" value="100">
-                  <select class="sc-input rule-unit" id="unit-over">
-                    <option value="target">% of target</option>
-                    <option value="capacity">% of capacity</option>
-                  </select>
-                  <span class="swatches" id="sw-over"></span>
-                </div>
-                <div class="rule-sub" id="sub-over"></div>
-              </div>
+            <div class="band-unit">
+              <label class="sc-label" for="unit">Measure against</label>
+              <select class="sc-input" id="unit">
+                <option value="target">Each person's target</option>
+                <option value="capacity">Total capacity</option>
+              </select>
             </div>
 
-            <div class="rule" id="rule-under">
-              <input class="rule-chk" type="checkbox" id="chk-under" checked>
-              <div class="rule-main">
-                <div class="rule-line">
-                  <span class="rule-name">Below target</span>
-                  <span>highlight under</span>
-                  <input class="sc-input rule-num" type="number" id="val-under" min="0" max="400" step="5" value="75">
-                  <select class="sc-input rule-unit" id="unit-under">
-                    <option value="target">% of target</option>
-                    <option value="capacity">% of capacity</option>
-                  </select>
-                  <span class="swatches" id="sw-under"></span>
-                </div>
-                <div class="rule-sub" id="sub-under"></div>
-              </div>
+            <div class="strip-wrap">
+              <div class="strip" id="strip"></div>
+              <div class="handles" id="handles"></div>
+              <div class="axis" id="axis"></div>
             </div>
 
-            <div class="rule" id="rule-on">
-              <input class="rule-chk" type="checkbox" id="chk-on">
-              <div class="rule-main">
-                  <div class="rule-line">
-                  <span class="rule-name">Within range</span>
-                  <span>highlight whatever the other two rules leave</span>
-                  <span class="swatches" id="sw-on"></span>
-                </div>
-                <div class="rule-sub" id="sub-on"></div>
-              </div>
-            </div>
+            <div class="bands" id="bands"></div>
           </div>
 
           <div class="card-body" style="border-top:1px solid var(--p-border)">
@@ -303,25 +292,44 @@ body{font-family:var(--font-sans);font-size:13px;color:var(--text-primary);backg
    ══════════════════════════════════════════════════════════ */
 const STORE_KEY = 'rl.targetUtilisation';
 
+/* ══ Bands ══
+   Stored as ascending edges plus one colour per band. N edges make N+1
+   bands, so they are contiguous and exhaustive by construction — there is no
+   remainder band to mislabel and nothing to validate for gaps or overlaps.
+
+   `null` as a colour means no highlight, which matters: with bands covering
+   every value, a report would otherwise be coloured end to end. */
+const SCALE_MAX = 150;      // the strip runs 0 → 150; the top band is open-ended
+const MIN_GAP   = 5;
+
 const DEFAULTS = {
   enabled: false,
-  over:  { on:true,  value:100, unit:'target',   colour:'#FEE2E2' },
-  under: { on:true,  value:75,  unit:'target',   colour:'#FEF3C7' },
-  onTgt: { on:false,             colour:'#DCFCE7' },
+  unit: 'target',
+  edges: [40, 70, 90, 110],
+  // index 0 is the lowest band
+  colours: ['#FFEDD5', '#FEF3C7', null, null, '#FEE2E2'],
 };
 
-const PALETTE = ['#FEE2E2','#FEF3C7','#DCFCE7','#DBEAFE','#EDE9FE','#F3F4F6'];
+const PALETTE = [null, '#FEE2E2', '#FFEDD5', '#FEF3C7', '#DCFCE7', '#DBEAFE', '#F3F4F6'];
 
 function load(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
     if(!raw) return JSON.parse(JSON.stringify(DEFAULTS));
     const s = JSON.parse(raw);
+    // Anything saved under the old three-rule shape has no edges; start fresh
+    // rather than guess an equivalent.
+    if(!Array.isArray(s.edges)) {
+      const d = JSON.parse(JSON.stringify(DEFAULTS));
+      d.enabled = !!s.enabled;
+      return d;
+    }
     return {
       enabled: !!s.enabled,
-      over:  Object.assign({}, DEFAULTS.over,  s.over  || {}),
-      under: Object.assign({}, DEFAULTS.under, s.under || {}),
-      onTgt: Object.assign({}, DEFAULTS.onTgt, s.onTgt || {}),
+      unit: s.unit === 'capacity' ? 'capacity' : 'target',
+      edges: s.edges.slice().sort((a,b)=>a-b),
+      colours: (s.colours && s.colours.length === s.edges.length + 1)
+        ? s.colours.slice() : JSON.parse(JSON.stringify(DEFAULTS.colours)),
     };
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 }
@@ -329,8 +337,6 @@ function load(){
 let cfg = load();
 let saved = JSON.stringify(cfg);
 
-/* ── Preview data: a deliberate spread of targets, so a single rule can be
-   seen landing differently on different people. ── */
 const SAMPLE = [
   { name:'Atul Dhiman',    target:80, planned:100 },
   { name:'Augie Haro',     target:90, planned:100 },
@@ -339,59 +345,184 @@ const SAMPLE = [
   { name:'Austin King',    target:80, planned:13  },
 ];
 
-/* A rule's threshold is either a share of the person's target or a flat
-   share of capacity; this turns both into the same comparable number. */
-function measure(rule, planned, target){
-  return rule.unit === 'capacity' ? planned : Math.round(planned / target * 100);
+/* Where a week sits on the scale: against its own target, or flat capacity. */
+function measure(planned, target){
+  return cfg.unit === 'capacity' ? planned : Math.round(planned / target * 100);
 }
 
-function classify(planned, target){
-  if(cfg.over.on  && measure(cfg.over,  planned, target) >  cfg.over.value)  return 'over';
-  if(cfg.under.on && measure(cfg.under, planned, target) <  cfg.under.value) return 'under';
-  if(cfg.onTgt.on) return 'onTgt';
-  return null;
+/* Highest band whose lower edge the value reaches. */
+function bandIndex(v){
+  for(let i = cfg.edges.length - 1; i >= 0; i--) if(v >= cfg.edges[i]) return i + 1;
+  return 0;
 }
 
-const VERDICT = {
-  over:  'Above target',
-  under: 'Below target',
-  onTgt: 'Within range',
-};
+function bandLabel(i){
+  const lo = i === 0 ? 0 : cfg.edges[i-1];
+  const hi = i === cfg.edges.length ? null : cfg.edges[i];
+  if(hi === null) return `Over ${lo}%`;
+  if(i === 0)     return `Under ${hi}%`;
+  return `${lo} – ${hi}%`;
+}
 
-function renderSwatches(id, selected, onPick){
-  document.getElementById(id).innerHTML = PALETTE.map(c =>
-    `<button class="swatch${c === selected ? ' sel' : ''}" data-c="${c}" style="background:${c}" aria-label="${c}"></button>`
+/* A plain-words read on each band, so the numbers are not the only cue. */
+function bandNote(i){
+  const n = cfg.edges.length;
+  if(cfg.unit === 'capacity') return i === n ? 'Over capacity' : '';
+  if(i === n)   return 'Over target';
+  if(i === n-1) return 'At target';
+  if(i === 0)   return 'Well under';
+  return 'Under target';
+}
+
+/* ── Strip ── */
+function renderStrip(){
+  const stops = [0, ...cfg.edges, SCALE_MAX];
+  document.getElementById('strip').innerHTML = cfg.colours.map((c,i)=>{
+    const w = (stops[i+1] - stops[i]) / SCALE_MAX * 100;
+    const bg = c ? `background:${c}` : '';
+    return `<div class="strip-seg${c ? '' : ' none'}" style="flex:0 0 ${w}%;${bg}">${
+      stops[i+1]-stops[i] >= 18 ? bandLabel(i) : ''}</div>`;
+  }).join('');
+
+  document.getElementById('handles').innerHTML = cfg.edges.map((e,i)=>
+    `<div class="handle" data-i="${i}" style="left:${e / SCALE_MAX * 100}%" role="slider"
+          aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="${SCALE_MAX}" tabindex="0"></div>`
   ).join('');
-  document.getElementById(id).onclick = e => {
-    const b = e.target.closest('.swatch');
-    if(b){ onPick(b.dataset.c); render(); }
-  };
+
+  document.getElementById('axis').innerHTML =
+    [0, ...cfg.edges, SCALE_MAX].map(v =>
+      `<span style="left:${v / SCALE_MAX * 100}%">${v}%</span>`).join('');
 }
 
-function ruleSub(rule, label){
-  if(rule.unit === 'capacity'){
-    return `Fixed band: any week over ${rule.value}% of capacity, whatever the target.`;
+/* Dragging an edge moves only that edge, clamped so it cannot cross a
+   neighbour — the bands stay ordered without any validation step. */
+function bindDrag(){
+  document.getElementById('handles').querySelectorAll('.handle').forEach(h => {
+    h.addEventListener('pointerdown', ev => {
+      ev.preventDefault();
+      const i = +h.dataset.i;
+      const track = document.getElementById('strip').getBoundingClientRect();
+      h.classList.add('drag');
+      h.setPointerCapture(ev.pointerId);
+
+      const move = e => {
+        const pct = Math.round(((e.clientX - track.left) / track.width) * SCALE_MAX);
+        const lo = i === 0 ? MIN_GAP : cfg.edges[i-1] + MIN_GAP;
+        const hi = i === cfg.edges.length - 1 ? SCALE_MAX - MIN_GAP : cfg.edges[i+1] - MIN_GAP;
+        cfg.edges[i] = Math.max(lo, Math.min(hi, pct));
+        render();
+      };
+      const up = e => {
+        h.classList.remove('drag');
+        h.removeEventListener('pointermove', move);
+        h.removeEventListener('pointerup', up);
+      };
+      h.addEventListener('pointermove', move);
+      h.addEventListener('pointerup', up);
+    });
+
+    h.addEventListener('keydown', ev => {
+      const i = +h.dataset.i;
+      const step = ev.key === 'ArrowLeft' ? -1 : ev.key === 'ArrowRight' ? 1 : 0;
+      if(!step) return;
+      ev.preventDefault();
+      const lo = i === 0 ? MIN_GAP : cfg.edges[i-1] + MIN_GAP;
+      const hi = i === cfg.edges.length - 1 ? SCALE_MAX - MIN_GAP : cfg.edges[i+1] - MIN_GAP;
+      cfg.edges[i] = Math.max(lo, Math.min(hi, cfg.edges[i] + step));
+      render();
+    });
+  });
+}
+
+/* ── Band rows (highest first, the way a legend reads) ── */
+function renderBands(){
+  /* Every edit re-renders, which replaces these rows wholesale — so note
+     where the caret was and put it back, or typing an edge loses focus after
+     each character. */
+  const act = document.activeElement;
+  const keep = act && act.classList && act.classList.contains('band-edge')
+    ? { edge: act.dataset.edge, start: act.selectionStart, end: act.selectionEnd }
+    : null;
+
+  const rows = [];
+  for(let i = cfg.colours.length - 1; i >= 0; i--){
+    const c = cfg.colours[i];
+    const lowerEdge = i === 0 ? null : i - 1;   // which edge this band starts at
+    rows.push(`
+      <div class="band">
+        <span class="band-chip${c ? '' : ' none'}" ${c ? `style="background:${c}"` : ''}></span>
+        <span class="band-range">
+          ${lowerEdge === null
+            ? `<span>Under ${cfg.edges[0]}%</span>`
+            : i === cfg.colours.length - 1
+              ? `<span>Over</span>
+                 <input class="sc-input band-edge" type="number" data-edge="${lowerEdge}"
+                        min="0" max="${SCALE_MAX}" step="1" value="${cfg.edges[lowerEdge]}"><span>%</span>`
+              : `<input class="sc-input band-edge" type="number" data-edge="${lowerEdge}"
+                        min="0" max="${SCALE_MAX}" step="1" value="${cfg.edges[lowerEdge]}">
+                 <span>&ndash; ${cfg.edges[i]}%</span>`}
+        </span>
+        <span class="band-label">${bandNote(i)}</span>
+        <span class="band-sw" data-band="${i}"></span>
+      </div>`);
   }
-  // Spell the rule out in real numbers, since "% of target" is abstract.
-  const a = Math.round(80 * rule.value / 100);
-  const b = Math.round(60 * rule.value / 100);
-  return `${label} — at an 80% target that means ${a}% utilisation; at a 60% target, ${b}%.`;
+  document.getElementById('bands').innerHTML = rows.join('');
+
+  document.querySelectorAll('.band-sw').forEach(el => {
+    const bi = +el.dataset.band;
+    el.innerHTML = PALETTE.map(c =>
+      `<button class="swatch${c === null ? ' none' : ''}${c === cfg.colours[bi] ? ' sel' : ''}"
+               data-c="${c === null ? '' : c}" ${c ? `style="background:${c}"` : ''}
+               title="${c === null ? 'No highlight' : c}"></button>`).join('');
+    el.onclick = e => {
+      const btn = e.target.closest('.swatch');
+      if(!btn) return;
+      cfg.colours[bi] = btn.dataset.c || null;
+      render();
+    };
+  });
+
+  if(keep){
+    const back = document.querySelector(`.band-edge[data-edge="${keep.edge}"]`);
+    if(back){
+      back.focus();
+      try{ back.setSelectionRange(keep.start, keep.end); }catch(e){}
+    }
+  }
+
+  document.querySelectorAll('.band-edge').forEach(inp => {
+    inp.oninput = () => {
+      const i = +inp.dataset.edge;
+      const lo = i === 0 ? MIN_GAP : cfg.edges[i-1] + MIN_GAP;
+      const hi = i === cfg.edges.length - 1 ? SCALE_MAX - MIN_GAP : cfg.edges[i+1] - MIN_GAP;
+      const v = parseInt(inp.value, 10);
+      if(isNaN(v)) return;
+      cfg.edges[i] = Math.max(lo, Math.min(hi, v));
+      render();
+    };
+  });
 }
 
-/* This band is the remainder, not a rule of its own — it covers whatever the
-   other two do not claim. Say so in real numbers, because switching one of
-   them off silently widens this one, and a label alone would then be lying. */
-function remainderSub(){
-  const u = r => r.unit === 'capacity' ? '% of capacity' : '% of target';
-  const over = cfg.over.on, under = cfg.under.on;
-  if(over && under)  return `Everything from ${cfg.under.value}${u(cfg.under)} up to ${cfg.over.value}${u(cfg.over)}.`;
-  if(over && !under) return `Everything up to ${cfg.over.value}${u(cfg.over)} — including weeks far below target, because "Below target" is off.`;
-  if(!over && under) return `Everything from ${cfg.under.value}${u(cfg.under)} upwards, however far above target it goes.`;
-  return 'Every week, since neither threshold is switched on.';
+function renderPreview(){
+  document.getElementById('pv-body').innerHTML = SAMPLE.map(s => {
+    const att = Math.round(s.planned / s.target * 100);
+    const i   = bandIndex(measure(s.planned, s.target));
+    const c   = cfg.colours[i];
+    return `<tr class="sc-tr">
+      <td class="sc-td pv-name">${s.name}</td>
+      <td class="sc-td num">${s.target}%</td>
+      <td class="sc-td num">${s.planned}%</td>
+      <td class="sc-td num">${att}%</td>
+      <td class="sc-td">
+        <span class="pv-val" style="background:${c || 'transparent'}">${s.planned}%</span>
+        ${c ? `<span class="pv-verdict"> ${bandLabel(i)}${bandNote(i) ? ' · ' + bandNote(i) : ''}</span>`
+            : `<span class="pv-none"> not highlighted</span>`}
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 function render(){
-  // Master
   document.getElementById('sw-enabled').classList.toggle('sc-switch--on', cfg.enabled);
   document.getElementById('sw-enabled').setAttribute('aria-checked', cfg.enabled);
   document.getElementById('card-rules').classList.toggle('hidden', !cfg.enabled);
@@ -399,57 +530,20 @@ function render(){
     ? 'Target fields appear on Roles & placeholders and Team members, and reports gain their target column and highlighting.'
     : 'Off — no target field appears on Roles & placeholders or Team members, and reports show no target column or highlighting.';
 
-  // Rules
-  document.getElementById('chk-over').checked  = cfg.over.on;
-  document.getElementById('chk-under').checked = cfg.under.on;
-  document.getElementById('chk-on').checked    = cfg.onTgt.on;
-  document.getElementById('val-over').value    = cfg.over.value;
-  document.getElementById('val-under').value   = cfg.under.value;
-  document.getElementById('unit-over').value   = cfg.over.unit;
-  document.getElementById('unit-under').value  = cfg.under.unit;
-  document.getElementById('rule-over').dataset.off  = !cfg.over.on;
-  document.getElementById('rule-under').dataset.off = !cfg.under.on;
-  document.getElementById('rule-on').dataset.off    = !cfg.onTgt.on;
-
-  document.getElementById('sub-over').textContent  = ruleSub(cfg.over,  'Above target');
-  document.getElementById('sub-under').textContent = ruleSub(cfg.under, 'Below target');
-  document.getElementById('sub-on').textContent    = remainderSub();
-
-  renderSwatches('sw-over',  cfg.over.colour,  c => cfg.over.colour  = c);
-  renderSwatches('sw-under', cfg.under.colour, c => cfg.under.colour = c);
-  renderSwatches('sw-on',    cfg.onTgt.colour, c => cfg.onTgt.colour = c);
-
-  // Preview
-  document.getElementById('pv-body').innerHTML = SAMPLE.map(s => {
-    const att  = Math.round(s.planned / s.target * 100);
-    const kind = classify(s.planned, s.target);
-    const bg   = kind ? cfg[kind === 'onTgt' ? 'onTgt' : kind].colour : 'transparent';
-    return `<tr class="sc-tr">
-      <td class="sc-td pv-name">${s.name}</td>
-      <td class="sc-td num">${s.target}%</td>
-      <td class="sc-td num">${s.planned}%</td>
-      <td class="sc-td num">${att}%</td>
-      <td class="sc-td">
-        <span class="pv-val" style="background:${bg}">${s.planned}%</span>
-        ${kind ? `<span class="pv-verdict"> ${VERDICT[kind]}</span>`
-               : `<span class="pv-none"> not highlighted</span>`}
-      </td>
-    </tr>`;
-  }).join('');
+  if(cfg.enabled){
+    document.getElementById('unit').value = cfg.unit;
+    renderStrip();
+    bindDrag();
+    renderBands();
+    renderPreview();
+  }
 
   document.getElementById('footer-note').textContent =
     JSON.stringify(cfg) === saved ? 'All changes saved' : 'Unsaved changes';
 }
 
-/* ── Wiring ── */
 document.getElementById('sw-enabled').onclick = () => { cfg.enabled = !cfg.enabled; render(); };
-document.getElementById('chk-over').onchange  = e => { cfg.over.on  = e.target.checked; render(); };
-document.getElementById('chk-under').onchange = e => { cfg.under.on = e.target.checked; render(); };
-document.getElementById('chk-on').onchange    = e => { cfg.onTgt.on = e.target.checked; render(); };
-document.getElementById('val-over').oninput   = e => { cfg.over.value  = +e.target.value || 0; render(); };
-document.getElementById('val-under').oninput  = e => { cfg.under.value = +e.target.value || 0; render(); };
-document.getElementById('unit-over').onchange  = e => { cfg.over.unit  = e.target.value; render(); };
-document.getElementById('unit-under').onchange = e => { cfg.under.unit = e.target.value; render(); };
+document.getElementById('unit').onchange = e => { cfg.unit = e.target.value; render(); };
 
 function save(){
   localStorage.setItem(STORE_KEY, JSON.stringify(cfg));
@@ -458,10 +552,7 @@ function save(){
   toast(cfg.enabled ? 'Target utilisation enabled' : 'Target utilisation turned off');
 }
 
-function revert(){
-  cfg = JSON.parse(saved);
-  render();
-}
+function revert(){ cfg = JSON.parse(saved); render(); }
 
 let toastT;
 function toast(msg){
