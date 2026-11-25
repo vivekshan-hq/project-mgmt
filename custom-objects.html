@@ -346,6 +346,11 @@ select.co-input{
 }
 .co-toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
 
+/* Kit drawers carry a rule under the header; these are title-only, so the
+   divider reads as a seam. Overridden here — ds/rl/drawer.css is a verbatim
+   mirror of the design system and must not be edited. */
+.rl-drawer-header{ border-bottom:0; padding-bottom:6px; }
+
 /* The shadcn dialog ships z-index:50, below the kit's drawer at 100. */
 .sc-dialog-overlay{ z-index:400; }
 .sc-dialog{ max-width:460px; }
@@ -1127,7 +1132,7 @@ function drawerHead(title, desc, backFn){
     ${backFn ? `<button class="rl-drawer-close" onclick="${backFn}" aria-label="Back" style="margin-left:-4px">${ICO.back}</button>` : ''}
     <div class="rl-drawer-titles">
       <h2 class="rl-drawer-title">${title}</h2>
-      <p class="rl-drawer-description">${desc}</p>
+      ${desc ? `<p class="rl-drawer-description">${desc}</p>` : ''}
     </div>
     <button class="rl-drawer-close" onclick="closeDrawer()" aria-label="Close">${ICO.x}</button>
   </div>`;
@@ -1190,11 +1195,7 @@ function odRender(){
     </button>`;
 
   showDrawer(
-    drawerHead(
-      editing ? 'Edit ' + esc(o.label) : 'New custom object',
-      editing ? 'Level is fixed. Everything else can change.'
-              : 'Fields come next, on the object’s page.'
-    ) + `
+    drawerHead(editing ? 'Edit ' + esc(o.label) : 'New custom object') + `
     <div class="rl-drawer-body">
       ${field('Label', true,
         `<input class="co-input" id="od-label" value="${esc(d.label)}" placeholder="Enter label" oninput="odSet('label', this.value)">`,
@@ -1309,7 +1310,7 @@ function fdRenderType(){
   }).join('');
 
   showDrawer(
-    drawerHead(`Add a field to ${esc(o.label)}`, 'Start with the data type — it cannot be changed after the field is saved.') + `
+    drawerHead(`Add a field to ${esc(o.label)}`) + `
     <div class="rl-drawer-body">
       <input class="co-input" placeholder="Search data types" value="${esc(fd.q)}" style="margin-bottom:16px"
              oninput="fd.q = this.value; fdRenderType()">
@@ -1330,8 +1331,7 @@ function fdRenderForm(){
   showDrawer(
     drawerHead(
       editing ? 'Edit field' : 'New ' + esc(m.label.toLowerCase()) + ' field',
-      `On ${esc(o.label)} · ${esc(m.label)}${editing ? ' · the data type cannot change' : ''}`,
-      editing ? null : "fd.step='type';fdRender()"
+      '', editing ? null : "fd.step='type';fdRender()"
     ) + `
     <div class="rl-drawer-body">
       <div class="co-prev" style="margin-bottom:16px">
