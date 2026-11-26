@@ -356,6 +356,15 @@ select.co-input{
 .co-mod-i:hover:not(:disabled){ background:var(--co-rail-hover); }
 .co-mod-i.on{ background:var(--co-nav-active); color:#11325E; font-weight:500; }
 .co-mod-i:disabled{ color:var(--muted-foreground); cursor:not-allowed; }
+.co-mod-i{ display:flex; align-items:center; gap:8px; }
+.co-mod-n{ margin-left:auto; font-size:12px; color:var(--muted-foreground); font-weight:400; }
+.co-mod-i.on .co-mod-n{ color:#4C74A8; }
+.co-mod-label{ padding:14px 14px 5px; font-size:12px; font-weight:600; color:var(--muted-foreground); }
+
+/* Read / Edit columns in the field grid. */
+.co-fcol{ width:84px; text-align:center; }
+.co-table td.co-fcol{ text-align:center; }
+.co-fhead{ display:inline-flex; align-items:center; gap:7px; cursor:pointer; }
 
 /* A permission is a checkbox and a sentence. */
 .co-perm{ display:flex; align-items:flex-start; gap:11px; padding:7px 0; }
@@ -1290,7 +1299,6 @@ const isAccount = ps => ps.scope === 'ACCOUNT';
 const has = v => !!v && v !== 'NONE';
 
 let permDraft = null;          // the set being edited
-let permCollapsed = {};        // objId → true when its card is folded
 
 /* ── List ─────────────────────────────────────────────────────────── */
 const PERM_TABS = [
@@ -1337,12 +1345,15 @@ function viewPerms(){
 const PERM_MODULES = ['Projects','Phase','Tasks','Accounts','Account fields','Spaces','Chat',
   'Files and Folders','Status updates','Form responses','Templates','Dashboards','Reports','Settings'];
 
+let permObj = null;   // nav selection inside Custom objects: 'manage' or an object id
+
 function openPermSet(id){
   permDraft = JSON.parse(JSON.stringify(permSet(id)));
-  permCollapsed = {};
+  permObj = null;
   go('permset', id);
 }
 const permDirty = () => permDraft && JSON.stringify(permDraft) !== JSON.stringify(permSet(permDraft.id));
+function selectPermObj(key){ permObj = key; render(); }
 
 function viewPermSet(){
   if(!permDraft || permDraft.id !== route.id){
@@ -1351,6 +1362,14 @@ function viewPermSet(){
     permDraft = JSON.parse(JSON.stringify(ps));
   }
   const ps = permDraft, acct = isAccount(ps);
+  /* Default to the first object, which is the common task. The manage
+     permission is a different thing — configuring objects, not using
+     their records — so it gets its own entry, as the spec separates it. */
+  if(permObj === null) permObj = state.objects.length ? state.objects[0].id : 'manage';
+
+  const navItem = (key, label, right) => `
+    <button class="co-mod-i${permObj===key?' on':''}" onclick="selectPermObj('${key}')">
+      <span>${label}</span>${right ? `<span class="co-mod-n">${right}</span>` : ''}</button>`;
 
   return `
     <div class="co-head">
@@ -1367,11 +1386,12 @@ function viewPermSet(){
       <div class="co-split">
         <div class="co-mod">
           ${PERM_MODULES.map(m => `<button class="co-mod-i" disabled title="Not in this prototype yet">${m}</button>`).join('')}
-          <button class="co-mod-i on">Custom objects</button>
+          <div class="co-mod-label">Custom objects</div>
+          ${acct ? navItem('manage', 'Manage objects', ps.manage ? 'On' : '') : ''}
+          ${state.objects.map(o => navItem(o.id, esc(o.label), permNavSummary(ps, o))).join('')}
         </div>
         <div class="co-pbody">
-          ${acct ? manageCard(ps) : ''}
-          ${state.objects.map(o => objectCard(ps, o)).join('')}
+          ${permObj === 'manage' ? managePane(ps) : objectPane(ps, obj(permObj) || state.objects[0])}
         </div>
       </div>
     </div>
@@ -1382,10 +1402,20 @@ function viewPermSet(){
     </div>`;
 }
 
-function manageCard(ps){
+/* A short right-hand marker so an admin can scan the nav for what is
+   granted without opening each object. */
+function permNavSummary(ps, o){
+  const p = ps.objects[o.id];
+  if(!p || !has(p.view)) return '';
+  if(has(p.del)) return 'Full';
+  if(has(p.edit)) return 'Edit';
+  return p.create ? 'Create' : 'View';
+}
+
+function managePane(ps){
   return `
     <div class="co-card">
-      <div class="co-band"><span class="co-band-t">Custom objects</span></div>
+      <div class="co-band"><span class="co-band-t">Manage objects</span></div>
       <div style="padding:14px 20px">
         ${permRow('Can manage custom objects', ps.manage, "togglePermManage()", null,
           'Create objects and change their fields, relationships and layouts. Grants no access to records.')}
@@ -1393,7 +1423,37 @@ function manageCard(ps){
     </div>`;
 }
 
-/* One checkbox + sentence, optionally with an access tag and a note. */
+function objectPane(ps, o){
+  const acct = isAccount(ps);
+  if(!ps.objects[o.id]) ps.objects[o.id] = P(acct?'NONE':0, 0, acct?'NONE':0, acct?'NONE':0);
+  const p = ps.objects[o.id];
+  const noun = o.plural.toLowerCase();
+  const noView = !has(p.view), noEdit = !has(p.edit);
+
+  const modeTag = key => {
+    if(!acct || !has(p[key])) return '';
+    const m = MODES[p[key]];
+    return `<button class="co-modetag" onclick="modeMenu(event,'${o.id}','${key}')">${m.label} · ${m.note}</button>`;
+  };
+  const toggle = key => `togglePerm('${o.id}','${key}')`;
+
+  return `
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">${esc(o.label)}</span>
+        <span class="co-band-n">${permObjSummary(ps, p)}</span></div>
+      <div style="padding:14px 20px 16px">
+        ${permRow(`Can view ${esc(noun)}`, has(p.view), toggle('view'), modeTag('view'))}
+        ${permRow(`Can create ${esc(noun)}`, !!p.create, toggle('create'), '', '', false, noView)}
+        ${permRow(`Can edit ${esc(noun)}`, has(p.edit), toggle('edit'), modeTag('edit'), '', false, noView)}
+        ${permRow(`Can delete ${esc(noun)}`, has(p.del), toggle('del'), modeTag('del'), '', false, noView || noEdit)}
+      </div>
+    </div>
+
+    ${fieldGrid(ps, o, p)}`;
+}
+
+/* One checkbox and a sentence, optionally with an access tag and a note
+   — the form the product uses for every permission. */
 function permRow(label, on, onclick, modeTag, note, sub, disabled){
   return `
     <div class="co-perm${sub?' sub':''}">
@@ -1411,47 +1471,7 @@ function permRow(label, on, onclick, modeTag, note, sub, disabled){
     </div>`;
 }
 
-function objectCard(ps, o){
-  const acct = isAccount(ps);
-  if(!ps.objects[o.id]) ps.objects[o.id] = P(acct?'NONE':0, 0, acct?'NONE':0, acct?'NONE':0);
-  const p = ps.objects[o.id];
-  const folded = permCollapsed[o.id] === undefined ? !has(p.view) : permCollapsed[o.id];
-  const noun = o.plural.toLowerCase();
-  const noView = !has(p.view), noEdit = !has(p.edit);
-
-  /* On account sets the mode rides next to the checkbox, as the product
-     does for "Can view projects". Project sets have no mode: the scope
-     is always the project. */
-  const modeTag = key => {
-    if(!acct || !has(p[key])) return '';
-    const m = MODES[p[key]];
-    return `<button class="co-modetag" onclick="event.stopPropagation();modeMenu(event,'${o.id}','${key}')">${m.label} · ${m.note}</button>`;
-  };
-  const toggle = key => `togglePerm('${o.id}','${key}')`;
-
-  return `
-    <div class="co-card">
-      <button class="co-band co-band-btn" onclick="toggleObjectCard('${o.id}')">
-        <span class="co-band-t">${esc(o.label)}</span>
-        <span class="co-band-n">${permObjSummary(ps, p)}</span>
-        <span class="co-band-chev${folded?' folded':''}">${ICO.chevDown}</span>
-      </button>
-      ${folded ? '' : `
-        <div style="padding:14px 20px 16px">
-          ${permRow(`Can view ${esc(noun)}`, has(p.view), toggle('view'), modeTag('view'))}
-          ${permRow(`Can create ${esc(noun)}`, !!p.create, toggle('create'), '', '', false, noView)}
-          ${permRow(`Can edit ${esc(noun)}`, has(p.edit), toggle('edit'), modeTag('edit'), '', false, noView)}
-          ${permRow(`Can delete ${esc(noun)}`, has(p.del), toggle('del'), modeTag('del'), '', false, noView || noEdit)}
-
-          ${has(p.view) ? `
-            <div class="co-perm-head">Field permissions</div>
-            ${fieldRows(ps, o, p)}`
-          : `<div class="co-perm-note" style="padding-left:29px;margin-top:10px">
-              Turn on view to set field permissions.</div>`}
-        </div>`}
-    </div>`;
-}
-
+/* The band's right-hand read: what this set can do with the object. */
 function permObjSummary(ps, p){
   if(!has(p.view)) return 'No access';
   const bits = ['View'];
@@ -1461,34 +1481,92 @@ function permObjSummary(ps, p){
   return bits.join(' · ');
 }
 
-/* Field access follows the object unless an admin narrows it: Read where
-   the set can view, Edit where it can edit. */
-function fieldDefault(p){ return has(p.edit) ? 'EDIT' : has(p.view) ? 'READ' : 'NONE'; }
-function fieldAccess(p, fid){ return p.fields[fid] || fieldDefault(p); }
+/* Field access is stored only where an admin narrows it; otherwise it
+   follows the object — Read where the set can view, Edit where it can
+   edit, and never Edit on a calculated field. */
+function fieldDefault(p, f){
+  if(f && (f.type === 'FORMULA' || f.type === 'ROLLUP')) return has(p.view) ? 'READ' : 'NONE';
+  return has(p.edit) ? 'EDIT' : has(p.view) ? 'READ' : 'NONE';
+}
+function fieldAccess(p, fid){
+  if(p.fields[fid]) return p.fields[fid];
+  const o = state.objects.find(x => x.fields.some(f => f.id === fid));
+  return fieldDefault(p, o && o.fields.find(f => f.id === fid));
+}
 
-function fieldRows(ps, o, p){
-  const noEdit = !has(p.edit);
+/* Field permissions as a Read / Edit grid.
+   Salesforce gets this shape right: one row per field, two columns, and a
+   tick in the header to set a whole column. It scans in a way a stack of
+   checkbox sentences does not, so this is the one place the object page
+   stops using Rocketlane's sentence form.
+
+   Edit implies Read, the way it does there — and Edit additionally needs
+   Edit on the object itself. */
+function fieldGrid(ps, o, p){
+  const noView = !has(p.view), noEdit = !has(p.edit);
   const states = o.fields.map(f => fieldAccess(p, f.id));
-  const visible = states.filter(v => v !== 'NONE').length;
-  const all = visible === 0 ? false : visible === states.length ? true : 'mixed';
+  const allRead = states.length && states.every(v => v !== 'NONE');
+  const allEdit = states.length && states.every(v => v === 'EDIT');
 
-  const accessTag = (fid, v) => v === 'NONE' ? '' :
-    `<button class="co-modetag" onclick="event.stopPropagation();fieldMenuAccess(event,'${o.id}','${fid}')">${v === 'EDIT' ? 'Can edit' : 'Read only'}</button>`;
+  if(noView){
+    return `
+      <div class="co-card">
+        <div class="co-band"><span class="co-band-t">Field permissions</span></div>
+        <div style="padding:16px 20px;color:var(--muted-foreground);font-size:13.5px">
+          Turn on view to set field permissions.
+        </div>
+      </div>`;
+  }
+
+  const box = (on, locked, onclick, title) => `
+    <button class="co-chk${on?' on':''}${locked?' locked':''}" ${locked?'disabled':''}
+            ${locked?'':`onclick="${onclick}"`} ${title?`title="${esc(title)}"`:''}
+            role="checkbox" aria-checked="${!!on}">${on?ICO.check:''}</button>`;
+
+  const row = (label, type, read, edit, readLock, editLock, fid) => `
+    <tr>
+      <td style="padding-left:20px">${type
+        ? `<span class="co-type">${typeIcon(type)}${label}</span>`
+        : `<span style="color:var(--muted-foreground)">${label}</span>`}</td>
+      <td style="color:var(--muted-foreground)">${type ? esc(typeMeta(type).label) : 'System'}</td>
+      <td class="co-fcol">${box(read, readLock, `setFieldCol('${o.id}','${fid}','read')`,
+        readLock ? 'Always visible' : '')}</td>
+      <td class="co-fcol">${box(edit, editLock, `setFieldCol('${o.id}','${fid}','edit')`,
+        editLock ? (noEdit ? 'Needs edit access on the object' : 'Set by Rocketlane') : '')}</td>
+    </tr>`;
 
   return `
-    ${permRow('All fields', all, "toggleAllFields('"+o.id+"')", '', '', true)}
-    ${o.fields.map(f => {
-      const v = fieldAccess(p, f.id);
-      return permRow(esc(f.label), v !== 'NONE', `toggleField('${o.id}','${f.id}')`, accessTag(f.id, v), '', true);
-    }).join('')}
-    ${[o.recordNameLabel, ...ALWAYS_VISIBLE].map(l => `
-      <div class="co-perm sub">
-        <span class="co-chk on locked">${ICO.check}</span>
-        <div class="co-perm-body"><div class="co-perm-line">
-          <span style="color:var(--muted-foreground)">${esc(l)}</span>
-          ${tag('Always visible','', 'sm','A user with view access always sees this')}
-        </div></div>
-      </div>`).join('')}`;
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Field permissions</span>
+        <span class="co-band-n">${states.filter(v => v !== 'NONE').length} of ${states.length} visible</span></div>
+      <table class="co-table">
+        <thead><tr>
+          <th style="padding-left:20px">Field</th><th>Type</th>
+          <th class="co-fcol">
+            <label class="co-fhead">${box(allRead, false, `setAllCol('${o.id}','read')`)}<span>Read</span></label>
+          </th>
+          <th class="co-fcol">
+            <label class="co-fhead">${box(allEdit, noEdit, `setAllCol('${o.id}','edit')`)}<span>Edit</span></label>
+          </th>
+        </tr></thead>
+        <tbody>
+          ${o.fields.map(f => {
+            const v = fieldAccess(p, f.id);
+            const calculated = f.type === 'FORMULA' || f.type === 'ROLLUP';
+            return row(esc(f.label), f.type, v !== 'NONE', v === 'EDIT', false,
+              noEdit || calculated, f.id);
+          }).join('')}
+          ${row(esc(o.recordNameLabel), o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT',
+                true, !noEdit && o.recordNameType !== 'AUTONUMBER', true,
+                noEdit || o.recordNameType === 'AUTONUMBER', '_name')}
+          ${ALWAYS_VISIBLE.map(l => row(esc(l), null, true, false, true, true, '_sys')).join('')}
+        </tbody>
+      </table>
+      <div class="co-band-d" style="border-bottom:0;border-top:1px solid var(--co-border)">
+        Edit includes Read. Record Name and the audit fields are always visible.
+        ${noEdit ? 'Edit on a field needs edit access on the object.' : ''}
+      </div>
+    </div>`;
 }
 
 /* ── Edits (all against the draft) ────────────────────────────────── */
@@ -1515,27 +1593,31 @@ function modeMenu(ev, objId, key){
     label: m.label + ' — ' + m.note, fn: () => setMode(objId, key, k),
   })));
 }
-function toggleField(objId, fid){
+/* Read and Edit as two columns: Edit implies Read, clearing Read clears
+   Edit. Mirrors how Salesforce behaves, and keeps our NONE/READ/EDIT
+   model intact underneath. */
+function setFieldCol(objId, fid, col){
   const p = permDraft.objects[objId];
-  p.fields[fid] = fieldAccess(p, fid) === 'NONE' ? (has(p.edit) ? 'EDIT' : 'READ') : 'NONE';
+  const v = fieldAccess(p, fid);
+  p.fields[fid] = col === 'read'
+    ? (v === 'NONE' ? 'READ' : 'NONE')
+    : (v === 'EDIT' ? 'READ' : 'EDIT');
   render();
 }
-function fieldMenuAccess(ev, objId, fid){
-  const p = permDraft.objects[objId];
-  const items = [{label:'Read only', fn:()=>{ p.fields[fid] = 'READ'; render(); }}];
-  if(has(p.edit)) items.push({label:'Can edit', fn:()=>{ p.fields[fid] = 'EDIT'; render(); }});
-  items.push('-', {label:'Hidden', danger:true, fn:()=>{ p.fields[fid] = 'NONE'; render(); }});
-  showMenu(ev, items);
-}
-function toggleAllFields(objId){
+function setAllCol(objId, col){
   const p = permDraft.objects[objId], o = obj(objId);
-  const anyVisible = o.fields.some(f => fieldAccess(p, f.id) !== 'NONE');
-  const v = anyVisible ? 'NONE' : (has(p.edit) ? 'EDIT' : 'READ');
-  o.fields.forEach(f => { p.fields[f.id] = v; });
+  const states = o.fields.map(f => fieldAccess(p, f.id));
+  const v = col === 'read'
+    ? (states.every(x => x !== 'NONE') ? 'NONE' : 'READ')
+    : (states.every(x => x === 'EDIT') ? 'READ' : 'EDIT');
+  o.fields.forEach(f => {
+    /* A formula or roll-up is read-only, so it never takes Edit. */
+    const calculated = f.type === 'FORMULA' || f.type === 'ROLLUP';
+    p.fields[f.id] = (v === 'EDIT' && calculated) ? 'READ' : v;
+  });
   render();
 }
 function togglePermManage(){ permDraft.manage = !permDraft.manage; render(); }
-function toggleObjectCard(objId){ permCollapsed[objId] = !permCollapsed[objId]; render(); }
 
 function savePermSet(){
   const i = state.permSets.findIndex(p => p.id === permDraft.id);
