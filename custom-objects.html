@@ -1426,8 +1426,7 @@ function objectPane(ps, o){
 
   return `
     <div class="co-card">
-      <div class="co-band"><span class="co-band-t">${esc(o.label)}</span>
-        <span class="co-band-n">${permObjSummary(ps, p)}</span></div>
+      <div class="co-band"><span class="co-band-t">${esc(o.label)}</span></div>
       <div style="padding:14px 20px 16px">
         ${permRow(`Can view ${esc(noun)}`, has(p.view), toggle('view'), modeTag('view'))}
         ${permRow(`Can create ${esc(noun)}`, !!p.create, toggle('create'), '', '', false, noView)}
@@ -1458,15 +1457,6 @@ function permRow(label, on, onclick, modeTag, note, sub, disabled){
     </div>`;
 }
 
-/* The band's right-hand read: what this set can do with the object. */
-function permObjSummary(ps, p){
-  if(!has(p.view)) return 'No access';
-  const bits = ['View'];
-  if(p.create) bits.push('Create');
-  if(has(p.edit)) bits.push('Edit');
-  if(has(p.del)) bits.push('Delete');
-  return bits.join(' · ');
-}
 
 /* Field access is stored only where an admin narrows it; otherwise it
    follows the object — Read where the set can view, Edit where it can
