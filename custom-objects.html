@@ -303,6 +303,20 @@ select.co-input{
 .co-tp:disabled{ cursor:not-allowed; opacity:.6; background:var(--co-band); }
 .co-tp-t{ font-size:13.5px; font-weight:500; display:flex; align-items:center; gap:5px; min-width:0; }
 
+/* Formula palette: a labelled row per token kind. */
+.co-palette{ margin-top:10px; border:1px solid var(--co-border); border-radius:8px; background:var(--co-band); padding:4px 10px; }
+.co-tokrow{ display:flex; align-items:flex-start; gap:10px; padding:7px 0; }
+.co-tokrow + .co-tokrow{ border-top:1px solid var(--co-border-soft); }
+.co-toklabel{ width:70px; flex-shrink:0; font-size:11.5px; font-weight:600; color:var(--muted-foreground); padding-top:4px; }
+.co-toks{ display:flex; flex-wrap:wrap; gap:4px; flex:1; min-width:0; }
+.co-tok{
+  padding:3px 8px; border-radius:6px; font-size:12.5px; line-height:1.4;
+  background:var(--background); border:1px solid var(--co-border); color:var(--foreground);
+  font-family:var(--font-mono); white-space:nowrap;
+}
+.co-tok:hover{ border-color:var(--co-blue); color:var(--co-blue); }
+.co-tok.op{ min-width:30px; text-align:center; font-weight:600; }
+
 .co-pl{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
 .co-pl-grip{ color:#B6BAC2; font-size:13px; width:12px; text-align:center; flex-shrink:0; cursor:grab; }
 .co-pl-sw{ width:28px; height:28px; border-radius:6px; border:1px solid rgba(0,0,0,.08); flex-shrink:0; cursor:pointer; }
@@ -2096,10 +2110,54 @@ function fdLookupSettings(o, d){
     ` : ''}`;
 }
 
-/* ── Formula (Phase 5 — enough of it to model a line's net extension) ── */
+/* ── Formula ──────────────────────────────────────────────────────
+   Building an expression means alternating between fields and
+   operators, so both are offered the same way: a palette under the box
+   that inserts at the cursor. Nothing here requires knowing the syntax
+   in advance, which the bare textarea did.
+
+   Tokens go through an array rather than inline onclick strings — field
+   labels and operators both carry characters that would need escaping
+   twice over. ──────────────────────────────────────────────────────── */
+let FD_TOKENS = [];
+
+const FD_OPS = [
+  {t:'+', hint:'Add'}, {t:'-', hint:'Subtract'}, {t:'*', hint:'Multiply'},
+  {t:'/', hint:'Divide'}, {t:'(', hint:'Open bracket'}, {t:')', hint:'Close bracket'},
+];
+const FD_COMPARE = [
+  {t:'=', hint:'Equals'}, {t:'!=', hint:'Does not equal'}, {t:'>', hint:'Greater than'},
+  {t:'<', hint:'Less than'}, {t:'>=', hint:'At least'}, {t:'<=', hint:'At most'},
+];
+const FD_LOGIC = [{t:'AND', hint:'Both are true'}, {t:'OR', hint:'Either is true'}, {t:'NOT', hint:'Is not true'}];
+/* Functions worth offering depend on what the formula returns. */
+function fdFunctions(returns){
+  if(returns === 'TEXT')     return [{t:'CONCAT(', hint:'Join text'}, {t:'UPPER(', hint:'Upper case'}, {t:'LOWER(', hint:'Lower case'}];
+  if(returns === 'DATE')     return [{t:'TODAY()', hint:'Today’s date'}, {t:'DATE_ADD(', hint:'Add days to a date'}];
+  if(returns === 'CHECKBOX') return [{t:'IF(', hint:'If this, then that'}, {t:'ISBLANK(', hint:'Has no value'}];
+  return [{t:'ROUND(', hint:'Round to decimals'}, {t:'ABS(', hint:'Drop the minus sign'},
+          {t:'MIN(', hint:'Smallest of'}, {t:'MAX(', hint:'Largest of'}];
+}
+
 function fdFormulaSettings(o, d){
   const s = d.settings;
   const usable = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
+  const bool = s.returns === 'CHECKBOX';
+  FD_TOKENS = [];
+
+  const chip = (text, kind, title) => {
+    const i = FD_TOKENS.push({text, kind}) - 1;
+    return `<button class="co-tok${kind === 'op' ? ' op' : ''}" type="button"
+              onclick="insertToken(${i})"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</button>`;
+  };
+  const group = (label, chips) => `
+    <div class="co-tokrow">
+      <span class="co-toklabel">${label}</span>
+      <div class="co-toks">${chips}</div>
+    </div>`;
+
+  const expr = s.expr || '';
+
   return secLabel('Formula') + `
     ${field('Returns', false, `<select class="co-input" style="max-width:220px" onchange="fd.d.settings.returns = this.value; fdRender()">
       ${['NUMBER','CURRENCY','PERCENT','TEXT','DATE','CHECKBOX'].map(t =>
@@ -2107,14 +2165,65 @@ function fdFormulaSettings(o, d){
     </select>`)}
     <div class="co-f"><div class="rl-field">
       <label class="rl-field-label">Expression <span class="rl-field-required">*</span></label>
-      <textarea class="co-input co-mono" rows="2" placeholder="{Quantity} * {Unit Price}" oninput="fd.d.settings.expr = this.value">${esc(s.expr)}</textarea>
+      <textarea class="co-input co-mono" id="fd-expr" rows="2" placeholder="{Quantity} * {Unit Price}"
+                oninput="fd.d.settings.expr = this.value; fdExprCheck()">${esc(expr)}</textarea>
       ${fErr('expr', fd.err)}
-      <div class="rl-field-hint" style="margin-top:8px">Insert a field:</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
-        ${usable.map(f => `<button class="co-tag sm" type="button" onclick="fdInsertToken('${esc(f.label).replace(/'/g,"\\'")}')">${esc(f.label)}</button>`).join('')
-          || '<span class="co-rel-empty">No other fields yet.</span>'}
+      <div id="fd-expr-warn">${exprWarning(expr)}</div>
+      <div class="co-palette">
+        ${group('Fields', usable.length
+          ? usable.map(f => chip('{' + f.label + '}', 'field', typeMeta(f.type).label)).join('')
+          : '<span style="font-size:12px;color:var(--muted-foreground)">No other fields yet.</span>')}
+        ${group('Operators', FD_OPS.map(x => chip(x.t, 'op', x.hint)).join('')
+          + (bool ? FD_COMPARE.map(x => chip(x.t, 'op', x.hint)).join('') : ''))}
+        ${bool ? group('Logic', FD_LOGIC.map(x => chip(x.t, 'op', x.hint)).join('')) : ''}
+        ${group('Functions', fdFunctions(s.returns).map(x => chip(x.t, 'fn', x.hint)).join(''))}
       </div>
+      <div class="rl-field-hint">Click to insert at the cursor. Fields are wrapped in braces.</div>
     </div></div>`;
+}
+
+/* Unbalanced brackets are the mistake this box invites, so say so — and
+   say it while typing, since inserting a token deliberately skips the
+   re-render to keep the caret where it is. */
+function exprWarning(expr){
+  const open = (String(expr||'').match(/\(/g) || []).length;
+  const close = (String(expr||'').match(/\)/g) || []).length;
+  if(open === close) return '';
+  return `<div class="co-err">${ICO.warn} ${open > close
+    ? 'A bracket is not closed.' : 'There is a closing bracket with nothing to close.'}</div>`;
+}
+function fdExprCheck(){
+  const el = document.getElementById('fd-expr-warn');
+  if(el) el.innerHTML = exprWarning(fd.d.settings.expr);
+}
+
+/* Insert at the caret and leave it after the token, so a field, an
+   operator and a second field can be clicked in sequence without
+   touching the keyboard. Spacing is added where it is missing. */
+function insertToken(i){
+  const tok = FD_TOKENS[i];
+  if(!tok) return;
+  const el = document.getElementById('fd-expr');
+  if(!el){ fd.d.settings.expr = (fd.d.settings.expr || '') + tok.text; fdRender(); return; }
+
+  const start = el.selectionStart, end = el.selectionEnd, v = el.value;
+  const before = v.slice(0, start), after = v.slice(end);
+  const prev = before.slice(-1), next = after.slice(0, 1);
+
+  /* No space right after an opening bracket, or before a closing one. */
+  const lead  = (!before || prev === ' ' || prev === '(' || tok.text === ')') ? '' : ' ';
+  const trail = (tok.kind === 'fn' || tok.text === '(') ? ''
+              : (!after || next === ' ' || next === ')') ? '' : ' ';
+
+  const piece = lead + tok.text + trail;
+  const value = (before + piece + after).replace(/ {2,}/g, ' ');
+  el.value = value;
+  fd.d.settings.expr = value;
+
+  const caret = (before + piece).replace(/ {2,}/g, ' ').length;
+  el.focus();
+  el.setSelectionRange(caret, caret);
+  fdExprCheck();
 }
 
 /* ── Roll-up (Part C) ─────────────────────────────────────────────── */
@@ -2363,10 +2472,6 @@ function fdTogglePicker(label){
   fdRender();
 }
 
-function fdInsertToken(label){
-  fd.d.settings.expr = (fd.d.settings.expr ? fd.d.settings.expr.trimEnd() + ' ' : '') + '{' + label + '}';
-  fdRender();
-}
 
 function fdSetRollupChild(v){
   const s = fd.d.settings;
