@@ -307,19 +307,6 @@ select.co-input{
 .co-pl-grip{ color:#B6BAC2; font-size:13px; width:12px; text-align:center; flex-shrink:0; cursor:grab; }
 .co-pl-sw{ width:28px; height:28px; border-radius:6px; border:1px solid rgba(0,0,0,.08); flex-shrink:0; cursor:pointer; }
 
-.co-map{ display:flex; flex-direction:column; }
-.co-map-row{ display:flex; align-items:center; gap:10px; padding:7px 0; flex-wrap:wrap; }
-.co-node{
-  display:inline-flex; align-items:center; gap:8px; border:1px solid var(--co-border);
-  border-radius:8px; padding:6px 11px; background:var(--background);
-  font-size:13.5px; font-weight:500; box-shadow:var(--shadow-xs);
-}
-.co-node.me{ border-color:color-mix(in oklab, var(--co-blue) 35%, var(--co-border)); background:var(--co-nav-active); color:#11325E; }
-.co-node.sys{ background:var(--co-band); color:var(--muted-foreground); font-weight:400; box-shadow:none; }
-.co-conn{ display:inline-flex; align-items:center; gap:7px; font-size:11.5px; color:var(--muted-foreground); font-family:var(--font-mono); }
-.co-line{ width:26px; height:1px; background:var(--co-border); position:relative; }
-.co-line::after{ content:''; position:absolute; right:0; top:-3px; border-left:5px solid var(--co-border); border-top:3.5px solid transparent; border-bottom:3.5px solid transparent; }
-
 .co-rel-head{ display:flex; align-items:center; gap:9px; }
 .co-rel-t{ flex:1; min-width:0; font-size:14px; font-weight:500; }
 .co-rel-meta{ font-size:12.5px; color:var(--muted-foreground); line-height:1.65; }
@@ -1123,74 +1110,105 @@ function fieldLabel(objId, fieldId){
   return f ? f.label : fieldId;
 }
 
-/* ── Tab: relationships ───────────────────────────────────────────── */
+/* ── Tab: relationships ───────────────────────────────────────────
+   Three tables rather than three stacks of prose. The direction of a
+   link is the thing that confuses people, so each table is named for
+   the direction and the columns carry the detail. ────────────────── */
 function tabRel(o){
   const out = o.fields.filter(f => f.type === 'LOOKUP');
   const inc = incoming(o.id);
   const rollups = o.fields.filter(f => f.type === 'ROLLUP');
+  const empty = (cols, msg) => `<tr><td colspan="${cols}" style="padding:18px 20px;color:var(--muted-foreground)">${msg}</td></tr>`;
 
-  const card = (title, action, meta) => `
+  const pointsAt = `
     <div class="co-card">
-      <div class="co-band">
-        <span class="co-band-t">${title}</span>
-        <span style="margin-left:auto">${action}</span>
-      </div>
-      <div style="padding:14px 20px"><div class="co-rel-meta">${meta}</div></div>
+      <div class="co-band"><span class="co-band-t">Points at</span><span class="co-band-n">(${out.length})</span></div>
+      <table class="co-table">
+        <thead><tr>
+          <th style="padding-left:20px">Field</th><th>Points to</th><th>Required</th>
+          <th>If the target is deleted</th><th>Related list it creates</th><th class="col-menu"></th>
+        </tr></thead>
+        <tbody>
+          ${out.length ? out.map(f => `
+            <tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
+              <td style="padding-left:20px"><span class="co-type">${typeIcon('LOOKUP')}${esc(f.label)}</span></td>
+              <td>${tag(esc(targetLabel(f.settings.target)), 'purple')}</td>
+              <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
+              <td>${f.settings.onDelete === 'BLOCK'
+                    ? tag('Blocks the delete', 'orange', 'sm')
+                    : '<span style="color:var(--muted-foreground)">Clears this value</span>'}</td>
+              <td style="color:var(--muted-foreground)">${esc(f.settings.relatedListLabel)} <span style="opacity:.6">on ${esc(targetLabel(f.settings.target))}</span></td>
+              <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')">${ICO.dots}</button></td>
+            </tr>`).join('')
+          : empty(6, `${esc(o.label)} does not point at another object yet.`)}
+        </tbody>
+      </table>
     </div>`;
 
-  const map = `
+  const referencedBy = `
     <div class="co-card">
-      <div class="co-band"><span class="co-band-t">How ${esc(o.label)} sits in the model</span></div>
-      <div style="padding:14px 20px">
-        <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:6px">Arrows are lookups.</div>
-        <div class="co-map">
-          ${out.map(f => `<div class="co-map-row">
-            <span class="co-node me">${esc(o.label)}</span>
-            <span class="co-conn"><span class="co-line"></span>${esc(f.label)}${f.required?' · required':''}</span>
-            <span class="co-node">${esc(targetLabel(f.settings.target))}</span>
-          </div>`).join('')}
-          ${inc.map(({obj:p, field:f}) => `<div class="co-map-row">
-            <span class="co-node">${esc(p.label)}</span>
-            <span class="co-conn"><span class="co-line"></span>${esc(f.label)}${f.required?' · required':''}</span>
-            <span class="co-node me">${esc(o.label)}</span>
-          </div>`).join('')}
-        </div>
-      </div>
+      <div class="co-band"><span class="co-band-t">Referenced by</span><span class="co-band-n">(${inc.length})</span></div>
+      <div class="co-band-d">Lookups on other objects that point here. Each one shows as a related list on a ${esc(o.label)} record.</div>
+      <table class="co-table">
+        <thead><tr>
+          <th style="padding-left:20px">Related list</th><th>Object</th><th>Through</th>
+          <th>Required</th><th>If a ${esc(o.label)} is deleted</th><th class="col-menu"></th>
+        </tr></thead>
+        <tbody>
+          ${inc.length ? inc.map(({obj:pr, field:f}) => `
+            <tr class="is-clickable" onclick="go('object','${pr.id}','fields')">
+              <td style="padding-left:20px"><div class="co-fname">${esc(f.settings.relatedListLabel)}</div></td>
+              <td>${tag(esc(pr.label), 'purple')}</td>
+              <td><span class="co-type">${typeIcon('LOOKUP')}${esc(f.label)}</span></td>
+              <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
+              <td>${f.settings.onDelete === 'BLOCK'
+                    ? tag('Delete is blocked', 'orange', 'sm')
+                    : `<span style="color:var(--muted-foreground)">${esc(f.label)} is cleared</span>`}</td>
+              <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();go('object','${pr.id}','fields')">${ICO.dots}</button></td>
+            </tr>`).join('')
+          : empty(6, `No other object points at ${esc(o.label)} yet.`)}
+        </tbody>
+      </table>
     </div>`;
 
-  const outHtml = out.length ? out.map(f => card(
-    `${esc(f.label)} <span style="color:var(--muted-foreground);font-weight:400">→ ${esc(targetLabel(f.settings.target))}</span>`,
-    `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
-    `${f.required ? '<b>Required</b>' : 'Optional'} · related list <b>${esc(f.settings.relatedListLabel)}</b> on ${esc(targetLabel(f.settings.target))} ·
-     ${f.settings.onDelete === 'BLOCK' ? '<b>blocks delete</b>' : 'clears on delete'}
-     ${(f.settings.pickerFields||[]).length ? `<br>Picker: ${(f.settings.pickerFields||[]).map(x => tag(esc(x), '', 'sm')).join(' ')}` : ''}`
-  )).join('') : `<div class="co-rel-empty">${esc(o.label)} does not point at any other object yet.</div>`;
+  const rollHtml = `
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Roll-ups</span><span class="co-band-n">(${rollups.length})</span>
+        <span style="margin-left:10px">${openChip('Recommended, not decided.')}</span></div>
+      <table class="co-table">
+        <thead><tr>
+          <th style="padding-left:20px">Field</th><th>Function</th><th>Aggregates</th>
+          <th>Across</th><th>Only where</th><th class="col-menu"></th>
+        </tr></thead>
+        <tbody>
+          ${rollups.length ? rollups.map(f => {
+            const c = obj(f.settings.child);
+            return `
+            <tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
+              <td style="padding-left:20px"><span class="co-type">${typeIcon('ROLLUP')}${esc(f.label)}</span></td>
+              <td>${tag(esc(f.settings.fn), 'pink')}</td>
+              <td>${f.settings.fn === 'COUNT'
+                    ? '<span style="color:var(--muted-foreground)">records</span>'
+                    : esc(fieldLabel(f.settings.child, f.settings.aggField))}</td>
+              <td style="color:var(--muted-foreground)">${esc(c ? c.plural : f.settings.child)}
+                <span style="opacity:.6">via ${esc(c ? fieldLabel(c.id, f.settings.childLookup) : f.settings.childLookup)}</span></td>
+              <td style="color:var(--muted-foreground)">${f.settings.filterField
+                    ? `${esc(fieldLabel(f.settings.child, f.settings.filterField))} ${f.settings.filterOp === 'neq' ? 'is not' : 'is'} <b style="color:var(--foreground);font-weight:500">${esc(f.settings.filterValue)}</b>`
+                    : '<span style="opacity:.6">Every record</span>'}</td>
+              <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')">${ICO.dots}</button></td>
+            </tr>`;
+          }).join('')
+          : empty(6, `No roll-ups on ${esc(o.label)} yet.`)}
+        </tbody>
+      </table>
+    </div>`;
 
-  const incHtml = inc.length ? inc.map(({obj:p, field:f}) => card(
-    `${esc(f.settings.relatedListLabel)} <span style="color:var(--muted-foreground);font-weight:400">· ${esc(p.label)} records</span>`,
-    `<button class="rl-btn v-outline sz-sm" onclick="go('object','${p.id}','fields')"><span class="rl-btn-label">Open ${esc(p.label)}</span></button>`,
-    `Lists the ${esc(p.plural.toLowerCase())} whose <b>${esc(f.label)}</b> points here.
-     ${f.settings.onDelete === 'BLOCK'
-       ? `<b>Blocks deletion</b> of this ${esc(o.label)}.`
-       : `Cleared if this ${esc(o.label)} is deleted.`}`
-  )).join('') : `<div class="co-rel-empty">No other object points at ${esc(o.label)} yet.</div>`;
-
-  const rollHtml = rollups.length ? rollups.map(f => {
-    const c = obj(f.settings.child);
-    return card(esc(f.label),
-      `<button class="rl-btn v-outline sz-sm" onclick="openFieldDrawer('${o.id}','${f.id}')"><span class="rl-btn-label">Edit</span></button>`,
-      `<b>${esc(f.settings.fn)}</b>${f.settings.fn !== 'COUNT' ? ' of <b>' + esc(fieldLabel(f.settings.child, f.settings.aggField)) + '</b>' : ''}
-       across ${esc(c ? c.plural : f.settings.child)}, through
-       <b>${esc(c ? fieldLabel(c.id, f.settings.childLookup) : f.settings.childLookup)}</b>.
-       ${f.settings.filterField ? ` Only where <b>${esc(fieldLabel(f.settings.child, f.settings.filterField))}</b> ${f.settings.filterOp === 'neq' ? 'is not' : 'is'} <b>${esc(f.settings.filterValue)}</b>.` : ''}`);
-  }).join('') : `<div class="co-rel-empty">No roll-ups on ${esc(o.label)} yet.</div>`;
-
-  return map + `
-    <div class="co-sec"><span class="co-sec-t">Points at (lookups on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
-    ${outHtml}
-    <div class="co-sec"><span class="co-sec-t">Referenced by (related lists on ${esc(o.label)})</span><span class="co-sec-line"></span></div>
-    ${incHtml}
-    <div class="co-sec"><span class="co-sec-t">Roll-ups</span><span class="co-sec-line"></span>${openChip('Recommended, not decided.')}</div>
+  return `
+    <div class="co-actions">
+      <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}')"><span class="rl-btn-label">New field</span>${ICO.plus}</button>
+    </div>
+    ${pointsAt}
+    ${referencedBy}
     ${rollHtml}`;
 }
 
