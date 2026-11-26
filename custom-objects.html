@@ -479,11 +479,6 @@ const TYPE_GROUPS = [
   {key:'later',  title:'Not in release 1'},
 ];
 const NUMERIC = ['NUMBER','CURRENCY','PERCENT'];
-const LEVELS = {
-  ACCOUNT:{label:'Account', hue:'blue'},
-  PROJECT:{label:'Project', hue:'green'},
-  GLOBAL :{label:'Global',  hue:'yellow'},
-};
 /* An object label cannot collide with a default object. */
 const RESERVED = ['project','task','phase','account','budget','time entry','form','document',
                   'user','customer','invoice','milestone','resource','asset','space'];
@@ -494,12 +489,16 @@ const PALETTE = ['#DBEAFE','#DCFCE7','#FEF3C7','#FFEDD5','#FEE2E2','#F3E8FF','#E
 function seed(){
   return {objects:[
     {
-      id:'so', label:'Sales Order', plural:'Sales Orders', level:'ACCOUNT',
+      id:'so', label:'Sales Order', plural:'Sales Orders',
       description:'Holds sales orders synced from Salesforce. One order can create one or more projects.',
       recordNameLabel:'Order Number', recordNameType:'AUTONUMBER',
       autoFormat:'SO-{0000000}', autoStart:1, autoNext:1043,
       fieldHistory:true, records:1042, updated:'21 Nov 2026',
       fields:[
+        {id:'so_acct', label:'Account', type:'LOOKUP',
+         description:'The customer this order belongs to.', help:'', required:true, showInReports:true,
+         settings:{target:'ACCOUNT', relatedListLabel:'Sales Orders', onDelete:'BLOCK',
+           pickerFields:['Account Owner','Region']}},
         {id:'so_sfid', label:'Salesforce Opportunity ID', type:'TEXT',
          description:'Sync key. Matches the Opportunity record in Salesforce.', help:'', required:false,
          unique:true, extId:true, showInReports:false, settings:{maxLength:255}},
@@ -545,7 +544,7 @@ function seed(){
       ],
     },
     {
-      id:'li', label:'Line Item', plural:'Line Items', level:'ACCOUNT',
+      id:'li', label:'Line Item', plural:'Line Items',
       description:'One product sold on a sales order, with quantity and price.',
       recordNameLabel:'Line Number', recordNameType:'AUTONUMBER',
       autoFormat:'LI-{000000}', autoStart:1, autoNext:4871,
@@ -587,7 +586,7 @@ function seed(){
       ],
     },
     {
-      id:'prod', label:'Product', plural:'Products', level:'GLOBAL', levelOpen:true,
+      id:'prod', label:'Product', plural:'Products',
       description:'Master catalogue of what we sell, with a default price.',
       recordNameLabel:'Product Name', recordNameType:'TEXT',
       autoFormat:'', autoStart:1, autoNext:1,
@@ -728,15 +727,11 @@ function usages(o, f){
 function systemFields(o){
   /* `supplied` marks the two a person actually fills in. The rest are
      written by Rocketlane, so the mandatory column stays empty for them. */
-  const parent = o.level === 'GLOBAL' ? null
-    : {label:o.level === 'ACCOUNT' ? 'Account' : 'Project', type:'LOOKUP', supplied:true,
-       note:'Required lookup, created from the object\u2019s level.'};
   const rows = [
     {label:o.recordNameLabel, type:o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT',
      supplied:o.recordNameType !== 'AUTONUMBER',
      note:'Record Name. Always present and cannot be deleted.'},
   ];
-  if(parent) rows.push(parent);
   rows.push(
     {label:'Record ID', type:'TEXT', note:'System ID. Used by lookups, reports and integrations.'},
     {label:'Created by', type:'USER', note:''},
@@ -804,14 +799,12 @@ function viewList(){
   }
 
   const rows = os.map(o => {
-    const lv = LEVELS[o.level];
     const nLookups = o.fields.filter(f => f.type === 'LOOKUP').length;
     return `<tr class="is-clickable" onclick="go('object','${o.id}','fields')">
       <td class="col-grip">${ICO_GRIP}</td>
       <td>
         <div class="co-fname">${esc(o.label)}</div>
       </td>
-      <td>${tag(lv.label, lv.hue)}${o.levelOpen ? ' ' + openChip('Where a global reference list lives is undecided.') : ''}</td>
       <td>
         <span class="co-type">${typeIcon(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}${esc(o.recordNameLabel)}</span>
         ${o.recordNameType === 'AUTONUMBER' ? ' ' + tag(esc(o.autoFormat), '', 'sm') : ''}
@@ -832,7 +825,7 @@ function viewList(){
       <div class="co-band"><span class="co-band-t">All custom objects</span><span class="co-band-n">(${os.length})</span></div>
       <table class="co-table">
         <thead><tr>
-          <th class="col-grip"></th><th>Object</th><th>Level</th><th>Record name</th>
+          <th class="col-grip"></th><th>Object</th><th>Record name</th>
           <th class="num">Fields</th><th class="num">Records</th><th>Last updated</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
@@ -846,7 +839,6 @@ function viewList(){
 function viewObject(){
   const o = obj(route.id);
   if(!o){ route.view = 'list'; return viewList(); }
-  const lv = LEVELS[o.level];
   const tabs = [
     ['fields','Fields', o.fields.length],
     ['rel','Relationships', o.fields.filter(f=>f.type==='LOOKUP').length + incoming(o.id).length],
@@ -859,10 +851,7 @@ function viewObject(){
       <div class="co-crumb"><a onclick="go('list')">Custom objects</a><span>›</span><span>${esc(o.label)}</span></div>
       <div style="display:flex;align-items:flex-start;gap:14px">
         <div style="flex:1;min-width:0">
-          <div class="co-title">${ICON_CUBE} ${esc(o.label)}
-            ${tag(lv.label + ' level', lv.hue)}
-            ${o.levelOpen ? openChip('Where a global reference list lives is undecided.') : ''}
-          </div>
+          <div class="co-title">${ICON_CUBE} ${esc(o.label)}</div>
           <div class="co-desc">${esc(o.description) || 'No description'}</div>
         </div>
       </div>
@@ -984,14 +973,6 @@ function tabRel(o){
       <div style="padding:14px 20px">
         <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:6px">Arrows are lookups.</div>
         <div class="co-map">
-          ${o.level !== 'GLOBAL' ? `<div class="co-map-row">
-            <span class="co-node sys">${LEVELS[o.level].label}</span>
-            <span class="co-conn"><span class="co-line"></span>parent · required</span>
-            <span class="co-node me">${esc(o.label)}</span>
-          </div>` : `<div class="co-map-row">
-            <span class="co-node me">${esc(o.label)}</span>
-            <span class="co-conn">no parent — </span>${openChip('Undecided.')}
-          </div>`}
           ${out.map(f => `<div class="co-map-row">
             <span class="co-node me">${esc(o.label)}</span>
             <span class="co-conn"><span class="co-line"></span>${esc(f.label)}${f.required?' · required':''}</span>
@@ -1052,7 +1033,6 @@ function tabDetails(o){
         ${note ? `<div style="color:var(--muted-foreground);font-size:12.5px;margin-top:3px;line-height:1.55;max-width:620px">${note}</div>` : ''}
       </td>
     </tr>`;
-  const lv = LEVELS[o.level];
   const next = autoPreview(o.autoFormat, o.autoNext);
 
   return `
@@ -1064,8 +1044,6 @@ function tabDetails(o){
       <div class="co-band"><span class="co-band-t">Object</span></div>
       <table class="co-table"><tbody>
         ${row('Label', esc(o.label))}
-        ${row('Level', tag(lv.label, lv.hue) + ' ' + tag('Fixed', '', 'sm', 'Cannot change after save'),
-          o.level === 'GLOBAL' ? 'No account or project parent.' : 'Records depend on it.')}
         ${row('Description', esc(o.description) || '<span style="color:var(--muted-foreground)">—</span>')}
         ${row('Record Name', esc(o.recordNameLabel), 'Shown in lists, lookups and search.')}
         ${row('Record Name type', `<span class="co-type">${typeIcon(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT')}${typeMeta(o.recordNameType === 'AUTONUMBER' ? 'AUTONUMBER' : 'TEXT').label}</span>`)}
@@ -1169,12 +1147,12 @@ function openObjectDrawer(id){
     id: id || null, err: {},
     touchedRecName: !!o,
     d: o ? JSON.parse(JSON.stringify({
-        label:o.label, plural:o.plural, level:o.level, description:o.description,
+        label:o.label, plural:o.plural, description:o.description,
         recordNameLabel:o.recordNameLabel, recordNameType:o.recordNameType,
         autoFormat:o.autoFormat, autoStart:o.autoStart,
         reports:o.reports !== false, fieldHistory:o.fieldHistory, search:o.search !== false,
       }))
-      : {label:'', plural:'', level:'ACCOUNT', description:'', recordNameLabel:'',
+      : {label:'', plural:'', description:'', recordNameLabel:'',
          recordNameType:'TEXT', autoFormat:'', autoStart:1,
          reports:true, fieldHistory:true, search:true},
   };
@@ -1188,36 +1166,12 @@ function odRender(){
   const hasRecords = editing && o.records > 0;
   const recNamePlaceholder = d.label ? `${d.label} Name` : 'Sales Order Name';
 
-  const levelCard = (key, title, desc) => `
-    <button class="co-card-opt${d.level===key?' sel':''}" type="button" onclick="odLevel('${key}')">
-      <div class="co-card-t">${title}</div>
-      <div class="co-card-d">${desc}</div>
-    </button>`;
-
   showDrawer(
     drawerHead(editing ? 'Edit ' + esc(o.label) : 'New custom object') + `
     <div class="rl-drawer-body">
       ${field('Label', true,
         `<input class="co-input" id="od-label" value="${esc(d.label)}" placeholder="Enter label" oninput="odSet('label', this.value)">`,
         'Must be unique across all objects.', fErr('label', od.err))}
-
-      <div class="co-f"><div class="rl-field">
-        <label class="rl-field-label">Level <span class="rl-field-required">*</span>
-          ${editing ? tag('Fixed after save', 'gray', 's-sm', 'Records depend on the level') : ''}</label>
-        ${editing ? `
-          <div class="co-prev">${tag(LEVELS[d.level].label, LEVELS[d.level].hue)}<span>Records depend on it.</span></div>
-        ` : `
-          <div class="co-cards">
-            ${levelCard('ACCOUNT','Account','Outlives any one project. Orders, contracts, assets.')}
-            ${levelCard('PROJECT','Project','Ends with the project. Change requests, risks.')}
-          </div>
-          <button class="co-card-opt" style="margin-top:8px;width:100%" disabled type="button">
-            <div class="co-card-t">Global ${openChip('Undecided — a catalogue has no account or project parent.')}</div>
-            <div class="co-card-d">A reference list with no parent, such as a product catalogue.</div>
-          </button>
-          <div class="rl-field-hint">This cannot be changed later.</div>
-        `}
-      </div></div>
 
       ${field('Description', false,
         `<textarea class="co-input" rows="2" placeholder="Enter description" oninput="odSet('description', this.value)">${esc(d.description)}</textarea>`)}
@@ -1700,7 +1654,6 @@ function odSet(k, v){
   }
 }
 
-function odLevel(l){ od.d.level = l; odRender(); }
 function odNameType(t){
   od.d.recordNameType = t;
   if(t === 'AUTONUMBER' && !od.d.autoFormat){
@@ -1745,7 +1698,7 @@ function odSave(){
     save(); closeDrawer(); render(); toast(`${label} updated.`);
   }else{
     const o = {
-      id: uid('o'), label, plural:(d.plural||pluralise(label)).trim(), level:d.level,
+      id: uid('o'), label, plural:(d.plural||pluralise(label)).trim(),
       description:d.description, recordNameLabel:d.recordNameLabel.trim(),
       recordNameType:d.recordNameType, autoFormat:d.autoFormat, autoStart:d.autoStart,
       autoNext:d.autoStart, reports:d.reports, fieldHistory:d.fieldHistory, search:d.search,
@@ -1824,8 +1777,7 @@ function targetFieldLabels(target){
   if(target === 'ACCOUNT') return ['Account Owner','Region','Industry','Created at'];
   if(target === 'PROJECT') return ['Customer','Project Owner','Status','Start date','Created at'];
   const t = obj(target); if(!t) return [];
-  const parent = t.level === 'GLOBAL' ? null : (t.level === 'ACCOUNT' ? 'Account' : 'Project');
-  return [parent, ...t.fields.filter(f => f.type !== 'ROLLUP').map(f => f.label), 'Created at'].filter(Boolean);
+  return [...t.fields.filter(f => f.type !== 'ROLLUP').map(f => f.label), 'Created at'];
 }
 
 function fdSetTarget(v){
