@@ -1032,7 +1032,7 @@ function viewObject(){
     ['rel','Relationships', incoming(o.id).length + o.fields.filter(f=>f.type==='ROLLUP').length],
     ['details','Details', null],
   ];
-  const later = [['Validation rules','Phase 6'],['Record types','Phase 7'],['Page layouts','Phase 8'],['Access','Phase 10'],['Automations','Phase 12']];
+  const later = ['Validation rules','Record types','Page layouts','Access','Automations'];
 
   const head = `
     <div class="co-head">
@@ -1045,7 +1045,7 @@ function viewObject(){
       </div>
       <div class="co-tabs">
         ${tabs.map(([k,t,n]) => `<button class="co-tab${route.tab===k?' on':''}" onclick="go('object','${o.id}','${k}')">${t}${n!==null?' <span style="color:var(--muted-foreground);font-variant-numeric:tabular-nums">'+n+'</span>':''}</button>`).join('')}
-        ${later.map(([t,p]) => `<button class="co-tab" disabled title="${p} — not in this prototype yet">${t}</button>`).join('')}
+        ${later.map(t => `<button class="co-tab" disabled title="Not in this prototype yet">${t}</button>`).join('')}
       </div>
     </div>`;
 
@@ -2100,7 +2100,7 @@ function fdLookupSettings(o, d){
 function fdFormulaSettings(o, d){
   const s = d.settings;
   const usable = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
-  return secLabel('Formula', tag('Phase 5')) + `
+  return secLabel('Formula') + `
     ${field('Returns', false, `<select class="co-input" style="max-width:220px" onchange="fd.d.settings.returns = this.value; fdRender()">
       ${['NUMBER','CURRENCY','PERCENT','TEXT','DATE','CHECKBOX'].map(t =>
         `<option value="${t}" ${s.returns===t?'selected':''}>${esc(typeMeta(t).label)}</option>`).join('')}
