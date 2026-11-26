@@ -426,6 +426,21 @@ select.co-input{
 .co-pfwrap .co-table tbody td{ border-bottom:1px solid color-mix(in oklab, var(--co-border) 55%, transparent); padding:6px 12px; }
 .co-pfwrap .co-table tbody tr:last-child td{ border-bottom:0; }
 
+/* Scope dialog. */
+.sc-dialog.co-scope{ max-width:540px; gap:20px; padding:24px 26px 22px; }
+.co-scope-head{ display:flex; align-items:flex-start; }
+.co-scope-title{ flex:1; font-size:24px; font-weight:600; letter-spacing:-0.02em; }
+.co-scope-opt{ display:flex; align-items:flex-start; gap:14px; width:100%; text-align:left; padding:11px 0; }
+.co-scope-l{ display:block; font-size:16px; line-height:1.35; }
+.co-scope-d{ display:block; font-size:14px; color:var(--muted-foreground); line-height:1.45; margin-top:2px; }
+.co-radio{
+  width:20px; height:20px; flex-shrink:0; margin-top:2px; border-radius:50%;
+  border:1.5px solid var(--co-check-off); background:var(--background); position:relative;
+}
+.co-scope-opt:hover .co-radio{ border-color:var(--co-blue); }
+.co-radio.on{ border-color:var(--co-blue); border-width:2px; box-shadow:0 0 0 3px color-mix(in oklab, var(--co-blue) 18%, transparent); }
+.co-radio.on::after{ content:''; position:absolute; inset:3px; border-radius:50%; background:var(--co-blue); }
+
 /* The shadcn dialog ships z-index:50, below the kit's drawer at 100. */
 .sc-dialog-overlay{ z-index:400; }
 .sc-dialog{ max-width:460px; }
@@ -723,11 +738,11 @@ function seed(){
                risk:P('GLOBAL',1,'GLOBAL','GLOBAL'), prod:P('GLOBAL',1,'GLOBAL','GLOBAL') }},
     {id:'ps_salesops', scope:'ACCOUNT', name:'Sales Ops', users:7,
      description:'Owns orders and line items from the CRM handoff.', manage:false,
-     objects:{ so:P('LINKED',1,'LINKED','NONE'), li:P('LINKED',1,'LINKED','NONE'),
+     objects:{ so:P('PARTICIPANT',1,'PARTICIPANT','NONE'), li:P('PARTICIPANT',1,'PARTICIPANT','NONE'),
                risk:P('NONE',0,'NONE','NONE'), prod:P('GLOBAL',0,'NONE','NONE') }},
     {id:'ps_pm', scope:'ACCOUNT', name:'Project Manager', users:23,
      description:'Delivers projects. Reads commercial data, does not change it.', manage:false,
-     objects:{ so:P('LINKED',0,'NONE','NONE'), li:P('LINKED',0,'NONE','NONE'),
+     objects:{ so:P('PARTICIPANT',0,'NONE','NONE'), li:P('PARTICIPANT',0,'NONE','NONE'),
                risk:P('NONE',0,'NONE','NONE'), prod:P('GLOBAL',0,'NONE','NONE') }},
     {id:'ps_collab', scope:'ACCOUNT', name:'Collaborator', users:64,
      description:'Works on assigned tasks.', manage:false,
@@ -746,7 +761,7 @@ function seed(){
   ]};
 }
 /* One object permission line: view, create, edit, delete. Account sets
-   store an access mode ('NONE'|'LINKED'|'GLOBAL'); project sets store 0/1.
+   store a scope ('GLOBAL'|'PARTICIPANT'|'OWNER'|'NONE'); project sets store 0/1.
    `fields` is set per field only where the admin has narrowed it. */
 function P(view, create, edit, del){ return {view, create:!!create, edit, del, fields:{}}; }
 
@@ -1287,11 +1302,15 @@ function tabDetails(o){
    Edits go to a draft so Cancel and Save mean something, as they do in
    the product.
    ══════════════════════════════════════════════════════════════════ */
+/* Access scope, in the three the product offers. "No access" is not a
+   scope — it is the permission being off, which the checkbox says. */
 const MODES = {
-  NONE:   {label:'No access',     note:'Cannot see any records'},
-  LINKED: {label:'Linked access', note:'Records linked to an account or project they can access'},
-  GLOBAL: {label:'Global access', note:'Can see all records'},
+  GLOBAL:      {label:'Global access',            note:'For all records'},
+  PARTICIPANT: {label:'Projects they are part of', note:'For records linked to a project they are part of'},
+  OWNER:       {label:'Projects they own',         note:'For records linked to a project they own'},
+  NONE:        {label:'No access',                 note:'Cannot see any records'},
 };
+const SCOPES = ['GLOBAL','PARTICIPANT','OWNER'];
 /* A View on the object always carries these; they cannot be removed. */
 const ALWAYS_VISIBLE = ['Created by','Created at','Updated by','Updated at'];
 
@@ -1434,7 +1453,10 @@ function objectPane(ps, o){
   const modeTag = key => {
     if(!acct || !has(p[key])) return '';
     const m = MODES[p[key]];
-    return `<button class="co-modetag" onclick="modeMenu(event,'${o.id}','${key}')">${m.label} · ${m.note}</button>`;
+    /* Label only: these scope names say it, and the dialog carries the
+       sentence. "Projects they are part of · For records linked to a
+       project they are part of" was the tag repeating itself. */
+    return `<button class="co-modetag" onclick="openScope('${o.id}','${key}')" title="${esc(m.note)}">${m.label}</button>`;
   };
   const toggle = key => `togglePerm('${o.id}','${key}')`;
 
@@ -1575,7 +1597,7 @@ function togglePerm(objId, key){
   const ps = permDraft, p = ps.objects[objId], acct = isAccount(ps);
   const off = acct ? 'NONE' : 0;
   if(key === 'create') p.create = !p.create;
-  else p[key] = has(p[key]) ? off : (acct ? (key === 'view' ? 'LINKED' : 'LINKED') : 1);
+  else p[key] = has(p[key]) ? off : (acct ? 'OWNER' : 1);
   /* Dependencies, applied as you edit: Create, Edit and Delete each need
      View; Delete also needs Edit. */
   if(!has(p.view)){ p.create = false; p.edit = off; p.del = off; }
@@ -1589,10 +1611,45 @@ function setMode(objId, key, mode){
   if(!has(p.edit)) p.del = 'NONE';
   render();
 }
-function modeMenu(ev, objId, key){
-  showMenu(ev, Object.entries(MODES).map(([k,m]) => ({
-    label: m.label + ' — ' + m.note, fn: () => setMode(objId, key, k),
-  })));
+/* Scope picker — the product asks for this in a dialog with one radio
+   per scope and its sentence, so a change is deliberate rather than a
+   stray click in a menu. */
+let scopeEdit = null;
+function openScope(objId, key){
+  scopeEdit = {objId, key, value: permDraft.objects[objId][key]};
+  renderScope();
+}
+function pickScope(v){ scopeEdit.value = v; renderScope(); }
+function closeScope(){ scopeEdit = null; closeDialog(); }
+function saveScope(){
+  const {objId, key, value} = scopeEdit;
+  scopeEdit = null; closeDialog();
+  setMode(objId, key, value);
+}
+function renderScope(){
+  document.getElementById('dialog-host').innerHTML = `
+    <div class="sc-dialog-overlay" onclick="if(event.target===this) closeScope()">
+      <div class="sc-dialog co-scope" role="dialog" aria-modal="true">
+        <div class="co-scope-head">
+          <div class="co-scope-title">Permissions</div>
+          <button class="co-menu-btn" onclick="closeScope()" aria-label="Close">${ICO.x}</button>
+        </div>
+        <div>
+          ${SCOPES.map(k => `
+            <button class="co-scope-opt" onclick="pickScope('${k}')">
+              <span class="co-radio${scopeEdit.value===k?' on':''}"></span>
+              <span>
+                <span class="co-scope-l">${MODES[k].label}</span>
+                <span class="co-scope-d">${MODES[k].note}</span>
+              </span>
+            </button>`).join('')}
+        </div>
+        <div class="sc-dialog-footer">
+          <button class="rl-btn v-outline sz-md" onclick="closeScope()"><span class="rl-btn-label">Cancel</span></button>
+          <button class="rl-btn v-primary sz-md" onclick="saveScope()"><span class="rl-btn-label">Save</span></button>
+        </div>
+      </div>
+    </div>`;
 }
 /* Read and Edit as two columns: Edit implies Read, clearing Read clears
    Edit. Mirrors how Salesforce behaves, and keeps our NONE/READ/EDIT
