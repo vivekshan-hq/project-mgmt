@@ -351,15 +351,21 @@ select.co-input{
 .co-plist tbody td{ padding:12px; }
 
 /* Module rail inside a permission set — plain text, no icons. */
-.co-mod{ width:240px; flex-shrink:0; display:flex; flex-direction:column; gap:1px; position:sticky; top:0; }
-.co-mod-i{ padding:9px 14px; border-radius:8px; font-size:14px; color:#2B313B; text-align:left; }
-.co-mod-i:hover:not(:disabled){ background:var(--co-rail-hover); }
+.co-mod{ width:232px; flex-shrink:0; display:flex; flex-direction:column; position:sticky; top:0; }
+.co-mod-i{
+  display:block; width:100%; padding:7px 12px; border-radius:7px;
+  font-size:14px; line-height:1.45; color:#2B313B; text-align:left;
+}
+.co-mod-i + .co-mod-i{ margin-top:1px; }
+.co-mod-i:hover{ background:var(--co-rail-hover); }
 .co-mod-i.on{ background:var(--co-nav-active); color:#11325E; font-weight:500; }
-.co-mod-i:disabled{ color:var(--muted-foreground); cursor:not-allowed; }
-.co-mod-i{ display:flex; align-items:center; gap:8px; }
-.co-mod-n{ margin-left:auto; font-size:12px; color:var(--muted-foreground); font-weight:400; }
-.co-mod-i.on .co-mod-n{ color:#4C74A8; }
-.co-mod-label{ padding:14px 14px 5px; font-size:12px; font-weight:600; color:var(--muted-foreground); }
+/* Modules this prototype does not cover keep the normal text colour —
+   greying a dozen rows made the whole rail read as broken rather than
+   as a rail with one section built. A tooltip says what is going on. */
+.co-mod-i:disabled{ cursor:default; }
+.co-mod-sep{ height:1px; background:var(--co-border-soft); margin:10px 12px 9px; }
+.co-mod-label{ padding:0 12px 6px; font-size:12px; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--muted-foreground); }
 
 /* Read / Edit columns in the field grid. */
 .co-fcol{ width:84px; text-align:center; }
@@ -1387,9 +1393,8 @@ function viewPermSet(){
      their records — so it gets its own entry, as the spec separates it. */
   if(permObj === null) permObj = state.objects.length ? state.objects[0].id : 'manage';
 
-  const navItem = (key, label, right) => `
-    <button class="co-mod-i${permObj===key?' on':''}" onclick="selectPermObj('${key}')">
-      <span>${label}</span>${right ? `<span class="co-mod-n">${right}</span>` : ''}</button>`;
+  const navItem = (key, label) =>
+    `<button class="co-mod-i${permObj===key?' on':''}" onclick="selectPermObj('${key}')">${label}</button>`;
 
   return `
     <div class="co-head">
@@ -1406,9 +1411,10 @@ function viewPermSet(){
       <div class="co-split">
         <div class="co-mod">
           ${PERM_MODULES.map(m => `<button class="co-mod-i" disabled title="Not in this prototype yet">${m}</button>`).join('')}
+          <div class="co-mod-sep"></div>
           <div class="co-mod-label">Custom objects</div>
-          ${acct ? navItem('manage', 'Manage objects', ps.manage ? 'On' : '') : ''}
-          ${state.objects.map(o => navItem(o.id, esc(o.label), permNavSummary(ps, o))).join('')}
+          ${acct ? navItem('manage', 'Manage objects') : ''}
+          ${state.objects.map(o => navItem(o.id, esc(o.label))).join('')}
         </div>
         <div class="co-pbody">
           ${permObj === 'manage' ? managePane(ps) : objectPane(ps, obj(permObj) || state.objects[0])}
@@ -1422,15 +1428,6 @@ function viewPermSet(){
     </div>`;
 }
 
-/* A short right-hand marker so an admin can scan the nav for what is
-   granted without opening each object. */
-function permNavSummary(ps, o){
-  const p = ps.objects[o.id];
-  if(!p || !has(p.view)) return '';
-  if(has(p.del)) return 'Full';
-  if(has(p.edit)) return 'Edit';
-  return p.create ? 'Create' : 'View';
-}
 
 function managePane(ps){
   return `
