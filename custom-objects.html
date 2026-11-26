@@ -316,6 +316,10 @@ select.co-input{
 }
 .co-tok:hover{ border-color:var(--co-blue); color:var(--co-blue); }
 .co-tok.op{ min-width:30px; text-align:center; font-weight:600; }
+/* An unsized SVG in a chip renders at its natural box and blows the row
+   apart — pin it. */
+.co-tok{ display:inline-flex; align-items:center; gap:4px; }
+.co-tok svg{ width:12px; height:12px; flex-shrink:0; }
 
 .co-pl{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
 .co-pl-grip{ color:#B6BAC2; font-size:13px; width:12px; text-align:center; flex-shrink:0; cursor:grab; }
@@ -912,6 +916,15 @@ function usages(o, f){
   state.objects.forEach(p => p.fields.forEach(g => {
     if(g.type === 'ROLLUP' && g.settings.child === o.id && (g.settings.aggField === f.id || g.settings.filterField === f.id))
       out.push(`Roll-up "${g.label}" on ${p.label}`);
+    /* A formula elsewhere can reach this field through a lookup —
+       {Product.Default Price} on Line Item reads a field on Product. */
+    if(g.type === 'FORMULA' && g.settings.expr){
+      p.fields.forEach(lk => {
+        if(lk.type === 'LOOKUP' && lk.settings.target === o.id &&
+           g.settings.expr.includes('{' + lk.label + '.' + f.label + '}'))
+          out.push(`Formula "${g.label}" on ${p.label}`);
+      });
+    }
   }));
   return out;
 }
@@ -2120,6 +2133,7 @@ function fdLookupSettings(o, d){
    labels and operators both carry characters that would need escaping
    twice over. ──────────────────────────────────────────────────────── */
 let FD_TOKENS = [];
+let FD_MENUS = [];
 
 const FD_OPS = [
   {t:'+', hint:'Add'}, {t:'-', hint:'Subtract'}, {t:'*', hint:'Multiply'},
@@ -2139,11 +2153,29 @@ function fdFunctions(returns){
           {t:'MIN(', hint:'Smallest of'}, {t:'MAX(', hint:'Largest of'}];
 }
 
+/* Fields one hop away. A formula on Line Item can read the product it
+   points at — {Product.Default Price} — which is how the line gets its
+   default price without an automation.
+
+   One hop only. The spec asks for a documented depth limit, and one hop
+   covers the cases in it while keeping the token readable; Line Item →
+   Sales Order → Account would not be. */
+function relatedFieldSources(o){
+  return o.fields.filter(f => f.type === 'LOOKUP' && f.settings.target).map(f => {
+    const t = f.settings.target;
+    const target = obj(t);
+    const fields = target
+      ? target.fields.filter(x => x.type !== 'MULTISELECT').map(x => ({label:x.label, type:x.type}))
+      : targetFieldLabels(t).map(l => ({label:l, type:null}));
+    return {lookup:f.label, target:targetLabel(t), fields};
+  }).filter(x => x.fields.length);
+}
+
 function fdFormulaSettings(o, d){
   const s = d.settings;
   const usable = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
   const bool = s.returns === 'CHECKBOX';
-  FD_TOKENS = [];
+  FD_TOKENS = []; FD_MENUS = [];
 
   const chip = (text, kind, title) => {
     const i = FD_TOKENS.push({text, kind}) - 1;
@@ -2173,13 +2205,34 @@ function fdFormulaSettings(o, d){
         ${group('Fields', usable.length
           ? usable.map(f => chip('{' + f.label + '}', 'field', typeMeta(f.type).label)).join('')
           : '<span style="font-size:12px;color:var(--muted-foreground)">No other fields yet.</span>')}
+        ${(() => {
+          const sources = relatedFieldSources(o);
+          if(!sources.length) return '';
+          /* One chip per lookup, opening that object's fields. Inlining
+             them all would bury the operators under a hundred chips. */
+          const chips = sources.map(src => {
+            const items = src.fields.map(x => ({
+              label: x.label,
+              i: FD_TOKENS.push({text:`{${src.lookup}.${x.label}}`, kind:'field'}) - 1,
+            }));
+            const j = FD_MENUS.push(items) - 1;
+            return `<button class="co-tok" type="button" onclick="relatedMenu(event,${j})"
+                      title="Fields on the ${esc(src.target)} this record points at">${esc(src.lookup)} ${ICO.chevDown}</button>`;
+          }).join('');
+          return group('Related', chips);
+        })()}
         ${group('Operators', FD_OPS.map(x => chip(x.t, 'op', x.hint)).join('')
           + (bool ? FD_COMPARE.map(x => chip(x.t, 'op', x.hint)).join('') : ''))}
         ${bool ? group('Logic', FD_LOGIC.map(x => chip(x.t, 'op', x.hint)).join('')) : ''}
         ${group('Functions', fdFunctions(s.returns).map(x => chip(x.t, 'fn', x.hint)).join(''))}
       </div>
-      <div class="rl-field-hint">Click to insert at the cursor. Fields are wrapped in braces.</div>
+      <div class="rl-field-hint">Click to insert at the cursor. Fields are wrapped in braces, and a field on a
+        linked record is written as <span class="co-mono">{Lookup.Field}</span> — one hop.</div>
     </div></div>`;
+}
+
+function relatedMenu(ev, j){
+  showMenu(ev, (FD_MENUS[j] || []).map(x => ({label:x.label, fn:() => insertToken(x.i)})));
 }
 
 /* Unbalanced brackets are the mistake this box invites, so say so — and
