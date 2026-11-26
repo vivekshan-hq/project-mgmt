@@ -1029,7 +1029,7 @@ function viewObject(){
   if(!o){ route.view = 'list'; return viewList(); }
   const tabs = [
     ['fields','Fields', o.fields.length],
-    ['rel','Relationships', o.fields.filter(f=>f.type==='LOOKUP').length + incoming(o.id).length],
+    ['rel','Relationships', incoming(o.id).length + o.fields.filter(f=>f.type==='ROLLUP').length],
     ['details','Details', null],
   ];
   const later = [['Validation rules','Phase 6'],['Record types','Phase 7'],['Page layouts','Phase 8'],['Access','Phase 10'],['Automations','Phase 12']];
@@ -1145,36 +1145,9 @@ function fieldLabel(objId, fieldId){
    link is the thing that confuses people, so each table is named for
    the direction and the columns carry the detail. ────────────────── */
 function tabRel(o){
-  const out = o.fields.filter(f => f.type === 'LOOKUP');
   const inc = incoming(o.id);
   const rollups = o.fields.filter(f => f.type === 'ROLLUP');
   const empty = (cols, msg) => `<tr><td colspan="${cols}" style="padding:18px 20px;color:var(--muted-foreground)">${msg}</td></tr>`;
-
-  const pointsAt = `
-    <div class="co-card">
-      <div class="co-band"><span class="co-band-t">Points at</span><span class="co-band-n">(${out.length})</span></div>
-      <table class="co-table">
-        <thead><tr>
-          <th style="padding-left:20px">Field</th><th>Points to</th><th>Required</th>
-          <th>If the linked record is deleted</th><th>Shown there as</th><th class="col-menu"></th>
-        </tr></thead>
-        <tbody>
-          ${out.length ? out.map(f => `
-            <tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
-              <td style="padding-left:20px"><span class="co-type">${typeIcon('LOOKUP')}${esc(f.label)}</span></td>
-              <td>${tag(esc(targetLabel(f.settings.target)), 'purple')}</td>
-              <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
-              <td>${f.settings.onDelete === 'BLOCK'
-                    ? `<span style="font-weight:500">Cannot be deleted while ${esc(o.plural.toLowerCase())} point at it</span>`
-                    : `<span style="color:var(--muted-foreground)">${esc(f.label)} is cleared</span>`}</td>
-              <td style="color:var(--muted-foreground)">${esc(f.settings.relatedListLabel)}
-                <span style="opacity:.6">on ${esc(targetLabel(f.settings.target))}</span></td>
-              <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')">${ICO.dots}</button></td>
-            </tr>`).join('')
-          : empty(6, `${esc(o.label)} does not point at another object yet.`)}
-        </tbody>
-      </table>
-    </div>`;
 
   const referencedBy = `
     <div class="co-card">
@@ -1182,8 +1155,7 @@ function tabRel(o){
       <div class="co-band-d">Objects whose lookups point at ${esc(o.label)}. Each one shows as a related list on a ${esc(o.label)} record.</div>
       <table class="co-table">
         <thead><tr>
-          <th style="padding-left:20px">Object</th><th>Through its field</th><th>Required</th>
-          <th>Shown here as</th><th>If you delete a ${esc(o.label)}</th><th class="col-menu"></th>
+          <th style="padding-left:20px">Object</th><th>Through its field</th><th>Required</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>
           ${inc.length ? inc.map(({obj:pr, field:f}) => `
@@ -1191,13 +1163,9 @@ function tabRel(o){
               <td style="padding-left:20px"><div class="co-fname">${esc(pr.label)}</div></td>
               <td><span class="co-type">${typeIcon('LOOKUP')}${esc(f.label)}</span></td>
               <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
-              <td style="color:var(--muted-foreground)">${esc(f.settings.relatedListLabel)}</td>
-              <td>${f.settings.onDelete === 'BLOCK'
-                    ? `<span style="font-weight:500">Blocked while it has ${esc(pr.plural.toLowerCase())}</span>`
-                    : `<span style="color:var(--muted-foreground)">Its ${esc(pr.plural.toLowerCase())} stay, ${esc(f.label)} is cleared</span>`}</td>
               <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();go('object','${pr.id}','fields')">${ICO.dots}</button></td>
             </tr>`).join('')
-          : empty(6, `No other object points at ${esc(o.label)} yet.`)}
+          : empty(4, `No other object points at ${esc(o.label)} yet.`)}
         </tbody>
       </table>
     </div>`;
@@ -1238,7 +1206,6 @@ function tabRel(o){
     <div class="co-actions">
       <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}')"><span class="rl-btn-label">New field</span>${ICO.plus}</button>
     </div>
-    ${pointsAt}
     ${referencedBy}
     ${rollHtml}`;
 }
