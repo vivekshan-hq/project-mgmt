@@ -1135,7 +1135,7 @@ function tabRel(o){
       <table class="co-table">
         <thead><tr>
           <th style="padding-left:20px">Field</th><th>Points to</th><th>Required</th>
-          <th>If the target is deleted</th><th>Related list it creates</th><th class="col-menu"></th>
+          <th>If the linked record is deleted</th><th>Shown there as</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>
           ${out.length ? out.map(f => `
@@ -1144,9 +1144,10 @@ function tabRel(o){
               <td>${tag(esc(targetLabel(f.settings.target)), 'purple')}</td>
               <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
               <td>${f.settings.onDelete === 'BLOCK'
-                    ? tag('Blocks the delete', 'orange', 'sm')
-                    : '<span style="color:var(--muted-foreground)">Clears this value</span>'}</td>
-              <td style="color:var(--muted-foreground)">${esc(f.settings.relatedListLabel)} <span style="opacity:.6">on ${esc(targetLabel(f.settings.target))}</span></td>
+                    ? `<span style="font-weight:500">Cannot be deleted while ${esc(o.plural.toLowerCase())} point at it</span>`
+                    : `<span style="color:var(--muted-foreground)">${esc(f.label)} is cleared</span>`}</td>
+              <td style="color:var(--muted-foreground)">${esc(f.settings.relatedListLabel)}
+                <span style="opacity:.6">on ${esc(targetLabel(f.settings.target))}</span></td>
               <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')">${ICO.dots}</button></td>
             </tr>`).join('')
           : empty(6, `${esc(o.label)} does not point at another object yet.`)}
@@ -1157,22 +1158,22 @@ function tabRel(o){
   const referencedBy = `
     <div class="co-card">
       <div class="co-band"><span class="co-band-t">Referenced by</span><span class="co-band-n">(${inc.length})</span></div>
-      <div class="co-band-d">Lookups on other objects that point here. Each one shows as a related list on a ${esc(o.label)} record.</div>
+      <div class="co-band-d">Objects whose lookups point at ${esc(o.label)}. Each one shows as a related list on a ${esc(o.label)} record.</div>
       <table class="co-table">
         <thead><tr>
-          <th style="padding-left:20px">Related list</th><th>Object</th><th>Through</th>
-          <th>Required</th><th>If a ${esc(o.label)} is deleted</th><th class="col-menu"></th>
+          <th style="padding-left:20px">Object</th><th>Through its field</th><th>Required</th>
+          <th>Shown here as</th><th>If you delete a ${esc(o.label)}</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>
           ${inc.length ? inc.map(({obj:pr, field:f}) => `
             <tr class="is-clickable" onclick="go('object','${pr.id}','fields')">
-              <td style="padding-left:20px"><div class="co-fname">${esc(f.settings.relatedListLabel)}</div></td>
-              <td>${tag(esc(pr.label), 'purple')}</td>
+              <td style="padding-left:20px"><div class="co-fname">${esc(pr.label)}</div></td>
               <td><span class="co-type">${typeIcon('LOOKUP')}${esc(f.label)}</span></td>
               <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
+              <td style="color:var(--muted-foreground)">${esc(f.settings.relatedListLabel)}</td>
               <td>${f.settings.onDelete === 'BLOCK'
-                    ? tag('Delete is blocked', 'orange', 'sm')
-                    : `<span style="color:var(--muted-foreground)">${esc(f.label)} is cleared</span>`}</td>
+                    ? `<span style="font-weight:500">Blocked while it has ${esc(pr.plural.toLowerCase())}</span>`
+                    : `<span style="color:var(--muted-foreground)">Its ${esc(pr.plural.toLowerCase())} stay, ${esc(f.label)} is cleared</span>`}</td>
               <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();go('object','${pr.id}','fields')">${ICO.dots}</button></td>
             </tr>`).join('')
           : empty(6, `No other object points at ${esc(o.label)} yet.`)}
@@ -1187,7 +1188,7 @@ function tabRel(o){
       <table class="co-table">
         <thead><tr>
           <th style="padding-left:20px">Field</th><th>Function</th><th>Aggregates</th>
-          <th>Across</th><th>Only where</th><th class="col-menu"></th>
+          <th>Across</th><th>Condition</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>
           ${rollups.length ? rollups.map(f => {
@@ -1203,7 +1204,7 @@ function tabRel(o){
                 <span style="opacity:.6">via ${esc(c ? fieldLabel(c.id, f.settings.childLookup) : f.settings.childLookup)}</span></td>
               <td style="color:var(--muted-foreground)">${f.settings.filterField
                     ? `${esc(fieldLabel(f.settings.child, f.settings.filterField))} ${f.settings.filterOp === 'neq' ? 'is not' : 'is'} <b style="color:var(--foreground);font-weight:500">${esc(f.settings.filterValue)}</b>`
-                    : '<span style="opacity:.6">Every record</span>'}</td>
+                    : '<span style="opacity:.6">None</span>'}</td>
               <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')">${ICO.dots}</button></td>
             </tr>`;
           }).join('')
@@ -2165,7 +2166,7 @@ function fdRollupSettings(o, d){
       </div>
 
       <div class="co-f"><div class="rl-field">
-        <label class="rl-field-label">Only include children where <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <label class="rl-field-label">Condition <span style="font-weight:400;text-transform:none">(optional)</span></label>
         <div style="display:flex;gap:8px">
           <select class="co-input" style="flex:1.2" onchange="fd.d.settings.filterField = this.value; fd.d.settings.filterValue=''; fdRender()">
             <option value="">No filter — include every child</option>
