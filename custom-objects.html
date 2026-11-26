@@ -1415,7 +1415,7 @@ function objectCard(ps, o){
   const acct = isAccount(ps);
   if(!ps.objects[o.id]) ps.objects[o.id] = P(acct?'NONE':0, 0, acct?'NONE':0, acct?'NONE':0);
   const p = ps.objects[o.id];
-  const folded = !!permCollapsed[o.id];
+  const folded = permCollapsed[o.id] === undefined ? !has(p.view) : permCollapsed[o.id];
   const noun = o.plural.toLowerCase();
   const noView = !has(p.view), noEdit = !has(p.edit);
 
@@ -1443,8 +1443,11 @@ function objectCard(ps, o){
           ${permRow(`Can edit ${esc(noun)}`, has(p.edit), toggle('edit'), modeTag('edit'), '', false, noView)}
           ${permRow(`Can delete ${esc(noun)}`, has(p.del), toggle('del'), modeTag('del'), '', false, noView || noEdit)}
 
-          <div class="co-perm-head">Field permissions</div>
-          ${fieldRows(ps, o, p)}
+          ${has(p.view) ? `
+            <div class="co-perm-head">Field permissions</div>
+            ${fieldRows(ps, o, p)}`
+          : `<div class="co-perm-note" style="padding-left:29px;margin-top:10px">
+              Turn on view to set field permissions.</div>`}
         </div>`}
     </div>`;
 }
@@ -1464,7 +1467,7 @@ function fieldDefault(p){ return has(p.edit) ? 'EDIT' : has(p.view) ? 'READ' : '
 function fieldAccess(p, fid){ return p.fields[fid] || fieldDefault(p); }
 
 function fieldRows(ps, o, p){
-  const noView = !has(p.view), noEdit = !has(p.edit);
+  const noEdit = !has(p.edit);
   const states = o.fields.map(f => fieldAccess(p, f.id));
   const visible = states.filter(v => v !== 'NONE').length;
   const all = visible === 0 ? false : visible === states.length ? true : 'mixed';
@@ -1473,11 +1476,10 @@ function fieldRows(ps, o, p){
     `<button class="co-modetag" onclick="event.stopPropagation();fieldMenuAccess(event,'${o.id}','${fid}')">${v === 'EDIT' ? 'Can edit' : 'Read only'}</button>`;
 
   return `
-    ${permRow('All fields', noView ? false : all, "toggleAllFields('"+o.id+"')", '', '', true, noView)}
+    ${permRow('All fields', all, "toggleAllFields('"+o.id+"')", '', '', true)}
     ${o.fields.map(f => {
       const v = fieldAccess(p, f.id);
-      return permRow(esc(f.label), noView ? false : v !== 'NONE',
-        `toggleField('${o.id}','${f.id}')`, accessTag(f.id, noView ? 'NONE' : v), '', true, noView);
+      return permRow(esc(f.label), v !== 'NONE', `toggleField('${o.id}','${f.id}')`, accessTag(f.id, v), '', true);
     }).join('')}
     ${[o.recordNameLabel, ...ALWAYS_VISIBLE].map(l => `
       <div class="co-perm sub">
