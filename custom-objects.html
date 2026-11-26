@@ -351,6 +351,24 @@ select.co-input{
    mirror of the design system and must not be edited. */
 .rl-drawer-header{ border-bottom:0; padding-bottom:6px; }
 
+.co-split{ display:flex; gap:20px; align-items:flex-start; }
+.co-pnav{ width:210px; flex-shrink:0; display:flex; flex-direction:column; gap:1px; position:sticky; top:0; }
+.co-pnav-i{
+  display:flex; align-items:center; gap:8px; width:100%; padding:7px 10px;
+  border-radius:8px; font-size:14px; color:#2B313B; text-align:left;
+}
+.co-pnav-i:hover:not(:disabled){ background:var(--co-rail-hover); }
+.co-pnav-i.on{ background:var(--co-nav-active); color:#11325E; font-weight:500; }
+.co-pnav-i:disabled{ color:var(--muted-foreground); cursor:not-allowed; }
+.co-pnav-n{ margin-left:auto; font-size:12px; color:var(--muted-foreground); font-variant-numeric:tabular-nums; }
+.co-pbody{ flex:1; min-width:0; }
+.co-ptable td{ padding-top:7px; padding-bottom:7px; }
+.co-psel{ height:30px; font-size:13px; }
+.co-prow.is-open td{ border-bottom:0; }
+.co-pfields > td{ padding:0 !important; background:var(--co-band); border-bottom:1px solid var(--co-border); }
+.co-pfwrap .co-table tbody td{ border-bottom:1px solid color-mix(in oklab, var(--co-border) 55%, transparent); padding:6px 12px; }
+.co-pfwrap .co-table tbody tr:last-child td{ border-bottom:0; }
+
 /* The shadcn dialog ships z-index:50, below the kit's drawer at 100. */
 .sc-dialog-overlay{ z-index:400; }
 .sc-dialog{ max-width:460px; }
@@ -398,6 +416,9 @@ select.co-input{
       <button class="co-nav-i"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9.5" cy="7" r="4"/></svg></span><span>Customer team member fields</span></button>
       <button class="co-nav-i"><span class="co-nav-ico" style="background:#CCFBF1;color:#0D9488"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.9 1.2 5.7L12 15.8 7 18.5l1.2-5.7L4 8.9l5.6-.6z"/></svg></span><span>Skills</span></button>
     </div>
+    <div class="co-nav" style="margin-top:2px">
+      <button class="co-nav-i" id="nav-perms" onclick="go('perms')"><span class="co-nav-ico" style="background:#DCFCE7;color:#16A34A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.4 8.3-8 9-4.6-.7-8-4-8-9V6z"/></svg></span><span>Permissions</span><span class="co-nav-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18l6-6-6-6"/></svg></span></button>
+    </div>
     <div class="co-side-div"></div>
     <div class="co-nav-label">Advanced</div>
     <div class="co-nav">
@@ -412,7 +433,7 @@ select.co-input{
       <button class="co-nav-i"><span class="co-nav-ico" style="background:#DCFCE7;color:#16A34A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h10M9 3v2M11 5c0 5-3 9-7 10M7 9c0 3 3 6 7 7"/><path d="M13 21l4-10 4 10M14.5 18h5"/></svg></span><span>Language Configurations</span></button>
       <button class="co-nav-i"><span class="co-nav-ico" style="background:#E2E8F0;color:#475569"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span>Custom apps</span></button>
       <button class="co-nav-i"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12z"/></svg></span><span>Automations</span><span class="co-nav-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span></button>
-      <button class="co-nav-i on" onclick="go('list')"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg></span><span>Custom objects</span><span class="co-nav-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span></button>
+      <button class="co-nav-i on" id="nav-objects" onclick="go('list')"><span class="co-nav-ico" style="background:#EDE9FE;color:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg></span><span>Custom objects</span><span class="co-nav-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span></button>
     </div>
     <div class="co-side-div"></div>
     <div class="co-nav" style="padding-bottom:18px">
@@ -441,7 +462,7 @@ select.co-input{
    type that rides on a lookup rather than a privilege of master-detail.
    ══════════════════════════════════════════════════════════════════════ */
 
-const STORE_KEY = 'rl.customObjects.v1';
+const STORE_KEY = 'rl.customObjects.v2';
 
 /* ── Data types ───────────────────────────────────────────────────────
    One shared list, which is the recommendation in both docs: the same
@@ -586,6 +607,33 @@ function seed(){
       ],
     },
     {
+      id:'risk', label:'Risk Register', plural:'Risks',
+      description:'Risks raised inside a project.',
+      recordNameLabel:'Risk Title', recordNameType:'TEXT',
+      autoFormat:'', autoStart:1, autoNext:1,
+      reports:true, fieldHistory:true, search:true, records:318, updated:'24 Nov 2026',
+      fields:[
+        {id:'rk_proj', label:'Project', type:'LOOKUP',
+         description:'The project this risk belongs to.', help:'', required:true, showInReports:true,
+         settings:{target:'PROJECT', relatedListLabel:'Risks', onDelete:'BLOCK',
+           pickerFields:['Customer','Status']}},
+        {id:'rk_sev', label:'Severity', type:'SELECT', description:'', help:'', required:true,
+         showInReports:true, def:'Medium',
+         settings:{options:[{label:'Low',color:'#DCFCE7'},{label:'Medium',color:'#FEF3C7'},
+           {label:'High',color:'#FFEDD5'},{label:'Critical',color:'#FEE2E2'}], sort:'entered'}},
+        {id:'rk_status', label:'Status', type:'SELECT', description:'', help:'', required:false,
+         showInReports:true, def:'Open',
+         settings:{options:[{label:'Open',color:'#FEE2E2'},{label:'Mitigating',color:'#FEF3C7'},
+           {label:'Closed',color:'#DCFCE7'}], sort:'entered'}},
+        {id:'rk_owner', label:'Risk Owner', type:'USER', description:'', help:'', required:false,
+         showInReports:true, settings:{userMode:'single', userDefault:'blank'}},
+        {id:'rk_mit', label:'Mitigation', type:'MULTILINE', description:'', help:'', required:false,
+         showInReports:true, settings:{maxLength:32000}},
+        {id:'rk_raised', label:'Raised Date', type:'DATE', description:'', help:'', required:false,
+         showInReports:true, settings:{dateDefault:'today'}},
+      ],
+    },
+    {
       id:'prod', label:'Product', plural:'Products',
       description:'Master catalogue of what we sell, with a default price.',
       recordNameLabel:'Product Name', recordNameType:'TEXT',
@@ -606,7 +654,56 @@ function seed(){
          required:false, showInReports:true, settings:{checkDefault:true}},
       ],
     },
+  ],
+  /* Permission sets. Each custom object gets its own line in every set,
+     and a new object starts at None everywhere except Account Admin.
+     Account sets carry an access mode on View / Edit / Delete; project
+     sets do not, because the scope is always the project. */
+  permSets: [
+    {id:'ps_admin', scope:'ACCOUNT', name:'Account Admin', users:4, system:true,
+     description:'Full control of the workspace.', manage:true,
+     objects:{ so:P('GLOBAL',1,'GLOBAL','GLOBAL'), li:P('GLOBAL',1,'GLOBAL','GLOBAL'),
+               risk:P('GLOBAL',1,'GLOBAL','GLOBAL'), prod:P('GLOBAL',1,'GLOBAL','GLOBAL') }},
+    {id:'ps_salesops', scope:'ACCOUNT', name:'Sales Ops', users:7,
+     description:'Owns orders and line items from the CRM handoff.', manage:false,
+     objects:{ so:P('LINKED',1,'LINKED','NONE'), li:P('LINKED',1,'LINKED','NONE'),
+               risk:P('NONE',0,'NONE','NONE'), prod:P('GLOBAL',0,'NONE','NONE') }},
+    {id:'ps_pm', scope:'ACCOUNT', name:'Project Manager', users:23,
+     description:'Delivers projects. Reads commercial data, does not change it.', manage:false,
+     objects:{ so:P('LINKED',0,'NONE','NONE'), li:P('LINKED',0,'NONE','NONE'),
+               risk:P('NONE',0,'NONE','NONE'), prod:P('GLOBAL',0,'NONE','NONE') }},
+    {id:'ps_collab', scope:'ACCOUNT', name:'Collaborator', users:64,
+     description:'Works on assigned tasks.', manage:false,
+     objects:{ so:P('NONE',0,'NONE','NONE'), li:P('NONE',0,'NONE','NONE'),
+               risk:P('NONE',0,'NONE','NONE'), prod:P('GLOBAL',0,'NONE','NONE') }},
+
+    {id:'ps_powner', scope:'PROJECT', name:'Project Owner', users:19, system:true,
+     description:'Runs the project.',
+     objects:{ so:P(0,0,0,0), li:P(0,0,0,0), risk:P(1,1,1,1), prod:P(0,0,0,0) }},
+    {id:'ps_pmember', scope:'PROJECT', name:'Project Member', users:88,
+     description:'Works inside the project.',
+     objects:{ so:P(0,0,0,0), li:P(0,0,0,0), risk:P(1,1,0,0), prod:P(0,0,0,0) }},
+    {id:'ps_pviewer', scope:'PROJECT', name:'Project Viewer', users:12,
+     description:'Read-only access to the project.',
+     objects:{ so:P(0,0,0,0), li:P(0,0,0,0), risk:P(1,0,0,0), prod:P(0,0,0,0) }},
   ]};
+}
+/* One object permission line: view, create, edit, delete. Account sets
+   store an access mode ('NONE'|'LINKED'|'GLOBAL'); project sets store 0/1.
+   `fields` is set per field only where the admin has narrowed it. */
+function P(view, create, edit, del){ return {view, create:!!create, edit, del, fields:{}}; }
+
+/* A new object appears in every permission set the moment it is created:
+   full access for the account admin, None everywhere else until an admin
+   opens the set. Doing it here rather than at render time means a set
+   nobody has looked at yet still holds the right answer. */
+function seedObjectPermissions(objId){
+  state.permSets.forEach(ps => {
+    if(ps.objects[objId]) return;
+    ps.objects[objId] = (ps.system && ps.scope === 'ACCOUNT')
+      ? P('GLOBAL', 1, 'GLOBAL', 'GLOBAL')
+      : (ps.scope === 'ACCOUNT' ? P('NONE', 0, 'NONE', 'NONE') : P(0, 0, 0, 0));
+  });
 }
 
 /* ── State ────────────────────────────────────────────────────────── */
@@ -618,7 +715,8 @@ function load(){
     const raw = localStorage.getItem(STORE_KEY);
     if(!raw) return seed();
     const s = JSON.parse(raw);
-    return (s && Array.isArray(s.objects)) ? s : seed();
+    if(!s || !Array.isArray(s.objects) || !Array.isArray(s.permSets)) return seed();
+    return s;
   }catch(e){ return seed(); }
 }
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
@@ -651,6 +749,7 @@ function toast(msg){
 }
 function typeMeta(t){ return TYPES[t] || {label:t, glyph:'?', cls:'g-sys'}; }
 function glyph(t, lg){ const m = typeMeta(t); return `<span class="co-glyph ${m.cls}${lg?' lg':''}">${esc(m.glyph)}</span>`; }
+const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.4 8.3-8 9-4.6-.7-8-4-8-9V6z"/></svg>';
 const ICON_CUBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>';
 
 /* Tag — the Settings screen uses rounded rectangles rather than the kit's
@@ -755,16 +854,26 @@ const ICO = {
   warn:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
   info:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>',
+  chevDown:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>',
+  chevUp:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>',
   lock:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/></svg>',
 };
 /* ══ Views ══════════════════════════════════════════════════════════ */
 function render(){
   const main = document.getElementById('main');
-  main.innerHTML = route.view === 'list' ? viewList() : viewObject();
+  main.innerHTML =
+      route.view === 'perms'   ? viewPerms()
+    : route.view === 'permset' ? viewPermSet()
+    : route.view === 'list'    ? viewList()
+    : viewObject();
+  document.querySelectorAll('.co-nav-i').forEach(el => el.classList.remove('on'));
+  const nav = document.getElementById(
+    (route.view === 'perms' || route.view === 'permset') ? 'nav-perms' : 'nav-objects');
+  if(nav) nav.classList.add('on');
   const sc = main.querySelector('.co-scroll');
   if(sc) sc.scrollTop = 0;
 }
-function go(view, id, tab){ route = {view, id:id||null, tab:tab||'fields'}; render(); }
+function go(view, id, tab){ route = {view, id:id||null, tab:tab||'fields', open:null}; render(); }
 
 const ICO_GRIP = '<span class="co-grip">⠿</span>';
 const ICO_CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M9 18l6-6-6-6"/></svg>';
@@ -1072,6 +1181,243 @@ function tabDetails(o){
         ${incoming(o.id).length ? `Blocked while ${incoming(o.id).map(x=>esc(x.obj.label)).join(' and ')} point at it.` : ''}
       </div>
     </div>`;
+}
+
+/* ══ Permissions ════════════════════════════════════════════════════
+   Settings › Permissions. Each custom object gets its own line in every
+   permission set, per the permissions spec.
+
+   Account sets carry an access mode on View / Edit / Delete — None,
+   Linked access (records reachable through a lookup to an account or
+   project the user can see) or Global. Project sets do not: their scope
+   is always the project, so each permission is simply on or off.
+
+   The two never subtract from each other. Effective access is the
+   account set unioned with every project set that applies, per line —
+   the rule Rocketlane already uses elsewhere.
+   ══════════════════════════════════════════════════════════════════ */
+const MODES = {NONE:'None', LINKED:'Linked access', GLOBAL:'Global'};
+/* A View on the object always carries these; they cannot be removed. */
+const ALWAYS_VISIBLE = ['Created by','Created at','Updated by','Updated at'];
+
+const permSet = id => state.permSets.find(p => p.id === id);
+const isAccount = ps => ps.scope === 'ACCOUNT';
+/* True for either shape: a mode that is not 'NONE', or a 1. */
+const has = v => !!v && v !== 'NONE';
+
+function viewPerms(){
+  const scope = route.tab === 'PROJECT' ? 'PROJECT' : 'ACCOUNT';
+  const sets = state.permSets.filter(p => p.scope === scope);
+  const rows = sets.map(ps => `
+    <tr class="is-clickable" onclick="go('permset','${ps.id}')">
+      <td style="padding-left:20px">
+        <div class="co-fname">${esc(ps.name)}${ps.system ? ' ' + tag('System', '', 'sm', 'Ships with Rocketlane') : ''}</div>
+      </td>
+      <td style="color:var(--muted-foreground)">${esc(ps.description)}</td>
+      <td class="num" style="color:var(--muted-foreground)">${ps.users}</td>
+      <td style="color:var(--muted-foreground)">${permSummary(ps)}</td>
+      <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation()" aria-label="More">${ICO.dots}</button></td>
+    </tr>`).join('');
+
+  return `
+    <div class="co-head">
+      <div class="co-title">${ICON_SHIELD} Permissions</div>
+      <div class="co-desc">What each group of people can see and do.</div>
+      <div class="co-tabs">
+        <button class="co-tab${scope==='ACCOUNT'?' on':''}" onclick="go('perms',null,'ACCOUNT')">Account</button>
+        <button class="co-tab${scope==='PROJECT'?' on':''}" onclick="go('perms',null,'PROJECT')">Project</button>
+        <button class="co-tab" disabled title="Not in this prototype yet">Customer</button>
+      </div>
+    </div>
+    <div class="co-scroll">
+      <div class="co-card">
+        <div class="co-band">
+          <span class="co-band-t">${scope === 'ACCOUNT' ? 'Account' : 'Project'} permission sets</span>
+          <span class="co-band-n">(${sets.length})</span>
+        </div>
+        <table class="co-table">
+          <thead><tr>
+            <th style="padding-left:20px">Permission set</th><th>Description</th>
+            <th class="num">Users</th><th>Custom objects</th><th class="col-menu"></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="co-note">
+        <span class="co-note-ico">${ICO.info}</span>
+        <div>${scope === 'ACCOUNT'
+          ? 'Account sets apply across every project. The access mode decides which records they reach.'
+          : 'Project sets apply only inside the project they are assigned in, and add to the account set.'}</div>
+      </div>
+    </div>`;
+}
+
+/* A one-glance read, so the list is not four columns of None. */
+function permSummary(ps){
+  const n = state.objects.filter(o => has((ps.objects[o.id]||{}).view)).length;
+  if(!n) return 'No access';
+  const full = state.objects.filter(o => has((ps.objects[o.id]||{}).del)).length;
+  return `${n} of ${state.objects.length} visible${full ? ` · ${full} deletable` : ''}`;
+}
+
+const PERM_MODULES = ['General','Projects','Tasks','Time tracking','Financials','Forms','Reports'];
+
+function viewPermSet(){
+  const ps = permSet(route.id);
+  if(!ps){ route.view = 'perms'; return viewPerms(); }
+  const acct = isAccount(ps);
+  const rows = state.objects.map(o => permRow(ps, o)).join('');
+
+  return `
+    <div class="co-head">
+      <div class="co-crumb"><a onclick="go('perms',null,'${ps.scope}')">Permissions</a><span>›</span><span>${esc(ps.name)}</span></div>
+      <div class="co-title">${ICON_SHIELD} ${esc(ps.name)}
+        ${tag(acct ? 'Account' : 'Project', acct ? 'blue' : 'green')}
+        ${ps.system ? tag('System', '', 'sm') : ''}</div>
+      <div class="co-desc">${esc(ps.description)}</div>
+    </div>
+    <div class="co-scroll">
+      <div class="co-split">
+        <div class="co-pnav">
+          ${PERM_MODULES.map(m => `<button class="co-pnav-i" disabled title="Not in this prototype yet">${m}</button>`).join('')}
+          <button class="co-pnav-i on">Custom objects<span class="co-pnav-n">${state.objects.length}</span></button>
+        </div>
+        <div class="co-pbody">
+          ${acct ? `
+            <div class="co-card">
+              <div class="co-band"><span class="co-band-t">Manage custom objects</span></div>
+              <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 20px">
+                <button class="sc-switch${ps.manage?' sc-switch--on':''}" role="switch" aria-checked="${!!ps.manage}"
+                        onclick="togglePermManage('${ps.id}')"><span class="sc-switch-thumb"></span></button>
+                <div class="co-ctl-d" style="flex:1;margin-top:3px">Create objects and change their fields, relationships and
+                  layouts. Grants no access to records.</div>
+              </div>
+            </div>` : ''}
+
+          <div class="co-card">
+            <div class="co-band">
+              <span class="co-band-t">Record access</span>
+              <span class="co-band-n">(${state.objects.length})</span>
+            </div>
+            <table class="co-table co-ptable">
+              <thead><tr>
+                <th style="padding-left:20px">Object</th>
+                <th style="width:${acct?'180px':'80px'}">View</th>
+                <th style="width:80px">Create</th>
+                <th style="width:${acct?'180px':'80px'}">Edit</th>
+                <th style="width:${acct?'180px':'80px'}">Delete</th>
+                <th style="width:110px"></th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+
+          <div class="co-note">
+            <span class="co-note-ico">${ICO.info}</span>
+            <div>Create, Edit and Delete each need View. Delete also needs Edit.
+            ${acct ? 'A record with no lookup to an account or project needs Global.'
+                   : 'A record is in this project when one of its lookups points at the project, or at a budget or task of it.'}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function permRow(ps, o){
+  const acct = isAccount(ps);
+  if(!ps.objects[o.id]) ps.objects[o.id] = P(acct?'NONE':0, 0, acct?'NONE':0, acct?'NONE':0);
+  const p = ps.objects[o.id];
+  const open = route.open === o.id;
+  const noView = !has(p.view), noEdit = !has(p.edit);
+
+  const sel = (key, dis) => `
+    <select class="co-input co-psel" ${dis?'disabled':''} onchange="setPerm('${ps.id}','${o.id}','${key}',this.value)">
+      ${Object.entries(MODES).map(([k,v]) => `<option value="${k}" ${p[key]===k?'selected':''}>${v}</option>`).join('')}
+    </select>`;
+  const box = (key, dis) => `
+    <button class="sc-check${p[key]?' sc-check--on':''}" ${dis?'disabled style="opacity:.4;cursor:not-allowed"':''}
+            onclick="setPerm('${ps.id}','${o.id}','${key}',${!p[key]})" role="checkbox" aria-checked="${!!p[key]}">${p[key]?ICO.check:''}</button>`;
+  const cell = (key, dis) => acct ? sel(key, dis) : box(key, dis);
+
+  return `
+    <tr class="co-prow${open?' is-open':''}">
+      <td style="padding-left:20px"><div class="co-fname">${esc(o.label)}</div></td>
+      <td>${cell('view', false)}</td>
+      <td>${box('create', noView)}</td>
+      <td>${cell('edit', noView)}</td>
+      <td>${cell('del', noView || noEdit)}</td>
+      <td style="text-align:right;padding-right:20px">
+        <button class="rl-btn v-ghost sz-sm" onclick="togglePermFields('${o.id}')">
+          <span class="rl-btn-label">Fields</span>${open?ICO.chevUp:ICO.chevDown}</button>
+      </td>
+    </tr>
+    ${open ? `<tr class="co-pfields"><td colspan="6">${permFields(ps, o)}</td></tr>` : ''}`;
+}
+
+/* Field access is stored only where the admin narrowed it; otherwise it
+   follows the object — Read where the set can view, Edit where it can edit. */
+function fieldDefault(p){ return has(p.edit) ? 'EDIT' : has(p.view) ? 'READ' : 'NONE'; }
+function fieldAccess(p, fid){ return p.fields[fid] || fieldDefault(p); }
+
+function permFields(ps, o){
+  const p = ps.objects[o.id];
+  const noView = !has(p.view), noEdit = !has(p.edit);
+  const opts = [['NONE','Hidden'],['READ','Read'],['EDIT','Edit']];
+  const seg = (cur, click) => `
+    <div class="co-seg">
+      ${opts.map(([k,l]) => {
+        const dis = (k !== 'NONE' && noView) || (k === 'EDIT' && noEdit);
+        return `<button class="${cur===k?'active':''}" ${dis?'disabled style="opacity:.4;cursor:not-allowed"':''}
+                  onclick="${click}('${k}')">${l}</button>`;
+      }).join('')}
+    </div>`;
+
+  const rows = o.fields.map(f => `
+    <tr>
+      <td style="padding-left:34px"><span class="co-type">${typeIcon(f.type)}${esc(f.label)}</span></td>
+      <td style="text-align:right;padding-right:20px">${seg(fieldAccess(p, f.id), `setFieldAccess('${ps.id}','${o.id}','${f.id}',`)}</td>
+    </tr>`).join('');
+
+  const locked = [o.recordNameLabel, ...ALWAYS_VISIBLE].map(l => `
+    <tr>
+      <td style="padding-left:34px;color:var(--muted-foreground)">${esc(l)}</td>
+      <td style="text-align:right;padding-right:20px">${tag('Always visible', '', 'sm', 'A user with View on the object always sees this')}</td>
+    </tr>`).join('');
+
+  return `
+    <div class="co-pfwrap">
+      <table class="co-table" style="background:transparent">
+        <tbody>
+          <tr>
+            <td style="padding-left:34px;font-weight:500">All fields</td>
+            <td style="text-align:right;padding-right:20px">${seg(null, `setAllFields('${ps.id}','${o.id}',`)}</td>
+          </tr>
+          ${rows}
+          ${locked}
+        </tbody>
+      </table>
+      ${noView ? `<div style="padding:4px 34px 14px;font-size:12px;color:var(--muted-foreground)">
+        This set cannot view ${esc(o.label)}, so no field is visible.</div>` : ''}
+    </div>`;
+}
+
+/* Dependencies run on every change rather than being validated later:
+   losing View clears the rest, losing Edit clears Delete. */
+function setPerm(setId, objId, key, value){
+  const ps = permSet(setId), p = ps.objects[objId];
+  p[key] = (value === 'true' || value === 'false') ? (value === 'true') : value;
+  const off = isAccount(ps) ? 'NONE' : 0;
+  if(!has(p.view)){ p.create = false; p.edit = off; p.del = off; }
+  if(!has(p.edit)) p.del = off;
+  save(); render();
+}
+function togglePermManage(setId){ const ps = permSet(setId); ps.manage = !ps.manage; save(); render(); }
+function togglePermFields(objId){ route.open = route.open === objId ? null : objId; render(); }
+function setFieldAccess(setId, objId, fid, v){ permSet(setId).objects[objId].fields[fid] = v; save(); render(); }
+function setAllFields(setId, objId, v){
+  const p = permSet(setId).objects[objId];
+  obj(objId).fields.forEach(f => { p.fields[f.id] = v; });
+  save(); render();
 }
 
 /* ══ Drawer plumbing — the kit's right-side sheet ═══════════════════ */
@@ -1704,7 +2050,9 @@ function odSave(){
       autoNext:d.autoStart, reports:d.reports, fieldHistory:d.fieldHistory, search:d.search,
       records:0, updated:'Just now', fields:[],
     };
-    state.objects.push(o); save(); closeDrawer(); go('object', o.id, 'fields');
+    state.objects.push(o);
+    seedObjectPermissions(o.id);
+    save(); closeDrawer(); go('object', o.id, 'fields');
     toast(`${label} created. Record Name, parent and system fields are in place — add your own fields next.`);
   }
 }
@@ -1969,6 +2317,7 @@ function confirmDeleteObject(id){
     confirm:`Delete ${esc(o.label)}`, danger:true,
     onConfirm(){
       state.objects = state.objects.filter(x => x.id !== id);
+      state.permSets.forEach(ps => { delete ps.objects[id]; });
       save(); go('list'); toast(`${o.label} deleted.`);
     },
   });
