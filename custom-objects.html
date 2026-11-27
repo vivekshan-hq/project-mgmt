@@ -333,9 +333,16 @@ select.co-input{
 .co-fp-search{ padding:8px; border-bottom:1px solid var(--co-border-soft); }
 .co-fp-list{ max-height:320px; overflow-y:auto; padding:4px; }
 .co-fp-group{
-  padding:8px 10px 4px; font-size:11px; font-weight:600; letter-spacing:.04em;
+  display:flex; align-items:center; gap:6px; width:100%;
+  padding:7px 10px 6px; border-radius:7px; text-align:left;
+  font-size:11px; font-weight:600; letter-spacing:.04em;
   text-transform:uppercase; color:var(--muted-foreground);
 }
+.co-fp-group:hover{ background:var(--co-rail-hover); color:var(--foreground); }
+.co-fp-chev{ display:inline-grid; place-items:center; transition:transform 140ms ease; }
+.co-fp-chev svg{ width:13px; height:13px; }
+.co-fp-chev.folded{ transform:rotate(-90deg); }
+.co-fp-n{ margin-left:auto; font-weight:500; letter-spacing:0; font-variant-numeric:tabular-nums; }
 .co-fp-i{ display:flex; align-items:center; gap:9px; width:100%; padding:6px 10px; border-radius:7px; text-align:left; }
 .co-fp-i:hover{ background:var(--co-rail-hover); }
 .co-fp-l{ font-size:13.5px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -2261,8 +2268,12 @@ function fieldPickerGroups(){
   const o = obj(fd.objId);
   const own = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
   const groups = [{label:o.label, items:own.map(f => ({label:f.label, type:f.type, token:`{${f.label}}`}))}];
+  /* The lookup's own label names the group. It reads as the object it
+     points at — Account, Product — and stays unambiguous when an object
+     points at the same one twice, as Customer Account and Partner
+     Account would. */
   relatedFieldSources(o).forEach(src => groups.push({
-    label: `Through ${src.lookup} · ${src.target}`,
+    label: src.lookup,
     items: src.fields.map(x => ({label:x.label, type:x.type, token:`{${src.lookup}.${x.label}}`})),
   }));
   return groups.filter(g => g.items.length);
@@ -2271,7 +2282,13 @@ function fieldPickerGroups(){
 function openFieldPicker(ev){
   ev.stopPropagation();
   closeMenu();
-  FP = {q:'', groups:fieldPickerGroups(), rect:ev.currentTarget.getBoundingClientRect()};
+  const groups = fieldPickerGroups();
+  /* Own fields open, linked objects folded — the list opens on what you
+     are most likely to want, and the rest is one click away rather than
+     a scroll. */
+  const collapsed = {};
+  groups.forEach((g, i) => { collapsed[g.label] = i > 0; });
+  FP = {q:'', groups, collapsed, rect:ev.currentTarget.getBoundingClientRect()};
   renderFieldPicker();
 }
 function closeFieldPicker(){
@@ -2280,21 +2297,16 @@ function closeFieldPicker(){
   if(el) el.remove();
 }
 function fpSearch(q){ FP.q = q; renderFieldPicker(true); }
+function fpToggle(label){ FP.collapsed[label] = !FP.collapsed[label]; renderFieldPicker(); }
 
 function renderFieldPicker(keepFocus){
   if(!FP) return;
   let el = document.getElementById('fp');
-  if(!el){
+  const opening = !el;
+  if(opening){
     el = document.createElement('div');
     el.id = 'fp'; el.className = 'co-fp';
     document.body.appendChild(el);
-    setTimeout(() => {
-      const r = FP && FP.rect;
-      if(!r) return;
-      el.style.left = Math.max(10, Math.min(r.left, window.innerWidth - el.offsetWidth - 10)) + 'px';
-      el.style.top  = Math.min(r.bottom + 6, window.innerHeight - el.offsetHeight - 10) + 'px';
-      const i = el.querySelector('input'); if(i) i.focus();
-    }, 0);
   }
   const q = FP.q.toLowerCase();
   const groups = FP.groups
@@ -2307,15 +2319,35 @@ function renderFieldPicker(keepFocus){
       <input class="co-input" placeholder="Search fields" value="${esc(FP.q)}" oninput="fpSearch(this.value)">
     </div>
     <div class="co-fp-list">
-      ${total ? groups.map(g => `
-        <div class="co-fp-group">${esc(g.label)}</div>
-        ${g.items.map(x => `
+      ${total ? groups.map(g => {
+        /* A search ignores the folds — hiding a match behind one would
+           make the search look broken. */
+        const folded = !q && FP.collapsed[g.label];
+        return `
+        <button class="co-fp-group" onclick="fpToggle('${esc(g.label).replace(/'/g, "&#39;")}')">
+          <span class="co-fp-chev${folded ? ' folded' : ''}">${ICO.chevDown}</span>
+          <span>${esc(g.label)}</span>
+          <span class="co-fp-n">${g.items.length}</span>
+        </button>
+        ${folded ? '' : g.items.map(x => `
           <button class="co-fp-i" onclick="pickField('${esc(x.token).replace(/'/g, "&#39;")}')">
             ${x.type ? typeIcon(x.type) : '<span class="co-type-ico"></span>'}
             <span class="co-fp-l">${esc(x.label)}</span>
-          </button>`).join('')}`).join('')
+          </button>`).join('')}`;
+      }).join('')
       : `<div class="co-fp-empty">No field matches “${esc(FP.q)}”.</div>`}
     </div>`;
+  /* Reposition on every render, not only on open: expanding a group
+     makes the panel taller, and one anchored near the bottom would grow
+     straight off the screen. */
+  setTimeout(() => {
+    if(!FP || !document.getElementById('fp')) return;
+    const r = FP.rect;
+    el.style.left = Math.max(10, Math.min(r.left, window.innerWidth - el.offsetWidth - 10)) + 'px';
+    el.style.top  = Math.max(10, Math.min(r.bottom + 6, window.innerHeight - el.offsetHeight - 10)) + 'px';
+    if(opening){ const i = el.querySelector('input'); if(i) i.focus(); }
+  }, 0);
+
   if(keepFocus){
     const i = el.querySelector('input');
     if(i){ i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
