@@ -683,23 +683,19 @@ function seed(){
       rules:[
         {id:'r_so1', name:'Handoff needs an owner and a signed date', active:true,
          description:'Keeps the sales-to-delivery handoff complete.',
-         condition:'{Status} = "Handed to Delivery" AND (ISBLANK({Account}) OR ISBLANK({Signed Date}) OR ISBLANK({Delivery Owner}))',
-         message:'Add the account, signed date and delivery owner before handing this order to delivery.',
-         location:'TOP', fieldId:''},
+         condition:'{Status} = "Handed to Delivery" AND ({Account} isempty OR {Signed Date} isempty OR {Delivery Owner} isempty)',
+         message:'Add the account, signed date and delivery owner before handing this order to delivery.',},
         {id:'r_so2', name:'Handoff needs line items', active:true,
          description:'An order with nothing on it cannot be delivered.',
          condition:'{Status} = "Handed to Delivery" AND {Line Item Count} = 0',
-         message:'Add at least one line item before handing this order to delivery.',
-         location:'TOP', fieldId:''},
+         message:'Add at least one line item before handing this order to delivery.',},
         {id:'r_so3', name:'Contract dates in order', active:true, description:'',
          condition:'{Contract Start Date} > {Contract End Date}',
-         message:'The contract start date cannot be after the end date.',
-         location:'FIELD', fieldId:'so_start'},
+         message:'The contract start date cannot be after the end date.',},
         {id:'r_so4', name:'Signed date cannot be in the future', active:false,
          description:'Off until we settle which time zone “today” uses.',
          condition:'{Signed Date} > TODAY()',
-         message:'The signed date cannot be in the future.',
-         location:'FIELD', fieldId:'so_signed'},
+         message:'The signed date cannot be in the future.',},
       ],
     },
     {
@@ -746,18 +742,15 @@ function seed(){
       rules:[
         {id:'r_li1', name:'Quantity must be more than 0', active:true,
          description:'Blank and zero both fail.',
-         condition:'ISBLANK({Quantity}) OR {Quantity} <= 0',
-         message:'Quantity must be more than 0.',
-         location:'FIELD', fieldId:'li_qty'},
+         condition:'{Quantity} isempty OR {Quantity} <= 0',
+         message:'Quantity must be more than 0.',},
         {id:'r_li2', name:'Discount between 0 and 100', active:true, description:'',
          condition:'{Discount} < 0 OR {Discount} > 100',
-         message:'Discount must be between 0% and 100%.',
-         location:'FIELD', fieldId:'li_disc'},
+         message:'Discount must be between 0% and 100%.',},
         {id:'r_li3', name:'Line dates inside the contract period', active:true,
          description:'Reads the order through the Sales Order lookup.',
          condition:'{Line Start Date} < {Sales Order.Contract Start Date} OR {Line End Date} > {Sales Order.Contract End Date}',
-         message:'Line dates must fall inside the order’s contract period.',
-         location:'TOP', fieldId:''},
+         message:'Line dates must fall inside the order’s contract period.',},
       ],
     },
     {
@@ -788,9 +781,8 @@ function seed(){
       ],
       rules:[
         {id:'r_rk1', name:'Critical risks need a mitigation', active:true, description:'',
-         condition:'{Severity} = "Critical" AND ISBLANK({Mitigation})',
-         message:'Describe how this risk will be mitigated before saving it as Critical.',
-         location:'FIELD', fieldId:'rk_mit'},
+         condition:'{Severity} = "Critical" AND {Mitigation} isempty',
+         message:'Describe how this risk will be mitigated before saving it as Critical.',},
       ],
     },
     {
@@ -1744,12 +1736,13 @@ function savePermSet(){
    set. Everything a rule needs is already there: fields on the object,
    fields one hop away through a lookup, comparison and logic.
    ══════════════════════════════════════════════════════════════════ */
+/* isempty, isnotempty and contains are operators in Rocketlane, so they
+   sit in the Operators row. What is left here are the ones with no
+   operator form. */
 const RULE_FNS = [
-  {t:'ISBLANK(',    hint:'Has no value'},
   {t:'ISCHANGED(',  hint:'Changed in this save'},
   {t:'PRIORVALUE(', hint:'Value before this save'},
   {t:'TODAY()',     hint:'Today’s date'},
-  {t:'INCLUDES(',   hint:'A multi select contains'},
   {t:'REGEX(',      hint:'Matches a pattern'},
   {t:'ROUND(',      hint:'Round to decimals'},
   {t:'ABS(',        hint:'Drop the minus sign'},
@@ -1766,16 +1759,13 @@ function tabRules(o){
       </td>
       <td><span class="co-mono" style="font-size:12px;color:var(--muted-foreground)">${esc(truncate(r.condition, 46))}</span></td>
       <td style="white-space:normal;max-width:280px">${esc(truncate(r.message, 80))}</td>
-      <td>${r.location === 'FIELD' && ruleField(o, r)
-            ? tag(esc(ruleField(o, r).label))
-            : '<span style="color:var(--muted-foreground)">Top of the form</span>'}</td>
       <td>
         <button class="sc-switch${r.active ? ' sc-switch--on' : ''}" role="switch" aria-checked="${!!r.active}"
                 onclick="event.stopPropagation();toggleRule('${o.id}','${r.id}')"><span class="sc-switch-thumb"></span></button>
       </td>
       <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();ruleMenu(event,'${o.id}','${r.id}')">${ICO.dots}</button></td>
     </tr>`).join('')
-  : `<tr><td colspan="6" style="padding:22px 20px;color:var(--muted-foreground)">
+  : `<tr><td colspan="5" style="padding:22px 20px;color:var(--muted-foreground)">
       No validation rules on ${esc(o.label)} yet. A rule checks a record when someone saves it, and
       stops the save when the check fails.</td></tr>`;
 
@@ -1789,7 +1779,7 @@ function tabRules(o){
       <table class="co-table">
         <thead><tr>
           <th style="padding-left:20px">Rule</th><th>Blocks the save when</th><th>Message</th>
-          <th>Shown</th><th style="width:70px">Active</th><th class="col-menu"></th>
+          <th style="width:70px">Active</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -1802,7 +1792,6 @@ function tabRules(o){
 }
 
 const truncate = (t, n) => { t = String(t || ''); return t.length > n ? t.slice(0, n) + '…' : t; };
-const ruleField = (o, r) => o.fields.find(f => f.id === r.fieldId);
 
 function toggleRule(objId, ruleId){
   const r = obj(objId).rules.find(x => x.id === ruleId);
@@ -1839,7 +1828,7 @@ function openRuleDrawer(objId, ruleId){
   vr = {
     objId, ruleId: ruleId || null, err:{},
     d: r ? JSON.parse(JSON.stringify(r))
-         : {name:'', description:'', condition:'', message:'', location:'TOP', fieldId:'', active:true},
+         : {name:'', description:'', condition:'', message:'', active:true},
   };
   vrRender();
 }
@@ -1862,7 +1851,7 @@ function vrRender(){
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Block the save when <span class="rl-field-required">*</span></label>
         <textarea class="co-input co-mono" id="vr-expr" rows="3"
-                  placeholder="ISBLANK({Quantity}) OR {Quantity} <= 0"
+                  placeholder="{Quantity} isempty OR {Quantity} <= 0"
                   oninput="vr.d.condition = this.value; exprCheck(this.value)">${esc(d.condition)}</textarea>
         ${fErr('condition', vr.err)}
         <div id="vr-expr-warn">${exprWarning(d.condition)}</div>
@@ -1875,22 +1864,6 @@ function vrRender(){
         `<textarea class="co-input" rows="2" placeholder="eg. Quantity must be more than 0."
                    oninput="vr.d.message = this.value; delete vr.err.message">${esc(d.message)}</textarea>`,
         'What the person saving the record sees.', fErr('message', vr.err))}
-
-      ${field('Show the message', true,
-        `<select class="co-input" onchange="vr.d.location = this.value; vrRender()">
-          <option value="TOP" ${d.location !== 'FIELD' ? 'selected' : ''}>At the top of the form</option>
-          <option value="FIELD" ${d.location === 'FIELD' ? 'selected' : ''}>Under a field</option>
-        </select>`,
-        d.location === 'FIELD' ? '' : 'Use this when the rule spans more than one field.')}
-
-      ${d.location === 'FIELD'
-        ? field('Field', true,
-            `<select class="co-input" onchange="vr.d.fieldId = this.value; delete vr.err.fieldId">
-              <option value="">Select a field…</option>
-              ${o.fields.map(f => `<option value="${f.id}" ${d.fieldId === f.id ? 'selected' : ''}>${esc(f.label)}</option>`).join('')}
-            </select>`,
-            'A rule on a field the person cannot see shows at the top instead.', fErr('fieldId', vr.err))
-        : ''}
 
       <div class="co-sw" style="border-top:1px solid var(--border);margin-top:4px">
         <button class="sc-switch${d.active ? ' sc-switch--on' : ''}" role="switch" aria-checked="${!!d.active}"
@@ -1916,11 +1889,9 @@ function vrSave(){
     vr.err.name = `${o.label} already has a rule called “${name}”.`;
   if(!(d.condition || '').trim()) vr.err.condition = 'Write the condition that blocks the save.';
   if(!(d.message || '').trim()) vr.err.message = 'Write the message the person will see.';
-  if(d.location === 'FIELD' && !d.fieldId) vr.err.fieldId = 'Choose the field to show it under.';
   if(Object.keys(vr.err).length){ vrRender(); return; }
 
   d.name = name;
-  if(d.location !== 'FIELD') d.fieldId = '';
   if(vr.ruleId){
     const i = o.rules.findIndex(r => r.id === vr.ruleId);
     o.rules[i] = Object.assign({}, o.rules[i], d);
@@ -2366,13 +2337,17 @@ const FD_OPS = [
 const FD_COMPARE = [
   {t:'=', hint:'Equals'}, {t:'!=', hint:'Does not equal'}, {t:'>', hint:'Greater than'},
   {t:'<', hint:'Less than'}, {t:'>=', hint:'At least'}, {t:'<=', hint:'At most'},
+  /* Rocketlane already has these as operators, so they belong here
+     rather than as borrowed Salesforce functions. */
+  {t:'isempty', hint:'Has no value'}, {t:'isnotempty', hint:'Has a value'},
+  {t:'contains', hint:'A multi select holds this value'},
 ];
 const FD_LOGIC = [{t:'AND', hint:'Both are true'}, {t:'OR', hint:'Either is true'}, {t:'NOT', hint:'Is not true'}];
 /* Functions worth offering depend on what the formula returns. */
 function fdFunctions(returns){
   if(returns === 'TEXT')     return [{t:'CONCAT(', hint:'Join text'}, {t:'UPPER(', hint:'Upper case'}, {t:'LOWER(', hint:'Lower case'}];
   if(returns === 'DATE')     return [{t:'TODAY()', hint:'Today’s date'}, {t:'DATE_ADD(', hint:'Add days to a date'}];
-  if(returns === 'CHECKBOX') return [{t:'IF(', hint:'If this, then that'}, {t:'ISBLANK(', hint:'Has no value'}];
+  if(returns === 'CHECKBOX') return [{t:'IF(', hint:'If this, then that'}];
   return [{t:'ROUND(', hint:'Round to decimals'}, {t:'ABS(', hint:'Drop the minus sign'},
           {t:'MIN(', hint:'Smallest of'}, {t:'MAX(', hint:'Largest of'}];
 }
