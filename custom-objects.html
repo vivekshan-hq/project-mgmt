@@ -246,11 +246,6 @@ select.co-input{
 .co-mono{ font-family:var(--font-mono); }
 
 /* ══ Bits the kit has no component for ══ */
-.co-sec{ display:flex; align-items:center; gap:10px; margin:22px 0 10px; }
-.co-sec:first-child{ margin-top:0; }
-.co-sec-t{ font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-foreground); }
-.co-sec-line{ flex:1; height:1px; background:var(--border); }
-
 .co-empty{ border:1px dashed var(--co-border); border-radius:10px; padding:48px 28px; text-align:center; background:var(--co-band); }
 .co-empty-t{ font-size:15px; font-weight:600; margin-bottom:6px; }
 .co-empty-d{ font-size:14px; color:var(--muted-foreground); line-height:1.55; max-width:460px; margin:0 auto 18px; }
@@ -274,18 +269,6 @@ select.co-input{
 .co-err{ font-size:11px; color:var(--tag-fg-red); line-height:1.35; margin-top:5px; display:flex; align-items:center; gap:4px; }
 .co-err svg{ width:12px; height:12px; flex-shrink:0; }
 
-.co-cards{ display:flex; gap:10px; }
-.co-card-opt{
-  flex:1; text-align:left; font-family:inherit; cursor:pointer;
-  border:1px solid var(--border); border-radius:var(--radius-md);
-  padding:10px 12px; background:var(--card);
-  transition:border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
-}
-.co-card-opt:hover:not(:disabled){ border-color:color-mix(in oklab, var(--co-blue) 35%, var(--border)); }
-.co-card-opt.sel{ border-color:var(--co-blue); box-shadow:0 0 0 3px color-mix(in oklab, var(--co-blue) 15%, transparent); }
-.co-card-opt:disabled{ cursor:not-allowed; opacity:.7; background:var(--co-band); }
-.co-card-t{ font-size:14px; font-weight:500; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.co-card-d{ font-size:12px; color:var(--muted-foreground); line-height:1.5; margin-top:4px; }
 
 .co-seg{ display:inline-flex; align-items:center; background:var(--muted); border-radius:var(--radius-md); padding:2px; }
 .co-seg button{ height:26px; padding:0 12px; border-radius:calc(var(--radius-md) - 2px); font-size:13px; font-weight:500; color:var(--muted-foreground); }
@@ -1093,7 +1076,8 @@ function viewObject(){
   if(!o){ route.view = 'list'; return viewList(); }
   const tabs = [
     ['fields','Fields', o.fields.length],
-    ['rel','Relationships', incoming(o.id).length + o.fields.filter(f=>f.type==='ROLLUP').length],
+    ['rel','Relationships', o.fields.filter(f=>f.type==='LOOKUP').length
+      + incoming(o.id).length + o.fields.filter(f=>f.type==='ROLLUP').length],
     ['details','Details', null],
   ];
   const later = ['Validation rules','Record types','Page layouts','Access','Automations'];
@@ -1785,9 +1769,6 @@ function field(label, required, control, hint, err){
 function fErr(key, store){
   return store[key] ? `<div class="co-err">${ICO.warn} ${esc(store[key])}</div>` : '';
 }
-function secLabel(t, extra){
-  return `<div class="co-sec"><span class="co-sec-t">${t}</span><span class="co-sec-line"></span>${extra||''}</div>`;
-}
 
 /* ══ Object drawer — Phase 1 ════════════════════════════════════════ */
 let od = null;
@@ -1826,8 +1807,6 @@ function odRender(){
 
       ${field('Description', false,
         `<textarea class="co-input" rows="2" placeholder="Enter description" oninput="odSet('description', this.value)">${esc(d.description)}</textarea>`)}
-
-      ${secLabel('Record name')}
       ${field('Record Name label', true,
         `<input class="co-input" id="od-recname" value="${esc(d.recordNameLabel)}" placeholder="${esc(recNamePlaceholder)}" oninput="odSet('recordNameLabel', this.value); od.touchedRecName = true">`,
         'How people recognise a record. Always present.', fErr('recordNameLabel', od.err))}
@@ -1866,8 +1845,6 @@ function odRender(){
           <span>First record</span><span class="co-prev-val" id="od-preview">${esc(autoPreview(d.autoFormat, d.autoStart) || '—')}</span>
         </div>
       ` : ''}
-
-      ${secLabel('Behaviour')}
       ${[['reports','Reports','Available in the custom report builder.'],
          ['fieldHistory','Field history','Field changes will be available in the audit logs.'],
          ['search','Search','Can be searched by Record Name.']].map(([k,t,note]) => `
@@ -1928,8 +1905,6 @@ function fdRenderForm(){
       </div>
 
       ${fdTypeSettings(o, d)}
-
-      ${secLabel('Behaviour')}
       ${calculated ? `
         <div class="co-note">
           <span class="co-note-ico">${ICO.info}</span>
@@ -1971,7 +1946,8 @@ function fdRenderForm(){
         </div>
       </div>
     </div>` +
-    drawerFoot('', editing ? 'Save field' : 'Create field', 'fdSave()'),
+    drawerFoot('', editing ? 'Save field'
+      : fd.preset === 'LOOKUP' ? 'Create relationship' : 'Create field', 'fdSave()'),
     560, 'field:' + (fd.fieldId || 'new'));
 
   const el = document.getElementById('fd-label');
@@ -2012,21 +1988,22 @@ function fdTypeSettings(o, d){
     </div></div>`;
 
   switch(d.type){
-    case 'TEXT': return secLabel('Text settings') + `<div class="co-f" style="max-width:190px">${field('Maximum length', false,
+    case 'TEXT': return `<div class="co-f" style="max-width:190px">${field('Maximum length', false,
       `<input class="co-input" type="number" min="1" max="255" value="${esc(s.maxLength)}" oninput="fd.d.settings.maxLength = parseInt(this.value||'255',10)">`,
       'Up to 255 characters.')}</div>`;
 
-    case 'MULTILINE': return secLabel('Text settings') + `<div class="co-f" style="max-width:190px">${field('Maximum length', false,
+    case 'MULTILINE': return `<div class="co-f" style="max-width:190px">${field('Maximum length', false,
       `<input class="co-input" type="number" min="1" max="32000" value="${esc(s.maxLength)}" oninput="fd.d.settings.maxLength = parseInt(this.value||'32000',10)">`,
       'Up to 32,000 characters.')}</div>`;
 
-    case 'NUMBER': return secLabel('Number settings') + dec(6, 'Blank is not 0.');
+    case 'NUMBER': return dec(6, 'Blank is not 0.');
 
-    case 'CURRENCY': return secLabel('Currency settings', openChip('One workspace currency, a Currency field on the record, or a code per value? Proposal: a Currency field on the record.')) + dec(4);
+    case 'CURRENCY': return dec(4, 'Which currency a value is in is undecided. ' +
+      openChip('One workspace currency, a Currency field on the record, or a code per value? Proposal: a Currency field on the record.'));
 
-    case 'PERCENT': return secLabel('Percent settings') + dec(4, '15% is stored as 15.');
+    case 'PERCENT': return dec(4, '15% is stored as 15.');
 
-    case 'DATE': return secLabel('Date settings') + `<div class="co-f"><div class="rl-field">
+    case 'DATE': return `<div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Default value</label>
         <div class="co-seg">
           <button class="${s.dateDefault!=='today'?'active':''}" type="button" onclick="fd.d.settings.dateDefault='blank';fdRender()">Blank</button>
@@ -2034,7 +2011,7 @@ function fdTypeSettings(o, d){
         </div>
       </div></div>`;
 
-    case 'CHECKBOX': return secLabel('Checkbox settings') + `<div class="co-f"><div class="rl-field">
+    case 'CHECKBOX': return `<div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Default value</label>
         <div class="co-seg">
           <button class="${!s.checkDefault?'active':''}" type="button" onclick="fd.d.settings.checkDefault=false;fdRender()">Unchecked</button>
@@ -2043,7 +2020,7 @@ function fdTypeSettings(o, d){
       </div></div>`;
 
     case 'SELECT':
-    case 'MULTISELECT': return secLabel('Values') + `
+    case 'MULTISELECT': return `
       <div class="co-f">
         ${(s.options||[]).map((opt,i) => `
           <div class="co-pl">
@@ -2064,7 +2041,7 @@ function fdTypeSettings(o, d){
       </div>
       <div style="font-size:12px;color:var(--muted-foreground)">Values are restricted to this list. Deleting one asks what replaces it.</div>`;
 
-    case 'USER': return secLabel('User settings') + `
+    case 'USER': return `
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">How many</label>
         <div class="co-seg">
@@ -2094,7 +2071,7 @@ function fdLookupSettings(o, d){
   const picks = targetFieldLabels(s.target);
   const chosen = s.pickerFields || [];
 
-  return secLabel('What it points at') + `
+  return `
     <div class="co-f"><div class="rl-field">
       <label class="rl-field-label">Related object <span class="rl-field-required">*</span>
         ${fd.fieldId ? tag('Fixed after save') : ''}</label>
@@ -2120,22 +2097,14 @@ function fdLookupSettings(o, d){
         `<input class="co-input" value="${esc(s.relatedListLabel)}" placeholder="${esc(o.plural)}" oninput="fd.d.settings.relatedListLabel = this.value; fd.touchedRLL = true">`,
         `Shown on the ${esc(targetLabel(s.target))} record.`)}
 
-      <div class="co-f"><div class="rl-field">
-        <label class="rl-field-label">When the ${esc(targetLabel(s.target))} is deleted <span class="rl-field-required">*</span></label>
-        <div class="co-cards">
-          <button class="co-card-opt${s.onDelete!=='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='CLEAR';fdRender()">
-            <div class="co-card-t">Clear the value</div>
-            <div class="co-card-d">Keeps the ${esc(o.label)}, empties the field.</div>
-          </button>
-          <button class="co-card-opt${s.onDelete==='BLOCK'?' sel':''}" type="button" onclick="fd.d.settings.onDelete='BLOCK';fdRender()">
-            <div class="co-card-t">Block the delete</div>
-            <div class="co-card-d">Stops deletion while ${esc(o.plural.toLowerCase())} point at it.</div>
-          </button>
-        </div>
-
-      </div></div>
-
-      ${secLabel('The picker users see')}
+      ${field(`When the ${esc(targetLabel(s.target))} is deleted`, true,
+        `<select class="co-input" onchange="fd.d.settings.onDelete = this.value; fdRender()">
+          <option value="CLEAR" ${s.onDelete!=='BLOCK'?'selected':''}>Clear the value</option>
+          <option value="BLOCK" ${s.onDelete==='BLOCK'?'selected':''}>Block the delete</option>
+        </select>`,
+        s.onDelete === 'BLOCK'
+          ? `The ${esc(targetLabel(s.target))} cannot be deleted while ${esc(o.plural.toLowerCase())} point at it.`
+          : `The ${esc(o.label)} is kept and this field is emptied.`)}
       <div class="co-f"><div class="rl-field">
         <label class="rl-field-label">Extra fields under the name ${tag(chosen.length + '/3')}</label>
         <div class="rl-field-hint" style="margin:0 0 8px">Record names repeat. Up to three extra fields help tell them apart.</div>
@@ -2230,7 +2199,7 @@ function fdFormulaSettings(o, d){
     : 'Search fields';
 
   const expr = s.expr || '';
-  return secLabel('Formula') + `
+  return `
     ${field('Returns', false, `<select class="co-input" style="max-width:220px" onchange="fd.d.settings.returns = this.value; fdRender()">
       ${['NUMBER','CURRENCY','PERCENT','TEXT','DATE','CHECKBOX'].map(t =>
         `<option value="${t}" ${s.returns===t?'selected':''}>${esc(typeMeta(t).label)}</option>`).join('')}
@@ -2423,14 +2392,14 @@ function fdRollupSettings(o, d){
   const filterField = child && s.filterField ? child.fields.find(f => f.id === s.filterField) : null;
 
   if(!children.length){
-    return secLabel('Roll-up') + `
+    return `
       <div class="co-note warn">
         <span class="co-note-ico">${ICO.warn}</span>
         <div>Nothing points at ${esc(o.label)} yet. Add a lookup on the object you want to aggregate first.</div>
       </div>`;
   }
 
-  return secLabel('What it aggregates') + `
+  return `
     <div class="co-f"><div class="rl-field">
       <label class="rl-field-label">Child object <span class="rl-field-required">*</span>
         ${fd.fieldId ? tag('Fixed after save') : ''}</label>
