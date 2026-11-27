@@ -901,6 +901,7 @@ function typeIcon(t){
 function valueAssignment(f){
   if(f.type === 'FORMULA') return tag('Formula', 'teal');
   if(f.type === 'ROLLUP')  return tag('Roll-up', 'pink');
+  if(f.type === 'LOOKUP')  return tag('Relationship', 'purple');
   return tag('Manual input', 'blue');
 }
 
@@ -1075,8 +1076,7 @@ function viewObject(){
   const o = obj(route.id);
   if(!o){ route.view = 'list'; return viewList(); }
   const tabs = [
-    ['fields','Fields', o.fields.length],
-    ['rel','Relationships', incoming(o.id).length + o.fields.filter(f=>f.type==='ROLLUP').length],
+    ['fields','Fields & Relationships', o.fields.length],
     ['details','Details', null],
   ];
   const later = ['Validation rules','Record types','Page layouts','Access','Automations'];
@@ -1096,7 +1096,7 @@ function viewObject(){
       </div>
     </div>`;
 
-  const body = route.tab === 'fields' ? tabFields(o) : route.tab === 'rel' ? tabRel(o) : tabDetails(o);
+  const body = route.tab === 'details' ? tabDetails(o) : tabFields(o);
   return head + `<div class="co-scroll">${body}</div>`;
 }
 
@@ -1124,6 +1124,7 @@ function tabFields(o){
     <div class="co-actions">
       <button class="rl-btn v-outline sz-lg" onclick="objectMenu(event,'${o.id}')"><span class="rl-btn-label">Object actions</span></button>
       <button class="rl-btn v-outline sz-lg" onclick="openObjectDrawer('${o.id}')"><span class="rl-btn-label">Edit object</span></button>
+      <button class="rl-btn v-outline sz-lg" onclick="openFieldDrawer('${o.id}', null, 'LOOKUP')"><span class="rl-btn-label">New relationship</span></button>
       <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}')"><span class="rl-btn-label">New field</span>${ICO.plus}</button>
     </div>
 
@@ -1142,7 +1143,9 @@ function tabFields(o){
       <div class="co-band"><span class="co-band-t">Created automatically</span><span class="co-band-n">(${systemFields(o).length})</span></div>
       <div class="co-band-d">Created with the object. Only the Record Name can be relabelled.</div>
       <table class="co-table"><tbody>${sys}</tbody></table>
-    </div>`;
+    </div>
+
+    ${relationshipCards(o)}`;
 }
 
 function fieldRow(o, f){
@@ -1153,8 +1156,9 @@ function fieldRow(o, f){
   if(f.showInReports === false) bits.push(tag('Not in reports', '', 'sm', 'Hidden from the report builder. Clutter control, not security.'));
   if(f.type === 'LOOKUP'){
     bits.push(tag('→ ' + esc(targetLabel(f.settings.target)), 'purple'));
+    /* Both are constraints, not errors — the orange read as a warning. */
     bits.push(f.settings.onDelete === 'BLOCK'
-      ? tag('Block delete', 'orange', 'sm', 'The linked record cannot be deleted while records point at it.')
+      ? tag('Block delete', '', 'sm', 'The linked record cannot be deleted while records point at it.')
       : tag('Clear on delete', '', 'sm', 'Deleting the linked record clears this value.'));
   }
   if(f.type === 'ROLLUP'){
@@ -1187,11 +1191,11 @@ function fieldLabel(objId, fieldId){
   return f ? f.label : fieldId;
 }
 
-/* ── Tab: relationships ───────────────────────────────────────────
+/* ── The relationship half of Fields & Relationships ──────────────
    Three tables rather than three stacks of prose. The direction of a
    link is the thing that confuses people, so each table is named for
    the direction and the columns carry the detail. ────────────────── */
-function tabRel(o){
+function relationshipCards(o){
   const inc = incoming(o.id);
   const rollups = o.fields.filter(f => f.type === 'ROLLUP');
   const empty = (cols, msg) => `<tr><td colspan="${cols}" style="padding:18px 20px;color:var(--muted-foreground)">${msg}</td></tr>`;
@@ -1250,10 +1254,6 @@ function tabRel(o){
     </div>`;
 
   return `
-    <div class="co-actions">
-      <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}', null, 'LOOKUP')">
-        <span class="rl-btn-label">New relationship</span>${ICO.plus}</button>
-    </div>
     ${referencedBy}
     ${rollHtml}`;
 }
