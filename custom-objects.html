@@ -1113,9 +1113,10 @@ function viewObject(){
   const tabs = [
     ['fields','Fields & Relationships', o.fields.length],
     ['rules','Validation rules', (o.rules || []).length],
+    ['access','Access', null],
     ['details','Details', null],
   ];
-  const later = ['Record types','Page layouts','Access','Automations'];
+  const later = ['Record types','Page layouts','Automations'];
 
   const head = `
     <div class="co-head">
@@ -1134,6 +1135,7 @@ function viewObject(){
 
   const body = route.tab === 'details' ? tabDetails(o)
              : route.tab === 'rules'   ? tabRules(o)
+             : route.tab === 'access'  ? tabAccess(o)
              : tabFields(o);
   return head + `<div class="co-scroll">${body}</div>`;
 }
@@ -1271,6 +1273,82 @@ function relationshipCards(o){
     ${rollHtml}`;
 }
 
+/* ── Tab: access ──────────────────────────────────────────────────
+   The object's own read-out of what every permission set grants it.
+   Permissions is where access is configured, one set at a time; this
+   is the other axis — one object, every set — which is the question an
+   admin standing on the object actually has.
+
+   Read-only on purpose. Two places to edit the same thing is how they
+   drift; each row opens the set that owns it. ──────────────────────── */
+function tabAccess(o){
+  const sets = state.permSets;
+  const cell = v => has(v)
+    ? (v === true || v === 1 ? tag('Yes', 'green', 'sm') : tag(MODES[v].label, 'blue', 'sm'))
+    : '<span style="color:var(--muted-foreground)">—</span>';
+
+  const objectRows = sets.map(ps => {
+    const p = ps.objects[o.id] || P(isAccount(ps) ? 'NONE' : 0, 0, isAccount(ps) ? 'NONE' : 0, isAccount(ps) ? 'NONE' : 0);
+    return `<tr class="is-clickable" onclick="openPermSet('${ps.id}')">
+      <td style="padding-left:20px"><div class="co-fname">${esc(ps.name)}</div></td>
+      <td>${tag(isAccount(ps) ? 'Account' : 'Project', isAccount(ps) ? 'blue' : 'green', 'sm')}</td>
+      <td>${cell(p.view)}</td>
+      <td>${p.create ? tag('Yes', 'green', 'sm') : '<span style="color:var(--muted-foreground)">—</span>'}</td>
+      <td>${cell(p.edit)}</td>
+      <td class="col-last">${cell(p.del)}</td>
+    </tr>`;
+  }).join('');
+
+  /* Fields down, sets across. With four fields and seven sets the other
+     way round would be seven tables saying the same thing. */
+  const fieldRows = o.fields.map(f => `
+    <tr>
+      <td style="padding-left:20px"><span class="co-type">${typeIcon(f.type)}${esc(f.label)}</span></td>
+      ${sets.map(ps => {
+        const p = ps.objects[o.id];
+        const v = p ? fieldAccess(p, f.id) : 'NONE';
+        return `<td style="text-align:center">${
+          v === 'EDIT' ? tag('Edit', 'green', 'sm')
+          : v === 'READ' ? tag('Read', 'blue', 'sm')
+          : '<span style="color:var(--muted-foreground)">—</span>'}</td>`;
+      }).join('')}
+    </tr>`).join('');
+
+  return `
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Object access</span>
+        <span class="co-band-n">${sets.filter(ps => has((ps.objects[o.id]||{}).view)).length} of ${sets.length} sets can see ${esc(o.plural.toLowerCase())}</span></div>
+      <table class="co-table">
+        <thead><tr>
+          <th style="padding-left:20px">Permission set</th><th>Level</th>
+          <th>View</th><th>Create</th><th>Edit</th><th class="col-last">Delete</th>
+        </tr></thead>
+        <tbody>${objectRows}</tbody>
+      </table>
+    </div>
+
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Field access</span>
+        <span class="co-band-n">${o.fields.length} fields</span></div>
+      <div class="co-table-wrap">
+        <table class="co-table">
+          <thead><tr>
+            <th style="padding-left:20px">Field</th>
+            ${sets.map(ps => `<th style="text-align:center;white-space:nowrap">${esc(ps.name)}</th>`).join('')}
+          </tr></thead>
+          <tbody>${o.fields.length ? fieldRows
+            : `<tr><td colspan="${sets.length + 1}" style="padding:22px 20px;color:var(--muted-foreground)">No fields yet.</td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="co-note">
+      <span class="co-note-ico">${ICO.info}</span>
+      <div>Set in <a onclick="go('perms')" style="color:var(--co-blue);cursor:pointer">Permissions</a> — a row here opens
+      the set that owns it. A person's access is their account set unioned with every project set that applies.</div>
+    </div>`;
+}
+
 /* ── Tab: details (the Phase 1 settings, after save) ──────────────── */
 function tabDetails(o){
   const row = (k, v, note) => `
@@ -1400,7 +1478,6 @@ const PERM_MODULES = ['Projects','Phase','Tasks','Accounts','Account fields','Sp
   'Files and Folders','Status updates','Form responses','Templates','Dashboards','Reports','Settings'];
 
 let permObj = null;   // nav selection inside Custom objects: 'manage' or an object id
-let permTab = 'object';   // which half of the object's permissions is open
 
 function openPermSet(id){
   permDraft = JSON.parse(JSON.stringify(permSet(id)));
@@ -1408,8 +1485,7 @@ function openPermSet(id){
   go('permset', id);
 }
 const permDirty = () => permDraft && JSON.stringify(permDraft) !== JSON.stringify(permSet(permDraft.id));
-function selectPermObj(key){ permObj = key; permTab = 'object'; render(); }
-function selectPermTab(t){ permTab = t; render(); }
+function selectPermObj(key){ permObj = key; render(); }
 
 function viewPermSet(){
   if(!permDraft || permDraft.id !== route.id){
@@ -1487,30 +1563,19 @@ function objectPane(ps, o){
   };
   const toggle = key => `togglePerm('${o.id}','${key}')`;
 
-  /* The tab labels carry the current state, so the half you are not
-     looking at still reports what it holds. */
-  const states = o.fields.map(f => fieldAccess(p, f.id));
-  const visible = states.filter(v => v !== 'NONE').length;
-  const tab = (key, label, note) => `
-    <button class="co-tab${permTab === key ? ' on' : ''}" onclick="selectPermTab('${key}')">
-      ${label}<span style="color:var(--muted-foreground);font-weight:400"> ${note}</span></button>`;
-
   return `
-    <div class="co-tabs" style="margin:0 0 16px">
-      ${tab('object', 'Object access', permObjSummary(ps, p))}
-      ${tab('fields', 'Field access', noView ? 'No access' : `${visible} of ${states.length}`)}
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Object access</span>
+        <span class="co-band-n">${permObjSummary(ps, p)}</span></div>
+      <div style="padding:14px 20px 16px">
+        ${permRow(`Can view ${esc(noun)}`, has(p.view), toggle('view'), modeTag('view'))}
+        ${permRow(`Can create ${esc(noun)}`, !!p.create, toggle('create'), '', '', false, noView)}
+        ${permRow(`Can edit ${esc(noun)}`, has(p.edit), toggle('edit'), modeTag('edit'), '', false, noView)}
+        ${permRow(`Can delete ${esc(noun)}`, has(p.del), toggle('del'), modeTag('del'), '', false, noView || noEdit)}
+      </div>
     </div>
 
-    ${permTab === 'fields' ? fieldGrid(ps, o, p) : `
-      <div class="co-card">
-        <div class="co-band"><span class="co-band-t">${esc(o.label)}</span></div>
-        <div style="padding:14px 20px 16px">
-          ${permRow(`Can view ${esc(noun)}`, has(p.view), toggle('view'), modeTag('view'))}
-          ${permRow(`Can create ${esc(noun)}`, !!p.create, toggle('create'), '', '', false, noView)}
-          ${permRow(`Can edit ${esc(noun)}`, has(p.edit), toggle('edit'), modeTag('edit'), '', false, noView)}
-          ${permRow(`Can delete ${esc(noun)}`, has(p.del), toggle('del'), modeTag('del'), '', false, noView || noEdit)}
-        </div>
-      </div>`}`;
+    ${fieldGrid(ps, o, p)}`;
 }
 
 /* One checkbox and a sentence, optionally with an access tag and a note
