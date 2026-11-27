@@ -1076,8 +1076,7 @@ function viewObject(){
   if(!o){ route.view = 'list'; return viewList(); }
   const tabs = [
     ['fields','Fields', o.fields.length],
-    ['rel','Relationships', o.fields.filter(f=>f.type==='LOOKUP').length
-      + incoming(o.id).length + o.fields.filter(f=>f.type==='ROLLUP').length],
+    ['rel','Relationships', incoming(o.id).length + o.fields.filter(f=>f.type==='ROLLUP').length],
     ['details','Details', null],
   ];
   const later = ['Validation rules','Record types','Page layouts','Access','Automations'];
@@ -1193,30 +1192,9 @@ function fieldLabel(objId, fieldId){
    link is the thing that confuses people, so each table is named for
    the direction and the columns carry the detail. ────────────────── */
 function tabRel(o){
-  const out = o.fields.filter(f => f.type === 'LOOKUP');
   const inc = incoming(o.id);
   const rollups = o.fields.filter(f => f.type === 'ROLLUP');
   const empty = (cols, msg) => `<tr><td colspan="${cols}" style="padding:18px 20px;color:var(--muted-foreground)">${msg}</td></tr>`;
-
-  const pointsAt = `
-    <div class="co-card">
-      <div class="co-band"><span class="co-band-t">Points at</span><span class="co-band-n">(${out.length})</span></div>
-      <table class="co-table">
-        <thead><tr>
-          <th style="padding-left:20px">Field</th><th>Points to</th><th>Required</th><th class="col-menu"></th>
-        </tr></thead>
-        <tbody>
-          ${out.length ? out.map(f => `
-            <tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
-              <td style="padding-left:20px"><span class="co-type">${typeIcon('LOOKUP')}${esc(f.label)}</span></td>
-              <td>${tag(esc(targetLabel(f.settings.target)), 'purple')}</td>
-              <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
-              <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')">${ICO.dots}</button></td>
-            </tr>`).join('')
-          : empty(4, `${esc(o.label)} does not point at another object yet.`)}
-        </tbody>
-      </table>
-    </div>`;
 
   const referencedBy = `
     <div class="co-card">
@@ -1276,7 +1254,6 @@ function tabRel(o){
       <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}', null, 'LOOKUP')">
         <span class="rl-btn-label">New relationship</span>${ICO.plus}</button>
     </div>
-    ${pointsAt}
     ${referencedBy}
     ${rollHtml}`;
 }
@@ -2700,9 +2677,14 @@ function fdSave(){
   }else{
     d.id = uid('f');
     o.fields.push(d);
-    toast(d.type === 'LOOKUP'
-      ? `${label} created. ${targetLabel(d.settings.target)} records now show a “${d.settings.relatedListLabel}” related list.`
-      : `${label} created and available in records, reports, automations and the API.`);
+    if(d.type === 'LOOKUP'){
+      /* The lookup is a field, so Fields is where it appears. Land there
+         rather than leaving the Relationships tab showing nothing new. */
+      route.tab = 'fields';
+      toast(`${label} created. ${targetLabel(d.settings.target)} records now show a “${d.settings.relatedListLabel}” related list.`);
+    }else{
+      toast(`${label} created and available in records, reports, automations and the API.`);
+    }
   }
   o.updated = 'Just now';
   save(); closeDrawer(); render();
