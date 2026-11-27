@@ -313,6 +313,38 @@ select.co-input{
 .co-tok{ display:inline-flex; align-items:center; gap:4px; }
 .co-tok svg{ width:12px; height:12px; flex-shrink:0; }
 /* Autocomplete list, anchored under the expression box. */
+/* Condition builder. */
+.co-cbuilder{ border:1px solid var(--co-border); border-radius:10px; background:var(--co-band); padding:12px 14px; }
+.co-cmatch, .co-cgroup-head{ font-size:13px; color:var(--muted-foreground); margin-bottom:9px;
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.co-match{ width:auto; min-width:72px; height:28px; display:inline-block; }
+.co-cond{ display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.co-cfield{ flex:1.3; min-width:0; }
+.co-cop{ flex:1; min-width:0; }
+.co-cval{ flex:1.1; min-width:0; }
+.co-cval:empty{ display:none; }
+.co-cswap{
+  flex-shrink:0; height:32px; padding:0 9px; border-radius:var(--radius-md);
+  border:1px dashed var(--co-border); background:var(--background);
+  font-size:11.5px; color:var(--muted-foreground);
+}
+.co-cswap:hover{ border-style:solid; color:var(--co-blue); }
+/* Without this the remove button is the only flex child with no
+   min-width floor, so a crowded row squeezes it to nothing. */
+/* Restored: the base rule was lost in an earlier CSS cleanup, which
+   left every remove button rendering as a zero-width block — the
+   picklist editor's as well as the condition builder's. */
+.co-icon-btn{
+  width:28px; height:28px; flex-shrink:0; border-radius:var(--radius-md);
+  display:inline-grid; place-items:center; color:var(--muted-foreground); cursor:pointer;
+}
+.co-icon-btn:hover{ background:var(--co-rail-hover); color:var(--foreground); }
+.co-icon-btn svg{ width:15px; height:15px; }
+.co-icon-btn.danger:hover{ background:var(--tag-bg-red); color:var(--tag-fg-red); }
+.co-cgroup{ border:1px solid var(--co-border); border-radius:8px; background:var(--background); padding:10px 12px; margin-bottom:6px; }
+.co-link{ background:none; border:0; padding:0; color:var(--co-blue); cursor:pointer; font:inherit; }
+.co-link:hover{ text-decoration:underline; }
+
 .co-ac{
   position:fixed; z-index:440; max-height:280px; overflow-y:auto; padding:4px;
   background:var(--popover); border:1px solid var(--co-border); border-radius:10px;
@@ -675,18 +707,24 @@ function seed(){
       rules:[
         {id:'r_so1', name:'Handoff needs an owner and a signed date', active:true,
          description:'Keeps the sales-to-delivery handoff complete.',
-         condition:'{Status} = "Handed to Delivery" AND ({Account} isempty OR {Signed Date} isempty OR {Delivery Owner} isempty)',
+         condition:{mode:'BUILDER', match:'ALL', formula:'', rows:[
+           {kind:'cond', field:'{Status}', op:'is', value:'Handed to Delivery', valueIs:'VALUE', valueField:''},
+           {kind:'group', match:'ANY', rows:[{kind:'cond', field:'{Account}', op:'is empty', value:'', valueIs:'VALUE', valueField:''}, {kind:'cond', field:'{Signed Date}', op:'is empty', value:'', valueIs:'VALUE', valueField:''}, {kind:'cond', field:'{Delivery Owner}', op:'is empty', value:'', valueIs:'VALUE', valueField:''}]},
+         ]},
          message:'Add the account, signed date and delivery owner before handing this order to delivery.',},
         {id:'r_so2', name:'Handoff needs line items', active:true,
          description:'An order with nothing on it cannot be delivered.',
-         condition:'{Status} = "Handed to Delivery" AND {Line Item Count} = 0',
+         condition:{mode:'BUILDER', match:'ALL', formula:'', rows:[
+           {kind:'cond', field:'{Status}', op:'is', value:'Handed to Delivery', valueIs:'VALUE', valueField:''}, {kind:'cond', field:'{Line Item Count}', op:'=', value:'0', valueIs:'VALUE', valueField:''}]},
          message:'Add at least one line item before handing this order to delivery.',},
         {id:'r_so3', name:'Contract dates in order', active:true, description:'',
-         condition:'{Contract Start Date} > {Contract End Date}',
+         condition:{mode:'BUILDER', match:'ALL', formula:'', rows:[
+           {kind:'cond', field:'{Contract Start Date}', op:'is after', value:'', valueIs:'FIELD', valueField:'{Contract End Date}'}]},
          message:'The contract start date cannot be after the end date.',},
         {id:'r_so4', name:'Signed date cannot be in the future', active:false,
          description:'Off until we settle which time zone “today” uses.',
-         condition:'{Signed Date} > TODAY()',
+         condition:{mode:'BUILDER', match:'ALL', formula:'', rows:[
+           {kind:'cond', field:'{Signed Date}', op:'is in the future', value:'', valueIs:'VALUE', valueField:''}]},
          message:'The signed date cannot be in the future.',},
       ],
     },
@@ -734,14 +772,17 @@ function seed(){
       rules:[
         {id:'r_li1', name:'Quantity must be more than 0', active:true,
          description:'Blank and zero both fail.',
-         condition:'{Quantity} isempty OR {Quantity} <= 0',
+         condition:{mode:'BUILDER', match:'ANY', formula:'', rows:[
+           {kind:'cond', field:'{Quantity}', op:'is empty', value:'', valueIs:'VALUE', valueField:''}, {kind:'cond', field:'{Quantity}', op:'≤', value:'0', valueIs:'VALUE', valueField:''}]},
          message:'Quantity must be more than 0.',},
         {id:'r_li2', name:'Discount between 0 and 100', active:true, description:'',
-         condition:'{Discount} < 0 OR {Discount} > 100',
+         condition:{mode:'BUILDER', match:'ANY', formula:'', rows:[
+           {kind:'cond', field:'{Discount}', op:'<', value:'0', valueIs:'VALUE', valueField:''}, {kind:'cond', field:'{Discount}', op:'>', value:'100', valueIs:'VALUE', valueField:''}]},
          message:'Discount must be between 0% and 100%.',},
         {id:'r_li3', name:'Line dates inside the contract period', active:true,
          description:'Reads the order through the Sales Order lookup.',
-         condition:'{Line Start Date} < {Sales Order.Contract Start Date} OR {Line End Date} > {Sales Order.Contract End Date}',
+         condition:{mode:'BUILDER', match:'ANY', formula:'', rows:[
+           {kind:'cond', field:'{Line Start Date}', op:'is before', value:'', valueIs:'FIELD', valueField:'{Sales Order.Contract Start Date}'}, {kind:'cond', field:'{Line End Date}', op:'is after', value:'', valueIs:'FIELD', valueField:'{Sales Order.Contract End Date}'}]},
          message:'Line dates must fall inside the order’s contract period.',},
       ],
     },
@@ -773,7 +814,8 @@ function seed(){
       ],
       rules:[
         {id:'r_rk1', name:'Critical risks need a mitigation', active:true, description:'',
-         condition:'{Severity} = "Critical" AND {Mitigation} isempty',
+         condition:{mode:'BUILDER', match:'ALL', formula:'', rows:[
+           {kind:'cond', field:'{Severity}', op:'is', value:'Critical', valueIs:'VALUE', valueField:''}, {kind:'cond', field:'{Mitigation}', op:'is empty', value:'', valueIs:'VALUE', valueField:''}]},
          message:'Describe how this risk will be mitigated before saving it as Critical.',},
       ],
     },
@@ -1800,6 +1842,224 @@ function savePermSet(){
    set. Everything a rule needs is already there: fields on the object,
    fields one hop away through a lookup, comparison and logic.
    ══════════════════════════════════════════════════════════════════ */
+/* ── Condition builder ────────────────────────────────────────────
+   Of the 31 rules in the catalogue, 26 are field · operator · value.
+   Writing those as text meant inventing a syntax, then teaching it,
+   then checking it — autocomplete, bracket counting, a parser that was
+   never going to be real. None of that work exists here: pick a field,
+   pick an operator, type a value.
+
+   The operators are the ones Rocketlane already uses in its filters.
+   That was the tell, and I missed it the first time.
+
+   A formula escape hatch stays for the handful that genuinely need
+   arithmetic — V17's ±0.01 tolerance cannot be a row. ─────────────── */
+const OPS = {
+  TEXT:     ['is','is not','contains','does not contain','starts with','is empty','is not empty','matches pattern'],
+  NUMBER:   ['=','≠','>','<','≥','≤','is empty','is not empty'],
+  DATE:     ['is','is not','is before','is after','is on or before','is on or after','is in the past','is in the future','is empty','is not empty'],
+  CHECKBOX: ['is checked','is not checked'],
+  SELECT:   ['is','is not','is any of','is empty','is not empty'],
+  MULTI:    ['contains','does not contain','is empty','is not empty'],
+  USER:     ['is','is not','is the current user','is empty','is not empty'],
+  LOOKUP:   ['is','is not','is empty','is not empty'],
+};
+/* Operators that stand alone — no value box after them. */
+const NO_VALUE = new Set(['is empty','is not empty','is checked','is not checked',
+  'is in the past','is in the future','is the current user']);
+/* Operators that can compare against another field rather than a value. */
+const FIELD_COMPARABLE = new Set(['is','is not','=','≠','>','<','≥','≤',
+  'is before','is after','is on or before','is on or after']);
+
+function opsFor(type){
+  if(NUMERIC.includes(type)) return OPS.NUMBER;
+  if(type === 'DATE' || type === 'DATETIME') return OPS.DATE;
+  if(type === 'CHECKBOX') return OPS.CHECKBOX;
+  if(type === 'SELECT') return OPS.SELECT;
+  if(type === 'MULTISELECT') return OPS.MULTI;
+  if(type === 'USER') return OPS.USER;
+  if(type === 'LOOKUP') return OPS.LOOKUP;
+  if(type === 'ROLLUP' || type === 'FORMULA') return OPS.NUMBER;
+  return OPS.TEXT;
+}
+
+/* A condition names its field by the same token the formulas use, so
+   one hop through a lookup needs no second scheme. */
+function tokenOptions(o){
+  const out = o.fields.map(f => ({token:`{${f.label}}`, label:f.label, type:f.type, group:o.label}));
+  relatedFieldSources(o).forEach(src => src.fields.forEach(x =>
+    out.push({token:`{${src.lookup}.${x.label}}`, label:`${src.lookup} · ${x.label}`, type:x.type, group:src.lookup})));
+  return out;
+}
+const resolveToken = (o, token) => tokenOptions(o).find(x => x.token === token) || null;
+
+const blankRow = () => ({kind:'cond', field:'', op:'', value:'', valueIs:'VALUE', valueField:''});
+const blankGroup = () => ({kind:'group', match:'ANY', rows:[blankRow()]});
+
+/* ── Reading a condition back as a sentence ──────────────────────── */
+function conditionText(o, c){
+  if(!c) return '';
+  if(c.mode === 'FORMULA') return c.formula || '';
+  const part = row => {
+    if(row.kind === 'group') return '(' + row.rows.map(part).filter(Boolean).join(row.match === 'ALL' ? ' and ' : ' or ') + ')';
+    const f = resolveToken(o, row.field);
+    if(!f || !row.op) return '';
+    if(NO_VALUE.has(row.op)) return `${f.label} ${row.op}`;
+    const v = row.valueIs === 'FIELD'
+      ? (resolveToken(o, row.valueField) || {label:'…'}).label
+      : (row.value === '' ? '…' : row.value);
+    return `${f.label} ${row.op} ${v}`;
+  };
+  return (c.rows || []).map(part).filter(Boolean).join(c.match === 'ALL' ? ' and ' : ' or ');
+}
+
+/* ── Rendering ───────────────────────────────────────────────────── */
+function matchToggle(path, value){
+  return `<select class="co-input co-match" onchange="vrSetMatch('${path}', this.value)">
+      <option value="ALL" ${value !== 'ANY' ? 'selected' : ''}>all</option>
+      <option value="ANY" ${value === 'ANY' ? 'selected' : ''}>any</option>
+    </select>`;
+}
+
+function conditionRow(o, row, path){
+  const f = row.field ? resolveToken(o, row.field) : null;
+  const ops = f ? opsFor(f.type) : [];
+  const needsValue = row.op && !NO_VALUE.has(row.op);
+  const canCompareField = row.op && FIELD_COMPARABLE.has(row.op);
+  const opts = tokenOptions(o);
+
+  const fieldSelect = (val, onchange) => `
+    <select class="co-input co-cfield" onchange="${onchange}">
+      <option value="">Select a field…</option>
+      ${[...new Set(opts.map(x => x.group))].map(g => `
+        <optgroup label="${esc(g)}">
+          ${opts.filter(x => x.group === g).map(x =>
+            `<option value="${esc(x.token)}" ${val === x.token ? 'selected' : ''}>${esc(x.label)}</option>`).join('')}
+        </optgroup>`).join('')}
+    </select>`;
+
+  let valueControl = '';
+  if(needsValue){
+    if(row.valueIs === 'FIELD'){
+      valueControl = fieldSelect(row.valueField, `vrSetRow('${path}','valueField', this.value)`);
+    }else if(f && f.type === 'SELECT'){
+      const src = o.fields.find(x => `{${x.label}}` === row.field);
+      valueControl = `<select class="co-input" onchange="vrSetRow('${path}','value', this.value)">
+          <option value="">Select…</option>
+          ${((src && src.settings.options) || []).map(opt =>
+            `<option ${row.value === opt.label ? 'selected' : ''}>${esc(opt.label)}</option>`).join('')}
+        </select>`;
+    }else{
+      valueControl = `<input class="co-input" type="${NUMERIC.includes(f && f.type) ? 'number' : (f && f.type === 'DATE' ? 'date' : 'text')}"
+          value="${esc(row.value)}" placeholder="Value" oninput="vrSetRow('${path}','value', this.value)">`;
+    }
+  }
+
+  return `
+    <div class="co-cond">
+      ${fieldSelect(row.field, `vrSetRow('${path}','field', this.value)`)}
+      <select class="co-input co-cop" ${f ? '' : 'disabled'} onchange="vrSetRow('${path}','op', this.value)">
+        <option value="">${f ? 'Condition…' : '—'}</option>
+        ${ops.map(op => `<option ${row.op === op ? 'selected' : ''}>${esc(op)}</option>`).join('')}
+      </select>
+      <div class="co-cval">${valueControl}</div>
+      ${canCompareField ? `<button class="co-cswap" title="Compare with another field instead"
+          onclick="vrSwapValue('${path}')">${row.valueIs === 'FIELD' ? 'field' : 'value'}</button>` : ''}
+      <button class="co-icon-btn danger" onclick="vrRemove('${path}')" aria-label="Remove">${ICO.trash}</button>
+    </div>`;
+}
+
+function conditionGroup(o, group, path){
+  return `
+    <div class="co-cgroup">
+      <div class="co-cgroup-head">Match ${matchToggle(path, group.match)} of these</div>
+      ${group.rows.map((r, i) => conditionRow(o, r, `${path}.${i}`)).join('')}
+      <button class="rl-btn v-ghost sz-sm" onclick="vrAddRow('${path}')">${ICO.plus}<span class="rl-btn-label">Add condition</span></button>
+    </div>`;
+}
+
+function conditionBuilder(o, c){
+  return `
+    <div class="co-cbuilder">
+      <div class="co-cmatch">Block the save when ${matchToggle('', c.match)} of these are true</div>
+      ${c.rows.map((r, i) => r.kind === 'group'
+        ? conditionGroup(o, r, String(i))
+        : conditionRow(o, r, String(i))).join('')}
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="rl-btn v-outline sz-sm" onclick="vrAddRow('')">${ICO.plus}<span class="rl-btn-label">Add condition</span></button>
+        <button class="rl-btn v-ghost sz-sm" onclick="vrAddGroup()"><span class="rl-btn-label">Add group</span></button>
+      </div>
+    </div>`;
+}
+
+/* ── Edits ───────────────────────────────────────────────────────── */
+const atPath = path => {
+  let node = vr.d.condition;
+  if(path === '') return node;
+  path.split('.').forEach((i, n, arr) => {
+    node = n === arr.length - 1 ? node : (node.rows[i]);
+  });
+  return node;
+};
+function parentOf(path){
+  const parts = path.split('.');
+  const last = parts.pop();
+  let node = vr.d.condition;
+  parts.forEach(i => { node = node.rows[i]; });
+  return {node, i:Number(last)};
+}
+function vrSetRow(path, key, value){
+  const {node, i} = parentOf(path);
+  const row = node.rows[i];
+  row[key] = value;
+  if(key === 'field'){ row.op = ''; row.value = ''; row.valueIs = 'VALUE'; row.valueField = ''; }
+  if(key === 'op' && NO_VALUE.has(value)){ row.value = ''; row.valueField = ''; }
+  vrRender();
+}
+function vrSwapValue(path){
+  const {node, i} = parentOf(path);
+  const row = node.rows[i];
+  row.valueIs = row.valueIs === 'FIELD' ? 'VALUE' : 'FIELD';
+  row.value = ''; row.valueField = '';
+  vrRender();
+}
+function vrSetMatch(path, value){
+  const node = path === '' ? vr.d.condition : parentOf(path + '.0').node;
+  node.match = value;
+  vrRender();
+}
+function vrAddRow(path){
+  const node = path === '' ? vr.d.condition : parentOf(path + '.0').node;
+  node.rows.push(blankRow());
+  vrRender();
+}
+function vrAddGroup(){ vr.d.condition.rows.push(blankGroup()); vrRender(); }
+function vrRemove(path){
+  const {node, i} = parentOf(path);
+  node.rows.splice(i, 1);
+  if(!node.rows.length && node !== vr.d.condition){
+    const outer = parentOf(path.split('.').slice(0, -1).join('.'));
+    outer.node.rows.splice(outer.i, 1);
+  }
+  if(!vr.d.condition.rows.length) vr.d.condition.rows.push(blankRow());
+  vrRender();
+}
+/* Every row needs a field, an operator, and a value where the operator
+   takes one — checked before save rather than parsed afterwards. */
+function conditionProblems(c){
+  if(c.mode === 'FORMULA') return (c.formula || '').trim() ? [] : ['Write the formula.'];
+  const walk = rows => rows.flatMap(r => {
+    if(r.kind === 'group') return r.rows.length ? walk(r.rows) : ['A group has no conditions.'];
+    if(!r.field) return ['A condition has no field.'];
+    if(!r.op) return ['A condition has no operator.'];
+    if(NO_VALUE.has(r.op)) return [];
+    if(r.valueIs === 'FIELD') return r.valueField ? [] : ['A condition has no field to compare with.'];
+    return String(r.value).trim() ? [] : ['A condition has no value.'];
+  });
+  const out = walk(c.rows);
+  return [...new Set(out)];
+}
+
 function tabRules(o){
   const rules = o.rules || (o.rules = []);
   const active = rules.filter(r => r.active).length;
@@ -1809,7 +2069,7 @@ function tabRules(o){
       <td style="padding-left:20px">
         <div class="co-fname">${esc(r.name)}</div>
       </td>
-      <td><span class="co-mono" style="font-size:12px;color:var(--muted-foreground)">${esc(truncate(r.condition, 46))}</span></td>
+      <td style="color:var(--muted-foreground);white-space:normal;max-width:300px">${esc(truncate(conditionText(o, r.condition), 70))}</td>
       <td style="white-space:normal;max-width:280px">${esc(truncate(r.message, 80))}</td>
       <td>
         <button class="sc-switch${r.active ? ' sc-switch--on' : ''}" role="switch" aria-checked="${!!r.active}"
@@ -1880,7 +2140,8 @@ function openRuleDrawer(objId, ruleId){
   vr = {
     objId, ruleId: ruleId || null, err:{},
     d: r ? JSON.parse(JSON.stringify(r))
-         : {name:'', description:'', condition:'', message:'', active:true},
+         : {name:'', description:'', message:'', active:true,
+            condition:{mode:'BUILDER', match:'ALL', rows:[blankRow()], formula:''}},
   };
   vrRender();
 }
@@ -1900,22 +2161,31 @@ function vrRender(){
         `<input class="co-input" value="${esc(d.description)}" placeholder="A note for admins"
                 oninput="vr.d.description = this.value">`)}
 
-      <div class="co-f"><div class="rl-field">
-        <label class="rl-field-label">Block the save when <span class="rl-field-required">*</span></label>
-        <textarea class="co-input co-mono" id="vr-expr" rows="3"
-                  placeholder="{Quantity} isempty OR {Quantity} <= 0"
-                  oninput="vr.d.condition = this.value; exprCheck(this.value); acUpdate('vr-expr')"
-                  onkeydown="acKey(event,'vr-expr')" onblur="setTimeout(acClose, 120)">${esc(d.condition)}</textarea>
-        ${fErr('condition', vr.err)}
-        <div id="vr-expr-warn">${exprWarning(d.condition)}</div>
-        <div style="margin-top:8px">
-          <button class="rl-btn v-outline sz-sm" onclick="runCheck('vr-expr','${o.id}','')">
-            <span class="rl-btn-label">Check syntax</span></button>
-        </div>
-        ${exprHelper('vr-expr', o.id, {bool:true, patterns:'RULE', onChange: v => { vr.d.condition = v; }})}
-        <div class="rl-field-hint">The rule runs on save. When this is true the save is stopped and your
-          message is shown — so it describes the records you want to reject, not the ones you want to allow.</div>
-      </div></div>
+      <div class="co-f">
+        ${d.condition.mode === 'FORMULA' ? `
+          <div class="rl-field">
+            <label class="rl-field-label">Block the save when <span class="rl-field-required">*</span></label>
+            <textarea class="co-input co-mono" id="vr-expr" rows="3"
+                      placeholder="ABS({Total Sales Value} - {Total Contract Value}) > 0.01"
+                      oninput="vr.d.condition.formula = this.value; exprCheck(this.value); acUpdate('vr-expr')"
+                      onkeydown="acKey(event,'vr-expr')" onblur="setTimeout(acClose, 120)">${esc(d.condition.formula || '')}</textarea>
+            ${fErr('condition', vr.err)}
+            <div id="vr-expr-warn">${exprWarning(d.condition.formula || '')}</div>
+            <div style="margin-top:8px">
+              <button class="rl-btn v-outline sz-sm" onclick="runCheck('vr-expr','${o.id}','')">
+                <span class="rl-btn-label">Check syntax</span></button>
+            </div>
+            ${exprHelper('vr-expr', o.id, {bool:true, patterns:'RULE', onChange: v => { vr.d.condition.formula = v; }})}
+            <div style="margin-top:8px"><button class="rl-btn v-ghost sz-sm" onclick="vrSetMode('BUILDER')">
+              <span class="rl-btn-label">← Back to conditions</span></button></div>
+          </div>`
+        : `
+          ${conditionBuilder(o, d.condition)}
+          ${fErr('condition', vr.err)}
+          <div class="rl-field-hint" style="margin-top:10px">The rule runs on save. When this is true the save is
+            stopped and your message is shown — so it describes the records you want to reject.
+            <button class="co-link" onclick="vrSetMode('FORMULA')">Write it as a formula instead</button></div>`}
+      </div>
 
       ${field('Message', true,
         `<textarea class="co-input" rows="2" placeholder="eg. Quantity must be more than 0."
@@ -1932,10 +2202,16 @@ function vrRender(){
       </div>
     </div>` +
     drawerFoot('', editing ? 'Save rule' : 'Create rule', 'vrSave()'),
-    560, 'rule:' + (vr.ruleId || 'new'));
+    680, 'rule:' + (vr.ruleId || 'new'));
 
   const el = document.getElementById('vr-name');
   if(el && !editing && !vr.focused){ vr.focused = true; setTimeout(() => el.focus(), 60); }
+}
+
+function vrSetMode(mode){
+  vr.d.condition.mode = mode === 'FORMULA' ? 'FORMULA' : 'BUILDER';
+  delete vr.err.condition;
+  vrRender();
 }
 
 function vrSave(){
@@ -1944,7 +2220,8 @@ function vrSave(){
   if(!name) vr.err.name = 'Give the rule a name.';
   else if((o.rules || []).some(r => r.id !== vr.ruleId && r.name.toLowerCase() === name.toLowerCase()))
     vr.err.name = `${o.label} already has a rule called “${name}”.`;
-  if(!(d.condition || '').trim()) vr.err.condition = 'Write the condition that blocks the save.';
+  const condProblems = conditionProblems(d.condition);
+  if(condProblems.length) vr.err.condition = condProblems[0];
   if(!(d.message || '').trim()) vr.err.message = 'Write the message the person will see.';
   if(Object.keys(vr.err).length){ vrRender(); return; }
 
