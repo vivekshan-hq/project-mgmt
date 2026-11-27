@@ -312,6 +312,9 @@ select.co-input{
    apart — pin it. */
 .co-tok{ display:inline-flex; align-items:center; gap:4px; }
 .co-tok svg{ width:12px; height:12px; flex-shrink:0; }
+.co-tokhelp{ padding:8px 0 4px; border-top:1px solid var(--co-border-soft); font-size:12px; line-height:1.5; }
+.co-ok{ font-size:11.5px; color:var(--tag-fg-green); display:flex; align-items:center; gap:4px; margin-top:5px; }
+.co-ok svg{ width:12px; height:12px; }
 .co-tok.find{ border-style:dashed; color:var(--muted-foreground); font-family:var(--font-sans); }
 .co-tok.find:hover{ border-style:solid; }
 
@@ -1929,6 +1932,10 @@ function vrRender(){
                   oninput="vr.d.condition = this.value; exprCheck(this.value)">${esc(d.condition)}</textarea>
         ${fErr('condition', vr.err)}
         <div id="vr-expr-warn">${exprWarning(d.condition)}</div>
+        <div style="margin-top:8px">
+          <button class="rl-btn v-outline sz-sm" onclick="runCheck('vr-expr','${o.id}','')">
+            <span class="rl-btn-label">Check syntax</span></button>
+        </div>
         ${exprPalette('vr-expr', o.id, {bool:true, fns:RULE_FNS, onChange: v => { vr.d.condition = v; }})}
         <div class="rl-field-hint">The rule runs on save. When this is true the save is stopped and your
           message is shown — so it describes the records you want to reject, not the ones you want to allow.</div>
@@ -2462,7 +2469,7 @@ function exprPalette(targetId, objId, opts){
   const chip = (text, kind, title) => {
     const i = FD_TOKENS.push({text, kind}) - 1;
     return `<button class="co-tok${kind === 'op' ? ' op' : ''}" type="button"
-              onclick="insertToken(${i})"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</button>`;
+              onclick="insertToken(${i})" onmouseenter="showTokenHelp(${i})"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</button>`;
   };
   const group = (label, chips) => `
     <div class="co-tokrow"><span class="co-toklabel">${label}</span><div class="co-toks">${chips}</div></div>`;
@@ -2479,6 +2486,7 @@ function exprPalette(targetId, objId, opts){
       + (opts.bool ? FD_COMPARE.map(x => chip(x.t, 'op', x.hint)).join('') : ''))}
     ${opts.bool ? group('Logic', FD_LOGIC.map(x => chip(x.t, 'op', x.hint)).join('')) : ''}
     ${group('Functions', opts.fns.map(x => chip(x.t, 'fn', x.hint)).join(''))}
+    <div class="co-tokhelp" id="${targetId}-help">${tokenHelpHTML(null)}</div>
   </div>`;
 }
 
@@ -2488,16 +2496,27 @@ function fdFormulaSettings(o, d){
 
   const expr = s.expr || '';
   return `
-    ${field('Returns', false, `<select class="co-input" style="max-width:220px" onchange="fd.d.settings.returns = this.value; fdRender()">
-      ${['NUMBER','CURRENCY','PERCENT','TEXT','DATE','CHECKBOX'].map(t =>
-        `<option value="${t}" ${s.returns===t?'selected':''}>${esc(typeMeta(t).label)}</option>`).join('')}
-    </select>`)}
+    <div class="co-f-row">
+      ${field('Returns', false, `<select class="co-input" onchange="fd.d.settings.returns = this.value; fdRender()">
+        ${['NUMBER','CURRENCY','PERCENT','TEXT','DATE','CHECKBOX'].map(t =>
+          `<option value="${t}" ${s.returns===t?'selected':''}>${esc(typeMeta(t).label)}</option>`).join('')}
+      </select>`)}
+      ${NUMERIC.includes(s.returns)
+        ? field('Decimal places', false, `<select class="co-input" onchange="fd.d.settings.decimals = parseInt(this.value,10)">
+            ${Array.from({length:5},(_,i)=>`<option value="${i}" ${(s.decimals==null?2:s.decimals)===i?'selected':''}>${i}</option>`).join('')}
+          </select>`)
+        : '<div class="co-f"></div>'}
+    </div>
     <div class="co-f"><div class="rl-field">
       <label class="rl-field-label">Expression <span class="rl-field-required">*</span></label>
       <textarea class="co-input co-mono" id="fd-expr" rows="2" placeholder="{Quantity} * {Unit Price}"
                 oninput="fd.d.settings.expr = this.value; fdExprCheck()">${esc(expr)}</textarea>
       ${fErr('expr', fd.err)}
       <div id="fd-expr-warn">${exprWarning(expr)}</div>
+      <div style="margin-top:8px">
+        <button class="rl-btn v-outline sz-sm" onclick="runCheck('fd-expr','${o.id}','${fd.fieldId || ''}')">
+          <span class="rl-btn-label">Check syntax</span></button>
+      </div>
       ${exprPalette('fd-expr', o.id, {
         excludeId: fd.fieldId, bool,
         fns: fdFunctions(s.returns),
@@ -2506,6 +2525,102 @@ function fdFormulaSettings(o, d){
       <div class="rl-field-hint">Click to insert at the cursor. Fields are wrapped in braces, and a field on a
         linked record is written as <span class="co-mono">{Lookup.Field}</span> — one hop.</div>
     </div></div>`;
+}
+
+/* ── Token help ───────────────────────────────────────────────────
+   Zoho puts a panel under its pickers showing the highlighted
+   function's syntax, description and a worked example. That is the
+   piece worth taking: a tooltip cannot hold an example, and an example
+   is what actually answers "what does ROUND take?".
+
+   Its two-step select-then-Insert is not worth taking — clicking the
+   chip inserts, which is one action instead of two. ───────────────── */
+const TOKEN_HELP = {
+  'ROUND(':      {sig:'ROUND(number, places)',  desc:'Rounds to the given decimal places.', eg:'ROUND(10.567, 2) → 10.57'},
+  'ABS(':        {sig:'ABS(number)',            desc:'Returns the value without its sign.', eg:'ABS(-42) → 42'},
+  'MIN(':        {sig:'MIN(a, b, …)',           desc:'The smallest of the values given.',   eg:'MIN(10, 4, 7) → 4'},
+  'MAX(':        {sig:'MAX(a, b, …)',           desc:'The largest of the values given.',    eg:'MAX(10, 4, 7) → 10'},
+  'CONCAT(':     {sig:'CONCAT(text, text, …)',  desc:'Joins text together.',                eg:'CONCAT("SO-", {Order Number}) → SO-1043'},
+  'UPPER(':      {sig:'UPPER(text)',            desc:'Upper cases the text.',               eg:'UPPER("emea") → EMEA'},
+  'LOWER(':      {sig:'LOWER(text)',            desc:'Lower cases the text.',               eg:'LOWER("EMEA") → emea'},
+  'TODAY()':     {sig:'TODAY()',                desc:'The date the record is saved.',       eg:'{Signed Date} > TODAY()'},
+  'DATE_ADD(':   {sig:'DATE_ADD(date, days)',   desc:'Moves a date by a number of days.',   eg:'DATE_ADD({Signed Date}, 30)'},
+  'IF(':         {sig:'IF(test, then, else)',   desc:'Picks between two values.',            eg:'IF({Quantity} > 10, "Bulk", "Standard")'},
+  'ISCHANGED(':  {sig:'ISCHANGED(field)',       desc:'True when the field changed in this save.', eg:'ISCHANGED({Unit Price})'},
+  'PRIORVALUE(': {sig:'PRIORVALUE(field)',      desc:'The value before this save. Blank on create.', eg:'PRIORVALUE({Status}) = "Signed"'},
+  'REGEX(':      {sig:'REGEX(text, pattern)',   desc:'True when the text matches the pattern.', eg:'REGEX({Order Number}, "SO-[0-9]{7}")'},
+  '+':  {sig:'a + b',  desc:'Add'},
+  '-':  {sig:'a - b',  desc:'Subtract'},
+  '*':  {sig:'a * b',  desc:'Multiply'},
+  '/':  {sig:'a / b',  desc:'Divide'},
+  '(':  {sig:'(',      desc:'Open bracket'},
+  ')':  {sig:')',      desc:'Close bracket'},
+  '=':  {sig:'a = b',  desc:'Equals'},
+  '!=': {sig:'a != b', desc:'Does not equal'},
+  '>':  {sig:'a > b',  desc:'Greater than'},
+  '<':  {sig:'a < b',  desc:'Less than'},
+  '>=': {sig:'a >= b', desc:'At least'},
+  '<=': {sig:'a <= b', desc:'At most'},
+  'isempty':    {sig:'{Field} isempty',          desc:'The field has no value.', eg:'{Mitigation} isempty'},
+  'isnotempty': {sig:'{Field} isnotempty',       desc:'The field has a value.'},
+  'contains':   {sig:'{Field} contains "value"', desc:'A multi select holds the value.', eg:'{Regions} contains "EMEA"'},
+  'AND': {sig:'a AND b', desc:'Both are true'},
+  'OR':  {sig:'a OR b',  desc:'Either is true'},
+  'NOT': {sig:'NOT a',   desc:'Is not true'},
+};
+
+function tokenHelpHTML(text){
+  const h = TOKEN_HELP[text];
+  if(!h) return '<span style="color:var(--muted-foreground)">Hover a token to see what it does.</span>';
+  return `<span class="co-mono" style="color:var(--foreground)">${esc(h.sig)}</span>
+    <span style="color:var(--muted-foreground)"> — ${esc(h.desc)}</span>
+    ${h.eg ? `<div class="co-mono" style="margin-top:3px;color:var(--muted-foreground)">${esc(h.eg)}</div>` : ''}`;
+}
+function showTokenHelp(i){
+  const el = document.getElementById(EXPR.target + '-help');
+  const tok = FD_TOKENS[i];
+  if(el && tok) el.innerHTML = tokenHelpHTML(tok.text);
+}
+
+/* ── Syntax check ─────────────────────────────────────────────────
+   The live warning only counts brackets. This is the fuller pass the
+   "Check syntax" button in both references promises: unknown fields,
+   unclosed quotes, an expression that stops on an operator. ───────── */
+function knownTokens(objId, excludeId){
+  const o = obj(objId);
+  const names = o.fields.filter(f => f.id !== excludeId).map(f => f.label);
+  names.push(o.recordNameLabel, 'Created by', 'Created at', 'Updated by', 'Updated at');
+  relatedFieldSources(o).forEach(src => src.fields.forEach(x => names.push(src.lookup + '.' + x.label)));
+  return names;
+}
+function checkExpr(text, objId, excludeId){
+  const expr = String(text || '').trim();
+  const out = [];
+  if(!expr) return ['Nothing to check yet.'];
+
+  const open = (expr.match(/\(/g) || []).length, close = (expr.match(/\)/g) || []).length;
+  if(open > close) out.push(`${open - close} bracket${open - close > 1 ? 's are' : ' is'} not closed.`);
+  if(close > open) out.push(`${close - open} closing bracket${close - open > 1 ? 's have' : ' has'} nothing to close.`);
+  if((expr.match(/"/g) || []).length % 2) out.push('A quote is not closed.');
+
+  const known = knownTokens(objId, excludeId);
+  const used = [...expr.matchAll(/\{([^}]*)\}/g)].map(m => m[1]);
+  const unknown = [...new Set(used.filter(n => !known.includes(n)))];
+  unknown.forEach(n => out.push(`There is no field called “${n}” on this object.`));
+
+  if(/[+\-*/=<>]$/.test(expr)) out.push('The expression stops on an operator.');
+  if(/\b(AND|OR|NOT)$/.test(expr)) out.push('The expression stops on AND, OR or NOT.');
+
+  return out;
+}
+function runCheck(targetId, objId, excludeId){
+  const el = document.getElementById(targetId);
+  const out = document.getElementById(targetId + '-warn');
+  if(!el || !out) return;
+  const problems = checkExpr(el.value, objId, excludeId);
+  out.innerHTML = problems.length
+    ? problems.map(m => `<div class="co-err">${ICO.warn} ${esc(m)}</div>`).join('')
+    : `<div class="co-ok">${ICO.check} Looks good.</div>`;
 }
 
 /* ── Field picker ─────────────────────────────────────────────────
