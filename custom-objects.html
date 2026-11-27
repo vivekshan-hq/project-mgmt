@@ -577,7 +577,7 @@ select.co-input{
    type that rides on a lookup rather than a privilege of master-detail.
    ══════════════════════════════════════════════════════════════════════ */
 
-const STORE_KEY = 'rl.customObjects.v2';
+const STORE_KEY = 'rl.customObjects.v3';
 
 /* ── Data types ───────────────────────────────────────────────────────
    One shared list, which is the recommendation in both docs: the same
@@ -678,6 +678,29 @@ function seed(){
          help:'', showInReports:true,
          settings:{child:'li', childLookup:'li_so', fn:'COUNT', aggField:'', filterField:'', filterOp:'eq', filterValue:''}},
       ],
+      /* From the validation rule catalogue, written the way the editor
+         asks for them: the condition describes what to reject. */
+      rules:[
+        {id:'r_so1', name:'Handoff needs an owner and a signed date', active:true,
+         description:'Keeps the sales-to-delivery handoff complete.',
+         condition:'{Status} = "Handed to Delivery" AND (ISBLANK({Account}) OR ISBLANK({Signed Date}) OR ISBLANK({Delivery Owner}))',
+         message:'Add the account, signed date and delivery owner before handing this order to delivery.',
+         location:'TOP', fieldId:''},
+        {id:'r_so2', name:'Handoff needs line items', active:true,
+         description:'An order with nothing on it cannot be delivered.',
+         condition:'{Status} = "Handed to Delivery" AND {Line Item Count} = 0',
+         message:'Add at least one line item before handing this order to delivery.',
+         location:'TOP', fieldId:''},
+        {id:'r_so3', name:'Contract dates in order', active:true, description:'',
+         condition:'{Contract Start Date} > {Contract End Date}',
+         message:'The contract start date cannot be after the end date.',
+         location:'FIELD', fieldId:'so_start'},
+        {id:'r_so4', name:'Signed date cannot be in the future', active:false,
+         description:'Off until we settle which time zone “today” uses.',
+         condition:'{Signed Date} > TODAY()',
+         message:'The signed date cannot be in the future.',
+         location:'FIELD', fieldId:'so_signed'},
+      ],
     },
     {
       id:'li', label:'Line Item', plural:'Line Items',
@@ -720,6 +743,22 @@ function seed(){
         {id:'li_to', label:'Line End Date', type:'DATE', description:'', help:'',
          required:false, showInReports:true, settings:{dateDefault:'blank'}},
       ],
+      rules:[
+        {id:'r_li1', name:'Quantity must be more than 0', active:true,
+         description:'Blank and zero both fail.',
+         condition:'ISBLANK({Quantity}) OR {Quantity} <= 0',
+         message:'Quantity must be more than 0.',
+         location:'FIELD', fieldId:'li_qty'},
+        {id:'r_li2', name:'Discount between 0 and 100', active:true, description:'',
+         condition:'{Discount} < 0 OR {Discount} > 100',
+         message:'Discount must be between 0% and 100%.',
+         location:'FIELD', fieldId:'li_disc'},
+        {id:'r_li3', name:'Line dates inside the contract period', active:true,
+         description:'Reads the order through the Sales Order lookup.',
+         condition:'{Line Start Date} < {Sales Order.Contract Start Date} OR {Line End Date} > {Sales Order.Contract End Date}',
+         message:'Line dates must fall inside the order’s contract period.',
+         location:'TOP', fieldId:''},
+      ],
     },
     {
       id:'risk', label:'Risk Register', plural:'Risks',
@@ -746,6 +785,12 @@ function seed(){
          showInReports:true, settings:{maxLength:32000}},
         {id:'rk_raised', label:'Raised Date', type:'DATE', description:'', help:'', required:false,
          showInReports:true, settings:{dateDefault:'today'}},
+      ],
+      rules:[
+        {id:'r_rk1', name:'Critical risks need a mitigation', active:true, description:'',
+         condition:'{Severity} = "Critical" AND ISBLANK({Mitigation})',
+         message:'Describe how this risk will be mitigated before saving it as Critical.',
+         location:'FIELD', fieldId:'rk_mit'},
       ],
     },
     {
@@ -1077,9 +1122,10 @@ function viewObject(){
   if(!o){ route.view = 'list'; return viewList(); }
   const tabs = [
     ['fields','Fields & Relationships', o.fields.length],
+    ['rules','Validation rules', (o.rules || []).length],
     ['details','Details', null],
   ];
-  const later = ['Validation rules','Record types','Page layouts','Access','Automations'];
+  const later = ['Record types','Page layouts','Access','Automations'];
 
   const head = `
     <div class="co-head">
@@ -1096,7 +1142,9 @@ function viewObject(){
       </div>
     </div>`;
 
-  const body = route.tab === 'details' ? tabDetails(o) : tabFields(o);
+  const body = route.tab === 'details' ? tabDetails(o)
+             : route.tab === 'rules'   ? tabRules(o)
+             : tabFields(o);
   return head + `<div class="co-scroll">${body}</div>`;
 }
 
@@ -1686,6 +1734,206 @@ function savePermSet(){
   toast(`${permDraft.name} saved.`);
 }
 
+/* ══ Validation rules ═══════════════════════════════════════════════
+   A rule runs on save and blocks it. Salesforce calls the expression an
+   "error condition" and leaves you to work out which way round it runs;
+   this says it in the label — "Block the save when" — so the direction
+   is never in doubt.
+
+   The condition editor is the formula palette, with a boolean function
+   set. Everything a rule needs is already there: fields on the object,
+   fields one hop away through a lookup, comparison and logic.
+   ══════════════════════════════════════════════════════════════════ */
+const RULE_FNS = [
+  {t:'ISBLANK(',    hint:'Has no value'},
+  {t:'ISCHANGED(',  hint:'Changed in this save'},
+  {t:'PRIORVALUE(', hint:'Value before this save'},
+  {t:'TODAY()',     hint:'Today’s date'},
+  {t:'INCLUDES(',   hint:'A multi select contains'},
+  {t:'REGEX(',      hint:'Matches a pattern'},
+  {t:'ROUND(',      hint:'Round to decimals'},
+  {t:'ABS(',        hint:'Drop the minus sign'},
+];
+
+function tabRules(o){
+  const rules = o.rules || (o.rules = []);
+  const active = rules.filter(r => r.active).length;
+
+  const rows = rules.length ? rules.map(r => `
+    <tr class="is-clickable" onclick="openRuleDrawer('${o.id}','${r.id}')">
+      <td style="padding-left:20px">
+        <div class="co-fname">${esc(r.name)}</div>
+      </td>
+      <td><span class="co-mono" style="font-size:12px;color:var(--muted-foreground)">${esc(truncate(r.condition, 46))}</span></td>
+      <td style="white-space:normal;max-width:280px">${esc(truncate(r.message, 80))}</td>
+      <td>${r.location === 'FIELD' && ruleField(o, r)
+            ? tag(esc(ruleField(o, r).label))
+            : '<span style="color:var(--muted-foreground)">Top of the form</span>'}</td>
+      <td>
+        <button class="sc-switch${r.active ? ' sc-switch--on' : ''}" role="switch" aria-checked="${!!r.active}"
+                onclick="event.stopPropagation();toggleRule('${o.id}','${r.id}')"><span class="sc-switch-thumb"></span></button>
+      </td>
+      <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();ruleMenu(event,'${o.id}','${r.id}')">${ICO.dots}</button></td>
+    </tr>`).join('')
+  : `<tr><td colspan="6" style="padding:22px 20px;color:var(--muted-foreground)">
+      No validation rules on ${esc(o.label)} yet. A rule checks a record when someone saves it, and
+      stops the save when the check fails.</td></tr>`;
+
+  return `
+    <div class="co-actions">
+      <button class="rl-btn v-primary sz-lg" onclick="openRuleDrawer('${o.id}')"><span class="rl-btn-label">New rule</span>${ICO.plus}</button>
+    </div>
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Validation rules</span>
+        <span class="co-band-n">${rules.length ? `${active} of ${rules.length} active` : '(0)'}</span></div>
+      <table class="co-table">
+        <thead><tr>
+          <th style="padding-left:20px">Rule</th><th>Blocks the save when</th><th>Message</th>
+          <th>Shown</th><th style="width:70px">Active</th><th class="col-menu"></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="co-note">
+      <span class="co-note-ico">${ICO.info}</span>
+      <div>Rules run on every path a record is written — the form, import, the API and sync.
+      A bulk import saves the rows that pass and reports the rest.</div>
+    </div>`;
+}
+
+const truncate = (t, n) => { t = String(t || ''); return t.length > n ? t.slice(0, n) + '…' : t; };
+const ruleField = (o, r) => o.fields.find(f => f.id === r.fieldId);
+
+function toggleRule(objId, ruleId){
+  const r = obj(objId).rules.find(x => x.id === ruleId);
+  r.active = !r.active;
+  save(); render();
+  toast(`${r.name} ${r.active ? 'is now active' : 'is no longer active'}.`);
+}
+function ruleMenu(ev, objId, ruleId){
+  showMenu(ev, [
+    {label:'Edit rule', fn:() => openRuleDrawer(objId, ruleId)},
+    '-',
+    {label:'Delete rule', danger:true, fn:() => confirmDeleteRule(objId, ruleId)},
+  ]);
+}
+function confirmDeleteRule(objId, ruleId){
+  const o = obj(objId), r = o.rules.find(x => x.id === ruleId);
+  dialog({
+    title:`Delete “${esc(r.name)}”?`,
+    body:`Records that this rule would have blocked will save from now on. Existing records are not rechecked.`,
+    confirm:'Delete rule', danger:true,
+    onConfirm(){
+      o.rules = o.rules.filter(x => x.id !== ruleId);
+      save(); render(); toast(`${r.name} deleted.`);
+    },
+  });
+}
+
+/* ── Rule editor ──────────────────────────────────────────────────── */
+let vr = null;
+
+function openRuleDrawer(objId, ruleId){
+  const o = obj(objId);
+  const r = ruleId ? o.rules.find(x => x.id === ruleId) : null;
+  vr = {
+    objId, ruleId: ruleId || null, err:{},
+    d: r ? JSON.parse(JSON.stringify(r))
+         : {name:'', description:'', condition:'', message:'', location:'TOP', fieldId:'', active:true},
+  };
+  vrRender();
+}
+
+function vrRender(){
+  const o = obj(vr.objId), d = vr.d, editing = !!vr.ruleId;
+
+  showDrawer(
+    drawerHead(editing ? 'Edit rule' : 'New validation rule') + `
+    <div class="rl-drawer-body">
+      ${field('Rule name', true,
+        `<input class="co-input" id="vr-name" value="${esc(d.name)}" placeholder="eg. Quantity must be more than 0"
+                oninput="vr.d.name = this.value; delete vr.err.name">`,
+        '', fErr('name', vr.err))}
+
+      ${field('Description', false,
+        `<input class="co-input" value="${esc(d.description)}" placeholder="A note for admins"
+                oninput="vr.d.description = this.value">`)}
+
+      <div class="co-f"><div class="rl-field">
+        <label class="rl-field-label">Block the save when <span class="rl-field-required">*</span></label>
+        <textarea class="co-input co-mono" id="vr-expr" rows="3"
+                  placeholder="ISBLANK({Quantity}) OR {Quantity} <= 0"
+                  oninput="vr.d.condition = this.value; exprCheck(this.value)">${esc(d.condition)}</textarea>
+        ${fErr('condition', vr.err)}
+        <div id="vr-expr-warn">${exprWarning(d.condition)}</div>
+        ${exprPalette('vr-expr', o.id, {bool:true, fns:RULE_FNS, onChange: v => { vr.d.condition = v; }})}
+        <div class="rl-field-hint">The rule runs on save. When this is true the save is stopped and your
+          message is shown — so it describes the records you want to reject, not the ones you want to allow.</div>
+      </div></div>
+
+      ${field('Message', true,
+        `<textarea class="co-input" rows="2" placeholder="eg. Quantity must be more than 0."
+                   oninput="vr.d.message = this.value; delete vr.err.message">${esc(d.message)}</textarea>`,
+        'What the person saving the record sees.', fErr('message', vr.err))}
+
+      ${field('Show the message', true,
+        `<select class="co-input" onchange="vr.d.location = this.value; vrRender()">
+          <option value="TOP" ${d.location !== 'FIELD' ? 'selected' : ''}>At the top of the form</option>
+          <option value="FIELD" ${d.location === 'FIELD' ? 'selected' : ''}>Under a field</option>
+        </select>`,
+        d.location === 'FIELD' ? '' : 'Use this when the rule spans more than one field.')}
+
+      ${d.location === 'FIELD'
+        ? field('Field', true,
+            `<select class="co-input" onchange="vr.d.fieldId = this.value; delete vr.err.fieldId">
+              <option value="">Select a field…</option>
+              ${o.fields.map(f => `<option value="${f.id}" ${d.fieldId === f.id ? 'selected' : ''}>${esc(f.label)}</option>`).join('')}
+            </select>`,
+            'A rule on a field the person cannot see shows at the top instead.', fErr('fieldId', vr.err))
+        : ''}
+
+      <div class="co-sw" style="border-top:1px solid var(--border);margin-top:4px">
+        <button class="sc-switch${d.active ? ' sc-switch--on' : ''}" role="switch" aria-checked="${!!d.active}"
+                onclick="vr.d.active = !vr.d.active; vrRender()"><span class="sc-switch-thumb"></span></button>
+        <div style="flex:1">
+          <div class="co-ctl-t">Active</div>
+          <div class="co-ctl-d">Turn off to keep the rule without enforcing it.</div>
+        </div>
+      </div>
+    </div>` +
+    drawerFoot('', editing ? 'Save rule' : 'Create rule', 'vrSave()'),
+    560, 'rule:' + (vr.ruleId || 'new'));
+
+  const el = document.getElementById('vr-name');
+  if(el && !editing && !vr.focused){ vr.focused = true; setTimeout(() => el.focus(), 60); }
+}
+
+function vrSave(){
+  const o = obj(vr.objId), d = vr.d; vr.err = {};
+  const name = (d.name || '').trim();
+  if(!name) vr.err.name = 'Give the rule a name.';
+  else if((o.rules || []).some(r => r.id !== vr.ruleId && r.name.toLowerCase() === name.toLowerCase()))
+    vr.err.name = `${o.label} already has a rule called “${name}”.`;
+  if(!(d.condition || '').trim()) vr.err.condition = 'Write the condition that blocks the save.';
+  if(!(d.message || '').trim()) vr.err.message = 'Write the message the person will see.';
+  if(d.location === 'FIELD' && !d.fieldId) vr.err.fieldId = 'Choose the field to show it under.';
+  if(Object.keys(vr.err).length){ vrRender(); return; }
+
+  d.name = name;
+  if(d.location !== 'FIELD') d.fieldId = '';
+  if(vr.ruleId){
+    const i = o.rules.findIndex(r => r.id === vr.ruleId);
+    o.rules[i] = Object.assign({}, o.rules[i], d);
+    toast(`${name} updated.`);
+  }else{
+    d.id = uid('r');
+    (o.rules || (o.rules = [])).push(d);
+    toast(d.active ? `${name} created and active.` : `${name} created, not yet active.`);
+  }
+  o.updated = 'Just now';
+  save(); closeDrawer(); render();
+}
+
 /* ══ Drawer plumbing — the kit's right-side sheet ═══════════════════ */
 let drawerKey = null;
 
@@ -2107,6 +2355,9 @@ function fdLookupSettings(o, d){
    labels and operators both carry characters that would need escaping
    twice over. ──────────────────────────────────────────────────────── */
 let FD_TOKENS = [];
+/* Which expression box the palette is driving. The formula editor and the
+   validation rule editor both use it, so it cannot read `fd` directly. */
+let EXPR = {target:'fd-expr', objId:null, excludeId:null};
 
 const FD_OPS = [
   {t:'+', hint:'Add'}, {t:'-', hint:'Subtract'}, {t:'*', hint:'Multiply'},
@@ -2144,17 +2395,16 @@ function relatedFieldSources(o){
   }).filter(x => x.fields.length);
 }
 
-function fdFormulaSettings(o, d){
-  const s = d.settings;
-  const own = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
+/* The palette, shared by the formula editor and the validation rule
+   editor. `opts.fns` chooses the function set, `opts.bool` adds the
+   comparison and logic rows a boolean expression needs. */
+function exprPalette(targetId, objId, opts){
+  const o = obj(objId);
+  EXPR = {target:targetId, objId, excludeId:opts.excludeId || null, onChange:opts.onChange};
+  const own = o.fields.filter(f => f.id !== EXPR.excludeId && !['MULTISELECT'].includes(f.type));
   const related = relatedFieldSources(o);
-  const bool = s.returns === 'CHECKBOX';
   FD_TOKENS = [];
 
-  /* Chips are for reaching for something you can already see. Past a
-     dozen they stop being that, so the row shows the first few and the
-     rest live behind a search — which also carries the related objects,
-     where a hundred more fields would otherwise pile up. */
   const CHIP_CAP = 12;
   const shown = own.slice(0, CHIP_CAP);
   const hidden = own.length - shown.length;
@@ -2166,14 +2416,26 @@ function fdFormulaSettings(o, d){
               onclick="insertToken(${i})"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</button>`;
   };
   const group = (label, chips) => `
-    <div class="co-tokrow">
-      <span class="co-toklabel">${label}</span>
-      <div class="co-toks">${chips}</div>
-    </div>`;
+    <div class="co-tokrow"><span class="co-toklabel">${label}</span><div class="co-toks">${chips}</div></div>`;
+  const searchLabel = hidden || relatedCount ? `Search ${own.length + relatedCount} fields` : 'Search fields';
 
-  const searchLabel = hidden || relatedCount
-    ? `Search ${own.length + relatedCount} fields`
-    : 'Search fields';
+  return `<div class="co-palette">
+    ${group('Fields',
+      (shown.length
+        ? shown.map(f => chip('{' + f.label + '}', 'field', typeMeta(f.type).label)).join('')
+        : '<span style="font-size:12px;color:var(--muted-foreground);padding-top:4px">No fields yet.</span>')
+      + `<button class="co-tok find" type="button" onclick="openFieldPicker(event)">
+           ${ICO.search}${esc(searchLabel)}${hidden ? ` <span style="opacity:.6">+${hidden} more</span>` : ''}</button>`)}
+    ${group('Operators', FD_OPS.map(x => chip(x.t, 'op', x.hint)).join('')
+      + (opts.bool ? FD_COMPARE.map(x => chip(x.t, 'op', x.hint)).join('') : ''))}
+    ${opts.bool ? group('Logic', FD_LOGIC.map(x => chip(x.t, 'op', x.hint)).join('')) : ''}
+    ${group('Functions', opts.fns.map(x => chip(x.t, 'fn', x.hint)).join(''))}
+  </div>`;
+}
+
+function fdFormulaSettings(o, d){
+  const s = d.settings;
+  const bool = s.returns === 'CHECKBOX';
 
   const expr = s.expr || '';
   return `
@@ -2187,18 +2449,11 @@ function fdFormulaSettings(o, d){
                 oninput="fd.d.settings.expr = this.value; fdExprCheck()">${esc(expr)}</textarea>
       ${fErr('expr', fd.err)}
       <div id="fd-expr-warn">${exprWarning(expr)}</div>
-      <div class="co-palette">
-        ${group('Fields',
-          (shown.length
-            ? shown.map(f => chip('{' + f.label + '}', 'field', typeMeta(f.type).label)).join('')
-            : '<span style="font-size:12px;color:var(--muted-foreground);padding-top:4px">No other fields yet.</span>')
-          + `<button class="co-tok find" type="button" onclick="openFieldPicker(event)">
-               ${ICO.search}${esc(searchLabel)}${hidden ? ` <span style="opacity:.6">+${hidden} more</span>` : ''}</button>`)}
-        ${group('Operators', FD_OPS.map(x => chip(x.t, 'op', x.hint)).join('')
-          + (bool ? FD_COMPARE.map(x => chip(x.t, 'op', x.hint)).join('') : ''))}
-        ${bool ? group('Logic', FD_LOGIC.map(x => chip(x.t, 'op', x.hint)).join('')) : ''}
-        ${group('Functions', fdFunctions(s.returns).map(x => chip(x.t, 'fn', x.hint)).join(''))}
-      </div>
+      ${exprPalette('fd-expr', o.id, {
+        excludeId: fd.fieldId, bool,
+        fns: fdFunctions(s.returns),
+        onChange: v => { fd.d.settings.expr = v; },
+      })}
       <div class="rl-field-hint">Click to insert at the cursor. Fields are wrapped in braces, and a field on a
         linked record is written as <span class="co-mono">{Lookup.Field}</span> — one hop.</div>
     </div></div>`;
@@ -2211,8 +2466,8 @@ function fdFormulaSettings(o, d){
 let FP = null;
 
 function fieldPickerGroups(){
-  const o = obj(fd.objId);
-  const own = o.fields.filter(f => f.id !== fd.fieldId && !['FORMULA','ROLLUP','MULTISELECT'].includes(f.type));
+  const o = obj(EXPR.objId);
+  const own = o.fields.filter(f => f.id !== EXPR.excludeId && !['MULTISELECT'].includes(f.type));
   const groups = [{label:o.label, items:own.map(f => ({label:f.label, type:f.type, token:`{${f.label}}`}))}];
   /* The lookup's own label names the group. It reads as the object it
      points at — Account, Product — and stays unambiguous when an object
@@ -2318,10 +2573,11 @@ function exprWarning(expr){
   return `<div class="co-err">${ICO.warn} ${open > close
     ? 'A bracket is not closed.' : 'There is a closing bracket with nothing to close.'}</div>`;
 }
-function fdExprCheck(){
-  const el = document.getElementById('fd-expr-warn');
-  if(el) el.innerHTML = exprWarning(fd.d.settings.expr);
+function exprCheck(value){
+  const el = document.getElementById(EXPR.target + '-warn');
+  if(el) el.innerHTML = exprWarning(value);
 }
+function fdExprCheck(){ exprCheck(fd.d.settings.expr); }
 
 /* Insert at the caret and leave it after the token, so a field, an
    operator and a second field can be clicked in sequence without
@@ -2331,8 +2587,8 @@ function insertToken(i){
   if(tok) insertText(tok.text, tok.kind);
 }
 function insertText(text, kind){
-  const el = document.getElementById('fd-expr');
-  if(!el){ fd.d.settings.expr = (fd.d.settings.expr || '') + text; fdRender(); return; }
+  const el = document.getElementById(EXPR.target);
+  if(!el) return;
 
   const start = el.selectionStart, end = el.selectionEnd, v = el.value;
   const before = v.slice(0, start), after = v.slice(end);
@@ -2346,12 +2602,12 @@ function insertText(text, kind){
   const piece = lead + text + trail;
   const value = (before + piece + after).replace(/ {2,}/g, ' ');
   el.value = value;
-  fd.d.settings.expr = value;
+  EXPR.onChange(value);
 
   const caret = (before + piece).replace(/ {2,}/g, ' ').length;
   el.focus();
   el.setSelectionRange(caret, caret);
-  fdExprCheck();
+  exprCheck(value);
 }
 
 /* ── Roll-up (Part C) ─────────────────────────────────────────────── */
@@ -2503,7 +2759,7 @@ function odSave(){
       description:d.description, recordNameLabel:d.recordNameLabel.trim(),
       recordNameType:d.recordNameType, autoFormat:d.autoFormat, autoStart:d.autoStart,
       autoNext:d.autoStart, reports:d.reports, fieldHistory:d.fieldHistory, search:d.search,
-      records:0, updated:'Just now', fields:[],
+      records:0, updated:'Just now', fields:[], rules:[],
     };
     state.objects.push(o);
     seedObjectPermissions(o.id);
