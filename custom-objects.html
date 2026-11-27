@@ -405,6 +405,8 @@ select.co-input{
   text-transform:uppercase; color:var(--muted-foreground); }
 
 /* Read / Edit columns in the field grid. */
+.co-grouprow td{ background:var(--co-band); font-size:12px; font-weight:600;
+  color:var(--foreground); padding-top:7px; padding-bottom:7px; }
 .co-fcol{ width:84px; text-align:center; }
 .co-table td.co-fcol{ text-align:center; }
 .co-fhead{ display:inline-flex; align-items:center; gap:7px; cursor:pointer; }
@@ -1287,17 +1289,27 @@ function tabAccess(o){
     ? (v === true || v === 1 ? tag('Yes', 'green', 'sm') : tag(MODES[v].label, 'blue', 'sm'))
     : '<span style="color:var(--muted-foreground)">—</span>';
 
-  const objectRows = sets.map(ps => {
+  /* Grouped rather than carrying a Level column. "Level" now means the
+     object level we removed, and the group header says more than a tag:
+     a project set only grants inside the project it is assigned in. */
+  const setRow = ps => {
     const p = ps.objects[o.id] || P(isAccount(ps) ? 'NONE' : 0, 0, isAccount(ps) ? 'NONE' : 0, isAccount(ps) ? 'NONE' : 0);
     return `<tr class="is-clickable" onclick="openPermSet('${ps.id}')">
       <td style="padding-left:20px"><div class="co-fname">${esc(ps.name)}</div></td>
-      <td>${tag(isAccount(ps) ? 'Account' : 'Project', isAccount(ps) ? 'blue' : 'green', 'sm')}</td>
       <td>${cell(p.view)}</td>
       <td>${p.create ? tag('Yes', 'green', 'sm') : '<span style="color:var(--muted-foreground)">—</span>'}</td>
       <td>${cell(p.edit)}</td>
       <td class="col-last">${cell(p.del)}</td>
     </tr>`;
-  }).join('');
+  };
+  const groupRow = (label, note) =>
+    `<tr class="co-grouprow"><td colspan="5" style="padding-left:20px">${label}
+      <span style="font-weight:400;color:var(--muted-foreground)"> — ${note}</span></td></tr>`;
+  const objectRows =
+    groupRow('Account permission sets', 'apply across every project')
+    + sets.filter(isAccount).map(setRow).join('')
+    + groupRow('Project permission sets', 'apply inside the project they are assigned in')
+    + sets.filter(ps => !isAccount(ps)).map(setRow).join('');
 
   /* Fields down, sets across. With four fields and seven sets the other
      way round would be seven tables saying the same thing. */
@@ -1320,7 +1332,7 @@ function tabAccess(o){
         <span class="co-band-n">${sets.filter(ps => has((ps.objects[o.id]||{}).view)).length} of ${sets.length} sets can see ${esc(o.plural.toLowerCase())}</span></div>
       <table class="co-table">
         <thead><tr>
-          <th style="padding-left:20px">Permission set</th><th>Level</th>
+          <th style="padding-left:20px">Permission set</th>
           <th>View</th><th>Create</th><th>Edit</th><th class="col-last">Delete</th>
         </tr></thead>
         <tbody>${objectRows}</tbody>
