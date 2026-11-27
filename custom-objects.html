@@ -1400,6 +1400,7 @@ const PERM_MODULES = ['Projects','Phase','Tasks','Accounts','Account fields','Sp
   'Files and Folders','Status updates','Form responses','Templates','Dashboards','Reports','Settings'];
 
 let permObj = null;   // nav selection inside Custom objects: 'manage' or an object id
+let permTab = 'object';   // which half of the object's permissions is open
 
 function openPermSet(id){
   permDraft = JSON.parse(JSON.stringify(permSet(id)));
@@ -1407,7 +1408,8 @@ function openPermSet(id){
   go('permset', id);
 }
 const permDirty = () => permDraft && JSON.stringify(permDraft) !== JSON.stringify(permSet(permDraft.id));
-function selectPermObj(key){ permObj = key; render(); }
+function selectPermObj(key){ permObj = key; permTab = 'object'; render(); }
+function selectPermTab(t){ permTab = t; render(); }
 
 function viewPermSet(){
   if(!permDraft || permDraft.id !== route.id){
@@ -1485,18 +1487,30 @@ function objectPane(ps, o){
   };
   const toggle = key => `togglePerm('${o.id}','${key}')`;
 
+  /* The tab labels carry the current state, so the half you are not
+     looking at still reports what it holds. */
+  const states = o.fields.map(f => fieldAccess(p, f.id));
+  const visible = states.filter(v => v !== 'NONE').length;
+  const tab = (key, label, note) => `
+    <button class="co-tab${permTab === key ? ' on' : ''}" onclick="selectPermTab('${key}')">
+      ${label}<span style="color:var(--muted-foreground);font-weight:400"> ${note}</span></button>`;
+
   return `
-    <div class="co-card">
-      <div class="co-band"><span class="co-band-t">${esc(o.label)}</span></div>
-      <div style="padding:14px 20px 16px">
-        ${permRow(`Can view ${esc(noun)}`, has(p.view), toggle('view'), modeTag('view'))}
-        ${permRow(`Can create ${esc(noun)}`, !!p.create, toggle('create'), '', '', false, noView)}
-        ${permRow(`Can edit ${esc(noun)}`, has(p.edit), toggle('edit'), modeTag('edit'), '', false, noView)}
-        ${permRow(`Can delete ${esc(noun)}`, has(p.del), toggle('del'), modeTag('del'), '', false, noView || noEdit)}
-      </div>
+    <div class="co-tabs" style="margin:0 0 16px">
+      ${tab('object', 'Object access', permObjSummary(ps, p))}
+      ${tab('fields', 'Field access', noView ? 'No access' : `${visible} of ${states.length}`)}
     </div>
 
-    ${fieldGrid(ps, o, p)}`;
+    ${permTab === 'fields' ? fieldGrid(ps, o, p) : `
+      <div class="co-card">
+        <div class="co-band"><span class="co-band-t">${esc(o.label)}</span></div>
+        <div style="padding:14px 20px 16px">
+          ${permRow(`Can view ${esc(noun)}`, has(p.view), toggle('view'), modeTag('view'))}
+          ${permRow(`Can create ${esc(noun)}`, !!p.create, toggle('create'), '', '', false, noView)}
+          ${permRow(`Can edit ${esc(noun)}`, has(p.edit), toggle('edit'), modeTag('edit'), '', false, noView)}
+          ${permRow(`Can delete ${esc(noun)}`, has(p.del), toggle('del'), modeTag('del'), '', false, noView || noEdit)}
+        </div>
+      </div>`}`;
 }
 
 /* One checkbox and a sentence, optionally with an access tag and a note
@@ -1518,6 +1532,16 @@ function permRow(label, on, onclick, modeTag, note, sub, disabled){
     </div>`;
 }
 
+
+/* What this set can do with the object, for the tab label. */
+function permObjSummary(ps, p){
+  if(!has(p.view)) return 'No access';
+  const bits = ['View'];
+  if(p.create) bits.push('Create');
+  if(has(p.edit)) bits.push('Edit');
+  if(has(p.del)) bits.push('Delete');
+  return bits.join(' · ');
+}
 
 /* Field access is stored only where an admin narrows it; otherwise it
    follows the object — Read where the set can view, Edit where it can
