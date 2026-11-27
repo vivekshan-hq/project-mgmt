@@ -873,7 +873,6 @@ function load(){
 }
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
 function resetData(){ state = seed(); save(); route = {view:'list', id:null, tab:'fields'}; render(); toast('Sample data restored.'); }
-function clearData(){ state = {objects:[]}; save(); route = {view:'list', id:null, tab:'fields'}; render(); toast('All custom objects removed.'); }
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1091,7 +1090,6 @@ function viewList(){
 
   return head + `<div class="co-scroll">
     <div class="co-actions">
-      <button class="rl-btn v-outline sz-lg" onclick="pageMenu(event)"><span class="rl-btn-label">Manage sample data</span></button>
       <button class="rl-btn v-primary sz-lg" onclick="openObjectDrawer()"><span class="rl-btn-label">New object</span>${ICO.plus}</button>
     </div>
     <div class="co-card">
@@ -1143,7 +1141,7 @@ function viewObject(){
 /* ── Tab: fields ──────────────────────────────────────────────────── */
 function tabFields(o){
   const custom = o.fields.length ? o.fields.map(f => fieldRow(o, f)).join('') : `
-    <tr><td colspan="7" style="color:var(--muted-foreground);padding:22px 20px">
+    <tr><td colspan="6" style="color:var(--muted-foreground);padding:22px 20px">
       No fields yet. Every object starts with its Record Name, its parent and the system fields below.
     </td></tr>`;
 
@@ -1173,7 +1171,7 @@ function tabFields(o){
       <table class="co-table">
         <thead><tr>
           <th class="col-grip"></th><th>Field name</th><th>Field type</th>
-          <th>Value assignment</th><th>Is mandatory</th><th>Settings</th><th class="col-menu"></th>
+          <th>Value assignment</th><th>Is mandatory</th><th class="col-menu"></th>
         </tr></thead>
         <tbody>${custom}</tbody>
       </table>
@@ -1190,41 +1188,16 @@ function tabFields(o){
 
 function fieldRow(o, f){
   const m = typeMeta(f.type);
-  const bits = [];
-  if(f.unique) bits.push(tag('Unique'));
-  if(f.extId) bits.push(tag('External ID'));
-  if(f.showInReports === false) bits.push(tag('Not in reports', '', 'sm', 'Hidden from the report builder. Clutter control, not security.'));
-  if(f.type === 'LOOKUP'){
-    bits.push(tag('→ ' + esc(targetLabel(f.settings.target)), 'purple'));
-    /* Both are constraints, not errors — the orange read as a warning. */
-    bits.push(f.settings.onDelete === 'BLOCK'
-      ? tag('Block delete', '', 'sm', 'The linked record cannot be deleted while records point at it.')
-      : tag('Clear on delete', '', 'sm', 'Deleting the linked record clears this value.'));
-  }
-  if(f.type === 'ROLLUP'){
-    const c = obj(f.settings.child);
-    bits.push(tag(esc(f.settings.fn) + (f.settings.fn !== 'COUNT' && f.settings.aggField ? ' ' + esc(fieldLabel(f.settings.child, f.settings.aggField)) : ''), 'pink', 'sm'));
-    bits.push(tag('of ' + esc(c ? c.plural : f.settings.child), '', 'sm'));
-  }
-  if(f.type === 'FORMULA'){
-    const e = String(f.settings.expr || '');
-    bits.push(`<span class="co-tag c-teal sm mono" title="${esc(e)}">${esc(e.slice(0,22))}${e.length>22?'…':''}</span>`);
-  }
-  if(f.type === 'SELECT' || f.type === 'MULTISELECT') bits.push(tag(`${(f.settings.options||[]).length} values`, '', 'sm'));
-  if(f.def) bits.push(tag('Default ' + esc(f.def), '', 'sm'));
-
   return `<tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
     <td class="col-grip">${ICO_GRIP}</td>
-    <td>
-      <div class="co-fname">${esc(f.label)}</div>
-    </td>
+    <td><div class="co-fname">${esc(f.label)}</div></td>
     <td><span class="co-type">${typeIcon(f.type)}${esc(m.label)}</span>${m.isNew ? ' ' + tag('New', 'purple', 'sm') : ''}</td>
     <td>${valueAssignment(f)}</td>
     <td>${mandatoryBox(!!f.required)}</td>
-    <td><div style="display:flex;gap:5px;flex-wrap:wrap;max-width:330px">${bits.join('')}</div></td>
     <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')" aria-label="More">${ICO.dots}</button></td>
   </tr>`;
 }
+
 function fieldLabel(objId, fieldId){
   const o = obj(objId); if(!o) return fieldId;
   const f = o.fields.find(x => x.id === fieldId);
@@ -2950,12 +2923,6 @@ function fieldMenu(ev, objId, fieldId){
     {label:'Delete field', danger:true, fn:()=>confirmDeleteField(objId, fieldId)},
   ]);
 }
-function pageMenu(ev){
-  showMenu(ev, [
-    {label:'Restore sample data', fn:resetData},
-    {label:'Remove every object', danger:true, fn:clearData},
-  ]);
-}
 function objectMenu(ev, id){
   const blockers = incoming(id);
   showMenu(ev, [
@@ -3045,6 +3012,9 @@ function confirmDeleteObject(id){
 }
 
 /* ══ Go ═════════════════════════════════════════════════════════════ */
+/* Prototype escape hatch, deliberately not a button: ?reset puts the
+   sample data back after a demo has deleted its way through it. */
+if(/[?&]reset\b/.test(location.search)) resetData();
 render();
 </script>
 </body>
