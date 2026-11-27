@@ -1912,7 +1912,7 @@ function vrRender(){
           <button class="rl-btn v-outline sz-sm" onclick="runCheck('vr-expr','${o.id}','')">
             <span class="rl-btn-label">Check syntax</span></button>
         </div>
-        ${exprHelper('vr-expr', o.id, {bool:true, onChange: v => { vr.d.condition = v; }})}
+        ${exprHelper('vr-expr', o.id, {bool:true, patterns:'RULE', onChange: v => { vr.d.condition = v; }})}
         <div class="rl-field-hint">The rule runs on save. When this is true the save is stopped and your
           message is shown — so it describes the records you want to reject, not the ones you want to allow.</div>
       </div></div>
@@ -2491,6 +2491,88 @@ function relatedFieldSources(o){
   }).filter(x => x.fields.length);
 }
 
+/* ── Patterns ─────────────────────────────────────────────────────
+   Picking tokens one at a time is fine for one formula and miserable
+   for the twentieth. Most formulas are a handful of shapes with the
+   fields swapped, so start from the shape: a pattern drops in with
+   empty slots, and Tab walks between them.
+
+   {} is a slot. Dropping the caret inside one puts autocomplete
+   straight into field mode, so a pattern is pick, type, Tab, type —
+   not five separate choices. ──────────────────────────────────────── */
+const PATTERNS = {
+  NUMBER: [
+    {label:'A × B',            expr:'{} * {}'},
+    {label:'A − B',            expr:'{} - {}'},
+    {label:'Less a discount',  expr:'{} * (1 - {} / 100)'},
+    {label:'As a percentage',  expr:'{} / {} * 100'},
+    {label:'Rounded total',    expr:'ROUND({} * {}, 2)'},
+  ],
+  TEXT: [
+    {label:'Join two fields',  expr:'CONCAT({}, " ", {})'},
+    {label:'Prefix a value',   expr:'CONCAT("SO-", {})'},
+    {label:'Upper case',       expr:'UPPER({})'},
+  ],
+  DATE: [
+    {label:'Days between',     expr:'DATE_DIFF({}, {})'},
+    {label:'Days after',       expr:'DATE_ADD({}, 30)'},
+  ],
+  CHECKBOX: [
+    {label:'Is it set',        expr:'{} isnotempty'},
+    {label:'Over a threshold', expr:'{} > 0'},
+    {label:'Either of two',    expr:'{} isempty OR {} isempty'},
+  ],
+  RULE: [
+    {label:'Must have a value',   expr:'{} isempty'},
+    {label:'Out of range',        expr:'{} < 0 OR {} > 100'},
+    {label:'Required once set',   expr:'{} = "" AND {} isempty'},
+    {label:'One date before another', expr:'{} > {}'},
+    {label:'Cannot change',       expr:'ISCHANGED({}) AND NOT ISNEW()'},
+  ],
+};
+function patternsFor(kind){
+  if(kind === 'RULE') return PATTERNS.RULE;
+  return PATTERNS[kind] || PATTERNS.NUMBER;
+}
+
+/* Drop the pattern in whole and land in its first slot. */
+function usePattern(targetId, expr){
+  const el = document.getElementById(targetId);
+  if(!el) return;
+  el.value = expr;
+  EXPR.onChange(expr);
+  el.focus();
+  const slot = expr.indexOf('{}');
+  if(slot >= 0) el.setSelectionRange(slot + 1, slot + 1);
+  else el.setSelectionRange(expr.length, expr.length);
+  exprCheck(expr);
+  acUpdate(targetId);
+}
+
+/* Tab with no suggestion open walks to the next empty slot, so a
+   pattern is filled left to right without reaching for the mouse. */
+function nextSlot(el){
+  const from = el.selectionStart;
+  let i = el.value.indexOf('{}', from);
+  if(i < 0) i = el.value.indexOf('{}');          // wrap
+  if(i < 0) return false;
+  el.focus();
+  el.setSelectionRange(i + 1, i + 1);
+  return true;
+}
+
+/* ── Recently used ────────────────────────────────────────────────
+   The same few fields turn up in formula after formula, so what you
+   reached for last sorts first. Kept with the rest of the prototype
+   state rather than in memory, so it survives a reload. */
+const RECENT_KEY = 'rl.customObjects.recentTokens';
+let RECENT = (() => { try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch(e){ return []; } })();
+function noteRecent(token){
+  RECENT = [token, ...RECENT.filter(t => t !== token)].slice(0, 12);
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(RECENT)); } catch(e){}
+}
+const recentRank = token => { const i = RECENT.indexOf(token); return i < 0 ? 99 : i; };
+
 /* ── Expression autocomplete ──────────────────────────────────────
    The chip wall had an arbitrary cutoff — twelve fields, four
    functions — and two ways to do one thing: click a chip, or open a
@@ -2511,16 +2593,17 @@ let AC = null;
 function acItems(mode, q){
   const query = q.toLowerCase();
   if(mode === 'fn'){
-    return FN_LIBRARY.map(g => ({
+    const fns = FN_LIBRARY.map(g => ({
       label: g.group,
       items: g.items.filter(f => f.t.toLowerCase().startsWith(query))
         .map(f => ({label:f.t.replace(/\($/, ''), token:f.t, sig:f.sig, kind:'fn'})),
     })).filter(g => g.items.length);
+    return withRecent(fns);
   }
   /* Substring matching, but a name that starts with what you typed
      ranks above one that merely contains it — "{un" should reach Unit
      Price before Discount. */
-  return fieldPickerGroups().map(g => ({
+  const groups = fieldPickerGroups().map(g => ({
     label: g.label,
     items: g.items
       .filter(x => x.label.toLowerCase().includes(query))
@@ -2531,6 +2614,18 @@ function acItems(mode, q){
       })
       .map(x => ({label:x.label, token:x.token, type:x.type, kind:'field'})),
   })).filter(g => g.items.length);
+  return withRecent(groups);
+}
+
+/* Anything used lately is lifted into its own group at the top. */
+function withRecent(groups){
+  const hits = groups.flatMap(g => g.items).filter(x => recentRank(x.token) < 99)
+    .sort((a, b) => recentRank(a.token) - recentRank(b.token));
+  if(hits.length < 2) return groups;
+  const seen = new Set(hits.map(x => x.token));
+  const rest = groups.map(g => ({label:g.label, items:g.items.filter(x => !seen.has(x.token))}))
+    .filter(g => g.items.length);
+  return [{label:'Recent', items:hits}, ...rest];
 }
 
 /* What is being typed right before the caret decides the mode. */
@@ -2569,7 +2664,7 @@ function acRender(){
     ${g.items.map(x => {
       n++;
       return `<button class="co-ac-i${n === AC.index ? ' on' : ''}" data-i="${n}"
-                onmousedown="event.preventDefault();acAccept(${n})" onmouseenter="acHover(${n})">
+                onmousedown="event.preventDefault();acAccept(${n})" onmousemove="acHover(${n})">
         ${x.kind === 'fn' ? '<span class="co-type-ico">ƒx</span>' : (x.type ? typeIcon(x.type) : '<span class="co-type-ico"></span>')}
         <span class="co-ac-l">${esc(x.label)}${x.sig ? `<span class="co-fp-sig">${esc(x.sig)}</span>` : ''}</span>
       </button>`;
@@ -2588,7 +2683,7 @@ function acHelp(){
   const el = AC && document.getElementById(AC.targetId + '-help');
   if(el && item) el.innerHTML = tokenHelpHTML(item.token);
 }
-function acHover(i){ if(AC){ AC.index = i; acRender(); } }
+function acHover(i){ if(AC && AC.index !== i){ AC.index = i; acRender(); } }
 function acClose(){ AC = null; const el = document.getElementById('ac'); if(el) el.remove(); }
 
 function acAccept(i){
@@ -2598,14 +2693,18 @@ function acAccept(i){
   if(!item || !el) return acClose();
 
   const before = el.value.slice(0, AC.from);
-  const after = el.value.slice(el.selectionStart);
-  /* A field closes its own brace; a function leaves the caret inside. */
+  let after = el.value.slice(el.selectionStart);
+  /* The token carries its own braces, so a "{" already on the page —
+     a pattern's empty slot, or a half-typed one — has its closing
+     brace consumed rather than left behind as "}}". */
+  if(item.kind === 'field' && after.startsWith('}')) after = after.slice(1);
   const piece = item.token;
   const value = before + piece + after;
   const caret = (before + piece).length;
 
   el.value = value;
   EXPR.onChange(value);
+  noteRecent(item.token);
   acClose();
   el.focus();
   el.setSelectionRange(caret, caret);
@@ -2617,6 +2716,10 @@ function acKey(e, targetId){
     /* Ctrl/Cmd-Space opens it without typing, for anyone who wants to
        browse rather than recall. */
     if(e.key === ' ' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); acBrowse(targetId); }
+    if(e.key === 'Tab'){
+      const el = document.getElementById(targetId);
+      if(el && el.value.includes('{}')){ e.preventDefault(); nextSlot(el); acUpdate(targetId); }
+    }
     return;
   }
   if(e.key === 'ArrowDown'){ e.preventDefault(); AC.index = (AC.index + 1) % AC.flat.length; acRender(); }
@@ -2652,7 +2755,16 @@ function exprHelper(targetId, objId, opts){
   const named = opts.bool
     ? ['isempty','isnotempty','contains','AND','OR','NOT']
     : [];
+  const pats = patternsFor(opts.patterns);
   return `<div class="co-palette">
+    <div class="co-tokrow">
+      <span class="co-toklabel">Start from</span>
+      <div class="co-toks">
+        ${pats.map(x => `<button class="co-tok" type="button"
+          onclick="usePattern('${targetId}', '${esc(x.expr).replace(/'/g, "&#39;")}')"
+          title="${esc(x.expr)}">${esc(x.label)}</button>`).join('')}
+      </div>
+    </div>
     <div class="co-tokrow">
       <span class="co-toklabel">Insert</span>
       <div class="co-toks">
@@ -2663,8 +2775,9 @@ function exprHelper(targetId, objId, opts){
       </div>
     </div>
     <div class="co-tokhelp" id="${targetId}-help">
-      <span style="color:var(--muted-foreground)">Type <span class="co-mono">{</span> for a field, or start typing a
-      function name. <span class="co-mono">↑↓</span> to choose, <span class="co-mono">Enter</span> to insert.</span>
+      <span style="color:var(--muted-foreground)">Type <span class="co-mono">{</span> for a field or start typing a
+      function — <span class="co-mono">Tab</span> takes the top match, and moves to the next
+      <span class="co-mono">{}</span> in a pattern.</span>
     </div>
   </div>`;
 }
@@ -2698,7 +2811,7 @@ function fdFormulaSettings(o, d){
           <span class="rl-btn-label">Check syntax</span></button>
       </div>
       ${exprHelper('fd-expr', o.id, {
-        excludeId: fd.fieldId, bool,
+        excludeId: fd.fieldId, bool, patterns: s.returns,
         onChange: v => { fd.d.settings.expr = v; },
       })}
       <div class="rl-field-hint">Click to insert at the cursor. Fields are wrapped in braces, and a field on a
