@@ -224,6 +224,25 @@ select.co-input{
   background-repeat:no-repeat; background-position:right 9px center; background-size:14px;
 }
 .co-search{ height:38px; border-radius:8px; font-size:14px; }
+
+/* Field-type dropdown — a control that looks like the input beside it
+   but can carry an icon, which a native select cannot. */
+.co-ddt{ display:flex; align-items:center; gap:8px; text-align:left; cursor:pointer; }
+.co-ddt .co-type{ flex:1; min-width:0; }
+.co-ddt-chev, .co-ddt-lock{ display:inline-grid; place-items:center; color:var(--muted-foreground); flex-shrink:0; }
+.co-ddt-chev svg, .co-ddt-lock svg{ width:15px; height:15px; }
+.co-ddt.is-fixed{ cursor:default; background:color-mix(in oklab, var(--muted) 40%, var(--card)); color:var(--muted-foreground); }
+.co-dd{
+  position:fixed; z-index:430; max-height:320px; overflow-y:auto; padding:4px;
+  background:var(--popover); border:1px solid var(--co-border); border-radius:10px;
+  box-shadow:0 12px 36px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.06);
+}
+.co-dd-i{ display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border-radius:7px; text-align:left; font-size:14px; }
+.co-dd-i:hover{ background:var(--co-rail-hover); }
+.co-dd-i.on{ background:var(--co-nav-active); color:#11325E; }
+.co-dd-l{ flex:1; min-width:0; }
+.co-dd-check{ display:inline-grid; place-items:center; color:var(--co-blue); }
+.co-dd-check svg{ width:14px; height:14px; }
 .co-mono{ font-family:var(--font-mono); }
 
 /* ══ Bits the kit has no component for ══ */
@@ -1200,9 +1219,30 @@ function fieldLabel(objId, fieldId){
    link is the thing that confuses people, so each table is named for
    the direction and the columns carry the detail. ────────────────── */
 function tabRel(o){
+  const out = o.fields.filter(f => f.type === 'LOOKUP');
   const inc = incoming(o.id);
   const rollups = o.fields.filter(f => f.type === 'ROLLUP');
   const empty = (cols, msg) => `<tr><td colspan="${cols}" style="padding:18px 20px;color:var(--muted-foreground)">${msg}</td></tr>`;
+
+  const pointsAt = `
+    <div class="co-card">
+      <div class="co-band"><span class="co-band-t">Points at</span><span class="co-band-n">(${out.length})</span></div>
+      <table class="co-table">
+        <thead><tr>
+          <th style="padding-left:20px">Field</th><th>Points to</th><th>Required</th><th class="col-menu"></th>
+        </tr></thead>
+        <tbody>
+          ${out.length ? out.map(f => `
+            <tr class="is-clickable" onclick="openFieldDrawer('${o.id}','${f.id}')">
+              <td style="padding-left:20px"><span class="co-type">${typeIcon('LOOKUP')}${esc(f.label)}</span></td>
+              <td>${tag(esc(targetLabel(f.settings.target)), 'purple')}</td>
+              <td>${f.required ? tag('Required') : '<span style="color:var(--muted-foreground)">Optional</span>'}</td>
+              <td class="col-menu"><button class="co-menu-btn" onclick="event.stopPropagation();fieldMenu(event,'${o.id}','${f.id}')">${ICO.dots}</button></td>
+            </tr>`).join('')
+          : empty(4, `${esc(o.label)} does not point at another object yet.`)}
+        </tbody>
+      </table>
+    </div>`;
 
   const referencedBy = `
     <div class="co-card">
@@ -1259,8 +1299,10 @@ function tabRel(o){
 
   return `
     <div class="co-actions">
-      <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}')"><span class="rl-btn-label">New field</span>${ICO.plus}</button>
+      <button class="rl-btn v-primary sz-lg" onclick="openFieldDrawer('${o.id}', null, 'LOOKUP')">
+        <span class="rl-btn-label">New relationship</span>${ICO.plus}</button>
     </div>
+    ${pointsAt}
     ${referencedBy}
     ${rollHtml}`;
 }
@@ -1858,41 +1900,7 @@ function odRender(){
 /* ══ Field drawer — Phases 3 and 4 ══════════════════════════════════ */
 let fd = null;
 
-/* ── Step 1: pick the data type ───────────────────────────────────── */
-function fdRenderType(){
-  const o = obj(fd.objId);
-  const q = (fd.q||'').toLowerCase();
-  const groups = TYPE_GROUPS.map(g => {
-    const items = Object.entries(TYPES)
-      .filter(([k,t]) => t.group === g.key)
-      .filter(([k,t]) => !q || t.label.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
-    if(!items.length) return '';
-    const later = g.key === 'later';
-    return `<div style="margin-bottom:18px">
-      ${secLabel(g.title)}
-      <div class="co-tp-grid">
-        ${items.map(([k,t]) => `
-          <button class="co-tp" type="button" ${later?'disabled title="Not in release 1"':`onclick="fdPickType('${k}')"`}>
-            ${glyph(k)}
-            <span class="co-tp-t">${esc(t.label)}
-              ${t.isNew?tag('New','purple'):''}
-              ${later?tag('Later'):''}</span>
-          </button>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
-
-  showDrawer(
-    drawerHead(`Add a field to ${esc(o.label)}`) + `
-    <div class="rl-drawer-body">
-      <input class="co-input" placeholder="Search data types" value="${esc(fd.q)}" style="margin-bottom:16px"
-             oninput="fd.q = this.value; fdRenderType()">
-      ${groups || '<div class="co-rel-empty">No data type matches that.</div>'}
-    </div>`,
-    680, 'field:type');
-}
-
-/* ── Step 2: the field form ───────────────────────────────────────── */
+/* ── The field form ───────────────────────────────────────────────── */
 function fdRenderForm(){
   const o = obj(fd.objId);
   const d = fd.d;
@@ -1902,24 +1910,27 @@ function fdRenderForm(){
   const calculated = d.type === 'FORMULA' || d.type === 'ROLLUP';
 
   showDrawer(
-    drawerHead(
-      editing ? 'Edit field' : 'New ' + esc(m.label.toLowerCase()) + ' field',
-      '', editing ? null : "fd.step='type';fdRender()"
-    ) + `
+    drawerHead(editing ? 'Edit field'
+      : fd.preset === 'LOOKUP' ? 'New relationship'
+      : 'New field') + `
     <div class="rl-drawer-body">
-      <div class="co-prev" style="margin-bottom:16px">
-        ${glyph(d.type, true)}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13.5px;font-weight:600;color:var(--foreground)">${esc(m.label)}</div>
-          <div style="font-size:12px;margin-top:2px">${esc(m.desc)}</div>
-        </div>
-        ${editing ? tag('Fixed', 'gray', 's-sm', 'A field’s data type cannot change after save. Create a new field and move the data.')
-                  : `<button class="rl-btn v-outline sz-sm" onclick="fd.step='type';fdRender()"><span class="rl-btn-label">Change</span></button>`}
+      <div class="co-f-row">
+        ${field('Field name', true,
+          `<input class="co-input" id="fd-label" value="${esc(d.label)}" placeholder="eg. Order date" oninput="fdSetLabel(this.value)">`,
+          '', fErr('label', fd.err))}
+        <div class="co-f"><div class="rl-field">
+          <label class="rl-field-label">Field type <span class="rl-field-required">*</span></label>
+          ${(editing || fd.preset)
+            ? `<div class="co-input co-ddt is-fixed"${editing ? ' title="A field’s data type cannot change after save."' : ''}>
+                 <span class="co-type">${typeIcon(d.type)}${esc(m.label)}</span>
+                 ${editing ? `<span class="co-ddt-lock">${ICO.lock}</span>` : ''}
+               </div>`
+            : `<button class="co-input co-ddt" onclick="openTypeMenu(event)">
+                 <span class="co-type">${typeIcon(d.type)}${esc(m.label)}</span>
+                 <span class="co-ddt-chev">${ICO.chevDown}</span>
+               </button>`}
+        </div></div>
       </div>
-
-      ${field('Label', true,
-        `<input class="co-input" id="fd-label" value="${esc(d.label)}" placeholder="Order Date" oninput="fdSetLabel(this.value)">`,
-        '', fErr('label', fd.err))}
 
       <div class="co-f-row">
         ${field('Description', false, `<input class="co-input" value="${esc(d.description)}" placeholder="A note for admins" oninput="fd.d.description = this.value">`)}
@@ -2589,31 +2600,65 @@ function defaultSettings(type){
   }
 }
 
-function openFieldDrawer(objId, fieldId){
+/* presetType opens the drawer on a type the user cannot change — how a
+   lookup is created now that relationships have their own entry point. */
+function openFieldDrawer(objId, fieldId, presetType){
   const o = obj(objId);
   const f = fieldId ? o.fields.find(x => x.id === fieldId) : null;
+  const type = f ? f.type : (presetType || 'TEXT');
   fd = {
-    objId, fieldId: fieldId || null, q:'',
-    step: f ? 'form' : 'type',
+    objId, fieldId: fieldId || null,
+    preset: !f && presetType ? presetType : null,
     touchedRLL: !!f,
     err:{},
     d: f ? JSON.parse(JSON.stringify(f))
-         : {label:'', type:'', description:'', help:'', required:false, unique:false,
-            extId:false, def:'', showInReports:true, settings:{}},
+         : {label:'', type, description:'', help:'', required:false, unique:false,
+            extId:false, def:'', showInReports:true, settings:defaultSettings(type)},
   };
+  if(!f && type === 'LOOKUP') fd.d.settings.relatedListLabel = o.plural;
   fdRender();
 }
 
-function fdRender(){ fd.step === 'type' ? fdRenderType() : fdRenderForm(); }
-
-
-function fdPickType(t){
-  fd.d.type = t;
-  fd.d.settings = defaultSettings(t);
-  if(t === 'LOOKUP') fd.d.settings.relatedListLabel = obj(fd.objId).plural;
-  fd.step = 'form';
+/* Field type, as a dropdown beside the name — the form every other
+   custom field in Rocketlane uses. Lookup is absent on purpose: a
+   relationship is created from the Relationships tab. */
+function fdTypeOptions(){
+  return Object.entries(TYPES).filter(([k, t]) =>
+    (t.group !== 'later' && k !== 'LOOKUP') || k === fd.d.type);
+}
+function openTypeMenu(ev){
+  ev.stopPropagation();
+  closeMenu(); closeFieldPicker(); closeTypeMenu();
+  const r = ev.currentTarget.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.id = 'tp-menu'; el.className = 'co-dd';
+  el.innerHTML = fdTypeOptions().map(([k, t]) => `
+    <button class="co-dd-i${fd.d.type === k ? ' on' : ''}" onclick="pickType('${k}')">
+      ${typeIcon(k)}<span class="co-dd-l">${esc(t.label)}</span>
+      ${fd.d.type === k ? `<span class="co-dd-check">${ICO.check}</span>` : ''}
+    </button>`).join('');
+  document.body.appendChild(el);
+  el.style.width = Math.max(r.width, 240) + 'px';
+  el.style.left = r.left + 'px';
+  el.style.top = Math.min(r.bottom + 4, window.innerHeight - el.offsetHeight - 10) + 'px';
+}
+function closeTypeMenu(){ const el = document.getElementById('tp-menu'); if(el) el.remove(); }
+document.addEventListener('click', e => {
+  const el = document.getElementById('tp-menu');
+  if(el && !el.contains(e.target)) closeTypeMenu();
+}, true);
+function pickType(k){
+  closeTypeMenu();
+  if(fd.d.type === k) return;
+  fd.d.type = k;
+  fd.d.settings = defaultSettings(k);
+  fd.d.def = '';
   fdRender();
 }
+
+function fdRender(){ fdRenderForm(); }
+
+
 
 function fdAddOption(){ fd.d.settings.options.push({label:'', color:PALETTE[fd.d.settings.options.length % PALETTE.length]}); delete fd.err.options; fdRender(); }
 function fdRemoveOption(i){
