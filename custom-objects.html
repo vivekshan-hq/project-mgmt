@@ -312,37 +312,23 @@ select.co-input{
    apart — pin it. */
 .co-tok{ display:inline-flex; align-items:center; gap:4px; }
 .co-tok svg{ width:12px; height:12px; flex-shrink:0; }
+/* Autocomplete list, anchored under the expression box. */
+.co-ac{
+  position:fixed; z-index:440; max-height:280px; overflow-y:auto; padding:4px;
+  background:var(--popover); border:1px solid var(--co-border); border-radius:10px;
+  box-shadow:0 12px 36px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.06);
+}
+.co-ac-group{ padding:7px 10px 4px; font-size:11px; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--muted-foreground); }
+.co-ac-i{ display:flex; align-items:center; gap:9px; width:100%; padding:6px 10px; border-radius:7px; text-align:left; }
+.co-ac-i.on{ background:var(--co-nav-active); }
+.co-ac-l{ font-size:13.5px; min-width:0; }
+.co-fp-sig{ display:block; font-family:var(--font-mono); font-size:11px; color:var(--muted-foreground); margin-top:1px; }
 .co-tokhelp{ padding:8px 0 4px; border-top:1px solid var(--co-border-soft); font-size:12px; line-height:1.5; }
 .co-ok{ font-size:11.5px; color:var(--tag-fg-green); display:flex; align-items:center; gap:4px; margin-top:5px; }
 .co-ok svg{ width:12px; height:12px; }
 .co-tok.find{ border-style:dashed; color:var(--muted-foreground); font-family:var(--font-sans); }
 .co-tok.find:hover{ border-style:solid; }
-
-/* Field picker — the one part of the palette that has to survive a
-   hundred fields. */
-.co-fp{
-  position:fixed; z-index:420; width:340px; max-width:92vw;
-  background:var(--popover); border:1px solid var(--co-border); border-radius:10px;
-  box-shadow:0 12px 36px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.06); overflow:hidden;
-}
-.co-fp-search{ padding:8px; border-bottom:1px solid var(--co-border-soft); }
-.co-fp-list{ max-height:320px; overflow-y:auto; padding:4px; }
-.co-fp-group{
-  display:flex; align-items:center; gap:6px; width:100%;
-  padding:7px 10px 6px; border-radius:7px; text-align:left;
-  font-size:11px; font-weight:600; letter-spacing:.04em;
-  text-transform:uppercase; color:var(--muted-foreground);
-}
-.co-fp-group:hover{ background:var(--co-rail-hover); color:var(--foreground); }
-.co-fp-chev{ display:inline-grid; place-items:center; transition:transform 140ms ease; }
-.co-fp-chev svg{ width:13px; height:13px; }
-.co-fp-chev.folded{ transform:rotate(-90deg); }
-.co-fp-n{ margin-left:auto; font-weight:500; letter-spacing:0; font-variant-numeric:tabular-nums; }
-.co-fp-i{ display:flex; align-items:center; gap:9px; width:100%; padding:6px 10px; border-radius:7px; text-align:left; }
-.co-fp-i:hover{ background:var(--co-rail-hover); }
-.co-fp-l{ font-size:13.5px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.co-fp-sig{ display:block; font-family:var(--font-mono); font-size:11px; color:var(--muted-foreground); margin-top:1px; }
-.co-fp-empty{ padding:18px 12px; font-size:13px; color:var(--muted-foreground); text-align:center; }
 
 .co-pl{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
 .co-pl-grip{ color:#B6BAC2; font-size:13px; width:12px; text-align:center; flex-shrink:0; cursor:grab; }
@@ -1918,14 +1904,15 @@ function vrRender(){
         <label class="rl-field-label">Block the save when <span class="rl-field-required">*</span></label>
         <textarea class="co-input co-mono" id="vr-expr" rows="3"
                   placeholder="{Quantity} isempty OR {Quantity} <= 0"
-                  oninput="vr.d.condition = this.value; exprCheck(this.value)">${esc(d.condition)}</textarea>
+                  oninput="vr.d.condition = this.value; exprCheck(this.value); acUpdate('vr-expr')"
+                  onkeydown="acKey(event,'vr-expr')" onblur="setTimeout(acClose, 120)">${esc(d.condition)}</textarea>
         ${fErr('condition', vr.err)}
         <div id="vr-expr-warn">${exprWarning(d.condition)}</div>
         <div style="margin-top:8px">
           <button class="rl-btn v-outline sz-sm" onclick="runCheck('vr-expr','${o.id}','')">
             <span class="rl-btn-label">Check syntax</span></button>
         </div>
-        ${exprPalette('vr-expr', o.id, {bool:true, fns:RULE_FNS, onChange: v => { vr.d.condition = v; }})}
+        ${exprHelper('vr-expr', o.id, {bool:true, onChange: v => { vr.d.condition = v; }})}
         <div class="rl-field-hint">The rule runs on save. When this is true the save is stopped and your
           message is shown — so it describes the records you want to reject, not the ones you want to allow.</div>
       </div></div>
@@ -2484,21 +2471,6 @@ function fdFunctions(returns){
 }
 const RULE_FNS = ['ISCHANGED(','PRIORVALUE(','TODAY()','REGEX(','ROUND(','ABS('].map(FN_PICK);
 
-function functionPickerGroups(){
-  return FN_LIBRARY.map(g => ({
-    label: g.group,
-    items: g.items.map(f => ({label:f.t.replace(/\($/, ''), token:f.t, sig:f.sig})),
-  }));
-}
-function openFunctionPicker(ev){
-  ev.stopPropagation();
-  closeMenu(); closeFieldPicker();
-  const groups = functionPickerGroups();
-  const collapsed = {};
-  groups.forEach((g, i) => { collapsed[g.label] = i > 0; });
-  FP = {q:'', groups, collapsed, rect:ev.currentTarget.getBoundingClientRect()};
-  renderFieldPicker();
-}
 
 
 /* Fields one hop away. A formula on Line Item can read the product it
@@ -2519,44 +2491,181 @@ function relatedFieldSources(o){
   }).filter(x => x.fields.length);
 }
 
-/* The palette, shared by the formula editor and the validation rule
-   editor. `opts.fns` chooses the function set, `opts.bool` adds the
-   comparison and logic rows a boolean expression needs. */
-function exprPalette(targetId, objId, opts){
-  const o = obj(objId);
+/* ── Expression autocomplete ──────────────────────────────────────
+   The chip wall had an arbitrary cutoff — twelve fields, four
+   functions — and two ways to do one thing: click a chip, or open a
+   picker and search. Neither scaled, and the cutoff was never
+   meaningful; the first twelve fields in definition order are not the
+   twelve you want.
+
+   Typing is the way in now. "{" opens the fields, letters open the
+   functions, and both filter as you type — the pattern every formula
+   editor and code editor has converged on. Nothing is behind a cutoff
+   because the list is as long as it needs to be.
+
+   What stays on screen is the part typing does not solve: the
+   operators you would not guess exist (isempty, contains), and the
+   help line. ────────────────────────────────────────────────────── */
+let AC = null;
+
+function acItems(mode, q){
+  const query = q.toLowerCase();
+  if(mode === 'fn'){
+    return FN_LIBRARY.map(g => ({
+      label: g.group,
+      items: g.items.filter(f => f.t.toLowerCase().startsWith(query))
+        .map(f => ({label:f.t.replace(/\($/, ''), token:f.t, sig:f.sig, kind:'fn'})),
+    })).filter(g => g.items.length);
+  }
+  /* Substring matching, but a name that starts with what you typed
+     ranks above one that merely contains it — "{un" should reach Unit
+     Price before Discount. */
+  return fieldPickerGroups().map(g => ({
+    label: g.label,
+    items: g.items
+      .filter(x => x.label.toLowerCase().includes(query))
+      .sort((a, b) => {
+        const ap = a.label.toLowerCase().startsWith(query) ? 0 : 1;
+        const bp = b.label.toLowerCase().startsWith(query) ? 0 : 1;
+        return ap - bp;
+      })
+      .map(x => ({label:x.label, token:x.token, type:x.type, kind:'field'})),
+  })).filter(g => g.items.length);
+}
+
+/* What is being typed right before the caret decides the mode. */
+function acDetect(el){
+  const before = el.value.slice(0, el.selectionStart);
+  const field = before.match(/\{([^{}]*)$/);
+  if(field) return {mode:'field', q:field[1], from:el.selectionStart - field[0].length};
+  const word = before.match(/([A-Za-z_][A-Za-z0-9_]*)$/);
+  if(word && word[1].length >= 1) return {mode:'fn', q:word[1], from:el.selectionStart - word[1].length};
+  return null;
+}
+
+function acUpdate(targetId){
+  const el = document.getElementById(targetId);
+  if(!el) return acClose();
+  const hit = acDetect(el);
+  if(!hit) return acClose();
+  const groups = acItems(hit.mode, hit.q);
+  const flat = groups.flatMap(g => g.items);
+  if(!flat.length) return acClose();
+  AC = {targetId, ...hit, groups, flat, index:0};
+  acRender();
+}
+
+function acRender(){
+  if(!AC) return;
+  let el = document.getElementById('ac');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'ac'; el.className = 'co-ac';
+    document.body.appendChild(el);
+  }
+  let n = -1;
+  el.innerHTML = AC.groups.map(g => `
+    <div class="co-ac-group">${esc(g.label)}</div>
+    ${g.items.map(x => {
+      n++;
+      return `<button class="co-ac-i${n === AC.index ? ' on' : ''}" data-i="${n}"
+                onmousedown="event.preventDefault();acAccept(${n})" onmouseenter="acHover(${n})">
+        ${x.kind === 'fn' ? '<span class="co-type-ico">ƒx</span>' : (x.type ? typeIcon(x.type) : '<span class="co-type-ico"></span>')}
+        <span class="co-ac-l">${esc(x.label)}${x.sig ? `<span class="co-fp-sig">${esc(x.sig)}</span>` : ''}</span>
+      </button>`;
+    }).join('')}`).join('');
+
+  const t = document.getElementById(AC.targetId).getBoundingClientRect();
+  el.style.left = t.left + 'px';
+  el.style.width = t.width + 'px';
+  el.style.top = Math.min(t.bottom + 4, window.innerHeight - el.offsetHeight - 10) + 'px';
+  const on = el.querySelector('.co-ac-i.on');
+  if(on) on.scrollIntoView({block:'nearest'});
+  acHelp();
+}
+function acHelp(){
+  const item = AC && AC.flat[AC.index];
+  const el = AC && document.getElementById(AC.targetId + '-help');
+  if(el && item) el.innerHTML = tokenHelpHTML(item.token);
+}
+function acHover(i){ if(AC){ AC.index = i; acRender(); } }
+function acClose(){ AC = null; const el = document.getElementById('ac'); if(el) el.remove(); }
+
+function acAccept(i){
+  if(!AC) return;
+  const item = AC.flat[i == null ? AC.index : i];
+  const el = document.getElementById(AC.targetId);
+  if(!item || !el) return acClose();
+
+  const before = el.value.slice(0, AC.from);
+  const after = el.value.slice(el.selectionStart);
+  /* A field closes its own brace; a function leaves the caret inside. */
+  const piece = item.token;
+  const value = before + piece + after;
+  const caret = (before + piece).length;
+
+  el.value = value;
+  EXPR.onChange(value);
+  acClose();
+  el.focus();
+  el.setSelectionRange(caret, caret);
+  exprCheck(value);
+}
+
+function acKey(e, targetId){
+  if(!AC){
+    /* Ctrl/Cmd-Space opens it without typing, for anyone who wants to
+       browse rather than recall. */
+    if(e.key === ' ' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); acBrowse(targetId); }
+    return;
+  }
+  if(e.key === 'ArrowDown'){ e.preventDefault(); AC.index = (AC.index + 1) % AC.flat.length; acRender(); }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); AC.index = (AC.index - 1 + AC.flat.length) % AC.flat.length; acRender(); }
+  else if(e.key === 'Enter' || e.key === 'Tab'){ e.preventDefault(); acAccept(); }
+  else if(e.key === 'Escape'){ e.preventDefault(); acClose(); }
+}
+/* Browse: every field, then every function, with no query. */
+function acBrowse(targetId){
+  const el = document.getElementById(targetId);
+  if(!el) return;
+  el.focus();
+  const groups = acItems('field', '').concat(acItems('fn', ''));
+  const flat = groups.flatMap(g => g.items);
+  AC = {targetId, mode:'field', q:'', from:el.selectionStart, groups, flat, index:0};
+  acRender();
+}
+document.addEventListener('click', e => {
+  const el = document.getElementById('ac');
+  if(AC && el && !el.contains(e.target)) acClose();
+}, true);
+
+/* What is left on screen: the operators you would not guess at, and the
+   help line. Arithmetic is faster to type than to click. */
+function exprHelper(targetId, objId, opts){
   EXPR = {target:targetId, objId, excludeId:opts.excludeId || null, onChange:opts.onChange};
-  const own = o.fields.filter(f => f.id !== EXPR.excludeId && !['MULTISELECT'].includes(f.type));
-  const related = relatedFieldSources(o);
   FD_TOKENS = [];
-
-  const CHIP_CAP = 12;
-  const shown = own.slice(0, CHIP_CAP);
-  const hidden = own.length - shown.length;
-  const relatedCount = related.reduce((n, r) => n + r.fields.length, 0);
-
-  const chip = (text, kind, title) => {
+  const chip = (text, kind) => {
     const i = FD_TOKENS.push({text, kind}) - 1;
-    return `<button class="co-tok${kind === 'op' ? ' op' : ''}" type="button"
-              onclick="insertToken(${i})" onmouseenter="showTokenHelp(${i})"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</button>`;
+    return `<button class="co-tok op" type="button" onclick="insertToken(${i})"
+              onmouseenter="showTokenHelp(${i})">${esc(text)}</button>`;
   };
-  const group = (label, chips) => `
-    <div class="co-tokrow"><span class="co-toklabel">${label}</span><div class="co-toks">${chips}</div></div>`;
-  const searchLabel = hidden || relatedCount ? `Search ${own.length + relatedCount} fields` : 'Search fields';
-
+  const named = opts.bool
+    ? ['isempty','isnotempty','contains','AND','OR','NOT']
+    : [];
   return `<div class="co-palette">
-    ${group('Fields',
-      (shown.length
-        ? shown.map(f => chip('{' + f.label + '}', 'field', typeMeta(f.type).label)).join('')
-        : '<span style="font-size:12px;color:var(--muted-foreground);padding-top:4px">No fields yet.</span>')
-      + `<button class="co-tok find" type="button" onclick="openFieldPicker(event)">
-           ${ICO.search}${esc(searchLabel)}${hidden ? ` <span style="opacity:.6">+${hidden} more</span>` : ''}</button>`)}
-    ${group('Operators', FD_OPS.map(x => chip(x.t, 'op', x.hint)).join('')
-      + (opts.bool ? FD_COMPARE.map(x => chip(x.t, 'op', x.hint)).join('') : ''))}
-    ${opts.bool ? group('Logic', FD_LOGIC.map(x => chip(x.t, 'op', x.hint)).join('')) : ''}
-    ${group('Functions', opts.fns.map(x => chip(x.t, 'fn', x.desc)).join('')
-      + `<button class="co-tok find" type="button" onclick="openFunctionPicker(event)">
-           ${ICO.search}Search ${ALL_FNS.length} functions</button>`)}
-    <div class="co-tokhelp" id="${targetId}-help">${tokenHelpHTML(null)}</div>
+    <div class="co-tokrow">
+      <span class="co-toklabel">Insert</span>
+      <div class="co-toks">
+        <button class="co-tok find" type="button" onclick="acBrowse('${targetId}')">
+          ${ICO.search}Browse fields and functions</button>
+        ${['(', ')'].concat(opts.bool ? ['=','!=','>','<','>=','<='] : ['+','-','*','/']).map(t => chip(t, 'op')).join('')}
+        ${named.map(t => chip(t, 'op')).join('')}
+      </div>
+    </div>
+    <div class="co-tokhelp" id="${targetId}-help">
+      <span style="color:var(--muted-foreground)">Type <span class="co-mono">{</span> for a field, or start typing a
+      function name. <span class="co-mono">↑↓</span> to choose, <span class="co-mono">Enter</span> to insert.</span>
+    </div>
   </div>`;
 }
 
@@ -2580,16 +2689,16 @@ function fdFormulaSettings(o, d){
     <div class="co-f"><div class="rl-field">
       <label class="rl-field-label">Expression <span class="rl-field-required">*</span></label>
       <textarea class="co-input co-mono" id="fd-expr" rows="2" placeholder="{Quantity} * {Unit Price}"
-                oninput="fd.d.settings.expr = this.value; fdExprCheck()">${esc(expr)}</textarea>
+                oninput="fd.d.settings.expr = this.value; fdExprCheck(); acUpdate('fd-expr')"
+                onkeydown="acKey(event,'fd-expr')" onblur="setTimeout(acClose, 120)">${esc(expr)}</textarea>
       ${fErr('expr', fd.err)}
       <div id="fd-expr-warn">${exprWarning(expr)}</div>
       <div style="margin-top:8px">
         <button class="rl-btn v-outline sz-sm" onclick="runCheck('fd-expr','${o.id}','${fd.fieldId || ''}')">
           <span class="rl-btn-label">Check syntax</span></button>
       </div>
-      ${exprPalette('fd-expr', o.id, {
+      ${exprHelper('fd-expr', o.id, {
         excludeId: fd.fieldId, bool,
-        fns: fdFunctions(s.returns),
         onChange: v => { fd.d.settings.expr = v; },
       })}
       <div class="rl-field-hint">Click to insert at the cursor. Fields are wrapped in braces, and a field on a
@@ -2697,12 +2806,8 @@ function runCheck(targetId, objId, excludeId){
     : `<div class="co-ok">${ICO.check} Looks good.</div>`;
 }
 
-/* ── Field picker ─────────────────────────────────────────────────
-   One searchable list for every field the formula can reach: this
-   object's own, then one group per lookup. It is the only part of the
-   palette that has to survive a hundred fields. ──────────────────── */
-let FP = null;
-
+/* Groups for autocomplete: this object's own fields first, then one
+   per lookup. One hop, same as the formula tokens. */
 function fieldPickerGroups(){
   const o = obj(EXPR.objId);
   const own = o.fields.filter(f => f.id !== EXPR.excludeId && !['MULTISELECT'].includes(f.type));
@@ -2718,90 +2823,6 @@ function fieldPickerGroups(){
   return groups.filter(g => g.items.length);
 }
 
-function openFieldPicker(ev){
-  ev.stopPropagation();
-  closeMenu();
-  const groups = fieldPickerGroups();
-  /* Own fields open, linked objects folded — the list opens on what you
-     are most likely to want, and the rest is one click away rather than
-     a scroll. */
-  const collapsed = {};
-  groups.forEach((g, i) => { collapsed[g.label] = i > 0; });
-  FP = {q:'', groups, collapsed, rect:ev.currentTarget.getBoundingClientRect()};
-  renderFieldPicker();
-}
-function closeFieldPicker(){
-  FP = null;
-  const el = document.getElementById('fp');
-  if(el) el.remove();
-}
-function fpSearch(q){ FP.q = q; renderFieldPicker(true); }
-function fpToggle(label){ FP.collapsed[label] = !FP.collapsed[label]; renderFieldPicker(); }
-
-function renderFieldPicker(keepFocus){
-  if(!FP) return;
-  let el = document.getElementById('fp');
-  const opening = !el;
-  if(opening){
-    el = document.createElement('div');
-    el.id = 'fp'; el.className = 'co-fp';
-    document.body.appendChild(el);
-  }
-  const q = FP.q.toLowerCase();
-  const groups = FP.groups
-    .map(g => ({label:g.label, items:g.items.filter(x => !q || x.label.toLowerCase().includes(q))}))
-    .filter(g => g.items.length);
-  const total = groups.reduce((n, g) => n + g.items.length, 0);
-
-  el.innerHTML = `
-    <div class="co-fp-search">
-      <input class="co-input" placeholder="Search fields" value="${esc(FP.q)}" oninput="fpSearch(this.value)">
-    </div>
-    <div class="co-fp-list">
-      ${total ? groups.map(g => {
-        /* A search ignores the folds — hiding a match behind one would
-           make the search look broken. */
-        const folded = !q && FP.collapsed[g.label];
-        return `
-        <button class="co-fp-group" onclick="fpToggle('${esc(g.label).replace(/'/g, "&#39;")}')">
-          <span class="co-fp-chev${folded ? ' folded' : ''}">${ICO.chevDown}</span>
-          <span>${esc(g.label)}</span>
-          <span class="co-fp-n">${g.items.length}</span>
-        </button>
-        ${folded ? '' : g.items.map(x => `
-          <button class="co-fp-i" onclick="pickField('${esc(x.token).replace(/'/g, "&#39;")}')"
-                  ${x.sig ? `title="${esc(x.sig)}"` : ''}>
-            ${x.type ? typeIcon(x.type) : '<span class="co-type-ico"></span>'}
-            <span class="co-fp-l">${esc(x.label)}${x.sig
-              ? `<span class="co-fp-sig">${esc(x.sig)}</span>` : ''}</span>
-          </button>`).join('')}`;
-      }).join('')
-      : `<div class="co-fp-empty">No field matches “${esc(FP.q)}”.</div>`}
-    </div>`;
-  /* Reposition on every render, not only on open: expanding a group
-     makes the panel taller, and one anchored near the bottom would grow
-     straight off the screen. */
-  setTimeout(() => {
-    if(!FP || !document.getElementById('fp')) return;
-    const r = FP.rect;
-    el.style.left = Math.max(10, Math.min(r.left, window.innerWidth - el.offsetWidth - 10)) + 'px';
-    el.style.top  = Math.max(10, Math.min(r.bottom + 6, window.innerHeight - el.offsetHeight - 10)) + 'px';
-    if(opening){ const i = el.querySelector('input'); if(i) i.focus(); }
-  }, 0);
-
-  if(keepFocus){
-    const i = el.querySelector('input');
-    if(i){ i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
-  }
-}
-function pickField(token){
-  closeFieldPicker();
-  insertText(token, 'field');
-}
-document.addEventListener('click', e => {
-  const el = document.getElementById('fp');
-  if(FP && el && !el.contains(e.target)) closeFieldPicker();
-}, true);
 
 /* Unbalanced brackets are the mistake this box invites, so say so — and
    say it while typing, since inserting a token deliberately skips the
@@ -3059,7 +3080,7 @@ function fdTypeOptions(){
 }
 function openTypeMenu(ev){
   ev.stopPropagation();
-  closeMenu(); closeFieldPicker(); closeTypeMenu();
+  closeMenu(); closeTypeMenu();
   const r = ev.currentTarget.getBoundingClientRect();
   const el = document.createElement('div');
   el.id = 'tp-menu'; el.className = 'co-dd';
